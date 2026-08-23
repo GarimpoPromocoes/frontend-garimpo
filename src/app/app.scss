@@ -1,0 +1,61 @@
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.brand-mark {
+  font-size: 32px;
+  line-height: 1;
+}
+.brand h1 {
+  font-size: 22px;
+  font-weight: 700;
+}
+.brand p {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.global-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.col-span-2 {
+  grid-column: span 2;
+}
+
+@media (max-width: 760px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .col-span-1,
+  .col-span-2 {
+    grid-column: span 1;
+  }
+}

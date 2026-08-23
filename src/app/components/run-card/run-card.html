@@ -1,0 +1,104 @@
+<div class="card">
+  <div class="card-header">
+    <div>
+      <h2>▶️ Executar</h2>
+      <p class="card-subtitle">Posta de verdade nos grupos do WhatsApp escolhidos, cada um só com produtos do seu tema.</p>
+    </div>
+    @if (jobsService.rodando()) {
+      <span class="badge badge-running">
+        <span class="badge-dot"></span>
+        Rodando: {{ jobsService.tipo() }}
+      </span>
+    }
+  </div>
+
+  @if (statusService.status()?.processoExterno?.rodando) {
+    <p class="hint-text">⚠️ O bot também está rodando fora do dashboard agora — feche-o antes de disparar algo aqui.</p>
+  }
+
+  <div style="display: flex; gap: 8px; flex-wrap: wrap">
+    <button type="button" class="btn" [class.btn-primary]="alvo() === 'todos'" [class.btn-ghost]="alvo() !== 'todos'" (click)="escolherAlvo('todos')">
+      Todos
+    </button>
+    <button type="button" class="btn" [class.btn-primary]="alvo() === 'selecionados'" [class.btn-ghost]="alvo() !== 'selecionados'" (click)="escolherAlvo('selecionados')">
+      Selecionados
+    </button>
+    <button type="button" class="btn" [class.btn-primary]="alvo() === 'um'" [class.btn-ghost]="alvo() !== 'um'" (click)="escolherAlvo('um')">
+      Um grupo
+    </button>
+  </div>
+
+  @if (grupos().length === 0) {
+    <p class="hint-text">Nenhum grupo cadastrado ainda — cadastre no cartão "Grupos" acima.</p>
+  } @else {
+    @if (alvo() === 'selecionados') {
+      <div class="card-section" style="gap: 8px">
+        @for (g of grupos(); track g.id) {
+          <label class="checkbox-row">
+            <input
+              type="checkbox"
+              [checked]="selecionados().has(g.id)"
+              (change)="toggleSelecionado(g.id, $any($event.target).checked)"
+            />
+            {{ g.nome }} <span class="hint-text">→ {{ g.groupName }}</span>
+          </label>
+        }
+      </div>
+    }
+    @if (alvo() === 'um') {
+      <div class="card-section" style="gap: 8px">
+        @for (g of grupos(); track g.id) {
+          <label class="checkbox-row">
+            <input type="radio" name="umGrupo" [checked]="umGrupoId() === g.id" (change)="escolherUm(g.id)" />
+            {{ g.nome }} <span class="hint-text">→ {{ g.groupName }}</span>
+          </label>
+        }
+      </div>
+    }
+  }
+
+  <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap">
+    <button type="button" class="btn btn-primary" [disabled]="jobsService.rodando()" (click)="executarGrupos()">
+      Executar
+    </button>
+    @if (jobsService.rodando()) {
+      <button type="button" class="btn btn-danger" (click)="parar()">Parar execução</button>
+    }
+  </div>
+
+  @if (erro()) {
+    <p class="error-text">{{ erro() }}</p>
+  }
+
+  <div class="card-section" style="flex-direction: row; align-items: flex-end; flex-wrap: wrap; gap: 10px">
+    <div class="field" style="max-width: 160px">
+      <label for="maxMaisVendidos">Quantidade</label>
+      <input
+        id="maxMaisVendidos"
+        type="number"
+        min="1"
+        max="100"
+        [ngModel]="maxMaisVendidos()"
+        (ngModelChange)="maxMaisVendidos.set($event)"
+      />
+    </div>
+    <button type="button" class="btn btn-ghost" [disabled]="jobsService.rodando()" (click)="garimparMaisVendidos()">
+      Garimpar mais vendidos
+    </button>
+    <span class="hint-text">Só abastece o catálogo (não posta nada).</span>
+  </div>
+
+  <div class="card-section">
+    <div class="card-header">
+      <label class="hint-text">Console ao vivo</label>
+      <button type="button" class="btn btn-ghost btn-sm" (click)="jobsService.limparConsole()">Limpar</button>
+    </div>
+    <div class="console" #consoleEl>
+      @for (linha of jobsService.linhas(); track $index) {
+        <div>{{ linha }}</div>
+      } @empty {
+        <span class="console-empty">Nenhuma execução ainda.</span>
+      }
+    </div>
+  </div>
+</div>

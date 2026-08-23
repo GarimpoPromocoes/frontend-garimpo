@@ -1,0 +1,71 @@
+<div class="card">
+  <div class="card-header">
+    <div>
+      <h2>{{ icone() }} {{ titulo() }}</h2>
+      <p class="card-subtitle">
+        {{ servico() === 'ml' ? 'Conta de afiliado usada para gerar os links dos produtos.' : 'Número que envia as promoções para o grupo.' }}
+      </p>
+    </div>
+    <span class="badge" [class.badge-ok]="conectado()" [class.badge-off]="!conectado()">
+      <span class="badge-dot"></span>
+      {{ conectado() ? 'Conectado' : 'Não conectado' }}
+    </span>
+  </div>
+
+  @if (esteCardEstaRodando()) {
+    <div class="card-section">
+      @if (servico() === 'ml') {
+        <p class="hint-text">
+          Uma janela do navegador abriu para você fazer login na sua conta de afiliado do Mercado Livre.
+          Quando terminar (a barra escura de "Afiliados" aparece no topo da página), volte aqui e clique em
+          <strong>Concluí o login</strong>.
+        </p>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap">
+          <button type="button" class="btn btn-primary" (click)="concluirLogin()">Concluí o login</button>
+          <button type="button" class="btn btn-ghost" (click)="cancelar()">Cancelar</button>
+        </div>
+      } @else {
+        <p class="hint-text">
+          Escaneie o QR Code que apareceu na janela do WhatsApp Web
+          (Aparelhos conectados → Conectar um aparelho).
+        </p>
+        <button type="button" class="btn btn-ghost" (click)="cancelar()">Cancelar</button>
+      }
+
+      <div class="console">
+        @for (linha of jobsService.linhas().slice(-8); track $index) {
+          <div>{{ linha }}</div>
+        } @empty {
+          <span class="console-empty">Aguardando...</span>
+        }
+      </div>
+    </div>
+  } @else {
+    <div style="display: flex; gap: 8px; flex-wrap: wrap">
+      <button
+        type="button"
+        class="btn"
+        [class.btn-ml]="servico() === 'ml'"
+        [class.btn-wpp]="servico() === 'whatsapp'"
+        [disabled]="outroJobRodando()"
+        (click)="conectar()"
+      >
+        {{ conectado() ? (servico() === 'ml' ? 'Revalidar sessão' : 'Reconectar / trocar número') : 'Conectar' }}
+      </button>
+
+      @if (servico() === 'ml' && conectado()) {
+        <button type="button" class="btn btn-ghost btn-sm" [disabled]="outroJobRodando()" (click)="trocarContaMl()">
+          Trocar de conta
+        </button>
+      }
+    </div>
+
+    @if (outroJobRodando()) {
+      <p class="hint-text">Aguarde: outro processo do bot está rodando no momento.</p>
+    }
+  }
+
+  @if (erro()) {
+    <p class="error-text">{{ erro() }}</p>
+  }
+</div>

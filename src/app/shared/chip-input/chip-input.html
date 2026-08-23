@@ -1,0 +1,23 @@
+<div class="chip-input">
+  <div class="chips">
+    @for (item of items(); track item + '' + $index; let i = $index) {
+      <span class="chip">
+        {{ item }}
+        <button type="button" class="chip-remove" (click)="remover(i)" aria-label="Remover">×</button>
+      </span>
+    }
+    @if (items().length === 0) {
+      <span class="chip-empty">Nenhum ainda</span>
+    }
+  </div>
+  <div class="chip-add">
+    <input
+      type="text"
+      [ngModel]="novoItem()"
+      (ngModelChange)="novoItem.set($event)"
+      [placeholder]="placeholder()"
+      (keydown)="aoTeclar($event)"
+    />
+    <button type="button" class="btn btn-ghost btn-sm" (click)="adicionar()">Adicionar</button>
+  </div>
+</div>

@@ -1,0 +1,20 @@
+<div class="card">
+  <div class="card-header">
+    <div>
+      <h2>📊 Estatísticas</h2>
+      <p class="card-subtitle">Números do catálogo local do bot.</p>
+    </div>
+    <button type="button" class="btn btn-ghost btn-sm" (click)="atualizar()">Atualizar</button>
+  </div>
+
+  <div class="grid-2">
+    <div class="stat-tile">
+      <span class="value">{{ statusService.status()?.produtosPublicados ?? '—' }}</span>
+      <span class="label">Produtos já publicados</span>
+    </div>
+    <div class="stat-tile">
+      <span class="value">{{ statusService.status()?.produtosCatalogo ?? '—' }}</span>
+      <span class="label">Produtos no catálogo</span>
+    </div>
+  </div>
+</div>

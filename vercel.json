@@ -1,0 +1,5 @@
+{
+  "buildCommand": "node scripts/set-env.js && npx ng build --configuration production",
+  "outputDirectory": "dist/dashboard/browser",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}

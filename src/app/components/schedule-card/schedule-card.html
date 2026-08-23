@@ -1,0 +1,98 @@
+<div class="card">
+  <div class="card-header">
+    <div>
+      <h2>⏰ Agendamento</h2>
+      <p class="card-subtitle">
+        Deixa o bot postando sozinho todo dia, dentro de um horário — sem precisar clicar em "Executar".
+      </p>
+    </div>
+    @if (statusService.status()?.agendamento; as ag) {
+      @if (!ag.ativo) {
+        <span class="badge badge-off"><span class="badge-dot"></span>Desativado</span>
+      } @else if (ag.dentroDaJanela) {
+        <span class="badge badge-ok"><span class="badge-dot"></span>Dentro da janela</span>
+      } @else {
+        <span class="badge badge-off"><span class="badge-dot"></span>Fora da janela</span>
+      }
+    }
+  </div>
+
+  <label class="checkbox-row">
+    <input type="checkbox" [ngModel]="ativo()" (ngModelChange)="ativo.set($event)" />
+    Agendamento ativo
+  </label>
+
+  <div class="grid-2">
+    <div class="field">
+      <label for="horaInicio">Início (todo dia)</label>
+      <input
+        id="horaInicio"
+        type="time"
+        [ngModel]="horaInicio()"
+        (ngModelChange)="horaInicio.set($event)"
+      />
+    </div>
+    <div class="field">
+      <label for="horaFim">Fim (todo dia)</label>
+      <input
+        id="horaFim"
+        type="time"
+        [ngModel]="horaFim()"
+        (ngModelChange)="horaFim.set($event)"
+      />
+      <span class="hint">Pode virar a noite (ex.: início 22:00, fim 06:00).</span>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="field">
+      <label for="intervaloMin">Intervalo mínimo (minutos)</label>
+      <input
+        id="intervaloMin"
+        type="number"
+        min="1"
+        max="720"
+        [ngModel]="intervaloMinMinutos()"
+        (ngModelChange)="intervaloMinMinutos.set($event)"
+      />
+    </div>
+    <div class="field">
+      <label for="intervaloMax">Intervalo máximo (minutos)</label>
+      <input
+        id="intervaloMax"
+        type="number"
+        min="1"
+        max="720"
+        [ngModel]="intervaloMaxMinutos()"
+        (ngModelChange)="intervaloMaxMinutos.set($event)"
+      />
+    </div>
+  </div>
+  <p class="hint-text">
+    Uma mensagem por vez: depois de cada postagem, o bot sorteia um tempo de espera entre esses dois
+    valores antes de postar a próxima — nunca várias de uma vez.
+  </p>
+
+  @if (statusService.status()?.agendamento; as ag) {
+    @if (ag.ultimaRodadaEm) {
+      <p class="hint-text">Última postagem automática: {{ formatarData(ag.ultimaRodadaEm) }}</p>
+    }
+    @if (ag.proximaRodadaEm) {
+      <p class="hint-text">Próxima postagem prevista: {{ formatarData(ag.proximaRodadaEm) }}</p>
+    }
+  }
+
+  <p class="hint-text">
+    As rodadas automáticas sempre escolhem entre "Todos" os grupos cadastrados. Só funciona enquanto este
+    servidor (dashboard-api) estiver rodando no computador.
+  </p>
+
+  <div style="display: flex; align-items: center; gap: 12px">
+    <button type="button" class="btn btn-primary" [disabled]="salvando()" (click)="salvar()">
+      {{ salvando() ? 'Salvando…' : 'Salvar' }}
+    </button>
+    @if (mensagem(); as m) {
+      <span [class]="m.tipo === 'ok' ? 'ok-text' : 'error-text'">{{ m.texto }}</span>
+    }
+  </div>
+</div>

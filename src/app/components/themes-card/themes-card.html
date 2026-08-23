@@ -1,0 +1,104 @@
+<div class="card">
+  <div class="card-header">
+    <div>
+      <h2>🎯 Temas de busca</h2>
+      <p class="card-subtitle">
+        Palavras-chave que dão prioridade a certos produtos numa janela de datas do ano
+        (ex.: "Copa do Mundo" prioriza camisas de time em junho/julho).
+      </p>
+    </div>
+  </div>
+
+  <label class="checkbox-row">
+    <input type="checkbox" [ngModel]="ativo()" (ngModelChange)="ativo.set($event)" />
+    Priorização sazonal ativa
+  </label>
+
+  <div class="card-section">
+    <p class="hint-text">
+      Já ativos automaticamente (não precisa cadastrar): {{ temasEmbutidos.join(', ') }}.
+    </p>
+  </div>
+
+  <div class="card-section" style="gap: 16px">
+    @for (ev of eventos(); track $index) {
+      <div style="border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px; display: flex; flex-direction: column; gap: 12px">
+        <div class="grid-2">
+          <div class="field">
+            <label>Nome do tema</label>
+            <input
+              type="text"
+              [ngModel]="ev.nome"
+              (ngModelChange)="atualizarCampo($index, 'nome', $event)"
+              placeholder="Ex.: Dia do Cliente Fiel"
+            />
+          </div>
+          <div class="field">
+            <label>Peso (1–30)</label>
+            <input
+              type="number"
+              min="1"
+              max="30"
+              [ngModel]="ev.peso"
+              (ngModelChange)="atualizarCampo($index, 'peso', $event)"
+            />
+          </div>
+          <div class="field">
+            <label>Início (MM-DD)</label>
+            <input
+              type="text"
+              maxlength="5"
+              placeholder="06-01"
+              [ngModel]="ev.inicio"
+              (ngModelChange)="atualizarCampo($index, 'inicio', $event)"
+            />
+            @if (ev.inicio && !dataValida(ev.inicio)) {
+              <span class="error-text">Use o formato MM-DD</span>
+            }
+          </div>
+          <div class="field">
+            <label>Fim (MM-DD)</label>
+            <input
+              type="text"
+              maxlength="5"
+              placeholder="07-20"
+              [ngModel]="ev.fim"
+              (ngModelChange)="atualizarCampo($index, 'fim', $event)"
+            />
+            @if (ev.fim && !dataValida(ev.fim)) {
+              <span class="error-text">Use o formato MM-DD</span>
+            }
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Palavras-chave</label>
+          <app-chip-input
+            [items]="ev.palavras"
+            (itemsChange)="atualizarPalavras($index, $event)"
+            placeholder="Ex.: camisa do brasil"
+          />
+        </div>
+
+        <button type="button" class="btn btn-danger btn-sm" style="align-self: flex-start" (click)="removerTema($index)">
+          Remover tema
+        </button>
+      </div>
+    } @empty {
+      <p class="hint-text">Nenhum tema customizado ainda.</p>
+    }
+
+    <button type="button" class="btn btn-ghost" style="align-self: flex-start" (click)="adicionarTema()">
+      + Adicionar tema
+    </button>
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 12px">
+    <button type="button" class="btn btn-primary" [disabled]="salvando()" (click)="salvar()">
+      {{ salvando() ? 'Salvando…' : 'Salvar' }}
+    </button>
+    @if (mensagem(); as m) {
+      <span [class]="m.tipo === 'ok' ? 'ok-text' : 'error-text'">{{ m.texto }}</span>
+    }
+  </div>
+</div>

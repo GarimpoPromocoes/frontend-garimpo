@@ -1,0 +1,58 @@
+<div class="page">
+  <header class="page-header">
+    <div class="brand">
+      <span class="brand-mark">🤖</span>
+      <div>
+        <h1>Promobot</h1>
+        <p>Painel de controle do robô de afiliados</p>
+      </div>
+    </div>
+
+    <div class="global-badges">
+      <span
+        class="badge"
+        [class.badge-ok]="statusService.status()?.mercadoLivre?.conectado"
+        [class.badge-off]="!statusService.status()?.mercadoLivre?.conectado"
+      >
+        <span class="badge-dot"></span>
+        ML {{ statusService.status()?.mercadoLivre?.conectado ? 'conectado' : 'desconectado' }}
+      </span>
+      <span
+        class="badge"
+        [class.badge-ok]="statusService.status()?.whatsapp?.conectado"
+        [class.badge-off]="!statusService.status()?.whatsapp?.conectado"
+      >
+        <span class="badge-dot"></span>
+        WhatsApp {{ statusService.status()?.whatsapp?.conectado ? 'conectado' : 'desconectado' }}
+      </span>
+      @if (statusService.status()?.job?.rodando) {
+        <span class="badge badge-running">
+          <span class="badge-dot"></span>
+          Rodando: {{ statusService.status()?.job?.tipo }}
+        </span>
+      }
+    </div>
+  </header>
+
+  @if (configService.erro()) {
+    <div class="alert-banner">⚠️ {{ configService.erro() }}</div>
+  }
+
+  @if (statusService.status()?.processoExterno?.rodando) {
+    <div class="alert-banner">
+      ⚠️ O bot já está rodando fora do dashboard (ex.: pelo menu do terminal). Feche-o antes de usar os botões
+      abaixo para evitar conflito de sessão.
+    </div>
+  }
+
+  <main class="grid">
+    <app-connection-card servico="ml" class="col-span-1" />
+    <app-connection-card servico="whatsapp" class="col-span-1" />
+    <app-groups-card class="col-span-2" />
+    <app-posting-config-card class="col-span-2" />
+    <app-themes-card class="col-span-2" />
+    <app-stats-card class="col-span-2" />
+    <app-schedule-card class="col-span-2" />
+    <app-run-card class="col-span-2" />
+  </main>
+</div>
