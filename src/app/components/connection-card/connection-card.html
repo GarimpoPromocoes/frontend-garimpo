@@ -16,10 +16,15 @@
     <div class="card-section">
       @if (servico() === 'ml') {
         <p class="hint-text">
-          Uma janela do navegador abriu para você fazer login na sua conta de afiliado do Mercado Livre.
-          Quando terminar (a barra escura de "Afiliados" aparece no topo da página), volte aqui e clique em
+          Uma janela do navegador abriu <strong>dentro do servidor</strong> para você fazer login na sua
+          conta de afiliado do Mercado Livre. Escaneie o QR Code (ou abra o link) pra ver essa tela e logar —
+          quando terminar (a barra escura de "Afiliados" aparece no topo da página), volte aqui e clique em
           <strong>Concluí o login</strong>.
         </p>
+        @if (novncQrCode(); as qr) {
+          <img [src]="qr" alt="QR Code para abrir a tela remota do login" style="width: 180px; height: 180px; align-self: flex-start" />
+        }
+        <a [href]="novncUrl()" target="_blank" rel="noopener" class="hint-text">{{ novncUrl() }}</a>
         <div style="display: flex; gap: 8px; flex-wrap: wrap">
           <button type="button" class="btn btn-primary" (click)="concluirLogin()">Concluí o login</button>
           <button type="button" class="btn btn-ghost" (click)="cancelar()">Cancelar</button>

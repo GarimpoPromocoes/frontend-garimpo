@@ -1,4 +1,5 @@
-import { Component, computed, inject, input, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, signal } from '@angular/core';
+import * as QRCode from 'qrcode';
 import { StatusService } from '../../services/status.service';
 import { JobsService, JobTipo } from '../../services/jobs.service';
 
@@ -39,6 +40,28 @@ export class ConnectionCard {
   protected readonly titulo = computed(() => (this.servico() === 'ml' ? 'Mercado Livre' : 'WhatsApp'));
   protected readonly icone = computed(() => (this.servico() === 'ml' ? '🛒' : '💬'));
   protected readonly erro = signal<string | null>(null);
+
+  // O login do ML abre um navegador DENTRO do container — só dá pra ver/usar
+  // pela tela remota (noVNC), que fica num endereço/porta diferente do
+  // dashboard. QR Code (e o link) evitam ter que descobrir/digitar essa URL
+  // na mão — abre "/" que já auto-conecta na tela remota (ver novnc-index.html).
+  protected readonly novncUrl = computed(
+    () => `${window.location.protocol}//${window.location.hostname}:6080/`,
+  );
+  protected readonly novncQrCode = signal<string | null>(null);
+
+  constructor() {
+    effect(() => {
+      const precisaQr = this.servico() === 'ml' && this.esteCardEstaRodando();
+      if (!precisaQr) {
+        this.novncQrCode.set(null);
+        return;
+      }
+      QRCode.toDataURL(this.novncUrl(), { margin: 1, width: 220 })
+        .then((url) => this.novncQrCode.set(url))
+        .catch(() => this.novncQrCode.set(null));
+    });
+  }
 
   async conectar(): Promise<void> {
     this.erro.set(null);

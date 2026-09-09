@@ -4,26 +4,39 @@
       <h2>▶️ Executar</h2>
       <p class="card-subtitle">Posta de verdade nos grupos do WhatsApp escolhidos, cada um só com produtos do seu tema.</p>
     </div>
-    @if (jobsService.rodando()) {
+    @if (garimpoRodando()) {
       <span class="badge badge-running">
         <span class="badge-dot"></span>
-        Rodando: {{ jobsService.tipo() }}
+        Garimpando agora
       </span>
+    } @else if (rodandoContinuo()) {
+      <span class="badge badge-running">
+        <span class="badge-dot"></span>
+        {{ jobsService.rodando() ? 'Postando agora' : 'Rodando — aguardando próxima postagem' }}
+      </span>
+    } @else if (statusService.status()?.agendamento; as ag) {
+      @if (!ag.ativo) {
+        <span class="badge badge-off"><span class="badge-dot"></span>Parado</span>
+      } @else if (ag.dentroDaJanela) {
+        <span class="badge badge-ok"><span class="badge-dot"></span>Agendado: dentro da janela</span>
+      } @else {
+        <span class="badge badge-off"><span class="badge-dot"></span>Agendado: fora da janela</span>
+      }
     }
   </div>
 
   @if (statusService.status()?.processoExterno?.rodando) {
-    <p class="hint-text">⚠️ O bot também está rodando fora do dashboard agora — feche-o antes de disparar algo aqui.</p>
+    <p class="hint-text">⚠️ O bot também está rodando fora do dashboard agora — clique em "Parar" abaixo para encerrá-lo.</p>
   }
 
   <div style="display: flex; gap: 8px; flex-wrap: wrap">
-    <button type="button" class="btn" [class.btn-primary]="alvo() === 'todos'" [class.btn-ghost]="alvo() !== 'todos'" (click)="escolherAlvo('todos')">
+    <button type="button" class="btn" [class.btn-primary]="alvo() === 'todos'" [class.btn-ghost]="alvo() !== 'todos'" [disabled]="algoRodando()" (click)="escolherAlvo('todos')">
       Todos
     </button>
-    <button type="button" class="btn" [class.btn-primary]="alvo() === 'selecionados'" [class.btn-ghost]="alvo() !== 'selecionados'" (click)="escolherAlvo('selecionados')">
+    <button type="button" class="btn" [class.btn-primary]="alvo() === 'selecionados'" [class.btn-ghost]="alvo() !== 'selecionados'" [disabled]="algoRodando()" (click)="escolherAlvo('selecionados')">
       Selecionados
     </button>
-    <button type="button" class="btn" [class.btn-primary]="alvo() === 'um'" [class.btn-ghost]="alvo() !== 'um'" (click)="escolherAlvo('um')">
+    <button type="button" class="btn" [class.btn-primary]="alvo() === 'um'" [class.btn-ghost]="alvo() !== 'um'" [disabled]="algoRodando()" (click)="escolherAlvo('um')">
       Um grupo
     </button>
   </div>
@@ -37,6 +50,7 @@
           <label class="checkbox-row">
             <input
               type="checkbox"
+              [disabled]="algoRodando()"
               [checked]="selecionados().has(g.id)"
               (change)="toggleSelecionado(g.id, $any($event.target).checked)"
             />
@@ -49,7 +63,7 @@
       <div class="card-section" style="gap: 8px">
         @for (g of grupos(); track g.id) {
           <label class="checkbox-row">
-            <input type="radio" name="umGrupo" [checked]="umGrupoId() === g.id" (change)="escolherUm(g.id)" />
+            <input type="radio" name="umGrupo" [disabled]="algoRodando()" [checked]="umGrupoId() === g.id" (change)="escolherUm(g.id)" />
             {{ g.nome }} <span class="hint-text">→ {{ g.groupName }}</span>
           </label>
         }
@@ -58,34 +72,111 @@
   }
 
   <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap">
-    <button type="button" class="btn btn-primary" [disabled]="jobsService.rodando()" (click)="executarGrupos()">
-      Executar
-    </button>
-    @if (jobsService.rodando()) {
-      <button type="button" class="btn btn-danger" (click)="parar()">Parar execução</button>
+    @if (!algoRodando()) {
+      <button type="button" class="btn btn-primary" [disabled]="iniciando()" (click)="executar()">
+        {{ iniciando() ? 'Iniciando…' : 'Executar' }}
+      </button>
+      <button type="button" class="btn btn-ghost" [disabled]="iniciando()" (click)="garimpar()">
+        Garimpar
+      </button>
+    } @else {
+      <button type="button" class="btn btn-danger" [disabled]="parando()" (click)="parar()">
+        {{ parando() ? 'Parando…' : 'Parar' }}
+      </button>
     }
   </div>
+  <p class="hint-text">
+    "Garimpar" busca as promoções reais de agora na página oficial de ofertas do Mercado Livre e abastece o
+    catálogo (não posta nada) — fica rodando até você clicar em "Parar".
+  </p>
 
   @if (erro()) {
     <p class="error-text">{{ erro() }}</p>
   }
 
-  <div class="card-section" style="flex-direction: row; align-items: flex-end; flex-wrap: wrap; gap: 10px">
-    <div class="field" style="max-width: 160px">
-      <label for="maxMaisVendidos">Quantidade</label>
-      <input
-        id="maxMaisVendidos"
-        type="number"
-        min="1"
-        max="100"
-        [ngModel]="maxMaisVendidos()"
-        (ngModelChange)="maxMaisVendidos.set($event)"
-      />
+  <div class="card-section" style="border-top: 1px solid var(--border); padding-top: 14px">
+    <label class="checkbox-row">
+      <input type="checkbox" [ngModel]="agendamentoAtivo()" (ngModelChange)="agendamentoAtivo.set($event)" />
+      Agendamento ativo
+    </label>
+    <p class="hint-text">
+      Com o agendamento ativo, o bot posta sozinho todo dia dentro do horário abaixo — sem precisar clicar em
+      "Executar". Já o botão "Executar" ignora o horário e roda até você clicar em "Parar".
+    </p>
+
+    <div class="grid-2">
+      <div class="field">
+        <label for="horaInicio">Início (todo dia)</label>
+        <input
+          id="horaInicio"
+          type="time"
+          [ngModel]="horaInicio()"
+          (ngModelChange)="horaInicio.set($event)"
+        />
+      </div>
+      <div class="field">
+        <label for="horaFim">Fim (todo dia)</label>
+        <input
+          id="horaFim"
+          type="time"
+          [ngModel]="horaFim()"
+          (ngModelChange)="horaFim.set($event)"
+        />
+        <span class="hint">Pode virar a noite (ex.: início 22:00, fim 06:00).</span>
+      </div>
     </div>
-    <button type="button" class="btn btn-ghost" [disabled]="jobsService.rodando()" (click)="garimparMaisVendidos()">
-      Garimpar mais vendidos
-    </button>
-    <span class="hint-text">Só abastece o catálogo (não posta nada).</span>
+
+    <div class="grid-2">
+      <div class="field">
+        <label for="intervaloMin">Intervalo mínimo (minutos)</label>
+        <input
+          id="intervaloMin"
+          type="number"
+          min="1"
+          max="720"
+          [ngModel]="intervaloMinMinutos()"
+          (ngModelChange)="intervaloMinMinutos.set($event)"
+        />
+      </div>
+      <div class="field">
+        <label for="intervaloMax">Intervalo máximo (minutos)</label>
+        <input
+          id="intervaloMax"
+          type="number"
+          min="1"
+          max="720"
+          [ngModel]="intervaloMaxMinutos()"
+          (ngModelChange)="intervaloMaxMinutos.set($event)"
+        />
+      </div>
+    </div>
+    <p class="hint-text">
+      Uma mensagem por vez: depois de cada postagem, o bot sorteia um tempo de espera entre esses dois
+      valores antes de postar a próxima — vale tanto para o agendamento quanto para o botão "Executar".
+    </p>
+
+    @if (statusService.status()?.agendamento; as ag) {
+      @if (ag.ultimaRodadaEm) {
+        <p class="hint-text">Última postagem automática: {{ formatarData(ag.ultimaRodadaEm) }}</p>
+      }
+      @if (ag.ativo && ag.proximaRodadaEm) {
+        <p class="hint-text">Próxima postagem automática prevista: {{ formatarData(ag.proximaRodadaEm) }}</p>
+      }
+    }
+
+    <p class="hint-text">
+      As rodadas automáticas sempre escolhem entre "Todos" os grupos cadastrados. Só funciona enquanto este
+      servidor (dashboard-api) estiver rodando no computador.
+    </p>
+
+    <div style="display: flex; align-items: center; gap: 12px">
+      <button type="button" class="btn btn-ghost" [disabled]="salvandoAgendamento()" (click)="salvarAgendamento()">
+        {{ salvandoAgendamento() ? 'Salvando…' : 'Salvar agendamento' }}
+      </button>
+      @if (mensagemAgendamento(); as m) {
+        <span [class]="m.tipo === 'ok' ? 'ok-text' : 'error-text'">{{ m.texto }}</span>
+      }
+    </div>
   </div>
 
   <div class="card-section">

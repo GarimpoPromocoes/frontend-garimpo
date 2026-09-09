@@ -252,7 +252,8 @@ textarea {
   color: var(--text-muted);
 }
 .field input[type='text'],
-.field input[type='number'] {
+.field input[type='number'],
+.field input[type='time'] {
   padding: 10px 12px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
@@ -301,8 +302,12 @@ textarea {
   line-height: 1.2;
   max-height: 560px;
   overflow-y: auto;
-  white-space: pre-wrap;
-  word-break: break-word;
+  overflow-x: auto;
+  // pre (nao pre-wrap): o QR Code do WhatsApp e' ASCII art (blocos Unicode)
+  // impresso linha a linha pelo bot — se uma linha quebrar no meio (wrap), o
+  // padrao do QR desalinha e fica ilegivel. Linhas de log normais que
+  // estourarem a largura ganham scroll horizontal em vez de quebrar.
+  white-space: pre;
 }
 .console-empty {
   color: #64748b;

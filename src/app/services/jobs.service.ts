@@ -3,16 +3,16 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
 
-export type JobTipo = 'login-ml' | 'trocar-ml' | 'trocar-zap' | 'wpp' | 'grupos' | 'mais-vendidos';
+export type JobTipo = 'login-ml' | 'trocar-ml' | 'trocar-zap' | 'grupos' | 'ofertas';
 
 export type AlvoGrupos = 'todos' | 'selecionados' | 'um';
 
 export interface IniciarJobOpts {
   max?: number;
   minVendidos?: number;
-  feminino?: boolean;
   alvo?: AlvoGrupos;
   ids?: string[];
+  loop?: boolean;
 }
 
 const MAX_LINHAS = 500;
@@ -84,5 +84,22 @@ export class JobsService {
 
   async parar(): Promise<void> {
     await firstValueFrom(this.http.post('/api/jobs/stop', {}));
+  }
+
+  // Liga o loop continuo do botao "Executar": posta 1 mensagem por vez, com
+  // intervalo aleatorio, ate o "Parar" ser clicado (ver scheduler.js).
+  async iniciarContinuo(alvo: AlvoGrupos, ids: string[] = []): Promise<{ ok: boolean; erro?: string }> {
+    try {
+      await firstValueFrom(this.http.post('/api/jobs/grupos/continuo/iniciar', { alvo, ids }));
+      return { ok: true };
+    } catch (e: any) {
+      return { ok: false, erro: e?.error?.erro || 'Não foi possível iniciar essa ação.' };
+    }
+  }
+
+  // Botão "Parar" único: derruba o loop manual, o job do jobRunner e, se
+  // houver, o processo apontado como "rodando fora do dashboard".
+  async pararTudo(): Promise<void> {
+    await firstValueFrom(this.http.post('/api/jobs/parar-tudo', {}));
   }
 }

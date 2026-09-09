@@ -14,6 +14,13 @@ export interface StatusResponse {
     dentroDaJanela: boolean;
     ultimaRodadaEm: string | null;
     proximaRodadaEm: string | null;
+    manual: {
+      ativo: boolean;
+      alvo: string;
+      ids: string[];
+      ultimaRodadaEm: string | null;
+      proximaRodadaEm: string | null;
+    };
   };
 }
 

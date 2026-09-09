@@ -29,17 +29,10 @@ export interface Agendamento {
 }
 
 export interface DashboardConfig {
-  whatsapp: {
-    gruposGarimpo: string[];
-    garimparCanais: boolean;
-  };
   grupos: GrupoTematico[];
   postagem: {
-    produtosPorExecucao: number;
-    maxMensagensPorExecucao: number;
     cooldownHoras: number;
     repostarAposDias: number;
-    maxPorFamilia: number;
   };
   sazonalidade: {
     ativo: boolean;

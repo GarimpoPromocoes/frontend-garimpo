@@ -1,96 +1,37 @@
 <div class="card">
   <div class="card-header">
     <div>
-      <h2>⛏️ Garimpo</h2>
-      <p class="card-subtitle">De onde o bot garimpa produtos novos para abastecer o catálogo.</p>
+      <h2>🔁 Anti-repetição</h2>
+      <p class="card-subtitle">Controla quando um produto já postado pode sair de novo.</p>
     </div>
   </div>
 
-  <div class="field">
-    <label>Grupos de garimpo (fontes)</label>
-    <span class="hint">
-      Grupos que o bot lê para encontrar produtos novos e trazer para o catálogo. Basta parte do nome.
-    </span>
-    <app-chip-input
-      [items]="gruposGarimpo()"
-      (itemsChange)="gruposGarimpo.set($event)"
-      placeholder="Nome (ou parte do nome) do grupo-fonte"
-    />
-  </div>
-
-  <label class="checkbox-row">
-    <input
-      type="checkbox"
-      [ngModel]="garimparCanais()"
-      (ngModelChange)="garimparCanais.set($event)"
-    />
-    Garimpar também canais (newsletters), não só grupos
-  </label>
-
-  <details class="collapsible">
-    <summary>Limites avançados de postagem</summary>
-    <p class="hint-text" style="margin-top: 8px">Esses limites valem por grupo, a cada rodada.</p>
-    <div class="grid-2" style="margin-top: 12px">
-      <div class="field">
-        <label for="produtosPorExecucao">Produtos por execução</label>
-        <input
-          id="produtosPorExecucao"
-          type="number"
-          min="1"
-          max="100"
-          [ngModel]="produtosPorExecucao()"
-          (ngModelChange)="produtosPorExecucao.set($event)"
-        />
-      </div>
-      <div class="field">
-        <label for="maxMensagensPorExecucao">Máximo de mensagens por execução</label>
-        <input
-          id="maxMensagensPorExecucao"
-          type="number"
-          min="1"
-          max="200"
-          [ngModel]="maxMensagensPorExecucao()"
-          (ngModelChange)="maxMensagensPorExecucao.set($event)"
-        />
-      </div>
-      <div class="field">
-        <label for="cooldownHoras">Cooldown (horas)</label>
-        <input
-          id="cooldownHoras"
-          type="number"
-          min="0"
-          max="720"
-          [ngModel]="cooldownHoras()"
-          (ngModelChange)="cooldownHoras.set($event)"
-        />
-        <span class="hint">Tempo mínimo antes de repostar o mesmo produto.</span>
-      </div>
-      <div class="field">
-        <label for="repostarAposDias">Repostar após (dias)</label>
-        <input
-          id="repostarAposDias"
-          type="number"
-          min="0"
-          max="90"
-          [ngModel]="repostarAposDias()"
-          (ngModelChange)="repostarAposDias.set($event)"
-        />
-        <span class="hint">0 = nunca reposta sem melhora de preço.</span>
-      </div>
-      <div class="field">
-        <label for="maxPorFamilia">Máximo por família de produto</label>
-        <input
-          id="maxPorFamilia"
-          type="number"
-          min="1"
-          max="20"
-          [ngModel]="maxPorFamilia()"
-          (ngModelChange)="maxPorFamilia.set($event)"
-        />
-        <span class="hint">Evita enxurrada do mesmo tipo de produto (ex.: só relógio).</span>
-      </div>
+  <div class="grid-2">
+    <div class="field">
+      <label for="cooldownHoras">Cooldown (horas)</label>
+      <input
+        id="cooldownHoras"
+        type="number"
+        min="0"
+        max="720"
+        [ngModel]="cooldownHoras()"
+        (ngModelChange)="cooldownHoras.set($event)"
+      />
+      <span class="hint">Tempo mínimo antes de repostar o mesmo produto — nem com preço menor, nem em relâmpago.</span>
     </div>
-  </details>
+    <div class="field">
+      <label for="repostarAposDias">Repostar após (dias)</label>
+      <input
+        id="repostarAposDias"
+        type="number"
+        min="0"
+        max="90"
+        [ngModel]="repostarAposDias()"
+        (ngModelChange)="repostarAposDias.set($event)"
+      />
+      <span class="hint">Depois desse prazo, pode repostar mesmo sem melhora de preço. 0 = nunca reposta sem melhora.</span>
+    </div>
+  </div>
 
   <div style="display: flex; align-items: center; gap: 12px">
     <button type="button" class="btn btn-primary" [disabled]="salvando()" (click)="salvar()">
