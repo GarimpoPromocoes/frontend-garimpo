@@ -53,6 +53,23 @@ export class RunCard {
       !!this.statusService.status()?.processoExterno?.rodando
   );
 
+  // Última publicação REAL (confirmada no WhatsApp) — a mais recente entre o
+  // agendamento automático e o loop manual, seja qual for que postou por
+  // último. Próxima publicação: do modo que estiver ativo agora.
+  protected readonly ultimaPublicacao = computed(() => {
+    const ag = this.statusService.status()?.agendamento;
+    if (!ag) return null;
+    const datas = [ag.ultimaRodadaEm, ag.manual?.ultimaRodadaEm].filter((d): d is string => !!d);
+    if (!datas.length) return null;
+    return datas.reduce((maisRecente, atual) => (atual > maisRecente ? atual : maisRecente));
+  });
+
+  protected readonly proximaPublicacao = computed(() => {
+    const ag = this.statusService.status()?.agendamento;
+    if (!ag) return null;
+    return this.rodandoContinuo() ? ag.manual?.proximaRodadaEm ?? null : ag.proximaRodadaEm;
+  });
+
   private readonly consoleEl = viewChild<ElementRef<HTMLDivElement>>('consoleEl');
 
   constructor() {

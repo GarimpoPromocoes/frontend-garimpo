@@ -25,6 +25,17 @@
     }
   </div>
 
+  <div class="grid-2">
+    <div class="stat-tile">
+      <span class="value">{{ formatarData(ultimaPublicacao()) }}</span>
+      <span class="label">Última publicação</span>
+    </div>
+    <div class="stat-tile">
+      <span class="value">{{ formatarData(proximaPublicacao()) }}</span>
+      <span class="label">Próxima publicação prevista</span>
+    </div>
+  </div>
+
   @if (statusService.status()?.processoExterno?.rodando) {
     <p class="hint-text">⚠️ O bot também está rodando fora do dashboard agora — clique em "Parar" abaixo para encerrá-lo.</p>
   }
@@ -154,15 +165,6 @@
       Uma mensagem por vez: depois de cada postagem, o bot sorteia um tempo de espera entre esses dois
       valores antes de postar a próxima — vale tanto para o agendamento quanto para o botão "Executar".
     </p>
-
-    @if (statusService.status()?.agendamento; as ag) {
-      @if (ag.ultimaRodadaEm) {
-        <p class="hint-text">Última postagem automática: {{ formatarData(ag.ultimaRodadaEm) }}</p>
-      }
-      @if (ag.ativo && ag.proximaRodadaEm) {
-        <p class="hint-text">Próxima postagem automática prevista: {{ formatarData(ag.proximaRodadaEm) }}</p>
-      }
-    }
 
     <p class="hint-text">
       As rodadas automáticas sempre escolhem entre "Todos" os grupos cadastrados. Só funciona enquanto este
