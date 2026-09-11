@@ -7,11 +7,12 @@ import { ThemesCard } from './components/themes-card/themes-card';
 import { GroupsCard } from './components/groups-card/groups-card';
 import { RunCard } from './components/run-card/run-card';
 import { StatsCard } from './components/stats-card/stats-card';
+import { CuponsCard } from './components/cupons-card/cupons-card';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [ConnectionCard, PostingConfigCard, ThemesCard, GroupsCard, RunCard, StatsCard],
+  imports: [ConnectionCard, PostingConfigCard, ThemesCard, GroupsCard, RunCard, StatsCard, CuponsCard],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })

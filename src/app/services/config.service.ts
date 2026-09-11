@@ -25,6 +25,12 @@ export interface Agendamento {
   intervaloMaxMinutos: number;
 }
 
+export interface Cupons {
+  ativo: boolean;
+  percentualProduto: number;
+  percentualSozinho: number;
+}
+
 export interface DashboardConfig {
   grupos: GrupoTematico[];
   postagem: {
@@ -36,6 +42,7 @@ export interface DashboardConfig {
     eventos: TemaEvento[];
   };
   agendamento: Agendamento;
+  cupons: Cupons;
 }
 
 @Injectable({ providedIn: 'root' })

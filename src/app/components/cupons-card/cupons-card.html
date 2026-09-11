@@ -1,0 +1,84 @@
+<div class="card">
+  <div class="card-header">
+    <div>
+      <h2>Cupons</h2>
+      <p class="card-subtitle">
+        Cruza cupons com código real do Mercado Livre com o catálogo pra misturar oferta pura, oferta+cupom e chuva de cupons nas postagens.
+      </p>
+    </div>
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 10px">
+    <button
+      type="button"
+      class="toggle-switch"
+      role="switch"
+      [attr.aria-checked]="ativo()"
+      [class.toggle-switch-on]="ativo()"
+      (click)="ativo.set(!ativo())"
+    >
+      <span class="toggle-switch-thumb"></span>
+    </button>
+    <span>Envio misturado ativo</span>
+  </div>
+  <p class="hint-text">
+    Com o envio misturado ativo, o botão "Executar" ocasionalmente troca uma oferta pura por uma oferta com cupom
+    (só quando a categoria/marca do próprio cupom bate com o produto) ou por uma chuva de cupons (vários códigos
+    de uma vez, sem produto) — o resto continua sendo oferta normal.
+  </p>
+
+  <div class="card-section">
+    <div class="grid-2">
+      <div class="field">
+        <label for="percentualProduto">% oferta + cupom</label>
+        <input
+          id="percentualProduto"
+          type="number"
+          min="0"
+          max="100"
+          [ngModel]="percentualProduto()"
+          (ngModelChange)="percentualProduto.set($event)"
+        />
+        <span class="hint">Produto em oferta cujo cupom o ML confirma pra ele.</span>
+      </div>
+      <div class="field">
+        <label for="percentualSozinho">% chuva de cupons</label>
+        <input
+          id="percentualSozinho"
+          type="number"
+          min="0"
+          max="100"
+          [ngModel]="percentualSozinho()"
+          (ngModelChange)="percentualSozinho.set($event)"
+        />
+        <span class="hint">Vários códigos de uma vez, sem produto associado.</span>
+      </div>
+    </div>
+    <p class="hint-text">A soma dos dois não pode passar de 50% — oferta pura continua sendo a maioria sempre.</p>
+
+    <div style="display: flex; align-items: center; gap: 12px">
+      <button type="button" class="btn btn-primary" [disabled]="salvando()" (click)="salvar()">
+        {{ salvando() ? 'Salvando…' : 'Salvar' }}
+      </button>
+      @if (mensagem(); as m) {
+        <span [class]="m.tipo === 'ok' ? 'ok-text' : 'error-text'">{{ m.texto }}</span>
+      }
+    </div>
+  </div>
+
+  <div class="card-section">
+    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
+      <button type="button" class="btn btn-ghost" [disabled]="garimpando() || jobsService.rodando()" (click)="garimpar()">
+        {{ garimpando() ? 'Iniciando…' : 'Garimpar cupons' }}
+      </button>
+      <span class="hint-text">{{ statusService.status()?.cuponsAtivos ?? '—' }} cupons ativos no catálogo agora.</span>
+    </div>
+    <p class="hint-text">
+      Busca cupons com código real de Mercado Livre (não os "clique em Aplicar" do próprio site, que não têm
+      código nenhum) e fica rodando rodada após rodada até "Parar" — igual ao "Garimpar" de ofertas.
+    </p>
+    @if (erroGarimpo()) {
+      <p class="error-text">{{ erroGarimpo() }}</p>
+    }
+  </div>
+</div>

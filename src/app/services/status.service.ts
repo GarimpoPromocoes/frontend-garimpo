@@ -7,6 +7,7 @@ export interface StatusResponse {
   whatsapp: { conectado: boolean };
   produtosPublicados: number;
   produtosCatalogo: number;
+  cuponsAtivos: number;
   processoExterno: { rodando: boolean };
   job: { rodando: boolean; tipo: string | null; iniciadoEm: string | null; codigoSaida?: number | null };
   agendamento: {

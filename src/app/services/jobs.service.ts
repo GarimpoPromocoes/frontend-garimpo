@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
 
-export type JobTipo = 'login-ml' | 'trocar-ml' | 'trocar-zap' | 'grupos' | 'ofertas';
+export type JobTipo = 'login-ml' | 'trocar-ml' | 'trocar-zap' | 'grupos' | 'ofertas' | 'cupons';
 
 export type AlvoGrupos = 'todos' | 'selecionados';
 

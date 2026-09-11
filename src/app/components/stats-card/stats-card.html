@@ -6,7 +6,7 @@
     <button type="button" class="btn btn-ghost btn-sm" (click)="atualizar()">Atualizar</button>
   </div>
 
-  <div class="grid-2">
+  <div class="grid-3">
     <div class="stat-tile">
       <span class="value">{{ statusService.status()?.produtosPublicados ?? '—' }}</span>
       <span class="label">Produtos já publicados</span>
@@ -14,6 +14,10 @@
     <div class="stat-tile">
       <span class="value">{{ statusService.status()?.produtosCatalogo ?? '—' }}</span>
       <span class="label">Produtos no catálogo</span>
+    </div>
+    <div class="stat-tile">
+      <span class="value">{{ statusService.status()?.cuponsAtivos ?? '—' }}</span>
+      <span class="label">Cupons ativos</span>
     </div>
   </div>
 </div>
