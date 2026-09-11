@@ -2,7 +2,6 @@
   <div class="card-header">
     <div>
       <h2>Executar</h2>
-      <p class="card-subtitle">Posta de verdade nos grupos do WhatsApp escolhidos, cada um só com produtos do seu tema.</p>
     </div>
     @if (garimpoRodando()) {
       <span class="badge badge-running">
@@ -34,13 +33,15 @@
     <p class="hint-text">O bot também está rodando fora do dashboard agora — clique em "Parar" abaixo para encerrá-lo.</p>
   }
 
-  <div style="display: flex; gap: 8px; flex-wrap: wrap">
-    <button type="button" class="btn" [class.btn-primary]="alvo() === 'todos'" [class.btn-ghost]="alvo() !== 'todos'" [disabled]="algoRodando()" (click)="escolherAlvo('todos')">
-      Todos
-    </button>
-    <button type="button" class="btn" [class.btn-primary]="alvo() === 'selecionados'" [class.btn-ghost]="alvo() !== 'selecionados'" [disabled]="algoRodando()" (click)="escolherAlvo('selecionados')">
-      Selecionados
-    </button>
+  <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap">
+    <div class="segmented">
+      <button type="button" class="segmented-option" [class.segmented-option-active]="alvo() === 'todos'" [disabled]="algoRodando()" (click)="escolherAlvo('todos')">
+        Todos
+      </button>
+      <button type="button" class="segmented-option" [class.segmented-option-active]="alvo() === 'selecionados'" [disabled]="algoRodando()" (click)="escolherAlvo('selecionados')">
+        Selecionados
+      </button>
+    </div>
   </div>
 
   @if (grupos().length === 0) {
@@ -65,22 +66,18 @@
 
   <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap">
     @if (!algoRodando()) {
-      <button type="button" class="btn btn-primary" [disabled]="iniciando()" (click)="executar()">
+      <button type="button" class="btn btn-lg btn-primary" [disabled]="iniciando()" (click)="executar()">
         {{ iniciando() ? 'Iniciando…' : 'Executar' }}
       </button>
-      <button type="button" class="btn btn-ghost" [disabled]="iniciando()" (click)="garimpar()">
+      <button type="button" class="btn btn-lg btn-ghost" [disabled]="iniciando()" (click)="garimpar()">
         Garimpar
       </button>
     } @else {
-      <button type="button" class="btn btn-danger" [disabled]="parando()" (click)="parar()">
+      <button type="button" class="btn btn-lg btn-danger" [disabled]="parando()" (click)="parar()">
         {{ parando() ? 'Parando…' : 'Parar' }}
       </button>
     }
   </div>
-  <p class="hint-text">
-    "Garimpar" busca as promoções reais de agora na página oficial de ofertas do Mercado Livre e abastece o
-    catálogo (não posta nada) — fica rodando até você clicar em "Parar".
-  </p>
 
   @if (erro()) {
     <p class="error-text">{{ erro() }}</p>
@@ -111,10 +108,6 @@
         />
       </div>
     </div>
-    <p class="hint-text">
-      Uma mensagem por vez: depois de cada postagem, o bot sorteia um tempo de espera entre esses dois
-      valores antes de postar a próxima — só vale enquanto o botão "Executar" estiver rodando.
-    </p>
 
     <div style="display: flex; align-items: center; gap: 12px">
       <button type="button" class="btn btn-ghost" [disabled]="salvandoAgendamento()" (click)="salvarAgendamento()">

@@ -1,18 +1,23 @@
 <div class="card">
   <div class="card-header">
     <div>
-      <h2>Temas de busca</h2>
-      <p class="card-subtitle">
-        Palavras-chave que dão prioridade a certos produtos numa janela de datas do ano
-        (ex.: "Copa do Mundo" prioriza camisas de time em junho/julho).
-      </p>
+      <h2>Datas Sazonais</h2>
     </div>
   </div>
 
-  <label class="checkbox-row">
-    <input type="checkbox" [ngModel]="ativo()" (ngModelChange)="ativo.set($event)" />
-    Priorização sazonal ativa
-  </label>
+  <div style="display: flex; align-items: center; gap: 10px">
+    <button
+      type="button"
+      class="toggle-switch"
+      role="switch"
+      [attr.aria-checked]="ativo()"
+      [class.toggle-switch-on]="ativo()"
+      (click)="ativo.set(!ativo())"
+    >
+      <span class="toggle-switch-thumb"></span>
+    </button>
+    <span>Priorização sazonal ativa</span>
+  </div>
 
   <div class="card-section">
     <p class="hint-text">
