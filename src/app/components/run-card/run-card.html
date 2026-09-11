@@ -3,12 +3,7 @@
     <div>
       <h2>Executar</h2>
     </div>
-    @if (garimpoRodando()) {
-      <span class="badge badge-running">
-        <span class="badge-dot"></span>
-        Garimpando agora
-      </span>
-    } @else if (rodandoContinuo()) {
+    @if (rodandoContinuo()) {
       <span class="badge badge-running">
         <span class="badge-dot"></span>
         {{ jobsService.rodando() ? 'Postando agora' : 'Rodando — aguardando próxima postagem' }}
@@ -69,15 +64,17 @@
       <button type="button" class="btn btn-lg btn-primary" [disabled]="iniciando()" (click)="executar()">
         {{ iniciando() ? 'Iniciando…' : 'Executar' }}
       </button>
-      <button type="button" class="btn btn-lg btn-ghost" [disabled]="iniciando()" (click)="garimpar()">
-        Garimpar
-      </button>
     } @else {
       <button type="button" class="btn btn-lg btn-danger" [disabled]="parando()" (click)="parar()">
         {{ parando() ? 'Parando…' : 'Parar' }}
       </button>
     }
   </div>
+
+  <p class="hint-text">
+    Sozinho, sem precisar de nenhuma outra ação: quando o catálogo fica sem produto (ou sem cupom, se o envio
+    misturado estiver ativo), o bot garimpa mais direto do Mercado Livre antes de continuar postando.
+  </p>
 
   @if (erro()) {
     <p class="error-text">{{ erro() }}</p>

@@ -67,18 +67,10 @@
   </div>
 
   <div class="card-section">
-    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
-      <button type="button" class="btn btn-ghost" [disabled]="garimpando() || jobsService.rodando()" (click)="garimpar()">
-        {{ garimpando() ? 'Iniciando…' : 'Garimpar cupons' }}
-      </button>
-      <span class="hint-text">{{ statusService.status()?.cuponsAtivos ?? '—' }} cupons ativos no catálogo agora.</span>
-    </div>
+    <span class="hint-text">{{ statusService.status()?.cuponsAtivos ?? '—' }} cupons ativos no catálogo agora.</span>
     <p class="hint-text">
-      Busca cupons com código real de Mercado Livre (não os "clique em Aplicar" do próprio site, que não têm
-      código nenhum) e fica rodando rodada após rodada até "Parar" — igual ao "Garimpar" de ofertas.
+      Sem botão de garimpo separado: quando o "Executar" precisa de um cupom e o catálogo está vazio, ele busca
+      mais direto de cupons com código real de Mercado Livre automaticamente, antes de continuar.
     </p>
-    @if (erroGarimpo()) {
-      <p class="error-text">{{ erroGarimpo() }}</p>
-    }
   </div>
 </div>

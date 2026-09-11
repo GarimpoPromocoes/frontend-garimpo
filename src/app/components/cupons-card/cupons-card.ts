@@ -1,7 +1,6 @@
 import { Component, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ConfigService } from '../../services/config.service';
-import { JobsService } from '../../services/jobs.service';
 import { StatusService } from '../../services/status.service';
 
 @Component({
@@ -12,7 +11,6 @@ import { StatusService } from '../../services/status.service';
 })
 export class CuponsCard {
   protected configService = inject(ConfigService);
-  protected jobsService = inject(JobsService);
   protected statusService = inject(StatusService);
 
   protected readonly ativo = signal(true);
@@ -21,9 +19,6 @@ export class CuponsCard {
 
   protected readonly salvando = signal(false);
   protected readonly mensagem = signal<{ tipo: 'ok' | 'erro'; texto: string } | null>(null);
-
-  protected readonly garimpando = signal(false);
-  protected readonly erroGarimpo = signal<string | null>(null);
 
   constructor() {
     effect(() => {
@@ -57,16 +52,5 @@ export class CuponsCard {
     this.salvando.set(false);
     this.mensagem.set(r.ok ? { tipo: 'ok', texto: 'Salvo!' } : { tipo: 'erro', texto: r.erro ?? 'Erro ao salvar.' });
     if (r.ok) setTimeout(() => this.mensagem.set(null), 3000);
-  }
-
-  // Garimpa os cupons ativos agora em mercadolivre.com.br/cupons (fica rodando
-  // rodada após rodada, igual ao "Garimpar" de ofertas, até "Parar").
-  async garimpar(): Promise<void> {
-    this.erroGarimpo.set(null);
-    this.garimpando.set(true);
-    const r = await this.jobsService.iniciar('cupons', { loop: true });
-    this.garimpando.set(false);
-    if (!r.ok) this.erroGarimpo.set(r.erro ?? null);
-    await this.statusService.atualizar();
   }
 }

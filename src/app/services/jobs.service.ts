@@ -3,13 +3,11 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
 
-export type JobTipo = 'login-ml' | 'trocar-ml' | 'trocar-zap' | 'grupos' | 'ofertas' | 'cupons';
+export type JobTipo = 'login-ml' | 'trocar-ml' | 'trocar-zap' | 'grupos';
 
 export type AlvoGrupos = 'todos' | 'selecionados';
 
 export interface IniciarJobOpts {
-  max?: number;
-  minVendidos?: number;
   alvo?: AlvoGrupos;
   ids?: string[];
   loop?: boolean;

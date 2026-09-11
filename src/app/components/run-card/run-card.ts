@@ -32,12 +32,6 @@ export class RunCard {
 
   protected readonly rodandoContinuo = computed(() => !!this.statusService.status()?.agendamento?.manual?.ativo);
 
-  // Garimpo continuo: um unico job de longa duracao (sem passar pelo
-  // agendamento) — ver comandos/garimpar-ofertas.js --loop.
-  protected readonly garimpoRodando = computed(
-    () => this.jobsService.tipo() === 'ofertas' && this.jobsService.rodando()
-  );
-
   // "Parar" precisa estar disponível sempre que QUALQUER coisa estiver
   // rodando: o loop manual, o garimpo continuo, um job avulso ou até um
   // processo detectado como rodando fora do dashboard.
@@ -114,11 +108,6 @@ export class RunCard {
       }
     }
 
-    const ok = window.confirm(
-      'Isso vai POSTAR mensagens de verdade nos grupos do WhatsApp escolhidos, uma de cada vez, até você clicar em "Parar". Continuar?'
-    );
-    if (!ok) return;
-
     this.iniciando.set(true);
     const r = await this.jobsService.iniciarContinuo(this.alvo(), ids);
     this.iniciando.set(false);
@@ -143,17 +132,6 @@ export class RunCard {
     } finally {
       this.parando.set(false);
     }
-  }
-
-  // Liga o garimpo continuo: fica coletando ofertas reais do Mercado Livre
-  // rodada após rodada (sem postar nada) até você clicar em "Parar".
-  async garimpar(): Promise<void> {
-    this.erro.set(null);
-    this.iniciando.set(true);
-    const r = await this.jobsService.iniciar('ofertas', { loop: true });
-    this.iniciando.set(false);
-    if (!r.ok) this.erro.set(r.erro ?? null);
-    await this.statusService.atualizar();
   }
 
   async salvarAgendamento(): Promise<void> {
