@@ -19,17 +19,12 @@ export class RunCard {
 
   protected readonly alvo = signal<AlvoGrupos>('todos');
   protected readonly selecionados = signal<Set<string>>(new Set());
-  protected readonly umGrupoId = signal<string | null>(null);
 
   protected readonly erro = signal<string | null>(null);
   protected readonly iniciando = signal(false);
   protected readonly parando = signal(false);
 
-  // Agendamento (janela + intervalo): liga o loop AUTOMATICO sozinho, dentro
-  // da janela. O intervalo tambem pauta o loop MANUAL do botao "Executar".
-  protected readonly agendamentoAtivo = signal(false);
-  protected readonly horaInicio = signal('08:00');
-  protected readonly horaFim = signal('22:00');
+  // Intervalo entre postagens do loop do botão "Executar".
   protected readonly intervaloMinMinutos = signal(20);
   protected readonly intervaloMaxMinutos = signal(60);
   protected readonly salvandoAgendamento = signal(false);
@@ -53,22 +48,14 @@ export class RunCard {
       !!this.statusService.status()?.processoExterno?.rodando
   );
 
-  // Última publicação REAL (confirmada no WhatsApp) — a mais recente entre o
-  // agendamento automático e o loop manual, seja qual for que postou por
-  // último. Próxima publicação: do modo que estiver ativo agora.
-  protected readonly ultimaPublicacao = computed(() => {
-    const ag = this.statusService.status()?.agendamento;
-    if (!ag) return null;
-    const datas = [ag.ultimaRodadaEm, ag.manual?.ultimaRodadaEm].filter((d): d is string => !!d);
-    if (!datas.length) return null;
-    return datas.reduce((maisRecente, atual) => (atual > maisRecente ? atual : maisRecente));
-  });
+  // Última/próxima publicação REAL (confirmada no WhatsApp) do loop manual.
+  protected readonly ultimaPublicacao = computed(
+    () => this.statusService.status()?.agendamento?.manual?.ultimaRodadaEm ?? null
+  );
 
-  protected readonly proximaPublicacao = computed(() => {
-    const ag = this.statusService.status()?.agendamento;
-    if (!ag) return null;
-    return this.rodandoContinuo() ? ag.manual?.proximaRodadaEm ?? null : ag.proximaRodadaEm;
-  });
+  protected readonly proximaPublicacao = computed(
+    () => this.statusService.status()?.agendamento?.manual?.proximaRodadaEm ?? null
+  );
 
   private readonly consoleEl = viewChild<ElementRef<HTMLDivElement>>('consoleEl');
 
@@ -85,9 +72,6 @@ export class RunCard {
     effect(() => {
       const cfg = this.configService.config();
       if (!cfg) return;
-      this.agendamentoAtivo.set(cfg.agendamento.ativo);
-      this.horaInicio.set(cfg.agendamento.horaInicio);
-      this.horaFim.set(cfg.agendamento.horaFim);
       this.intervaloMinMinutos.set(cfg.agendamento.intervaloMinMinutos);
       this.intervaloMaxMinutos.set(cfg.agendamento.intervaloMaxMinutos);
     });
@@ -112,10 +96,6 @@ export class RunCard {
     });
   }
 
-  escolherUm(id: string): void {
-    this.umGrupoId.set(id);
-  }
-
   // Liga o loop continuo: posta 1 mensagem por vez (com intervalo aleatorio)
   // nos grupos escolhidos ate o "Parar" ser clicado.
   async executar(): Promise<void> {
@@ -132,12 +112,6 @@ export class RunCard {
         this.erro.set('Selecione pelo menos 1 grupo.');
         return;
       }
-    } else if (this.alvo() === 'um') {
-      if (!this.umGrupoId()) {
-        this.erro.set('Escolha o grupo que vai rodar.');
-        return;
-      }
-      ids = [this.umGrupoId()!];
     }
 
     const ok = window.confirm(
@@ -185,10 +159,6 @@ export class RunCard {
   async salvarAgendamento(): Promise<void> {
     this.mensagemAgendamento.set(null);
 
-    if (this.horaInicio() === this.horaFim()) {
-      this.mensagemAgendamento.set({ tipo: 'erro', texto: 'Hora de início e hora de fim precisam ser diferentes.' });
-      return;
-    }
     if (this.intervaloMinMinutos() > this.intervaloMaxMinutos()) {
       this.mensagemAgendamento.set({ tipo: 'erro', texto: 'O intervalo mínimo não pode ser maior que o máximo.' });
       return;
@@ -197,9 +167,6 @@ export class RunCard {
     this.salvandoAgendamento.set(true);
     const r = await this.configService.salvar({
       agendamento: {
-        ativo: this.agendamentoAtivo(),
-        horaInicio: this.horaInicio(),
-        horaFim: this.horaFim(),
         intervaloMinMinutos: this.intervaloMinMinutos(),
         intervaloMaxMinutos: this.intervaloMaxMinutos(),
       },

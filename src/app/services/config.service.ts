@@ -21,9 +21,6 @@ export interface GrupoTematico {
 }
 
 export interface Agendamento {
-  ativo: boolean;
-  horaInicio: string; // HH:MM
-  horaFim: string; // HH:MM
   intervaloMinMinutos: number;
   intervaloMaxMinutos: number;
 }

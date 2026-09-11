@@ -38,7 +38,6 @@ export class ConnectionCard {
   protected readonly ehLoginMl = computed(() => this.jobsService.tipo() === 'login-ml' || this.jobsService.tipo() === 'trocar-ml');
 
   protected readonly titulo = computed(() => (this.servico() === 'ml' ? 'Mercado Livre' : 'WhatsApp'));
-  protected readonly icone = computed(() => (this.servico() === 'ml' ? '🛒' : '💬'));
   protected readonly erro = signal<string | null>(null);
 
   // O login do ML abre um navegador DENTRO do container — só dá pra ver/usar

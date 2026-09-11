@@ -1,7 +1,6 @@
 <div class="page">
   <header class="page-header">
     <div class="brand">
-      <span class="brand-mark">🤖</span>
       <div>
         <h1>Promobot</h1>
         <p>Painel de controle do robô de afiliados</p>
@@ -35,12 +34,12 @@
   </header>
 
   @if (configService.erro()) {
-    <div class="alert-banner">⚠️ {{ configService.erro() }}</div>
+    <div class="alert-banner">{{ configService.erro() }}</div>
   }
 
   @if (statusService.status()?.processoExterno?.rodando) {
     <div class="alert-banner">
-      ⚠️ O bot já está rodando fora do dashboard (ex.: pelo menu do terminal). Feche-o antes de usar os botões
+      O bot já está rodando fora do dashboard (ex.: pelo menu do terminal). Feche-o antes de usar os botões
       abaixo para evitar conflito de sessão.
     </div>
   }

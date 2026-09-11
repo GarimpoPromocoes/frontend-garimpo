@@ -10,10 +10,6 @@ export interface StatusResponse {
   processoExterno: { rodando: boolean };
   job: { rodando: boolean; tipo: string | null; iniciadoEm: string | null; codigoSaida?: number | null };
   agendamento: {
-    ativo: boolean;
-    dentroDaJanela: boolean;
-    ultimaRodadaEm: string | null;
-    proximaRodadaEm: string | null;
     manual: {
       ativo: boolean;
       alvo: string;

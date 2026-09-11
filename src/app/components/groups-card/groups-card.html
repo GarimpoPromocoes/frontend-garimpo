@@ -1,7 +1,7 @@
 <div class="card">
   <div class="card-header">
     <div>
-      <h2>👥 Grupos</h2>
+      <h2>Grupos</h2>
       <p class="card-subtitle">
         Cada grupo recebe só os produtos do catálogo cujo título ou categoria combina com o tema dele.
       </p>
@@ -65,17 +65,6 @@
           />
           Geral — recebe todo tipo de oferta, não importa o tema
         </label>
-
-        <details class="collapsible">
-          <summary>Grupos-espelho deste grupo</summary>
-          <div style="margin-top: 12px">
-            <app-chip-input
-              [items]="g.gruposEspelho"
-              (itemsChange)="atualizarEspelho($index, $event)"
-              placeholder="Nome do grupo-espelho"
-            />
-          </div>
-        </details>
 
         <button type="button" class="btn btn-danger btn-sm" style="align-self: flex-start" (click)="removerGrupo($index)">
           Remover grupo

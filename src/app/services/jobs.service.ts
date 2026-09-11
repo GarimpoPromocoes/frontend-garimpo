@@ -5,7 +5,7 @@ import { environment } from '../../environments/environment';
 
 export type JobTipo = 'login-ml' | 'trocar-ml' | 'trocar-zap' | 'grupos' | 'ofertas';
 
-export type AlvoGrupos = 'todos' | 'selecionados' | 'um';
+export type AlvoGrupos = 'todos' | 'selecionados';
 
 export interface IniciarJobOpts {
   max?: number;

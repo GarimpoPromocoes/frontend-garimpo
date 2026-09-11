@@ -1,7 +1,7 @@
 <div class="card">
   <div class="card-header">
     <div>
-      <h2>▶️ Executar</h2>
+      <h2>Executar</h2>
       <p class="card-subtitle">Posta de verdade nos grupos do WhatsApp escolhidos, cada um só com produtos do seu tema.</p>
     </div>
     @if (garimpoRodando()) {
@@ -14,14 +14,8 @@
         <span class="badge-dot"></span>
         {{ jobsService.rodando() ? 'Postando agora' : 'Rodando — aguardando próxima postagem' }}
       </span>
-    } @else if (statusService.status()?.agendamento; as ag) {
-      @if (!ag.ativo) {
-        <span class="badge badge-off"><span class="badge-dot"></span>Parado</span>
-      } @else if (ag.dentroDaJanela) {
-        <span class="badge badge-ok"><span class="badge-dot"></span>Agendado: dentro da janela</span>
-      } @else {
-        <span class="badge badge-off"><span class="badge-dot"></span>Agendado: fora da janela</span>
-      }
+    } @else {
+      <span class="badge badge-off"><span class="badge-dot"></span>Parado</span>
     }
   </div>
 
@@ -37,7 +31,7 @@
   </div>
 
   @if (statusService.status()?.processoExterno?.rodando) {
-    <p class="hint-text">⚠️ O bot também está rodando fora do dashboard agora — clique em "Parar" abaixo para encerrá-lo.</p>
+    <p class="hint-text">O bot também está rodando fora do dashboard agora — clique em "Parar" abaixo para encerrá-lo.</p>
   }
 
   <div style="display: flex; gap: 8px; flex-wrap: wrap">
@@ -46,9 +40,6 @@
     </button>
     <button type="button" class="btn" [class.btn-primary]="alvo() === 'selecionados'" [class.btn-ghost]="alvo() !== 'selecionados'" [disabled]="algoRodando()" (click)="escolherAlvo('selecionados')">
       Selecionados
-    </button>
-    <button type="button" class="btn" [class.btn-primary]="alvo() === 'um'" [class.btn-ghost]="alvo() !== 'um'" [disabled]="algoRodando()" (click)="escolherAlvo('um')">
-      Um grupo
     </button>
   </div>
 
@@ -65,16 +56,6 @@
               [checked]="selecionados().has(g.id)"
               (change)="toggleSelecionado(g.id, $any($event.target).checked)"
             />
-            {{ g.nome }} <span class="hint-text">→ {{ g.groupName }}</span>
-          </label>
-        }
-      </div>
-    }
-    @if (alvo() === 'um') {
-      <div class="card-section" style="gap: 8px">
-        @for (g of grupos(); track g.id) {
-          <label class="checkbox-row">
-            <input type="radio" name="umGrupo" [disabled]="algoRodando()" [checked]="umGrupoId() === g.id" (change)="escolherUm(g.id)" />
             {{ g.nome }} <span class="hint-text">→ {{ g.groupName }}</span>
           </label>
         }
@@ -106,37 +87,6 @@
   }
 
   <div class="card-section" style="border-top: 1px solid var(--border); padding-top: 14px">
-    <label class="checkbox-row">
-      <input type="checkbox" [ngModel]="agendamentoAtivo()" (ngModelChange)="agendamentoAtivo.set($event)" />
-      Agendamento ativo
-    </label>
-    <p class="hint-text">
-      Com o agendamento ativo, o bot posta sozinho todo dia dentro do horário abaixo — sem precisar clicar em
-      "Executar". Já o botão "Executar" ignora o horário e roda até você clicar em "Parar".
-    </p>
-
-    <div class="grid-2">
-      <div class="field">
-        <label for="horaInicio">Início (todo dia)</label>
-        <input
-          id="horaInicio"
-          type="time"
-          [ngModel]="horaInicio()"
-          (ngModelChange)="horaInicio.set($event)"
-        />
-      </div>
-      <div class="field">
-        <label for="horaFim">Fim (todo dia)</label>
-        <input
-          id="horaFim"
-          type="time"
-          [ngModel]="horaFim()"
-          (ngModelChange)="horaFim.set($event)"
-        />
-        <span class="hint">Pode virar a noite (ex.: início 22:00, fim 06:00).</span>
-      </div>
-    </div>
-
     <div class="grid-2">
       <div class="field">
         <label for="intervaloMin">Intervalo mínimo (minutos)</label>
@@ -163,17 +113,12 @@
     </div>
     <p class="hint-text">
       Uma mensagem por vez: depois de cada postagem, o bot sorteia um tempo de espera entre esses dois
-      valores antes de postar a próxima — vale tanto para o agendamento quanto para o botão "Executar".
-    </p>
-
-    <p class="hint-text">
-      As rodadas automáticas sempre escolhem entre "Todos" os grupos cadastrados. Só funciona enquanto este
-      servidor (dashboard-api) estiver rodando no computador.
+      valores antes de postar a próxima — só vale enquanto o botão "Executar" estiver rodando.
     </p>
 
     <div style="display: flex; align-items: center; gap: 12px">
       <button type="button" class="btn btn-ghost" [disabled]="salvandoAgendamento()" (click)="salvarAgendamento()">
-        {{ salvandoAgendamento() ? 'Salvando…' : 'Salvar agendamento' }}
+        {{ salvandoAgendamento() ? 'Salvando…' : 'Salvar intervalo' }}
       </button>
       @if (mensagemAgendamento(); as m) {
         <span [class]="m.tipo === 'ok' ? 'ok-text' : 'error-text'">{{ m.texto }}</span>
