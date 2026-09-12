@@ -1,61 +1,333 @@
-.page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 32px 24px 64px;
+// Shell: navegacao clara a esquerda (separada so por um filete), conteudo a
+// direita com cabecalho pegajoso. Sem sombra, sem gradiente — a hierarquia
+// vem do contraste entre a superficie quente da lateral e o branco dos
+// cartoes.
+.shell {
+  display: grid;
+  grid-template-columns: 232px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Navegacao lateral                                                      */
+/* ---------------------------------------------------------------------- */
+
+// Lateral em espresso com o ouro da marca nos destaques — e' o mesmo par de
+// cores da foto de perfil do grupo (fundo marrom escuro + ouro), o que da
+// identidade sem precisar espalhar cor pelo resto da interface.
+.sidebar {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
+  background: var(--espresso);
+  border-right: 1px solid #3a2a1b;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  padding: 20px 12px 16px;
+  gap: 26px;
+  z-index: 30;
 }
 
-.page-header {
+.sidebar-brand {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 16px;
+  gap: 9px;
+  padding: 0 10px;
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
 .brand-mark {
-  font-size: 32px;
-  line-height: 1;
-}
-.brand h1 {
-  font-size: 22px;
-  font-weight: 700;
-}
-.brand p {
-  font-size: 13px;
-  color: var(--text-muted);
-}
-
-.global-badges {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  background: var(--gold);
+  color: var(--espresso);
+  flex-shrink: 0;
+}
+.brand-mark svg {
+  width: 13px;
+  height: 13px;
+}
+
+.brand-text {
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #f6efe2;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: #b3a48f;
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  text-align: left;
+  transition:
+    background 0.14s ease,
+    color 0.14s ease;
+}
+.nav-item:hover:not(.nav-item-active) {
+  background: rgba(255, 255, 255, 0.055);
+  color: #e9dfce;
+}
+.nav-item-active {
+  background: rgba(224, 165, 32, 0.14);
+  border-color: rgba(224, 165, 32, 0.28);
+  color: #f4c664;
+  font-weight: 600;
+}
+.nav-item svg {
+  width: 16px;
+  height: 16px;
+  opacity: 0.62;
+}
+.nav-item-active svg {
+  opacity: 1;
+}
+
+.sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 14px;
+  border-top: 1px solid #3a2a1b;
+}
+
+.conn-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  font-size: 12.5px;
+  color: #cabba6;
+}
+.conn-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #57c07f;
+  flex-shrink: 0;
+}
+.conn-pill-off .conn-dot {
+  background: #6b5943;
+}
+.conn-state {
+  margin-left: auto;
+  font-size: 11.5px;
+  color: #8d7c64;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Cabecalho                                                              */
+/* ---------------------------------------------------------------------- */
+
+.main-area {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 32px;
+  background: rgba(250, 248, 244, 0.86);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+
+.topbar-title {
+  min-width: 0;
+  flex: 1;
+}
+.topbar-title h1 {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+.topbar-title p {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-xs);
+  background: var(--surface);
+  color: var(--text-soft);
+}
+.menu-toggle svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Conteudo                                                               */
+/* ---------------------------------------------------------------------- */
+
+.content {
+  width: 100%;
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 28px 32px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+// minmax(0, 1fr) e nao 1fr: uma trilha "1fr" nunca encolhe abaixo do
+// min-content do item mais largo — e o console tem linhas de log enormes
+// (white-space: pre), que esticavam a coluna pra fora da tela.
+.col-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
   align-items: start;
 }
 
-.col-span-2 {
-  grid-column: span 2;
+@media (max-width: 1100px) {
+  .col-2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
-@media (max-width: 760px) {
-  .grid {
+/* ---------------------------------------------------------------------- */
+/* Primeiros passos                                                       */
+/* ---------------------------------------------------------------------- */
+
+.setup-card {
+  border: 1px solid var(--gold-border);
+  background: var(--gold-soft);
+  border-radius: var(--radius);
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.setup-head h2 {
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--espresso);
+}
+.setup-head p {
+  font-size: 12.5px;
+  color: var(--gold-ink);
+  margin-top: 3px;
+}
+.setup-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.setup-list li {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 0;
+  border-top: 1px solid var(--gold-border);
+}
+.setup-index {
+  display: grid;
+  place-items: center;
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: var(--espresso);
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+.setup-text {
+  flex: 1;
+  font-size: 13.5px;
+  color: var(--espresso);
+}
+
+/* ---------------------------------------------------------------------- */
+/* Responsivo                                                             */
+/* ---------------------------------------------------------------------- */
+
+.sidebar-backdrop {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .shell {
     grid-template-columns: 1fr;
   }
-  .col-span-1,
-  .col-span-2 {
-    grid-column: span 1;
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 232px;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+    z-index: 50;
+  }
+  .sidebar-aberta {
+    transform: translateX(0);
+  }
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 26, 24, 0.35);
+    z-index: 40;
+  }
+  .menu-toggle {
+    display: flex;
+  }
+  .topbar {
+    padding: 14px 18px;
+    flex-wrap: wrap;
+  }
+  .topbar-title {
+    order: 3;
+    flex-basis: 100%;
+  }
+  .content {
+    padding: 20px 18px 48px;
   }
 }

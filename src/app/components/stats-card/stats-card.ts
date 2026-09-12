@@ -8,8 +8,4 @@ import { StatusService } from '../../services/status.service';
 })
 export class StatsCard {
   protected statusService = inject(StatusService);
-
-  atualizar(): void {
-    this.statusService.atualizar();
-  }
 }

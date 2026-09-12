@@ -1,14 +1,14 @@
 <div class="card">
   <div class="card-header">
     <div>
-      <h2>Anti-repetição</h2>
-      <p class="card-subtitle">Controla quando um produto já postado pode sair de novo.</p>
+      <h2>Repetição de produtos</h2>
+      <p class="card-subtitle">Evita que a mesma promoção apareça de novo cedo demais no grupo.</p>
     </div>
   </div>
 
   <div class="grid-2">
     <div class="field">
-      <label for="cooldownHoras">Cooldown (horas)</label>
+      <label for="cooldownHoras">Não repetir antes de</label>
       <input
         id="cooldownHoras"
         type="number"
@@ -17,10 +17,10 @@
         [ngModel]="cooldownHoras()"
         (ngModelChange)="cooldownHoras.set($event)"
       />
-      <span class="hint">Tempo mínimo antes de repostar o mesmo produto</span>
+      <span class="hint">Em horas. Tempo mínimo antes do mesmo produto poder sair de novo.</span>
     </div>
     <div class="field">
-      <label for="repostarAposDias">Repostar após (dias)</label>
+      <label for="repostarAposDias">Liberar repetição depois de</label>
       <input
         id="repostarAposDias"
         type="number"
@@ -29,13 +29,13 @@
         [ngModel]="repostarAposDias()"
         (ngModelChange)="repostarAposDias.set($event)"
       />
-      <span class="hint">Depois desse prazo, pode repostar mesmo sem melhora de preço. 0 = nunca reposta sem melhora.</span>
+      <span class="hint">Em dias. Passado esse prazo, pode repetir mesmo sem o preço ter melhorado. Use 0 para só repetir quando baixar de preço.</span>
     </div>
   </div>
 
-  <div style="display: flex; align-items: center; gap: 12px">
+  <div class="form-actions">
     <button type="button" class="btn btn-primary" [disabled]="salvando()" (click)="salvar()">
-      {{ salvando() ? 'Salvando…' : 'Salvar' }}
+      {{ salvando() ? 'Salvando…' : 'Salvar alterações' }}
     </button>
     @if (mensagem(); as m) {
       <span [class]="m.tipo === 'ok' ? 'ok-text' : 'error-text'">{{ m.texto }}</span>

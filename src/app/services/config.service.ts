@@ -15,6 +15,10 @@ export interface GrupoTematico {
   nome: string;
   groupName: string;
   palavras: string[];
+  // Desqualifica um produto mesmo com o tema batendo — pra palavra positiva
+  // ambigua por natureza (ex.: "sapato" bate em calcado feminino E em bota
+  // de trabalho masculina).
+  palavrasExcluir: string[];
   coringa: boolean;
   geral: boolean;
   gruposEspelho: string[];

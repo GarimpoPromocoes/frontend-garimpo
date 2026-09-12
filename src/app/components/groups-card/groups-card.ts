@@ -8,6 +8,7 @@ const GRUPO_VAZIO = (): GrupoTematico => ({
   nome: '',
   groupName: '',
   palavras: [],
+  palavrasExcluir: [],
   coringa: false,
   geral: false,
   gruposEspelho: [],
@@ -31,7 +32,12 @@ export class GroupsCard {
       const cfg = this.configService.config();
       if (!cfg) return;
       this.grupos.set(
-        cfg.grupos.map((g) => ({ ...g, palavras: [...g.palavras], gruposEspelho: [...g.gruposEspelho] })),
+        cfg.grupos.map((g) => ({
+          ...g,
+          palavras: [...g.palavras],
+          palavrasExcluir: [...(g.palavrasExcluir ?? [])],
+          gruposEspelho: [...g.gruposEspelho],
+        })),
       );
     });
   }
@@ -50,6 +56,10 @@ export class GroupsCard {
 
   atualizarPalavras(idx: number, palavras: string[]): void {
     this.grupos.update((atuais) => atuais.map((g, i) => (i === idx ? { ...g, palavras } : g)));
+  }
+
+  atualizarPalavrasExcluir(idx: number, palavrasExcluir: string[]): void {
+    this.grupos.update((atuais) => atuais.map((g, i) => (i === idx ? { ...g, palavrasExcluir } : g)));
   }
 
   atualizarEspelho(idx: number, gruposEspelho: string[]): void {

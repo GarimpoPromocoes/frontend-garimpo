@@ -1,57 +1,190 @@
-<div class="page">
-  <header class="page-header">
-    <div class="brand">
-      <div>
-        <h1>Promobot</h1>
-        <p>Painel de controle do robô de afiliados</p>
+<div class="shell">
+  <aside class="sidebar" [class.sidebar-aberta]="menuAberto()">
+    <div class="sidebar-brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z" />
+          <circle cx="7.5" cy="7.5" r="1.2" fill="currentColor" />
+        </svg>
+      </span>
+      <span class="brand-text">Promobot</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      @for (a of abas; track a.id) {
+        <button
+          type="button"
+          class="nav-item"
+          [class.nav-item-active]="aba() === a.id"
+          (click)="irPara(a.id)"
+        >
+          @switch (a.id) {
+            @case ('painel') {
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7.5" height="7.5" rx="1.6" />
+                <rect x="13.5" y="3" width="7.5" height="7.5" rx="1.6" />
+                <rect x="3" y="13.5" width="7.5" height="7.5" rx="1.6" />
+                <rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.6" />
+              </svg>
+            }
+            @case ('grupos') {
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 19v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V19" />
+                <circle cx="9" cy="7" r="3.4" />
+                <path d="M22 19v-1.5a4 4 0 0 0-3-3.87" />
+                <path d="M16.5 4.2a3.4 3.4 0 0 1 0 6.6" />
+              </svg>
+            }
+            @case ('conexoes') {
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.5 13.5a4.2 4.2 0 0 0 6.35.45l2.5-2.5a4.24 4.24 0 0 0-6-6l-1.43 1.43" />
+                <path d="M13.5 10.5a4.2 4.2 0 0 0-6.35-.45l-2.5 2.5a4.24 4.24 0 0 0 6 6l1.42-1.42" />
+              </svg>
+            }
+            @case ('postagens') {
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 7h7M14 7h7M3 17h4M11 17h10" />
+                <circle cx="12" cy="7" r="2.2" />
+                <circle cx="9" cy="17" r="2.2" />
+              </svg>
+            }
+            @case ('atividade') {
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12h4l2.5-7 5 14 2.5-7h6" />
+              </svg>
+            }
+          }
+          {{ a.label }}
+        </button>
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="conn-pill" [class.conn-pill-off]="!zapConectado()">
+        <span class="conn-dot"></span>
+        WhatsApp
+        <span class="conn-state">{{ zapConectado() ? 'Conectado' : 'Desligado' }}</span>
+      </div>
+      <div class="conn-pill" [class.conn-pill-off]="!mlConectado()">
+        <span class="conn-dot"></span>
+        Mercado Livre
+        <span class="conn-state">{{ mlConectado() ? 'Conectado' : 'Desligado' }}</span>
       </div>
     </div>
+  </aside>
 
-    <div class="global-badges">
-      <span
-        class="badge"
-        [class.badge-ok]="statusService.status()?.mercadoLivre?.conectado"
-        [class.badge-off]="!statusService.status()?.mercadoLivre?.conectado"
-      >
-        <span class="badge-dot"></span>
-        ML {{ statusService.status()?.mercadoLivre?.conectado ? 'conectado' : 'desconectado' }}
-      </span>
-      <span
-        class="badge"
-        [class.badge-ok]="statusService.status()?.whatsapp?.conectado"
-        [class.badge-off]="!statusService.status()?.whatsapp?.conectado"
-      >
-        <span class="badge-dot"></span>
-        WhatsApp {{ statusService.status()?.whatsapp?.conectado ? 'conectado' : 'desconectado' }}
-      </span>
-      @if (statusService.status()?.job?.rodando) {
-        <span class="badge badge-running">
-          <span class="badge-dot"></span>
-          Rodando: {{ statusService.status()?.job?.tipo }}
-        </span>
+  @if (menuAberto()) {
+    <div class="sidebar-backdrop" (click)="menuAberto.set(false)"></div>
+  }
+
+  <div class="main-area">
+    <header class="topbar">
+      <button type="button" class="menu-toggle" (click)="menuAberto.set(!menuAberto())" aria-label="Abrir menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <path d="M4 7h16M4 12h16M4 17h16" />
+        </svg>
+      </button>
+
+      <div class="topbar-title">
+        <h1>{{ abaAtual().titulo }}</h1>
+        <p>{{ abaAtual().descricao }}</p>
+      </div>
+
+      <div class="topbar-actions">
+        @if (runControl.rodandoContinuo()) {
+          <span class="badge badge-running">
+            <span class="badge-dot"></span>
+            {{ runControl.postandoAgora() ? 'Postando agora' : 'Robô ligado' }}
+          </span>
+        } @else {
+          <span class="badge badge-off"><span class="badge-dot"></span>Robô parado</span>
+        }
+
+        @if (!runControl.algoRodando()) {
+          <button
+            type="button"
+            class="btn btn-hero"
+            [disabled]="runControl.iniciando() || !runControl.podeLigar()"
+            [title]="runControl.podeLigar() ? '' : 'Complete a configuração no Painel antes de ligar'"
+            (click)="runControl.executar()"
+          >
+            {{ runControl.iniciando() ? 'Ligando…' : 'Ligar robô' }}
+          </button>
+        } @else {
+          <button
+            type="button"
+            class="btn btn-danger"
+            [disabled]="runControl.parando()"
+            (click)="runControl.parar()"
+          >
+            {{ runControl.parando() ? 'Parando…' : 'Parar' }}
+          </button>
+        }
+      </div>
+    </header>
+
+    <main class="content">
+      @if (configService.erro()) {
+        <div class="alert-banner">{{ configService.erro() }}</div>
       }
-    </div>
-  </header>
 
-  @if (configService.erro()) {
-    <div class="alert-banner">{{ configService.erro() }}</div>
-  }
+      @if (statusService.status()?.processoExterno?.rodando) {
+        <div class="alert-banner">
+          O robô já está rodando fora do painel (por exemplo, pelo terminal). Feche-o antes de usar os
+          botões daqui para evitar conflito de sessão.
+        </div>
+      }
 
-  @if (statusService.status()?.processoExterno?.rodando) {
-    <div class="alert-banner">
-      O bot já está rodando fora do dashboard (ex.: pelo menu do terminal). Feche-o antes de usar os botões
-      abaixo para evitar conflito de sessão.
-    </div>
-  }
+      @switch (aba()) {
+        @case ('painel') {
+          @if (runControl.pendencias().length > 0) {
+            <div class="setup-card">
+              <div class="setup-head">
+                <h2>Falta pouco para começar</h2>
+                <p>Complete os passos abaixo e o robô já pode ser ligado.</p>
+              </div>
+              <ul class="setup-list">
+                @for (p of runControl.pendencias(); track p.texto; let i = $index) {
+                  <li>
+                    <span class="setup-index">{{ i + 1 }}</span>
+                    <span class="setup-text">{{ p.texto }}</span>
+                    <button type="button" class="btn btn-ghost btn-sm" (click)="irPara(p.aba)">Resolver</button>
+                  </li>
+                }
+              </ul>
+            </div>
+          }
 
-  <main class="grid">
-    <app-connection-card servico="whatsapp" class="col-span-1" />
-    <app-connection-card servico="ml" class="col-span-1" />
-    <app-stats-card class="col-span-2" />
-    <app-run-card class="col-span-2" />
-    <app-groups-card class="col-span-2" />
-    <app-posting-config-card class="col-span-2" />
-    <app-cupons-card class="col-span-2" />
-    <app-themes-card class="col-span-2" />
-  </main>
+          <app-stats-card />
+
+          <div class="col-2">
+            <app-run-card />
+            <app-console-card [compacto]="true" (verTudo)="irPara('atividade')" />
+          </div>
+        }
+
+        @case ('grupos') {
+          <app-groups-card />
+        }
+
+        @case ('conexoes') {
+          <div class="col-2">
+            <app-connection-card servico="whatsapp" />
+            <app-connection-card servico="ml" />
+          </div>
+        }
+
+        @case ('postagens') {
+          <app-schedule-card />
+          <app-posting-config-card />
+          <app-cupons-card />
+          <app-themes-card />
+        }
+
+        @case ('atividade') {
+          <app-console-card />
+        }
+      }
+    </main>
+  </div>
 </div>

@@ -1,12 +1,15 @@
 <div class="card">
   <div class="card-header">
     <div>
-      <h2>Executar</h2>
+      <h2>Controle do robô</h2>
+      <p class="card-subtitle">
+        Ligado, o robô procura ofertas sozinho e vai publicando nos grupos até você mandar parar.
+      </p>
     </div>
-    @if (rodandoContinuo()) {
+    @if (runControl.rodandoContinuo()) {
       <span class="badge badge-running">
         <span class="badge-dot"></span>
-        {{ jobsService.rodando() ? 'Postando agora' : 'Rodando — aguardando próxima postagem' }}
+        {{ runControl.postandoAgora() ? 'Postando' : 'Ligado' }}
       </span>
     } @else {
       <span class="badge badge-off"><span class="badge-dot"></span>Parado</span>
@@ -15,118 +18,89 @@
 
   <div class="grid-2">
     <div class="stat-tile">
-      <span class="value">{{ formatarData(ultimaPublicacao()) }}</span>
+      <span class="value">{{ formatarData(runControl.ultimaPublicacao()) }}</span>
       <span class="label">Última publicação</span>
     </div>
     <div class="stat-tile">
-      <span class="value">{{ formatarData(proximaPublicacao()) }}</span>
+      <span class="value">{{ formatarData(runControl.proximaPublicacao()) }}</span>
       <span class="label">Próxima publicação prevista</span>
     </div>
   </div>
 
-  @if (statusService.status()?.processoExterno?.rodando) {
-    <p class="hint-text">O bot também está rodando fora do dashboard agora — clique em "Parar" abaixo para encerrá-lo.</p>
-  }
-
-  <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap">
-    <div class="segmented">
-      <button type="button" class="segmented-option" [class.segmented-option-active]="alvo() === 'todos'" [disabled]="algoRodando()" (click)="escolherAlvo('todos')">
-        Todos
-      </button>
-      <button type="button" class="segmented-option" [class.segmented-option-active]="alvo() === 'selecionados'" [disabled]="algoRodando()" (click)="escolherAlvo('selecionados')">
-        Selecionados
-      </button>
+  <div class="card-section">
+    <div class="field">
+      <label>Publicar em quais grupos</label>
+      <div class="segmented">
+        <button
+          type="button"
+          class="segmented-option"
+          [class.segmented-option-active]="runControl.alvo() === 'todos'"
+          [disabled]="runControl.algoRodando()"
+          (click)="escolherAlvo('todos')"
+        >
+          Todos os grupos
+        </button>
+        <button
+          type="button"
+          class="segmented-option"
+          [class.segmented-option-active]="runControl.alvo() === 'selecionados'"
+          [disabled]="runControl.algoRodando()"
+          (click)="escolherAlvo('selecionados')"
+        >
+          Escolher grupos
+        </button>
+      </div>
     </div>
-  </div>
 
-  @if (grupos().length === 0) {
-    <p class="hint-text">Nenhum grupo cadastrado ainda — cadastre no cartão "Grupos" acima.</p>
-  } @else {
-    @if (alvo() === 'selecionados') {
-      <div class="card-section" style="gap: 8px">
-        @for (g of grupos(); track g.id) {
+    @if (runControl.grupos().length === 0) {
+      <p class="hint-text">Nenhum grupo cadastrado ainda — cadastre na aba "Grupos".</p>
+    } @else if (runControl.alvo() === 'selecionados') {
+      <div style="display: flex; flex-direction: column; gap: 9px">
+        @for (g of runControl.grupos(); track g.id) {
           <label class="checkbox-row">
             <input
               type="checkbox"
-              [disabled]="algoRodando()"
-              [checked]="selecionados().has(g.id)"
+              [disabled]="runControl.algoRodando()"
+              [checked]="runControl.selecionados().has(g.id)"
               (change)="toggleSelecionado(g.id, $any($event.target).checked)"
             />
-            {{ g.nome }} <span class="hint-text">→ {{ g.groupName }}</span>
+            <span>{{ g.nome }} <span class="hint-text">→ {{ g.groupName }}</span></span>
           </label>
         }
       </div>
     }
-  }
+  </div>
 
-  <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap">
-    @if (!algoRodando()) {
-      <button type="button" class="btn btn-lg btn-primary" [disabled]="iniciando()" (click)="executar()">
-        {{ iniciando() ? 'Iniciando…' : 'Executar' }}
+  <div class="form-actions">
+    @if (!runControl.algoRodando()) {
+      <button
+        type="button"
+        class="btn btn-lg btn-hero"
+        [disabled]="runControl.iniciando() || !runControl.podeLigar()"
+        (click)="runControl.executar()"
+      >
+        {{ runControl.iniciando() ? 'Ligando…' : 'Ligar robô' }}
       </button>
+      @if (!runControl.podeLigar()) {
+        <span class="hint-text">Complete os passos acima para liberar.</span>
+      }
     } @else {
-      <button type="button" class="btn btn-lg btn-danger" [disabled]="parando()" (click)="parar()">
-        {{ parando() ? 'Parando…' : 'Parar' }}
+      <button
+        type="button"
+        class="btn btn-lg btn-danger"
+        [disabled]="runControl.parando()"
+        (click)="runControl.parar()"
+      >
+        {{ runControl.parando() ? 'Parando…' : 'Parar robô' }}
       </button>
     }
   </div>
 
-  <p class="hint-text">
-    Sozinho, sem precisar de nenhuma outra ação: quando o catálogo fica sem produto (ou sem cupom, se o envio
-    misturado estiver ativo), o bot garimpa mais direto do Mercado Livre antes de continuar postando.
-  </p>
-
-  @if (erro()) {
-    <p class="error-text">{{ erro() }}</p>
+  @if (runControl.erro()) {
+    <p class="error-text">{{ runControl.erro() }}</p>
   }
 
-  <div class="card-section" style="border-top: 1px solid var(--border); padding-top: 14px">
-    <div class="grid-2">
-      <div class="field">
-        <label for="intervaloMin">Intervalo mínimo (minutos)</label>
-        <input
-          id="intervaloMin"
-          type="number"
-          min="1"
-          max="720"
-          [ngModel]="intervaloMinMinutos()"
-          (ngModelChange)="intervaloMinMinutos.set($event)"
-        />
-      </div>
-      <div class="field">
-        <label for="intervaloMax">Intervalo máximo (minutos)</label>
-        <input
-          id="intervaloMax"
-          type="number"
-          min="1"
-          max="720"
-          [ngModel]="intervaloMaxMinutos()"
-          (ngModelChange)="intervaloMaxMinutos.set($event)"
-        />
-      </div>
-    </div>
-
-    <div style="display: flex; align-items: center; gap: 12px">
-      <button type="button" class="btn btn-ghost" [disabled]="salvandoAgendamento()" (click)="salvarAgendamento()">
-        {{ salvandoAgendamento() ? 'Salvando…' : 'Salvar intervalo' }}
-      </button>
-      @if (mensagemAgendamento(); as m) {
-        <span [class]="m.tipo === 'ok' ? 'ok-text' : 'error-text'">{{ m.texto }}</span>
-      }
-    </div>
-  </div>
-
-  <div class="card-section">
-    <div class="card-header">
-      <label class="hint-text">Console ao vivo</label>
-      <button type="button" class="btn btn-ghost btn-sm" (click)="jobsService.limparConsole()">Limpar</button>
-    </div>
-    <div class="console" #consoleEl>
-      @for (linha of jobsService.linhas(); track $index) {
-        <div>{{ linha }}</div>
-      } @empty {
-        <span class="console-empty">Nenhuma execução ainda.</span>
-      }
-    </div>
-  </div>
+  @if (runControl.processoExterno()) {
+    <p class="hint-text">O robô também está rodando fora do painel — clique em "Parar" para encerrá-lo.</p>
+  }
 </div>

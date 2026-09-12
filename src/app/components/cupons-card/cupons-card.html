@@ -1,14 +1,15 @@
 <div class="card">
   <div class="card-header">
     <div>
-      <h2>Cupons</h2>
+      <h2>Cupons de desconto</h2>
       <p class="card-subtitle">
-        Cruza cupons com código real do Mercado Livre com o catálogo pra misturar oferta pura, oferta+cupom e chuva de cupons nas postagens.
+        De vez em quando, no lugar de uma promoção comum, o robô envia um produto com cupom
+        ou uma lista de códigos de desconto para o grupo aproveitar.
       </p>
     </div>
   </div>
 
-  <div style="display: flex; align-items: center; gap: 10px">
+  <div class="toggle-row">
     <button
       type="button"
       class="toggle-switch"
@@ -19,58 +20,61 @@
     >
       <span class="toggle-switch-thumb"></span>
     </button>
-    <span>Envio misturado ativo</span>
+    <span class="toggle-label">Enviar cupons junto com as promoções</span>
   </div>
-  <p class="hint-text">
-    Com o envio misturado ativo, o botão "Executar" ocasionalmente troca uma oferta pura por uma oferta com cupom
-    (só quando a categoria/marca do próprio cupom bate com o produto) ou por uma chuva de cupons (vários códigos
-    de uma vez, sem produto) — o resto continua sendo oferta normal.
-  </p>
 
-  <div class="card-section">
-    <div class="grid-2">
-      <div class="field">
-        <label for="percentualProduto">% oferta + cupom</label>
-        <input
-          id="percentualProduto"
-          type="number"
-          min="0"
-          max="100"
-          [ngModel]="percentualProduto()"
-          (ngModelChange)="percentualProduto.set($event)"
-        />
-        <span class="hint">Produto em oferta cujo cupom o ML confirma pra ele.</span>
+  @if (ativo()) {
+    <div class="card-section">
+      <div class="grid-2">
+        <div class="field">
+          <label for="percentualProduto">Produto com cupom</label>
+          <input
+            id="percentualProduto"
+            type="number"
+            min="0"
+            max="100"
+            [ngModel]="percentualProduto()"
+            (ngModelChange)="percentualProduto.set($event)"
+          />
+          <span class="hint">% das mensagens. Promoção normal, com um cupom que vale para aquele produto.</span>
+        </div>
+        <div class="field">
+          <label for="percentualSozinho">Lista de cupons</label>
+          <input
+            id="percentualSozinho"
+            type="number"
+            min="0"
+            max="100"
+            [ngModel]="percentualSozinho()"
+            (ngModelChange)="percentualSozinho.set($event)"
+          />
+          <span class="hint">% das mensagens. Vários códigos de uma vez, sem produto.</span>
+        </div>
       </div>
-      <div class="field">
-        <label for="percentualSozinho">% chuva de cupons</label>
-        <input
-          id="percentualSozinho"
-          type="number"
-          min="0"
-          max="100"
-          [ngModel]="percentualSozinho()"
-          (ngModelChange)="percentualSozinho.set($event)"
-        />
-        <span class="hint">Vários códigos de uma vez, sem produto associado.</span>
+
+      <div class="info-box">
+        A soma das duas não pode passar de 50% — promoção comum continua sendo a maioria das mensagens.
+        Hoje há <strong>{{ statusService.status()?.cuponsAtivos ?? '—' }} cupons</strong> disponíveis;
+        quando acabam, o robô busca mais sozinho.
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-primary" [disabled]="salvando()" (click)="salvar()">
+          {{ salvando() ? 'Salvando…' : 'Salvar alterações' }}
+        </button>
+        @if (mensagem(); as m) {
+          <span [class]="m.tipo === 'ok' ? 'ok-text' : 'error-text'">{{ m.texto }}</span>
+        }
       </div>
     </div>
-    <p class="hint-text">A soma dos dois não pode passar de 50% — oferta pura continua sendo a maioria sempre.</p>
-
-    <div style="display: flex; align-items: center; gap: 12px">
+  } @else {
+    <div class="form-actions">
       <button type="button" class="btn btn-primary" [disabled]="salvando()" (click)="salvar()">
-        {{ salvando() ? 'Salvando…' : 'Salvar' }}
+        {{ salvando() ? 'Salvando…' : 'Salvar alterações' }}
       </button>
       @if (mensagem(); as m) {
         <span [class]="m.tipo === 'ok' ? 'ok-text' : 'error-text'">{{ m.texto }}</span>
       }
     </div>
-  </div>
-
-  <div class="card-section">
-    <span class="hint-text">{{ statusService.status()?.cuponsAtivos ?? '—' }} cupons ativos no catálogo agora.</span>
-    <p class="hint-text">
-      Sem botão de garimpo separado: quando o "Executar" precisa de um cupom e o catálogo está vazio, ele busca
-      mais direto de cupons com código real de Mercado Livre automaticamente, antes de continuar.
-    </p>
-  </div>
+  }
 </div>

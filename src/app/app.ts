@@ -1,31 +1,120 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { ConfigService } from './services/config.service';
 import { StatusService } from './services/status.service';
+import { RunControlService } from './services/run-control.service';
 import { ConnectionCard } from './components/connection-card/connection-card';
 import { PostingConfigCard } from './components/posting-config-card/posting-config-card';
 import { ThemesCard } from './components/themes-card/themes-card';
 import { GroupsCard } from './components/groups-card/groups-card';
 import { RunCard } from './components/run-card/run-card';
+import { ScheduleCard } from './components/schedule-card/schedule-card';
 import { StatsCard } from './components/stats-card/stats-card';
 import { CuponsCard } from './components/cupons-card/cupons-card';
+import { ConsoleCard } from './components/console-card/console-card';
+
+export type AbaId = 'painel' | 'grupos' | 'conexoes' | 'postagens' | 'atividade';
+
+interface Aba {
+  id: AbaId;
+  label: string;
+  titulo: string;
+  descricao: string;
+}
+
+const ABAS: Aba[] = [
+  {
+    id: 'painel',
+    label: 'Painel',
+    titulo: 'Painel',
+    descricao: 'Ligue o robô e acompanhe o que está acontecendo agora.',
+  },
+  {
+    id: 'grupos',
+    label: 'Grupos',
+    titulo: 'Grupos do WhatsApp',
+    descricao: 'Escolha para quais grupos as promoções vão e o tema de cada um.',
+  },
+  {
+    id: 'conexoes',
+    label: 'Conexões',
+    titulo: 'Conexões',
+    descricao: 'Conecte o WhatsApp que envia e a conta do Mercado Livre que gera os links.',
+  },
+  {
+    id: 'postagens',
+    label: 'Postagens',
+    titulo: 'Regras de postagem',
+    descricao: 'Frequência, repetição de produtos, cupons e datas especiais.',
+  },
+  {
+    id: 'atividade',
+    label: 'Atividade',
+    titulo: 'Atividade',
+    descricao: 'Acompanhe em tempo real tudo que o robô está fazendo.',
+  },
+];
+
+const CHAVE_ABA = 'promobot:aba';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [ConnectionCard, PostingConfigCard, ThemesCard, GroupsCard, RunCard, StatsCard, CuponsCard],
+  imports: [
+    ConnectionCard,
+    PostingConfigCard,
+    ThemesCard,
+    GroupsCard,
+    RunCard,
+    ScheduleCard,
+    StatsCard,
+    CuponsCard,
+    ConsoleCard,
+  ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
 export class App implements OnInit, OnDestroy {
   protected statusService = inject(StatusService);
   protected configService = inject(ConfigService);
+  protected runControl = inject(RunControlService);
+
+  protected readonly abas = ABAS;
+  protected readonly aba = signal<AbaId>('painel');
+  protected readonly menuAberto = signal(false);
+
+  protected readonly abaAtual = computed(
+    () => ABAS.find((a) => a.id === this.aba()) ?? ABAS[0]
+  );
+
+  protected readonly mlConectado = computed(
+    () => !!this.statusService.status()?.mercadoLivre?.conectado
+  );
+  protected readonly zapConectado = computed(
+    () => !!this.statusService.status()?.whatsapp?.conectado
+  );
 
   ngOnInit(): void {
+    try {
+      const salva = localStorage.getItem(CHAVE_ABA) as AbaId | null;
+      if (salva && ABAS.some((a) => a.id === salva)) this.aba.set(salva);
+    } catch (_) {
+      // localStorage bloqueado (aba anonima etc.) — segue com a aba padrao.
+    }
     this.configService.carregar();
     this.statusService.iniciarPolling();
   }
 
   ngOnDestroy(): void {
     this.statusService.pararPolling();
+  }
+
+  irPara(aba: AbaId): void {
+    this.aba.set(aba);
+    this.menuAberto.set(false);
+    try {
+      localStorage.setItem(CHAVE_ABA, aba);
+    } catch (_) {
+      // sem persistencia — nao impede a navegacao.
+    }
   }
 }

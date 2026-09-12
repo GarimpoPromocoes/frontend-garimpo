@@ -1,23 +1,38 @@
-<div class="card">
-  <div class="card-header">
-    <div>
-      <h2>Estatísticas</h2>
+<div class="stat-strip">
+  <div class="stat-cell">
+    <div class="stat-cell-head">
+      <!-- paperplane: promocao enviada -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21.3 3.2 2.9 10.4c-.7.3-.7 1.3.1 1.5l5 1.4 1.4 5c.2.8 1.2.8 1.5.1L21.3 3.2Z" />
+        <path d="M21.3 3.2 8.9 13.3" />
+      </svg>
+      <span class="stat-cell-label">Promoções já publicadas</span>
     </div>
-    <button type="button" class="btn btn-ghost btn-sm" (click)="atualizar()">Atualizar</button>
+    <span class="stat-cell-value">{{ statusService.status()?.produtosPublicados ?? '—' }}</span>
   </div>
 
-  <div class="grid-3">
-    <div class="stat-tile">
-      <span class="value">{{ statusService.status()?.produtosPublicados ?? '—' }}</span>
-      <span class="label">Produtos já publicados</span>
+  <div class="stat-cell">
+    <div class="stat-cell-head">
+      <!-- shippingbox: produtos aguardando na fila -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 8.2v7.6a1.6 1.6 0 0 1-.83 1.4l-7.4 4a1.6 1.6 0 0 1-1.54 0l-7.4-4A1.6 1.6 0 0 1 3 15.8V8.2a1.6 1.6 0 0 1 .83-1.4l7.4-4a1.6 1.6 0 0 1 1.54 0l7.4 4A1.6 1.6 0 0 1 21 8.2Z" />
+        <path d="m3.3 7.4 8.7 4.7 8.7-4.7" />
+        <path d="M12 21v-8.9" />
+      </svg>
+      <span class="stat-cell-label">Produtos na fila</span>
     </div>
-    <div class="stat-tile">
-      <span class="value">{{ statusService.status()?.produtosCatalogo ?? '—' }}</span>
-      <span class="label">Produtos no catálogo</span>
+    <span class="stat-cell-value">{{ statusService.status()?.produtosCatalogo ?? '—' }}</span>
+  </div>
+
+  <div class="stat-cell">
+    <div class="stat-cell-head">
+      <!-- ticket: cupom de desconto -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 5.5h16a1 1 0 0 1 1 1v2.6a2.6 2.6 0 0 0 0 5.8v2.6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-2.6a2.6 2.6 0 0 0 0-5.8V6.5a1 1 0 0 1 1-1Z" />
+        <path d="M14.5 6.4v11.2" stroke-dasharray="1.8 2.4" />
+      </svg>
+      <span class="stat-cell-label">Cupons disponíveis</span>
     </div>
-    <div class="stat-tile">
-      <span class="value">{{ statusService.status()?.cuponsAtivos ?? '—' }}</span>
-      <span class="label">Cupons ativos</span>
-    </div>
+    <span class="stat-cell-value">{{ statusService.status()?.cuponsAtivos ?? '—' }}</span>
   </div>
 </div>
