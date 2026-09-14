@@ -46,14 +46,22 @@ export class ConnectionCard {
   // dashboard. QR Code (e o link) evitam ter que descobrir/digitar essa URL
   // na mão — abre "/" que já auto-conecta na tela remota (ver novnc-index.html).
   //
+  // A PORTA vem do job: cada sessão de login ganha a sua (ver
+  // api-bot/src/displays.js). Antes era uma porta fixa compartilhada, o que
+  // com mais de um cliente significaria abrir a tela de login de outra pessoa.
+  //
   // environment.vncBase (configurado via NG_APP_VNC_BASE na Vercel) tem
   // prioridade: quando o front e a api estão em domínios diferentes (ex.:
-  // Vercel + túnel local), não dá pra assumir "mesmo host da página, porta
-  // 6080" — precisa da URL completa configurada à parte. Em dev local
-  // (mesmo domínio via docker/nginx) o fallback de sempre continua valendo.
-  protected readonly novncUrl = computed(
-    () => environment.vncBase || `${window.location.protocol}//${window.location.hostname}:6080/`,
-  );
+  // Vercel + túnel local), não dá pra assumir "mesmo host da página" — precisa
+  // da URL completa configurada à parte. Em dev local (mesmo domínio via
+  // docker/nginx) o fallback continua valendo.
+  protected readonly novncUrl = computed(() => {
+    const porta = this.jobsService.vncPort();
+    if (environment.vncBase) {
+      return porta ? `${environment.vncBase.replace(/\/$/, '')}:${porta}/` : environment.vncBase;
+    }
+    return `${window.location.protocol}//${window.location.hostname}:${porta ?? 6081}/`;
+  });
   protected readonly novncQrCode = signal<string | null>(null);
 
   constructor() {

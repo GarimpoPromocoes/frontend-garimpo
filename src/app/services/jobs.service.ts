@@ -25,6 +25,8 @@ export class JobsService {
   readonly tipo = signal<JobTipo | null>(null);
   readonly codigoSaida = signal<number | null>(null);
   readonly linhas = signal<string[]>([]);
+  // Porta da tela remota DESTA sessão de login (cada uma ganha a sua).
+  readonly vncPort = signal<number | null>(null);
 
   private eventSource: EventSource | null = null;
 
@@ -66,6 +68,7 @@ export class JobsService {
         this.rodando.set(!!s.rodando);
         this.tipo.set(s.tipo ?? null);
         this.codigoSaida.set(s.codigoSaida ?? null);
+        this.vncPort.set(s.vncPort ?? null);
       } catch (_) {}
     });
 
@@ -83,6 +86,7 @@ export class JobsService {
     this.rodando.set(false);
     this.tipo.set(null);
     this.codigoSaida.set(null);
+    this.vncPort.set(null);
   }
 
   limparConsole(): void {
