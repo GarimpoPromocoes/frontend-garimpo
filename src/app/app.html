@@ -1,3 +1,10 @@
+@if (auth.verificandoSessao()) {
+  <div class="login-shell">
+    <p class="card-subtitle">Carregando…</p>
+  </div>
+} @else if (!auth.usuario()) {
+  <app-login-card />
+} @else {
 <div class="shell">
   <aside class="sidebar" [class.sidebar-aberta]="menuAberto()">
     <div class="sidebar-brand">
@@ -69,6 +76,11 @@
         <span class="conn-dot"></span>
         Mercado Livre
         <span class="conn-state">{{ mlConectado() ? 'Conectado' : 'Desligado' }}</span>
+      </div>
+
+      <div class="usuario-pill">
+        <span class="usuario-email">{{ auth.usuario()?.email }}</span>
+        <button type="button" class="btn btn-ghost btn-sm" (click)="sair()">Sair</button>
       </div>
     </div>
   </aside>
@@ -188,3 +200,4 @@
     </main>
   </div>
 </div>
+}

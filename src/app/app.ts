@@ -1,7 +1,9 @@
-import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { ConfigService } from './services/config.service';
 import { StatusService } from './services/status.service';
 import { RunControlService } from './services/run-control.service';
+import { AuthService } from './services/auth.service';
+import { LoginCard } from './components/login-card/login-card';
 import { ConnectionCard } from './components/connection-card/connection-card';
 import { PostingConfigCard } from './components/posting-config-card/posting-config-card';
 import { ThemesCard } from './components/themes-card/themes-card';
@@ -60,6 +62,7 @@ const CHAVE_ABA = 'promobot:aba';
   selector: 'app-root',
   standalone: true,
   imports: [
+    LoginCard,
     ConnectionCard,
     PostingConfigCard,
     ThemesCard,
@@ -77,6 +80,7 @@ export class App implements OnInit, OnDestroy {
   protected statusService = inject(StatusService);
   protected configService = inject(ConfigService);
   protected runControl = inject(RunControlService);
+  protected auth = inject(AuthService);
 
   protected readonly abas = ABAS;
   protected readonly aba = signal<AbaId>('painel');
@@ -93,6 +97,25 @@ export class App implements OnInit, OnDestroy {
     () => !!this.statusService.status()?.whatsapp?.conectado
   );
 
+  private dashboardIniciado = false;
+
+  constructor() {
+    // So carrega config/status DEPOIS de saber quem esta logado — evita
+    // bater no /api/config com um token velho/ausente antes da hora, e
+    // desliga o polling de novo se o usuario sair.
+    effect(() => {
+      const logado = !!this.auth.usuario();
+      if (logado && !this.dashboardIniciado) {
+        this.dashboardIniciado = true;
+        this.configService.carregar();
+        this.statusService.iniciarPolling();
+      } else if (!logado && this.dashboardIniciado) {
+        this.dashboardIniciado = false;
+        this.statusService.pararPolling();
+      }
+    });
+  }
+
   ngOnInit(): void {
     try {
       const salva = localStorage.getItem(CHAVE_ABA) as AbaId | null;
@@ -100,8 +123,7 @@ export class App implements OnInit, OnDestroy {
     } catch (_) {
       // localStorage bloqueado (aba anonima etc.) — segue com a aba padrao.
     }
-    this.configService.carregar();
-    this.statusService.iniciarPolling();
+    this.auth.restaurarSessao();
   }
 
   ngOnDestroy(): void {
@@ -116,5 +138,9 @@ export class App implements OnInit, OnDestroy {
     } catch (_) {
       // sem persistencia — nao impede a navegacao.
     }
+  }
+
+  sair(): void {
+    this.auth.logout();
   }
 }

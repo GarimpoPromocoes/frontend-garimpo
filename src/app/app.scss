@@ -136,6 +136,23 @@
   color: #8d7c64;
 }
 
+.usuario-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 10px 0;
+  margin-top: 8px;
+  border-top: 1px solid #3a2a1b;
+}
+.usuario-email {
+  font-size: 12px;
+  color: #cabba6;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ---------------------------------------------------------------------- */
 /* Cabecalho                                                              */
 /* ---------------------------------------------------------------------- */

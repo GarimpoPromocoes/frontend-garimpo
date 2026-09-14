@@ -415,6 +415,24 @@ svg {
 }
 
 /* ---------------------------------------------------------------------- */
+/* Login                                                                  */
+/* ---------------------------------------------------------------------- */
+
+.login-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--bg);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 380px;
+}
+
+/* ---------------------------------------------------------------------- */
 /* Campos de formulario                                                   */
 /* ---------------------------------------------------------------------- */
 
@@ -436,7 +454,9 @@ svg {
 }
 .field input[type='text'],
 .field input[type='number'],
-.field input[type='time'] {
+.field input[type='time'],
+.field input[type='email'],
+.field input[type='password'] {
   padding: 9px 11px;
   border-radius: var(--radius-xs);
   border: 1px solid var(--border-strong);
