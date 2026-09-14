@@ -452,6 +452,7 @@ svg {
   color: var(--text-muted);
   line-height: 1.5;
 }
+.field select,
 .field input[type='text'],
 .field input[type='number'],
 .field input[type='time'],
@@ -471,7 +472,8 @@ svg {
 .field input::placeholder {
   color: #b3b0a8;
 }
-.field input:focus {
+.field input:focus,
+.field select:focus {
   outline: none;
   border-color: var(--gold);
   box-shadow: 0 0 0 3px rgba(224, 165, 32, 0.18);

@@ -5,6 +5,7 @@ import { RunControlService } from './services/run-control.service';
 import { AuthService } from './services/auth.service';
 import { LoginCard } from './components/login-card/login-card';
 import { ConnectionCard } from './components/connection-card/connection-card';
+import { MarketplaceCard } from './components/marketplace-card/marketplace-card';
 import { PostingConfigCard } from './components/posting-config-card/posting-config-card';
 import { ThemesCard } from './components/themes-card/themes-card';
 import { GroupsCard } from './components/groups-card/groups-card';
@@ -40,7 +41,7 @@ const ABAS: Aba[] = [
     id: 'conexoes',
     label: 'Conexões',
     titulo: 'Conexões',
-    descricao: 'Conecte o WhatsApp que envia e a conta do Mercado Livre que gera os links.',
+    descricao: 'Conecte o WhatsApp que envia e as lojas de afiliado que geram os links.',
   },
   {
     id: 'postagens',
@@ -64,6 +65,7 @@ const CHAVE_ABA = 'promobot:aba';
   imports: [
     LoginCard,
     ConnectionCard,
+    MarketplaceCard,
     PostingConfigCard,
     ThemesCard,
     GroupsCard,

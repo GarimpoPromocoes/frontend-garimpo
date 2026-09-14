@@ -1,0 +1,69 @@
+@if (formulario(); as form) {
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h2>{{ form.rotulo }}</h2>
+        <p class="card-subtitle">
+          Sua conta de afiliado da {{ form.rotulo }}. É ela que gera os links que dão comissão.
+        </p>
+      </div>
+      <span class="badge" [class.badge-ok]="conectado()" [class.badge-off]="!conectado()">
+        <span class="badge-dot"></span>
+        {{ conectado() ? 'Conectado' : 'Não conectado' }}
+      </span>
+    </div>
+
+    @if (conectado()) {
+      <div class="info-box">
+        Conectado. As credenciais ficam guardadas de forma criptografada — para trocá-las, desconecte e
+        conecte de novo.
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-danger-soft btn-sm" (click)="desconectar()">Desconectar</button>
+      </div>
+    } @else {
+      @if (ajuda(); as a) {
+        <div class="info-box">
+          {{ a.texto }}
+          <a [href]="a.link" target="_blank" rel="noopener">{{ a.rotuloLink }}</a>
+        </div>
+      }
+
+      @for (campo of form.campos; track campo.nome) {
+        <div class="field">
+          <label [for]="'campo-' + provedor() + '-' + campo.nome">{{ campo.rotulo }}</label>
+
+          @if (campo.tipo === 'opcoes') {
+            <select
+              [id]="'campo-' + provedor() + '-' + campo.nome"
+              [ngModel]="valorDe(campo.nome) || campo.opcoes?.[0]"
+              (ngModelChange)="definir(campo.nome, $event)"
+            >
+              @for (opcao of campo.opcoes ?? []; track opcao) {
+                <option [value]="opcao">{{ opcao }}</option>
+              }
+            </select>
+          } @else {
+            <input
+              [id]="'campo-' + provedor() + '-' + campo.nome"
+              [type]="campo.tipo === 'segredo' ? 'password' : 'text'"
+              [autocomplete]="campo.tipo === 'segredo' ? 'new-password' : 'off'"
+              [ngModel]="valorDe(campo.nome)"
+              (ngModelChange)="definir(campo.nome, $event)"
+            />
+          }
+        </div>
+      }
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-primary" [disabled]="enviando()" (click)="conectar()">
+          {{ enviando() ? 'Verificando…' : 'Conectar' }}
+        </button>
+      </div>
+    }
+
+    @if (erro()) {
+      <p class="error-text">{{ erro() }}</p>
+    }
+  </div>
+}

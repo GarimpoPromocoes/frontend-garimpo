@@ -1,7 +1,8 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, effect, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { AuthService } from './auth.service';
 
 export type JobTipo = 'login-ml' | 'trocar-ml' | 'trocar-zap' | 'grupos';
 
@@ -18,6 +19,7 @@ const MAX_LINHAS = 500;
 @Injectable({ providedIn: 'root' })
 export class JobsService {
   private http = inject(HttpClient);
+  private auth = inject(AuthService);
 
   readonly rodando = signal(false);
   readonly tipo = signal<JobTipo | null>(null);
@@ -27,16 +29,25 @@ export class JobsService {
   private eventSource: EventSource | null = null;
 
   constructor() {
-    this.conectarStream();
+    // O stream só existe enquanto há alguém logado: antes do login não há
+    // token pra autenticar, e depois do "Sair" o log precisa ser cortado
+    // (senão a próxima pessoa a logar neste navegador veria o log da anterior).
+    effect(() => {
+      if (this.auth.usuario()) this.conectarStream();
+      else this.desconectarStream();
+    });
   }
 
   private conectarStream(): void {
     if (typeof EventSource === 'undefined') return; // ambiente sem suporte (ex.: testes)
-    // EventSource nativo nao manda headers custom — o token (quando existe)
-    // vai por query param mesmo (auth.js do backend aceita os dois jeitos).
-    const url =
-      `${environment.apiBase}/api/jobs/stream` +
-      (environment.apiToken ? `?token=${encodeURIComponent(environment.apiToken)}` : '');
+    if (this.eventSource) return;
+
+    // EventSource nativo nao manda headers custom — por isso o token do
+    // usuario logado vai por query param (auth.js do backend aceita os dois).
+    const token = this.auth.obterToken();
+    if (!token) return;
+
+    const url = `${environment.apiBase}/api/jobs/stream?token=${encodeURIComponent(token)}`;
     this.eventSource = new EventSource(url);
 
     this.eventSource.addEventListener('log', (ev: MessageEvent) => {
@@ -61,6 +72,17 @@ export class JobsService {
     this.eventSource.onerror = () => {
       // o navegador reconecta o EventSource sozinho — nada a fazer aqui.
     };
+  }
+
+  private desconectarStream(): void {
+    if (this.eventSource) {
+      this.eventSource.close();
+      this.eventSource = null;
+    }
+    this.linhas.set([]);
+    this.rodando.set(false);
+    this.tipo.set(null);
+    this.codigoSaida.set(null);
   }
 
   limparConsole(): void {
