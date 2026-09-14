@@ -1,4 +1,5 @@
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import * as QRCode from 'qrcode';
 import { StatusService } from '../../services/status.service';
 import { JobsService, JobTipo } from '../../services/jobs.service';
@@ -10,12 +11,17 @@ type Servico = 'ml' | 'whatsapp';
   selector: 'app-connection-card',
   standalone: true,
   templateUrl: './connection-card.html',
+  // Durante o login do ML o card ocupa a largura toda: a tela remota é de
+  // 1366px e, espremida em meia coluna, fica pequena demais para alguém
+  // conseguir ler e digitar — que é justamente o que se faz nela.
+  host: { '[class.card-largo]': 'servico() === "ml" && esteCardEstaRodando()' },
 })
 export class ConnectionCard {
   servico = input.required<Servico>();
 
   protected statusService = inject(StatusService);
   protected jobsService = inject(JobsService);
+  private sanitizer = inject(DomSanitizer);
 
   protected readonly conectado = computed(() => {
     const s = this.statusService.status();
@@ -55,14 +61,30 @@ export class ConnectionCard {
   // Vercel + túnel local), não dá pra assumir "mesmo host da página" — precisa
   // da URL completa configurada à parte. Em dev local (mesmo domínio via
   // docker/nginx) o fallback continua valendo.
-  protected readonly novncUrl = computed(() => {
+  // null enquanto o servidor ainda não informou a porta desta sessão. O
+  // template só monta o iframe quando há URL: iframe que falha ao carregar
+  // não tenta de novo, então montá-lo antes da tela existir o deixaria em
+  // branco para sempre.
+  protected readonly novncUrl = computed<string | null>(() => {
     const porta = this.jobsService.vncPort();
-    if (environment.vncBase) {
-      return porta ? `${environment.vncBase.replace(/\/$/, '')}:${porta}/` : environment.vncBase;
-    }
-    return `${window.location.protocol}//${window.location.hostname}:${porta ?? 6081}/`;
+    if (!porta) return null;
+    if (environment.vncBase) return `${environment.vncBase.replace(/\/$/, '')}:${porta}/`;
+    return `${window.location.protocol}//${window.location.hostname}:${porta}/`;
   });
   protected readonly novncQrCode = signal<string | null>(null);
+
+  // A tela do login roda DENTRO do painel (iframe), não em outra aba: abrir
+  // aba nova e mandar o usuário achar um endereço era o passo que mais
+  // travava quem não é técnico. O QR Code continua abaixo, só como saída
+  // para quem preferir logar pelo celular.
+  //
+  // bypassSecurityTrust é necessário porque a URL é montada em runtime (a
+  // porta muda a cada sessão); ela não vem do usuário, é sempre a porta que
+  // o próprio servidor informou no status do job.
+  protected readonly novncUrlSegura = computed<SafeResourceUrl | null>(() => {
+    const url = this.novncUrl();
+    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
+  });
 
   constructor() {
     effect(() => {
@@ -71,8 +93,13 @@ export class ConnectionCard {
         this.novncQrCode.set(null);
         return;
       }
-      QRCode.toDataURL(this.novncUrl(), { margin: 1, width: 220 })
-        .then((url) => this.novncQrCode.set(url))
+      const url = this.novncUrl();
+      if (!url) {
+        this.novncQrCode.set(null);
+        return;
+      }
+      QRCode.toDataURL(url, { margin: 1, width: 220 })
+        .then((dataUrl) => this.novncQrCode.set(dataUrl))
         .catch(() => this.novncQrCode.set(null));
     });
   }

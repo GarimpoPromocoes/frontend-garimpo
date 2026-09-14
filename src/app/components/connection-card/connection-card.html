@@ -18,17 +18,28 @@
     <div class="card-section">
       @if (servico() === 'ml') {
         <p class="hint-text">
-          Abriu uma janela de navegador <strong>dentro do servidor</strong> para você entrar na sua conta do
-          Mercado Livre. Aponte a câmera do celular para o QR Code abaixo (ou abra o link) para ver essa
-          janela. Quando o login terminar — a barra escura de "Afiliados" aparece no topo do site —
-          volte aqui e clique em <strong>Terminei o login</strong>.
+          Entre na sua conta do Mercado Livre na tela abaixo. Assim que o login for concluído,
+          <strong>a conexão é salva sozinha</strong> — você não precisa avisar nem sair daqui.
         </p>
-        @if (novncQrCode(); as qr) {
-          <img [src]="qr" alt="QR Code para abrir a tela remota do login" class="qr-image" />
+
+        @if (novncUrlSegura(); as tela) {
+          <iframe class="login-remoto" [src]="tela" title="Tela de login do Mercado Livre"></iframe>
+
+          <details class="hint-text">
+            <summary>Prefere entrar pelo celular?</summary>
+            @if (novncQrCode(); as qr) {
+              <img [src]="qr" alt="QR Code para abrir a tela de login no celular" class="qr-image" />
+            }
+            <a [href]="novncUrl()" target="_blank" rel="noopener">{{ novncUrl() }}</a>
+          </details>
+        } @else {
+          <div class="login-remoto login-remoto-vazio">Preparando a tela de login…</div>
         }
-        <a [href]="novncUrl()" target="_blank" rel="noopener" class="hint-text">{{ novncUrl() }}</a>
+
         <div class="form-actions">
-          <button type="button" class="btn btn-primary" (click)="concluirLogin()">Terminei o login</button>
+          <button type="button" class="btn btn-ghost" (click)="concluirLogin()">
+            Já entrei, pode salvar
+          </button>
           <button type="button" class="btn btn-ghost" (click)="cancelar()">Cancelar</button>
         </div>
       } @else {
