@@ -27,6 +27,8 @@ export class JobsService {
   readonly linhas = signal<string[]>([]);
   // Porta da tela remota DESTA sessão de login (cada uma ganha a sua).
   readonly vncPort = signal<number | null>(null);
+  // Conteúdo do QR do WhatsApp; a tela é que desenha a imagem.
+  readonly qrWhatsapp = signal<string | null>(null);
 
   private eventSource: EventSource | null = null;
 
@@ -69,6 +71,7 @@ export class JobsService {
         this.tipo.set(s.tipo ?? null);
         this.codigoSaida.set(s.codigoSaida ?? null);
         this.vncPort.set(s.vncPort ?? null);
+        this.qrWhatsapp.set(s.qrWhatsapp ?? null);
       } catch (_) {}
     });
 
@@ -87,6 +90,7 @@ export class JobsService {
     this.tipo.set(null);
     this.codigoSaida.set(null);
     this.vncPort.set(null);
+    this.qrWhatsapp.set(null);
   }
 
   limparConsole(): void {

@@ -73,6 +73,17 @@ export class ConnectionCard {
   });
   protected readonly novncQrCode = signal<string | null>(null);
 
+  // QR do WhatsApp desenhado como IMAGEM. Antes o único QR era o de
+  // caracteres no log — apontar a câmera do celular pra aquilo, dentro de
+  // uma caixinha de texto rolável, era praticamente impossível.
+  protected readonly qrWhatsappImagem = signal<string | null>(null);
+
+  // Há um QR esperando ser lido = o pareamento ainda não terminou, mesmo que
+  // a pasta de sessão já exista em disco (é o que a badge usava até aqui).
+  protected readonly aguardandoPareamento = computed(
+    () => this.servico() === 'whatsapp' && this.esteCardEstaRodando() && !!this.jobsService.qrWhatsapp(),
+  );
+
   // A tela do login roda DENTRO do painel (iframe), não em outra aba: abrir
   // aba nova e mandar o usuário achar um endereço era o passo que mais
   // travava quem não é técnico. O QR Code continua abaixo, só como saída
@@ -101,6 +112,20 @@ export class ConnectionCard {
       QRCode.toDataURL(url, { margin: 1, width: 220 })
         .then((dataUrl) => this.novncQrCode.set(dataUrl))
         .catch(() => this.novncQrCode.set(null));
+    });
+
+    // O WhatsApp troca o QR de tempos em tempos; cada novo conteúdo redesenha
+    // a imagem. Maior que o do noVNC porque este é para ser lido pela câmera
+    // de um celular a alguma distância da tela.
+    effect(() => {
+      const conteudo = this.jobsService.qrWhatsapp();
+      if (this.servico() !== 'whatsapp' || !conteudo) {
+        this.qrWhatsappImagem.set(null);
+        return;
+      }
+      QRCode.toDataURL(conteudo, { margin: 2, width: 300 })
+        .then((dataUrl) => this.qrWhatsappImagem.set(dataUrl))
+        .catch(() => this.qrWhatsappImagem.set(null));
     });
   }
 

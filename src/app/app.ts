@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit, computed, effect, inject, signal } from '
 import { ConfigService } from './services/config.service';
 import { StatusService } from './services/status.service';
 import { RunControlService } from './services/run-control.service';
+import { JobsService } from './services/jobs.service';
 import { AuthService } from './services/auth.service';
 import { LoginCard } from './components/login-card/login-card';
 import { ConnectionCard } from './components/connection-card/connection-card';
@@ -82,6 +83,7 @@ export class App implements OnInit, OnDestroy {
   protected statusService = inject(StatusService);
   protected configService = inject(ConfigService);
   protected runControl = inject(RunControlService);
+  protected jobsService = inject(JobsService);
   protected auth = inject(AuthService);
 
   protected readonly abas = ABAS;
@@ -95,8 +97,12 @@ export class App implements OnInit, OnDestroy {
   protected readonly mlConectado = computed(
     () => !!this.statusService.status()?.mercadoLivre?.conectado
   );
+  // Enquanto há um QR esperando leitura o WhatsApp NÃO está conectado, mesmo
+  // que a pasta de sessão já exista (é só nela que o status do servidor se
+  // baseia). Sem isso a barra lateral dizia "Conectado" no exato momento em
+  // que o painel pedia pra escanear o código.
   protected readonly zapConectado = computed(
-    () => !!this.statusService.status()?.whatsapp?.conectado
+    () => !!this.statusService.status()?.whatsapp?.conectado && !this.jobsService.qrWhatsapp()
   );
 
   private dashboardIniciado = false;
