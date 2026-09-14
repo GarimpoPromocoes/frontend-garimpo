@@ -45,6 +45,25 @@ export class ConnectionCard {
   protected readonly ehLoginMl = computed(() => this.jobsService.tipo() === 'login-ml' || this.jobsService.tipo() === 'trocar-ml');
 
   protected readonly titulo = computed(() => (this.servico() === 'ml' ? 'Mercado Livre' : 'WhatsApp'));
+
+  // Qual número está conectado. Sem isso, quem tem mais de um chip não tinha
+  // como saber por qual número as promoções estavam saindo.
+  // Só aparece enquanto a conexão está de pé: mostrar um número embaixo de
+  // "Não conectado" faria o card se contradizer.
+  protected readonly contaWhatsapp = computed(() => {
+    if (this.servico() !== 'whatsapp' || !this.conectado()) return null;
+    const wpp = this.statusService.status()?.whatsapp;
+    if (!wpp?.numero) return null;
+    return { numero: this.formatarNumero(wpp.numero), nome: wpp.nome };
+  });
+
+  // "5511999998888" -> "+55 (11) 99999-8888". Se vier em formato inesperado,
+  // mostra como veio em vez de arriscar exibir um número errado.
+  private formatarNumero(bruto: string): string {
+    const d = bruto.replace(/\D/g, '');
+    const m = d.match(/^(\d{2})(\d{2})(\d{4,5})(\d{4})$/);
+    return m ? `+${m[1]} (${m[2]}) ${m[3]}-${m[4]}` : bruto;
+  }
   protected readonly erro = signal<string | null>(null);
 
   // O login do ML abre um navegador DENTRO do container — só dá pra ver/usar

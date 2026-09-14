@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 
 export interface StatusResponse {
   mercadoLivre: { conectado: boolean };
-  whatsapp: { conectado: boolean };
+  whatsapp: { conectado: boolean; numero: string | null; nome: string | null };
   produtosPublicados: number;
   produtosCatalogo: number;
   cuponsAtivos: number;

@@ -428,6 +428,16 @@ svg {
   background: var(--surface-2);
   display: block;
 }
+/* Numero do WhatsApp conectado, logo abaixo da descricao do card. */
+.conta-conectada {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--text-soft);
+}
+.conta-conectada span {
+  color: var(--text-muted);
+}
+
 /* QR do WhatsApp: precisa ser grande e com fundo branco, porque quem le e'
    a camera de um celular apontada pra tela. */
 .qr-whatsapp {

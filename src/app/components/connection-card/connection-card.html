@@ -7,6 +7,12 @@
           ? 'Sua conta de afiliado. É ela que gera os links que dão comissão.'
           : 'O número que envia as promoções para os grupos.' }}
       </p>
+      @if (contaWhatsapp(); as conta) {
+        <p class="conta-conectada">
+          <strong>{{ conta.numero }}</strong>
+          @if (conta.nome) { <span>&nbsp;· {{ conta.nome }}</span> }
+        </p>
+      }
     </div>
     <!-- Enquanto há um QR na tela o pareamento ainda não terminou. Mostrar
          "Conectado" aí (a pasta de sessão já existe, mas vazia) fazia a tela
