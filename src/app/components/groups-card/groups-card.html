@@ -57,22 +57,25 @@
           />
         </div>
 
-        @if (!g.geral) {
-          <div class="field">
-            <label>Nunca incluir se aparecer</label>
-            <span class="hint">
+        <div class="field">
+          <label>Nunca incluir se aparecer</label>
+          <span class="hint">
+            @if (g.geral) {
+              Mesmo recebendo tudo, uma promoção é descartada se o título ou a categoria tiver alguma
+              dessas palavras. Use para assuntos que não devem aparecer de jeito nenhum neste grupo.
+            } @else {
               Mesmo que uma promoção combine com o assunto acima, ela é descartada se o título ou a
               categoria tiver alguma dessas palavras. Útil quando uma palavra do assunto é ambígua — ex.:
               "sapato" também aparece em bota de trabalho; adicionar "masculino" ou "segurança" aqui evita
               que ela entre por engano.
-            </span>
-            <app-chip-input
-              [items]="g.palavrasExcluir"
-              (itemsChange)="atualizarPalavrasExcluir($index, $event)"
-              placeholder="Digite uma palavra e aperte Enter"
-            />
-          </div>
-        }
+            }
+          </span>
+          <app-chip-input
+            [items]="g.palavrasExcluir"
+            (itemsChange)="atualizarPalavrasExcluir($index, $event)"
+            placeholder="Digite uma palavra e aperte Enter"
+          />
+        </div>
 
         <label class="checkbox-row">
           <input type="checkbox" [ngModel]="g.geral" (ngModelChange)="marcarGeral($index, $event)" />
