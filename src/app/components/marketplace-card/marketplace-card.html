@@ -21,6 +21,57 @@
       <div class="form-actions">
         <button type="button" class="btn btn-danger-soft btn-sm" (click)="desconectar()">Desconectar</button>
       </div>
+
+      @if (provedor() === 'amazon') {
+        <div class="card-section">
+          <h3>Links curtos (link.amazon)</h3>
+
+          @if (loginAmazonRodando()) {
+            <p class="hint-text">
+              Entre na sua conta da <strong>Amazon Associados</strong> (a mesma da tag) na tela abaixo. Assim que o
+              login for concluído, <strong>a conexão é salva sozinha</strong>.
+            </p>
+            @if (novncUrlSegura(); as tela) {
+              <iframe class="login-remoto" [src]="tela" title="Tela de login da Amazon"></iframe>
+            } @else {
+              <div class="login-remoto login-remoto-vazio">Preparando a tela de login…</div>
+            }
+            <div class="form-actions">
+              <button type="button" class="btn btn-ghost" (click)="concluirLoginAmazon()">Já entrei, pode salvar</button>
+              <button type="button" class="btn btn-ghost" (click)="cancelarLoginAmazon()">Cancelar</button>
+            </div>
+            <div class="console console-sm">
+              @for (linha of jobsService.linhas().slice(-10); track $index) {
+                <div>{{ linha }}</div>
+              } @empty {
+                <span class="console-empty">Aguardando...</span>
+              }
+            </div>
+          } @else {
+            @if (sessaoAmazon()?.linkCurto) {
+              <p class="hint-text">Ativos: os posts da Amazon saem com link curto (link.amazon).</p>
+            } @else if (sessaoAmazon()?.logado) {
+              <div class="info-box">
+                Logado na Amazon, mas a barra de Associados (SiteStripe) não apareceu — confira se é a conta da Amazon
+                Associados. Enquanto isso os posts saem com o link longo, que também dá comissão.
+              </div>
+            } @else {
+              <p class="hint-text">
+                Opcional. Hoje os posts saem com o link longo (amazon.com.br/dp/…?tag=…), que já dá comissão. Entrando
+                na sua conta da Amazon Associados, o robô passa a usar o link curto oficial da Amazon (link.amazon).
+              </p>
+            }
+            <div class="form-actions">
+              <button type="button" class="btn btn-sm" [disabled]="outroJobRodando()" (click)="entrarNaAmazon()">
+                {{ sessaoAmazon()?.logado ? 'Entrar de novo na Amazon' : 'Entrar na Amazon' }}
+              </button>
+            </div>
+            @if (outroJobRodando()) {
+              <p class="hint-text">Aguarde: outra tarefa do robô está rodando no momento.</p>
+            }
+          }
+        </div>
+      }
     } @else {
       @if (ajuda(); as a) {
         <div class="info-box">

@@ -4,6 +4,8 @@ import { firstValueFrom } from 'rxjs';
 
 export interface StatusResponse {
   mercadoLivre: { conectado: boolean };
+  // Login na Amazon Associados (links curtos amzn.to). Opcional: API antiga não manda.
+  amazon?: { logado: boolean; linkCurto: boolean; verificadoEm: string | null };
   whatsapp: { conectado: boolean; numero: string | null; nome: string | null };
   produtosPublicados: number;
   produtosCatalogo: number;

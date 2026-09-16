@@ -38,9 +38,11 @@ const RE_LINHA_TAG = /^\[(\d{2}:\d{2}:\d{2})\]\s*\[([A-ZÇÃÕÁÉÍÓÚ]+)\]\s*
 const RE_HEADER = /^=+\s*(.+?)\s*=*$/;
 const RE_RODADA = /^===+\s*RODADA\s+(\d+):/i;
 const RE_GRUPO_HEADER = /^GRUPO\s+"(.+?)"\s*->\s*WhatsApp/i;
-// As linhas numeradas que aparecem durante a varredura de ofertas:
-// "[12] Titulo do produto — R$ 99,90 (40% OFF, 500 vendidos)"
-const RE_CANDIDATO = /^\[\d+\]\s+.+\s—\s*R\$\s*[\d.,]+\s*\(\d+%\s*OFF/;
+// As linhas numeradas de cada produto GARIMPADO (gravado no catalogo), de
+// qualquer loja — viram um contador unico em vez de uma linha por produto:
+// "[ML 12] Titulo — R$ 99,90 (40% OFF, 500 vendidos)"
+// "[amazon 3] Titulo — R$ 35,60 (11% OFF) +cupom"
+const RE_CANDIDATO = /^\[(?:ML |amazon )?\d+\]\s+.+\s—\s*R\$\s*[\d.,]+/i;
 
 function explicarMotivo(motivo: string): string {
   const m = motivo.trim();
@@ -61,6 +63,20 @@ function traduzirPorTag(tag: string, texto: string): { emoji: string; texto: str
       if (/^Abrindo o navegador/i.test(texto)) return { emoji: '🌐', texto: 'Abrindo o navegador...', tom: 'destaque' };
       if (/^Cupons:\s*https?:\/\//i.test(texto)) return { emoji: '🔎', texto: 'Procurando cupons disponíveis...', tom: 'destaque' };
       if (/^Ofertas:\s*https?:\/\//i.test(texto)) return { emoji: '🔎', texto: 'Procurando promoções novas...', tom: 'destaque' };
+
+      // Fontes do garimpo alternado (garimpoOfertas / garimpoAmazon)
+      if (/^ofertas: ML:/i.test(texto)) return { emoji: '🔎', texto: 'Mercado Livre: procurando ofertas...', tom: 'info' };
+      let m = texto.match(/^busca: (.+?): https?:\/\//i);
+      if (m) return { emoji: '🔎', texto: `Mercado Livre: buscando "${m[1]}"...`, tom: 'info' };
+      if (/^amazon: ofertas:/i.test(texto)) return { emoji: '🔎', texto: 'Amazon: procurando ofertas do dia...', tom: 'info' };
+      if (/^amazon: cupons:/i.test(texto)) return { emoji: '🔎', texto: 'Amazon: procurando produtos com cupom...', tom: 'info' };
+      m = texto.match(/^amazon: busca: (.+?): https?:\/\//i);
+      if (m) return { emoji: '🔎', texto: `Amazon: buscando "${m[1]}"...`, tom: 'info' };
+
+      // Sorteio da loja da proxima postagem
+      m = texto.match(/^Loja sorteada: (.+?) \(/i);
+      if (m) return { emoji: '🎲', texto: `Próxima postagem: produto da ${m[1]}.`, tom: 'info' };
+
       return { emoji: '▶️', texto, tom: 'destaque' };
     }
 
@@ -90,8 +106,17 @@ function traduzirPorTag(tag: string, texto: string): { emoji: string; texto: str
       if (/^Garimpando produtos novos em SEGUNDO PLANO/i.test(texto)) {
         return { emoji: '🔎', texto: 'Buscando produtos novos ao mesmo tempo, sem parar as postagens...', tom: 'info' };
       }
-      m = texto.match(/^Nada pra postar agora — tentando de novo em (\d+)s/i);
-      if (m) return { emoji: '⏳', texto: 'Nenhum produto novo por enquanto — tento de novo em instantes.', tom: 'info' };
+      if (/^Nada pra postar agora/i.test(texto)) {
+        return { emoji: '⏳', texto: 'Nenhum produto liberado agora — tento de novo em instantes.', tom: 'info' };
+      }
+      if (/^Catalogo ainda vazio/i.test(texto)) {
+        return { emoji: '⏳', texto: 'Ainda sem produtos — garimpando. Posto assim que tiver o primeiro.', tom: 'info' };
+      }
+      m = texto.match(/^Garimpo ligado: (.+?) \(/i);
+      if (m) return { emoji: '🔎', texto: `Garimpo ligado: ${m[1]}, um produto de cada loja por vez.`, tom: 'info' };
+      m = texto.match(/^Garimpo pausado: ainda ha (\d+) produtos para postar/i);
+      if (m) return { emoji: '⏸️', texto: `Garimpo pausado: ainda há ${m[1]} produtos para postar.`, tom: 'info' };
+      if (/^Lote de garimpo:/i.test(texto)) return null;
 
       m = texto.match(/^Produto pronto — aguardando ate (.+) pra postar\.?$/i);
       if (m) return { emoji: '⏰', texto: `Tudo pronto! Vou postar às ${m[1]}.`, tom: 'destaque' };
@@ -117,6 +142,8 @@ function traduzirPorTag(tag: string, texto: string): { emoji: string; texto: str
       if (/^Cupons com codigo gravados:/i.test(texto)) return null;
       if (/^\[PRODUTOS\] postado/i.test(texto)) return null;
       if (/^Postagem continua encerrada\.?$/i.test(texto)) return { emoji: '🛑', texto: 'Robô parado.', tom: 'destaque' };
+      if (/produtos garimpados — garimpo pausado/i.test(texto)) return { emoji: '⏸️', texto, tom: 'destaque' };
+      if (/^Produtos garimpados acabaram/i.test(texto)) return { emoji: '🔎', texto, tom: 'destaque' };
       // Conclusao do "plano B" de conexao (ver bloco AVISO abaixo) — nao e'
       // um evento novo pro usuario, so a confirmacao de que aquele passo
       // extra deu certo.

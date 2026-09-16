@@ -53,7 +53,8 @@
           <app-chip-input
             [items]="g.palavras"
             (itemsChange)="atualizarPalavras($index, $event)"
-            placeholder="Digite uma palavra e aperte Enter"
+            [separarPorVirgula]="true"
+            placeholder="Digite e aperte Enter — ou vários separados por vírgula: bolsa, sapato"
           />
         </div>
 
@@ -73,7 +74,8 @@
           <app-chip-input
             [items]="g.palavrasExcluir"
             (itemsChange)="atualizarPalavrasExcluir($index, $event)"
-            placeholder="Digite uma palavra e aperte Enter"
+            [separarPorVirgula]="true"
+            placeholder="Digite e aperte Enter — ou vários separados por vírgula: masculino, infantil"
           />
         </div>
 

@@ -1,6 +1,10 @@
 import { Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ConexoesService, Provedor } from '../../services/conexoes.service';
+import { JobsService } from '../../services/jobs.service';
+import { StatusService } from '../../services/status.service';
+import { environment } from '../../../environments/environment';
 
 // Onde o usuário encontra cada credencial. Sem isso, "App ID" é só um campo
 // vazio pra quem nunca abriu o painel de afiliados da Shopee.
@@ -22,11 +26,17 @@ const AJUDA: Record<string, { texto: string; link: string; rotuloLink: string }>
   standalone: true,
   imports: [FormsModule],
   templateUrl: './marketplace-card.html',
+  // Mesmo motivo do card do Mercado Livre: durante o login a tela remota
+  // precisa da largura toda pra dar pra ler e digitar nela.
+  host: { '[class.card-largo]': 'loginAmazonRodando()' },
 })
 export class MarketplaceCard implements OnInit {
   provedor = input.required<Provedor>();
 
   protected conexoes = inject(ConexoesService);
+  protected jobsService = inject(JobsService);
+  private statusService = inject(StatusService);
+  private sanitizer = inject(DomSanitizer);
 
   protected readonly valores = signal<Record<string, string>>({});
   protected readonly enviando = signal(false);
@@ -36,6 +46,43 @@ export class MarketplaceCard implements OnInit {
   protected readonly conexao = computed(() => this.conexoes.statusDe(this.provedor()));
   protected readonly conectado = computed(() => this.conexao()?.status === 'conectado');
   protected readonly ajuda = computed(() => AJUDA[this.provedor()] ?? null);
+
+  // ---- Links curtos da Amazon (link.amazon) ----------------------------------
+  // A tag já garante a comissão; o login na Amazon Associados só habilita a
+  // barra oficial que encurta o link (amazon.com.br/dp/...?tag=... -> link.amazon/...).
+  protected readonly sessaoAmazon = computed(() => this.statusService.status()?.amazon ?? null);
+  protected readonly loginAmazonRodando = computed(
+    () => this.provedor() === 'amazon' && this.jobsService.rodando() && this.jobsService.tipo() === 'login-amazon',
+  );
+  protected readonly outroJobRodando = computed(() => this.jobsService.rodando() && !this.loginAmazonRodando());
+
+  // Mesma montagem de URL da tela remota do card do Mercado Livre (ver
+  // connection-card.ts): a porta vem do job, e o iframe só é montado quando
+  // ela existe.
+  protected readonly novncUrl = computed<string | null>(() => {
+    const porta = this.jobsService.vncPort();
+    if (!porta) return null;
+    if (environment.vncBase) return `${environment.vncBase.replace(/\/$/, '')}:${porta}/`;
+    return `${window.location.protocol}//${window.location.hostname}:${porta}/`;
+  });
+  protected readonly novncUrlSegura = computed<SafeResourceUrl | null>(() => {
+    const url = this.novncUrl();
+    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
+  });
+
+  async entrarNaAmazon(): Promise<void> {
+    this.erro.set(null);
+    const r = await this.jobsService.iniciar('login-amazon');
+    if (!r.ok) this.erro.set(r.erro ?? null);
+  }
+
+  async concluirLoginAmazon(): Promise<void> {
+    await this.jobsService.confirmarEnter();
+  }
+
+  async cancelarLoginAmazon(): Promise<void> {
+    await this.jobsService.parar();
+  }
 
   ngOnInit(): void {
     this.conexoes.carregar();

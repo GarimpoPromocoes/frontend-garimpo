@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 
-export type JobTipo = 'login-ml' | 'trocar-ml' | 'trocar-zap' | 'grupos';
+export type JobTipo = 'login-ml' | 'trocar-ml' | 'login-amazon' | 'trocar-zap' | 'grupos';
 
 export type AlvoGrupos = 'todos' | 'selecionados';
 
