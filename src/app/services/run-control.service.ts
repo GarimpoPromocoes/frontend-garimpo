@@ -46,11 +46,11 @@ export class RunControlService {
   // O que ainda falta configurar pro robo conseguir rodar. Vira tanto o
   // checklist guiado do Painel quanto o motivo de o botao "Ligar" ficar
   // desabilitado — melhor do que deixar clicar e falhar depois.
-  readonly pendencias = computed<{ texto: string; aba: 'conexoes' | 'grupos' }[]>(() => {
+  readonly pendencias = computed<{ texto: string; aba: 'whatsapp' | 'lojas' | 'grupos' }[]>(() => {
     const s = this.statusService.status();
-    const itens: { texto: string; aba: 'conexoes' | 'grupos' }[] = [];
-    if (!s?.whatsapp?.conectado) itens.push({ texto: 'Conectar o WhatsApp', aba: 'conexoes' });
-    if (!s?.mercadoLivre?.conectado) itens.push({ texto: 'Conectar o Mercado Livre', aba: 'conexoes' });
+    const itens: { texto: string; aba: 'whatsapp' | 'lojas' | 'grupos' }[] = [];
+    if (!s?.whatsapp?.conectado) itens.push({ texto: 'Conectar o WhatsApp', aba: 'whatsapp' });
+    if (!s?.mercadoLivre?.conectado) itens.push({ texto: 'Conectar o Mercado Livre', aba: 'lojas' });
     if (this.grupos().length === 0) {
       itens.push({ texto: 'Cadastrar pelo menos um grupo', aba: 'grupos' });
     }

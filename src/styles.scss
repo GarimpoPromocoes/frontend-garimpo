@@ -467,6 +467,38 @@ svg {
   font-size: 13px;
 }
 
+/* JANELA SOBREPOSTA (verificacao de seguranca do Mercado Livre).
+   E' a unica situacao em que o robo para e depende de uma pessoa, entao a
+   tela vem por cima de tudo em vez de ficar dentro de um card: quem precisa
+   resolver o desafio tem que enxergar e clicar nele sem procurar. */
+.modal-fundo {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.62);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.modal-caixa {
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 20px;
+  width: min(1180px, 100%);
+  max-height: 92vh;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+}
+/* Dentro da janela a tela pode usar a altura toda que sobrar. */
+.modal-caixa .login-remoto {
+  height: min(70vh, 720px);
+}
+
 /* ---------------------------------------------------------------------- */
 /* Login                                                                  */
 /* ---------------------------------------------------------------------- */

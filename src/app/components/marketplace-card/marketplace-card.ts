@@ -28,7 +28,7 @@ const AJUDA: Record<string, { texto: string; link: string; rotuloLink: string }>
   templateUrl: './marketplace-card.html',
   // Mesmo motivo do card do Mercado Livre: durante o login a tela remota
   // precisa da largura toda pra dar pra ler e digitar nela.
-  host: { '[class.card-largo]': 'loginAmazonRodando()' },
+  host: { '[class.card-largo]': 'loginAmazonRodando() || loginShopeeRodando()' },
 })
 export class MarketplaceCard implements OnInit {
   provedor = input.required<Provedor>();
@@ -54,7 +54,23 @@ export class MarketplaceCard implements OnInit {
   protected readonly loginAmazonRodando = computed(
     () => this.provedor() === 'amazon' && this.jobsService.rodando() && this.jobsService.tipo() === 'login-amazon',
   );
-  protected readonly outroJobRodando = computed(() => this.jobsService.rodando() && !this.loginAmazonRodando());
+  // ---- Sessao do painel da Shopee -------------------------------------------
+  // Enquanto a Shopee nao libera o Open API pra conta, nao ha App ID/Secret pra
+  // cadastrar — entao esta secao aparece MESMO SEM a loja "conectada" por
+  // credencial: e' o login no painel de afiliados que faz a Shopee funcionar.
+  protected readonly sessaoShopee = computed(() => this.statusService.status()?.shopee ?? null);
+  protected readonly loginShopeeRodando = computed(
+    () => this.provedor() === 'shopee' && this.jobsService.rodando() && this.jobsService.tipo() === 'login-shopee',
+  );
+  protected readonly outroJobRodando = computed(
+    () => this.jobsService.rodando() && !this.loginAmazonRodando() && !this.loginShopeeRodando(),
+  );
+
+  async entrarNaShopee(): Promise<void> {
+    this.erro.set(null);
+    const r = await this.jobsService.iniciar('login-shopee');
+    if (!r.ok) this.erro.set(r.erro ?? null);
+  }
 
   // Mesma montagem de URL da tela remota do card do Mercado Livre (ver
   // connection-card.ts): a porta vem do job, e o iframe só é montado quando
@@ -76,11 +92,11 @@ export class MarketplaceCard implements OnInit {
     if (!r.ok) this.erro.set(r.erro ?? null);
   }
 
-  async concluirLoginAmazon(): Promise<void> {
+  async concluirLoginNavegador(): Promise<void> {
     await this.jobsService.confirmarEnter();
   }
 
-  async cancelarLoginAmazon(): Promise<void> {
+  async cancelarLoginNavegador(): Promise<void> {
     await this.jobsService.parar();
   }
 

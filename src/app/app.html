@@ -18,51 +18,32 @@
     </div>
 
     <nav class="sidebar-nav">
-      @for (a of abas; track a.id) {
-        <button
-          type="button"
-          class="nav-item"
-          [class.nav-item-active]="aba() === a.id"
-          (click)="irPara(a.id)"
-        >
-          @switch (a.id) {
-            @case ('painel') {
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="7.5" height="7.5" rx="1.6" />
-                <rect x="13.5" y="3" width="7.5" height="7.5" rx="1.6" />
-                <rect x="3" y="13.5" width="7.5" height="7.5" rx="1.6" />
-                <rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.6" />
-              </svg>
+      @for (s of secoes; track s.nome) {
+        <p class="nav-secao">{{ s.nome }}</p>
+        @for (a of s.itens; track a.id) {
+          <button
+            type="button"
+            class="nav-item"
+            [class.nav-item-active]="aba() === a.id"
+            (click)="irPara(a.id)"
+          >
+            @switch (a.id) {
+            @case ('painel') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.6"/></svg> }
+            @case ('atividade') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l2.5-7 5 14 2.5-7h6"/></svg> }
+            @case ('grupos') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 19v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V19"/><circle cx="9" cy="7" r="3.4"/><path d="M22 19v-1.5a4 4 0 0 0-3-3.87"/><path d="M16.5 4.2a3.4 3.4 0 0 1 0 6.6"/></svg> }
+            @case ('agendamento') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></svg> }
+            @case ('regras') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h7M14 7h7M3 17h4M11 17h10"/><circle cx="12" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg> }
+            @case ('cupons') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5V7a1.5 1.5 0 0 1 1.5-1.5h15A1.5 1.5 0 0 1 21 7v2.5a2.5 2.5 0 0 0 0 5V17a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17v-2.5a2.5 2.5 0 0 0 0-5Z"/><path d="M14 5.5v13" stroke-dasharray="2 2.6"/></svg> }
+            @case ('temas') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9.5h18M8 2.8v3.4M16 2.8v3.4"/></svg> }
+            @case ('whatsapp') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 11.6a8.4 8.4 0 0 1-12.3 7.4L3.5 20.5l1.6-4.6A8.4 8.4 0 1 1 20.5 11.6Z"/><path d="M8.8 9.1c0 3 2.4 5.4 5.4 5.4"/></svg> }
+            @case ('lojas') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9 5 4.5h14L20.5 9"/><path d="M3.5 9h17v9.5a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5Z"/><path d="M9.5 20v-5.5h5V20"/></svg> }
             }
-            @case ('grupos') {
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M16 19v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V19" />
-                <circle cx="9" cy="7" r="3.4" />
-                <path d="M22 19v-1.5a4 4 0 0 0-3-3.87" />
-                <path d="M16.5 4.2a3.4 3.4 0 0 1 0 6.6" />
-              </svg>
+            <span class="nav-label">{{ a.label }}</span>
+            @if (badgeDe(a.id); as b) {
+              <span class="nav-badge" [class.nav-badge-urgente]="badgeUrgente(a.id)">{{ b }}</span>
             }
-            @case ('conexoes') {
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M10.5 13.5a4.2 4.2 0 0 0 6.35.45l2.5-2.5a4.24 4.24 0 0 0-6-6l-1.43 1.43" />
-                <path d="M13.5 10.5a4.2 4.2 0 0 0-6.35-.45l-2.5 2.5a4.24 4.24 0 0 0 6 6l1.42-1.42" />
-              </svg>
-            }
-            @case ('postagens') {
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 7h7M14 7h7M3 17h4M11 17h10" />
-                <circle cx="12" cy="7" r="2.2" />
-                <circle cx="9" cy="17" r="2.2" />
-              </svg>
-            }
-            @case ('atividade') {
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M2 12h4l2.5-7 5 14 2.5-7h6" />
-              </svg>
-            }
-          }
-          {{ a.label }}
-        </button>
+          </button>
+        }
       }
     </nav>
 
@@ -179,19 +160,31 @@
           <app-groups-card />
         }
 
-        @case ('conexoes') {
+        @case ('whatsapp') {
+          <app-connection-card servico="whatsapp" />
+        }
+
+        @case ('lojas') {
           <div class="col-2">
-            <app-connection-card servico="whatsapp" />
             <app-connection-card servico="ml" />
-            <app-marketplace-card provedor="shopee" />
             <app-marketplace-card provedor="amazon" />
+            <app-marketplace-card provedor="shopee" />
           </div>
         }
 
-        @case ('postagens') {
+        @case ('agendamento') {
           <app-schedule-card />
+        }
+
+        @case ('regras') {
           <app-posting-config-card />
+        }
+
+        @case ('cupons') {
           <app-cupons-card />
+        }
+
+        @case ('temas') {
           <app-themes-card />
         }
 

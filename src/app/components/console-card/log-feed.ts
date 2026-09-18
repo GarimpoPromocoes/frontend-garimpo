@@ -42,7 +42,7 @@ const RE_GRUPO_HEADER = /^GRUPO\s+"(.+?)"\s*->\s*WhatsApp/i;
 // qualquer loja — viram um contador unico em vez de uma linha por produto:
 // "[ML 12] Titulo — R$ 99,90 (40% OFF, 500 vendidos)"
 // "[amazon 3] Titulo — R$ 35,60 (11% OFF) +cupom"
-const RE_CANDIDATO = /^\[(?:ML |amazon )?\d+\]\s+.+\s—\s*R\$\s*[\d.,]+/i;
+const RE_CANDIDATO = /^\[(?:ML |amazon |shopee )?\d+\]\s+.+\s—\s*R\$\s*[\d.,]+/i;
 
 function explicarMotivo(motivo: string): string {
   const m = motivo.trim();
@@ -72,6 +72,12 @@ function traduzirPorTag(tag: string, texto: string): { emoji: string; texto: str
       if (/^amazon: cupons:/i.test(texto)) return { emoji: '🔎', texto: 'Amazon: procurando produtos com cupom...', tom: 'info' };
       m = texto.match(/^amazon: busca: (.+?): https?:\/\//i);
       if (m) return { emoji: '🔎', texto: `Amazon: buscando "${m[1]}"...`, tom: 'info' };
+
+      // Shopee: garimpo por API, entao a "fonte" e' a palavra buscada, nao
+      // uma URL — por isso o formato aqui e' diferente do ML/Amazon.
+      if (/^shopee: ofertas:/i.test(texto)) return { emoji: '🔎', texto: 'Shopee: procurando ofertas do dia...', tom: 'info' };
+      m = texto.match(/^shopee: busca: (.+?):/i);
+      if (m) return { emoji: '🔎', texto: `Shopee: buscando "${m[1]}"...`, tom: 'info' };
 
       // Sorteio da loja da proxima postagem
       m = texto.match(/^Loja sorteada: (.+?) \(/i);
@@ -103,6 +109,27 @@ function traduzirPorTag(tag: string, texto: string): { emoji: string; texto: str
       if (/^Nenhum cupom disponivel/i.test(texto)) {
         return { emoji: '🎟️', texto: 'Não achei cupom dessa vez — seguindo com oferta normal.', tom: 'info' };
       }
+      // Sinal de vida do garimpo (garimpoOfertas.js): sem isto o painel ficava
+      // minutos so com "Ainda sem produtos", sem dizer se o robo estava
+      // trabalhando, travado, ou recusando tudo pelo mesmo motivo.
+      m = texto.match(/^Mercado Livre: (\d+) produto\(s\) examinado\(s\), (\d+) aprovado\(s\)(.*)\.$/i);
+      if (m) {
+        const motivos = m[3] ? m[3].replace(/^ — motivos:/i, ' Recusados por:') : '';
+        return {
+          emoji: '⛏️',
+          texto: `Mercado Livre: já olhei ${m[1]} produto(s), ${m[2]} aprovado(s).${motivos}`,
+          tom: 'info',
+        };
+      }
+      m = texto.match(/^Mercado Livre: (\d+) produto\(s\) novo\(s\) no catalogo \((\d+) examinado\(s\)\)\.$/i);
+      if (m) {
+        return { emoji: '✅', texto: `Mercado Livre: ${m[1]} produto(s) novo(s) guardado(s).`, tom: 'ok' };
+      }
+      m = texto.match(/^Shopee: (\d+) produto\(s\) novo\(s\) no catalogo \((\d+) oferta\(s\) vista\(s\)\)\.$/i);
+      if (m) {
+        return { emoji: '✅', texto: `Shopee: ${m[1]} produto(s) novo(s) guardado(s).`, tom: 'ok' };
+      }
+
       if (/^Garimpando produtos novos em SEGUNDO PLANO/i.test(texto)) {
         return { emoji: '🔎', texto: 'Buscando produtos novos ao mesmo tempo, sem parar as postagens...', tom: 'info' };
       }
@@ -211,6 +238,46 @@ function traduzirPorTag(tag: string, texto: string): { emoji: string; texto: str
       }
       if (/^Recarregando o WhatsApp Web/i.test(texto)) {
         return { emoji: '🔄', texto: 'Recarregando o WhatsApp para destravar...', tom: 'info' };
+      }
+      // DESAFIO DE SEGURANCA DO ML: precisa de GENTE. E' a unica mensagem do
+      // feed que pede uma acao manual, entao vai como erro (vermelho) e com
+      // texto que diz exatamente o que fazer — sem isso o sintoma no painel
+      // era so "Ainda sem produtos", por horas.
+      if (/^Mercado Livre pediu um desafio de seguranca/i.test(texto)) {
+        return {
+          emoji: '🧩',
+          texto:
+            'O Mercado Livre pediu uma verificação de segurança e está bloqueando as páginas de produto. ' +
+            'Use o botão "Resolver verificação agora" no aviso vermelho acima.',
+          tom: 'erro',
+        };
+      }
+      // Fonte de garimpo vazia (bloqueio/anti-robo ou layout novo) — a causa
+      // mais comum de "o robo nao pega produto nenhum".
+      if (/^Mercado Livre: a vitrine de ofertas nao devolveu nenhum produto/i.test(texto)) {
+        return {
+          emoji: '🚧',
+          texto: 'Mercado Livre não mostrou nenhuma oferta agora (pode ser bloqueio do site) — tentando outra fonte.',
+          tom: 'aviso',
+        };
+      }
+      const semCard = texto.match(/^Amazon: "(.+?)" nao devolveu nenhum card/i);
+      if (semCard) {
+        return {
+          emoji: '🚧',
+          texto: 'Amazon não mostrou nenhuma oferta agora (pode ser bloqueio do site) — tentando outra fonte.',
+          tom: 'aviso',
+        };
+      }
+      if (/^Shopee: "(.+?)" nao devolveu nenhuma oferta/i.test(texto)) {
+        return { emoji: '🚧', texto: 'Shopee não devolveu oferta agora — tentando outra fonte.', tom: 'aviso' };
+      }
+      if (/^Shopee: a busca de ofertas falhou/i.test(texto)) {
+        return {
+          emoji: '🚧',
+          texto: 'A Shopee não respondeu agora — confira a conexão dela em Conexões se isso se repetir.',
+          tom: 'aviso',
+        };
       }
       return { emoji: '⚠️', texto, tom: 'aviso' };
     }

@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 
-export type JobTipo = 'login-ml' | 'trocar-ml' | 'login-amazon' | 'trocar-zap' | 'grupos';
+export type JobTipo = 'login-ml' | 'trocar-ml' | 'login-amazon' | 'login-shopee' | 'trocar-zap' | 'grupos';
 
 export type AlvoGrupos = 'todos' | 'selecionados';
 
@@ -29,6 +29,10 @@ export class JobsService {
   readonly vncPort = signal<number | null>(null);
   // Conteúdo do QR do WhatsApp; a tela é que desenha a imagem.
   readonly qrWhatsapp = signal<string | null>(null);
+  // Verificação de segurança do Mercado Livre pendente. Enquanto isso não for
+  // resolvido por uma pessoa, o ML não abre página de produto nenhuma — por
+  // isso o painel precisa oferecer a tela remota (ver abrirTela()).
+  readonly desafioMl = signal<{ url: string; em: string } | null>(null);
 
   private eventSource: EventSource | null = null;
 
@@ -72,6 +76,7 @@ export class JobsService {
         this.codigoSaida.set(s.codigoSaida ?? null);
         this.vncPort.set(s.vncPort ?? null);
         this.qrWhatsapp.set(s.qrWhatsapp ?? null);
+        this.desafioMl.set(s.desafioMl ?? null);
       } catch (_) {}
     });
 
@@ -91,6 +96,7 @@ export class JobsService {
     this.codigoSaida.set(null);
     this.vncPort.set(null);
     this.qrWhatsapp.set(null);
+    this.desafioMl.set(null);
   }
 
   limparConsole(): void {
@@ -108,6 +114,18 @@ export class JobsService {
 
   async confirmarEnter(): Promise<void> {
     await firstValueFrom(this.http.post('/api/jobs/stdin', { text: '\n' }));
+  }
+
+  // Sobe a tela remota do robô que já está rodando (o job de postagem não
+  // publica tela por padrão) para alguém resolver a verificação do ML.
+  async abrirTela(): Promise<{ ok: boolean; vncPort?: number; erro?: string }> {
+    try {
+      const r: any = await firstValueFrom(this.http.post('/api/jobs/tela', {}));
+      if (r?.vncPort) this.vncPort.set(r.vncPort);
+      return { ok: true, vncPort: r?.vncPort };
+    } catch (e: any) {
+      return { ok: false, erro: e?.error?.erro || 'Não consegui abrir a tela do robô.' };
+    }
   }
 
   async parar(): Promise<void> {

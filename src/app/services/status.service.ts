@@ -6,6 +6,9 @@ export interface StatusResponse {
   mercadoLivre: { conectado: boolean };
   // Login na Amazon Associados (links curtos amzn.to). Opcional: API antiga não manda.
   amazon?: { logado: boolean; linkCurto: boolean; verificadoEm: string | null };
+  // Sessao do painel de afiliados da Shopee — a ponte usada enquanto o Open
+  // API da Shopee nao e' liberado pra conta.
+  shopee?: { logado: boolean; verificadoEm: string | null };
   whatsapp: { conectado: boolean; numero: string | null; nome: string | null };
   produtosPublicados: number;
   produtosCatalogo: number;
