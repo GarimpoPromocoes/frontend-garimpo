@@ -11,9 +11,6 @@ import { FormsModule } from '@angular/forms';
 export class ChipInput {
   items = input<string[]>([]);
   placeholder = input('Digite e aperte Enter');
-  // Liga a entrada em lote: "bolsa, sapato, sandália" vira 3 itens de uma vez.
-  // Opcional porque nem todo campo que usa este componente quer vírgula como
-  // separador.
   separarPorVirgula = input(false);
   itemsChange = output<string[]>();
 
@@ -27,8 +24,6 @@ export class ChipInput {
     this.novoItem.set('');
     if (!candidatos.length) return;
 
-    // Ignora repetidos (sem diferenciar maiúscula/minúscula) — tanto os que já
-    // estão na lista quanto os repetidos dentro do próprio lote colado.
     const resultado = [...this.items()];
     const vistos = new Set(resultado.map((i) => i.toLowerCase()));
     for (const v of candidatos) {

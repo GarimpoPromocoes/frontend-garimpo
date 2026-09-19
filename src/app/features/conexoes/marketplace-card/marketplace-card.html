@@ -1,0 +1,165 @@
+@if (formulario(); as form) {
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h2>{{ form.rotulo }}</h2>
+        <p class="card-subtitle">
+          Sua conta de afiliado da {{ form.rotulo }}. É ela que gera os links que dão comissão.
+        </p>
+      </div>
+      <span class="badge" [class.badge-ok]="conectado()" [class.badge-off]="!conectado()">
+        <span class="badge-dot"></span>
+        {{ conectado() ? 'Conectado' : 'Não conectado' }}
+      </span>
+    </div>
+
+    @if (conectado()) {
+      <div class="info-box">
+        Conectado. As credenciais ficam guardadas de forma criptografada — para trocá-las, desconecte e
+        conecte de novo.
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-danger-soft btn-sm" (click)="desconectar()">Desconectar</button>
+      </div>
+
+      @if (provedor() === 'amazon') {
+        <div class="card-section">
+          <h3>Links curtos (link.amazon)</h3>
+
+          @if (loginAmazonRodando()) {
+            <p class="hint-text">
+              Entre na sua conta da <strong>Amazon Associados</strong> (a mesma da tag) na tela abaixo. Assim que o
+              login for concluído, <strong>a conexão é salva sozinha</strong>.
+            </p>
+            @if (novncUrlSegura(); as tela) {
+              <iframe class="login-remoto" [src]="tela" title="Tela de login da Amazon"></iframe>
+            } @else {
+              <div class="login-remoto login-remoto-vazio">Preparando a tela de login…</div>
+            }
+            <div class="form-actions">
+              <button type="button" class="btn btn-ghost" (click)="concluirLoginNavegador()">Já entrei, pode salvar</button>
+              <button type="button" class="btn btn-ghost" (click)="cancelarLoginNavegador()">Cancelar</button>
+            </div>
+            <div class="console console-sm">
+              @for (linha of jobsService.linhas().slice(-10); track $index) {
+                <div>{{ linha }}</div>
+              } @empty {
+                <span class="console-empty">Aguardando...</span>
+              }
+            </div>
+          } @else {
+            @if (sessaoAmazon()?.linkCurto) {
+              <p class="hint-text">Ativos: os posts da Amazon saem com link curto (link.amazon).</p>
+            } @else if (sessaoAmazon()?.logado) {
+              <div class="info-box">
+                Logado na Amazon, mas a barra de Associados (SiteStripe) não apareceu — confira se é a conta da Amazon
+                Associados. Enquanto isso os posts saem com o link longo, que também dá comissão.
+              </div>
+            } @else {
+              <p class="hint-text">
+                Opcional. Hoje os posts saem com o link longo (amazon.com.br/dp/…?tag=…), que já dá comissão. Entrando
+                na sua conta da Amazon Associados, o robô passa a usar o link curto oficial da Amazon (link.amazon).
+              </p>
+            }
+            <div class="form-actions">
+              <button type="button" class="btn btn-sm" [disabled]="outroJobRodando()" (click)="entrarNaAmazon()">
+                {{ sessaoAmazon()?.logado ? 'Entrar de novo na Amazon' : 'Entrar na Amazon' }}
+              </button>
+            </div>
+            @if (outroJobRodando()) {
+              <p class="hint-text">Aguarde: outra tarefa do robô está rodando no momento.</p>
+            }
+          }
+        </div>
+      }
+    } @else {
+      @if (ajuda(); as a) {
+        <div class="info-box">
+          {{ a.texto }}
+          <a [href]="a.link" target="_blank" rel="noopener">{{ a.rotuloLink }}</a>
+        </div>
+      }
+
+      @for (campo of form.campos; track campo.nome) {
+        <div class="field">
+          <label [for]="'campo-' + provedor() + '-' + campo.nome">{{ campo.rotulo }}</label>
+
+          @if (campo.tipo === 'opcoes') {
+            <select
+              [id]="'campo-' + provedor() + '-' + campo.nome"
+              [ngModel]="valorDe(campo.nome) || campo.opcoes?.[0]"
+              (ngModelChange)="definir(campo.nome, $event)"
+            >
+              @for (opcao of campo.opcoes ?? []; track opcao) {
+                <option [value]="opcao">{{ opcao }}</option>
+              }
+            </select>
+          } @else {
+            <input
+              [id]="'campo-' + provedor() + '-' + campo.nome"
+              [type]="campo.tipo === 'segredo' ? 'password' : 'text'"
+              [autocomplete]="campo.tipo === 'segredo' ? 'new-password' : 'off'"
+              [ngModel]="valorDe(campo.nome)"
+              (ngModelChange)="definir(campo.nome, $event)"
+            />
+          }
+        </div>
+      }
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-primary" [disabled]="enviando()" (click)="conectar()">
+          {{ enviando() ? 'Verificando…' : 'Conectar' }}
+        </button>
+      </div>
+    }
+
+    @if (provedor() === 'shopee') {
+      <div class="card-section">
+        <h3>Entrar no painel de afiliados</h3>
+        @if (loginShopeeRodando()) {
+          <p class="hint-text">
+            Entre na sua conta de <strong>Afiliado da Shopee</strong> na tela abaixo. Assim que o login for
+            concluído, <strong>a sessão é salva sozinha</strong>.
+          </p>
+          @if (novncUrlSegura(); as tela) {
+            <iframe class="login-remoto" [src]="tela" title="Tela de login da Shopee"></iframe>
+          } @else {
+            <div class="login-remoto login-remoto-vazio">Preparando a tela de login…</div>
+          }
+          <div class="form-actions">
+            <button type="button" class="btn btn-ghost" (click)="concluirLoginNavegador()">Já entrei, pode salvar</button>
+            <button type="button" class="btn btn-ghost" (click)="cancelarLoginNavegador()">Cancelar</button>
+          </div>
+          <div class="console console-sm">
+            @for (linha of jobsService.linhas().slice(-10); track $index) {
+              <div>{{ linha }}</div>
+            } @empty {
+              <span class="console-empty">Aguardando...</span>
+            }
+          </div>
+        } @else {
+          @if (sessaoShopee()?.logado) {
+            <p class="hint-text">Sessão ativa: o robô já garimpa ofertas e gera o seu link de afiliado da Shopee.</p>
+          } @else {
+            <p class="hint-text">
+              Enquanto a Shopee não liberar o acesso à API (Open API) para a sua conta, o robô trabalha pelo seu
+              painel de afiliados. Entre uma vez e a sessão fica salva.
+            </p>
+          }
+          <div class="form-actions">
+            <button type="button" class="btn btn-sm" [disabled]="outroJobRodando()" (click)="entrarNaShopee()">
+              {{ sessaoShopee()?.logado ? 'Entrar de novo na Shopee' : 'Entrar na Shopee' }}
+            </button>
+          </div>
+          @if (outroJobRodando()) {
+            <p class="hint-text">Aguarde: outra tarefa do robô está rodando no momento.</p>
+          }
+        }
+      </div>
+    }
+
+    @if (erro()) {
+      <p class="error-text">{{ erro() }}</p>
+    }
+  </div>
+}

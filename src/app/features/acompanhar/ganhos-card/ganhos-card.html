@@ -1,0 +1,153 @@
+<div class="card">
+  <div class="card-header">
+    <div>
+      <h2>Ganhos de afiliado</h2>
+      <p class="card-subtitle">
+        O robô lê o painel de afiliado de cada loja a cada 12 horas, enquanto posta. Os valores são os que a
+        própria loja mostra.
+      </p>
+    </div>
+    <button type="button" class="btn btn-ghost btn-sm" [disabled]="pedindo() || ganhos.lendoAgora()" (click)="atualizar()">
+      {{ pedindo() || ganhos.lendoAgora() ? 'Lendo…' : 'Atualizar agora' }}
+    </button>
+  </div>
+
+  @if (aviso()) {
+    <p class="ok-text">{{ aviso() }}</p>
+  }
+  @if (erroAcao()) {
+    <p class="error-text">{{ erroAcao() }}</p>
+  }
+  @if (ganhos.erro()) {
+    <p class="error-text">{{ ganhos.erro() }}</p>
+  }
+
+  <ul class="ganhos-lojas">
+    @for (l of estadoLojas(); track l.id) {
+      <li>
+        <span class="ganhos-swatch" [style.background]="l.cor"></span>
+        <span class="ganhos-loja-nome">{{ l.nome }}</span>
+        @if (l.aguardando) {
+          <span class="hint-text">Aguardando leitura…</span>
+        } @else if (l.ok === false) {
+          <span class="error-text">{{ l.erro }}</span>
+        } @else if (l.ok) {
+          <span class="hint-text">Lido em {{ quando(l.lidoEm) }}</span>
+        } @else {
+          <span class="hint-text">Ainda não lido. Conecte a loja em "Lojas de afiliado".</span>
+        }
+      </li>
+    }
+  </ul>
+</div>
+
+<div class="stat-strip stat-strip-4">
+  <div class="stat-cell">
+    <span class="stat-cell-label">Gerado este mês</span>
+    <span class="stat-cell-value">{{ moeda(resumo().total) }}</span>
+  </div>
+  <div class="stat-cell">
+    <span class="stat-cell-label">Pendente</span>
+    <span class="stat-cell-value">{{ moeda(resumo().pendente) }}</span>
+  </div>
+  <div class="stat-cell">
+    <span class="stat-cell-label">Aprovado, a receber</span>
+    <span class="stat-cell-value">{{ moeda(resumo().confirmado) }}</span>
+  </div>
+  <div class="stat-cell">
+    <span class="stat-cell-label">Pago</span>
+    <span class="stat-cell-value">{{ moeda(resumo().pago) }}</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <div>
+      <h2>Evolução</h2>
+      <p class="card-subtitle">Ganhos gerados por mês nos últimos 12 meses, somando as lojas.</p>
+    </div>
+    <div class="ganhos-legenda">
+      @for (l of lojas; track l.id) {
+        <span><span class="ganhos-swatch" [style.background]="l.cor"></span>{{ l.nome }}</span>
+      }
+    </div>
+  </div>
+
+  @if (!temDados()) {
+    <div class="info-box">
+      Nenhum ganho lido ainda. Ligue o robô ou clique em "Atualizar agora". O histórico se forma mês a mês a
+      partir da primeira leitura.
+    </div>
+  } @else {
+    <div class="ganhos-grafico" (mouseleave)="colunaAtiva.set(null)">
+      <svg [attr.viewBox]="'0 0 ' + g.largura + ' ' + g.altura" role="img"
+        aria-label="Ganhos por mês, empilhados por loja. Os valores estão na tabela abaixo.">
+        @for (l of grafico().linhasGrade; track l.y) {
+          <line class="ganhos-grade" [attr.x1]="g.esq" [attr.x2]="g.largura - g.dir" [attr.y1]="l.y" [attr.y2]="l.y" />
+          <text class="ganhos-eixo" [attr.x]="g.esq - 8" [attr.y]="l.y + 4" text-anchor="end">{{ l.rotulo }}</text>
+        }
+        @for (c of grafico().colunas; track c.mes) {
+          <g class="ganhos-coluna" [class.ativa]="colunaAtiva() === c" tabindex="0"
+            (mouseenter)="colunaAtiva.set(c)" (focus)="colunaAtiva.set(c)" (blur)="colunaAtiva.set(null)">
+            <rect class="ganhos-alvo" [attr.x]="c.x - (grafico().passo - c.largura) / 2" [attr.y]="g.topo"
+              [attr.width]="grafico().passo" [attr.height]="g.altura - g.topo - g.base" />
+            @for (s of c.segmentos; track s.loja) {
+              @if (s.d) {
+                <path [attr.d]="s.d" [attr.fill]="s.cor" />
+              } @else {
+                <rect [attr.x]="c.x" [attr.y]="s.y" [attr.width]="c.largura" [attr.height]="s.altura" [attr.fill]="s.cor" />
+              }
+            }
+            <text class="ganhos-eixo" [attr.x]="c.x + c.largura / 2" [attr.y]="g.altura - 8" text-anchor="middle">
+              {{ c.rotulo }}
+            </text>
+          </g>
+        }
+      </svg>
+
+      @if (colunaAtiva(); as c) {
+        <div class="ganhos-tooltip" [style.left.%]="tooltipEsquerda(c)">
+          <strong>{{ nomeMes(c.mes) }}</strong>
+          @for (p of c.porLoja; track p.nome) {
+            <span class="ganhos-tooltip-linha">
+              <span class="ganhos-swatch" [style.background]="p.cor"></span>
+              {{ p.nome }}
+              <b>{{ moeda(p.valor) }}</b>
+            </span>
+          }
+          <span class="ganhos-tooltip-linha ganhos-tooltip-total">Total <b>{{ moeda(c.total) }}</b></span>
+        </div>
+      }
+    </div>
+
+    <div class="tabela-rolagem">
+      <table class="tabela">
+        <thead>
+          <tr>
+            <th>Mês</th>
+            <th>Loja</th>
+            <th class="col-num">Gerado</th>
+            <th class="col-num">Pendente</th>
+            <th class="col-num">Aprovado</th>
+            <th class="col-num">Pago</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of linhasTabela(); track r.mes + r.loja.id) {
+            <tr>
+              <td>{{ nomeMes(r.mes) }}</td>
+              <td>
+                <span class="ganhos-swatch" [style.background]="r.loja.cor"></span>
+                {{ r.loja.nome }}
+              </td>
+              <td class="col-num">{{ moeda(r.total) }}</td>
+              <td class="col-num">{{ moeda(r.g?.pendente) }}</td>
+              <td class="col-num">{{ moeda(r.g?.confirmado) }}</td>
+              <td class="col-num">{{ moeda(r.g?.pago) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

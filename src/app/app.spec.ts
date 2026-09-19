@@ -17,10 +17,14 @@ describe('App', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render the brand title', async () => {
+  it('should show the login screen when there is no session', async () => {
+    localStorage.removeItem('promobot:token');
     const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
     await fixture.whenStable();
+    fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Promobot');
+    expect(compiled.querySelector('app-login-card h2')?.textContent).toContain('Entrar');
+    expect(compiled.querySelector('#login-email')).toBeTruthy();
   });
 });

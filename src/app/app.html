@@ -8,12 +8,7 @@
 <div class="shell">
   <aside class="sidebar" [class.sidebar-aberta]="menuAberto()">
     <div class="sidebar-brand">
-      <span class="brand-mark">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z" />
-          <circle cx="7.5" cy="7.5" r="1.2" fill="currentColor" />
-        </svg>
-      </span>
+      <img class="brand-mark" src="logo.webp" alt="" width="42" height="42" />
       <span class="brand-text">Promobot</span>
     </div>
 
@@ -162,47 +157,87 @@
         }
 
         @case ('grupos') {
-          <app-groups-card />
+          @defer (on immediate) {
+            <app-groups-card />
+          } @placeholder {
+            <div class="card card-carregando">Carregando…</div>
+          }
         }
 
         @case ('ganhos') {
-          <app-ganhos-card />
+          @defer (on immediate) {
+            <app-ganhos-card />
+          } @placeholder {
+            <div class="card card-carregando">Carregando…</div>
+          }
         }
 
         @case ('produtos') {
-          <app-produtos-card />
+          @defer (on immediate) {
+            <app-produtos-card />
+          } @placeholder {
+            <div class="card card-carregando">Carregando…</div>
+          }
         }
 
         @case ('dono') {
-          <app-owner-card />
+          @defer (on immediate) {
+            <app-owner-card />
+          } @placeholder {
+            <div class="card card-carregando">Carregando…</div>
+          }
         }
 
         @case ('whatsapp') {
-          <app-connection-card servico="whatsapp" />
+          @defer (on immediate) {
+            <app-connection-card servico="whatsapp" />
+          } @placeholder {
+            <div class="card card-carregando">Carregando…</div>
+          }
         }
 
         @case ('lojas') {
-          <div class="col-2">
-            <app-connection-card servico="ml" />
-            <app-marketplace-card provedor="amazon" />
-            <app-marketplace-card provedor="shopee" />
-          </div>
+          @defer (on immediate) {
+            <div class="col-2">
+              <app-connection-card servico="ml" />
+              <app-marketplace-card provedor="amazon" />
+              <app-marketplace-card provedor="shopee" />
+            </div>
+          } @placeholder {
+            <div class="card card-carregando">Carregando…</div>
+          }
         }
 
         @case ('agendamento') {
-          <app-schedule-card />
+          @defer (on immediate) {
+            <app-schedule-card />
+          } @placeholder {
+            <div class="card card-carregando">Carregando…</div>
+          }
         }
 
         @case ('regras') {
-          <app-posting-config-card />
+          @defer (on immediate) {
+            <app-posting-config-card />
+          } @placeholder {
+            <div class="card card-carregando">Carregando…</div>
+          }
         }
 
         @case ('cupons') {
-          <app-cupons-card />
+          @defer (on immediate) {
+            <app-cupons-card />
+          } @placeholder {
+            <div class="card card-carregando">Carregando…</div>
+          }
         }
 
         @case ('temas') {
-          <app-themes-card />
+          @defer (on immediate) {
+            <app-themes-card />
+          } @placeholder {
+            <div class="card card-carregando">Carregando…</div>
+          }
         }
 
         @case ('atividade') {

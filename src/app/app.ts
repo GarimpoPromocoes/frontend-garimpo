@@ -1,35 +1,24 @@
 import { Component, OnDestroy, OnInit, computed, effect, inject, signal } from '@angular/core';
-import { ConfigService } from './services/config.service';
-import { StatusService } from './services/status.service';
-import { RunControlService } from './services/run-control.service';
-import { JobsService } from './services/jobs.service';
-import { AuthService } from './services/auth.service';
-import { LoginCard } from './components/login-card/login-card';
-import { ConnectionCard } from './components/connection-card/connection-card';
-import { MarketplaceCard } from './components/marketplace-card/marketplace-card';
-import { PostingConfigCard } from './components/posting-config-card/posting-config-card';
-import { ThemesCard } from './components/themes-card/themes-card';
-import { GroupsCard } from './components/groups-card/groups-card';
-import { RunCard } from './components/run-card/run-card';
-import { ScheduleCard } from './components/schedule-card/schedule-card';
-import { StatsCard } from './components/stats-card/stats-card';
-import { CuponsCard } from './components/cupons-card/cupons-card';
-import { ConsoleCard } from './components/console-card/console-card';
-import { ProdutosCard } from './components/produtos-card/produtos-card';
-import { OwnerCard } from './components/owner-card/owner-card';
-import { GanhosCard } from './components/ganhos-card/ganhos-card';
+import { ConfigService } from './core/services/config.service';
+import { StatusService } from './core/services/status.service';
+import { RunControlService } from './core/services/run-control.service';
+import { JobsService } from './core/services/jobs.service';
+import { AuthService } from './core/services/auth.service';
+import { LoginCard } from './features/auth/login-card/login-card';
+import { ConnectionCard } from './features/conexoes/connection-card/connection-card';
+import { MarketplaceCard } from './features/conexoes/marketplace-card/marketplace-card';
+import { PostingConfigCard } from './features/divulgacao/posting-config-card/posting-config-card';
+import { ThemesCard } from './features/divulgacao/themes-card/themes-card';
+import { GroupsCard } from './features/divulgacao/groups-card/groups-card';
+import { RunCard } from './features/acompanhar/run-card/run-card';
+import { ScheduleCard } from './features/divulgacao/schedule-card/schedule-card';
+import { StatsCard } from './features/acompanhar/stats-card/stats-card';
+import { CuponsCard } from './features/divulgacao/cupons-card/cupons-card';
+import { ConsoleCard } from './features/acompanhar/console-card/console-card';
+import { ProdutosCard } from './features/divulgacao/produtos-card/produtos-card';
+import { OwnerCard } from './features/admin/owner-card/owner-card';
+import { GanhosCard } from './features/acompanhar/ganhos-card/ganhos-card';
 
-// NAVEGACAO EM SECOES (09/2026). Antes eram 5 itens soltos numa lista; o
-// menu crescia sem hierarquia e "Postagens" virava um deposito de quatro
-// assuntos diferentes (frequencia, repeticao, cupons, datas).
-//
-// Agora cada item tem UM assunto e os itens sao agrupados pelo que a pessoa
-// esta tentando fazer: acompanhar, divulgar ou conectar. E' o formato que
-// sistemas do genero usam, e e' o que deixa o menu crescer sem virar sopa.
-//
-// REGRA AO ACRESCENTAR ITEM: todo item do menu leva a uma tela que FUNCIONA.
-// Nada de item "em breve" — menu com porta que nao abre e' o tipo de coisa
-// que queima a confianca de quem esta avaliando o produto.
 export type AbaId =
   | 'painel'
   | 'atividade'
@@ -44,8 +33,6 @@ export type AbaId =
   | 'lojas'
   | 'dono';
 
-// Qual contador aparece na bolinha ao lado do item (ver badgeDe, no
-// componente). 'alerta' nao e' numero: e' o "!" de algo que precisa de gente.
 type BadgeId = 'grupos' | 'cupons' | 'lojas' | 'produtos' | 'alerta' | null;
 
 interface Aba {
@@ -100,7 +87,7 @@ const ABAS: Aba[] = [
   {
     id: 'agendamento',
     label: 'Frequência',
-    titulo: 'Freuência',
+    titulo: 'Frequência',
     descricao: 'Em que horários o robô posta sozinho e com que intervalo entre uma promoção e outra.',
     secao: 'Divulgação',
   },
@@ -152,8 +139,6 @@ const ABAS: Aba[] = [
   },
 ];
 
-// Ordem das secoes no menu, e quais itens caem em cada uma. Derivado de ABAS
-// pra nao existir uma segunda lista pra manter em sincronia.
 const SECOES: { nome: string; itens: Aba[] }[] = [];
 for (const aba of ABAS) {
   const atual = SECOES.find((s) => s.nome === aba.secao);
@@ -192,10 +177,6 @@ export class App implements OnInit, OnDestroy {
   protected jobsService = inject(JobsService);
   protected auth = inject(AuthService);
 
-  protected readonly abas = ABAS;
-  // A seção Administração só aparece pra quem é dono. Esconder no menu é
-  // só aparência — o servidor confere o admin no banco a cada chamada (ver
-  // api-bot/src/auth.js). As duas camadas existem de propósito.
   protected readonly secoes = computed(() =>
     SECOES.map((s) => ({
       nome: s.nome,
@@ -205,12 +186,6 @@ export class App implements OnInit, OnDestroy {
   protected readonly aba = signal<AbaId>('painel');
   protected readonly menuAberto = signal(false);
 
-  // Contador da bolinha ao lado do item. Só mostra quando há algo a mostrar:
-  // bolinha com "0" é ruído, não informação.
-  //   - grupos/cupons: quantos existem agora;
-  //   - lojas: quantas AINDA faltam conectar (é o que exige ação);
-  //   - alerta: '!' quando o robô parou esperando uma pessoa (verificação
-  //     de segurança do Mercado Livre — ver console-card).
   protected badgeDe(id: AbaId): string | null {
     const s = this.statusService.status();
     switch (id) {
@@ -249,10 +224,6 @@ export class App implements OnInit, OnDestroy {
   protected readonly mlConectado = computed(
     () => !!this.statusService.status()?.mercadoLivre?.conectado
   );
-  // Enquanto há um QR esperando leitura o WhatsApp NÃO está conectado, mesmo
-  // que a pasta de sessão já exista (é só nela que o status do servidor se
-  // baseia). Sem isso a barra lateral dizia "Conectado" no exato momento em
-  // que o painel pedia pra escanear o código.
   protected readonly zapConectado = computed(
     () => !!this.statusService.status()?.whatsapp?.conectado && !this.jobsService.qrWhatsapp()
   );
@@ -260,15 +231,13 @@ export class App implements OnInit, OnDestroy {
   private dashboardIniciado = false;
 
   constructor() {
-    // So carrega config/status DEPOIS de saber quem esta logado — evita
-    // bater no /api/config com um token velho/ausente antes da hora, e
-    // desliga o polling de novo se o usuario sair.
     effect(() => {
       const logado = !!this.auth.usuario();
       if (logado && !this.dashboardIniciado) {
         this.dashboardIniciado = true;
         this.configService.carregar();
         this.statusService.iniciarPolling();
+        this.preCarregarAbas();
       } else if (!logado && this.dashboardIniciado) {
         this.dashboardIniciado = false;
         this.statusService.pararPolling();
@@ -281,7 +250,6 @@ export class App implements OnInit, OnDestroy {
       const salva = localStorage.getItem(CHAVE_ABA) as AbaId | null;
       if (salva && ABAS.some((a) => a.id === salva)) this.aba.set(salva);
     } catch (_) {
-      // localStorage bloqueado (aba anonima etc.) — segue com a aba padrao.
     }
     this.auth.restaurarSessao();
   }
@@ -290,13 +258,29 @@ export class App implements OnInit, OnDestroy {
     this.statusService.pararPolling();
   }
 
+  private preCarregarAbas(): void {
+    const carregar = () => {
+      void import('./features/divulgacao/groups-card/groups-card');
+      void import('./features/acompanhar/ganhos-card/ganhos-card');
+      void import('./features/divulgacao/produtos-card/produtos-card');
+      void import('./features/conexoes/connection-card/connection-card');
+      void import('./features/conexoes/marketplace-card/marketplace-card');
+      void import('./features/divulgacao/schedule-card/schedule-card');
+      void import('./features/divulgacao/posting-config-card/posting-config-card');
+      void import('./features/divulgacao/cupons-card/cupons-card');
+      void import('./features/divulgacao/themes-card/themes-card');
+      if (this.auth.usuario()?.admin) void import('./features/admin/owner-card/owner-card');
+    };
+    if (typeof requestIdleCallback === 'function') requestIdleCallback(carregar, { timeout: 5000 });
+    else setTimeout(carregar, 2000);
+  }
+
   irPara(aba: AbaId): void {
     this.aba.set(aba);
     this.menuAberto.set(false);
     try {
       localStorage.setItem(CHAVE_ABA, aba);
     } catch (_) {
-      // sem persistencia — nao impede a navegacao.
     }
   }
 

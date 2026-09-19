@@ -1,29 +1,8 @@
-// -----------------------------------------------------------------------
-// Identidade visual do Promobot
-//
-// Decisoes deliberadas (e o que elas evitam):
-//  - Neutros QUENTES (base #faf9f7), nao o cinza-azulado padrao. Da um tom
-//    mais editorial e menos "template de admin".
-//  - Acao primaria em TINTA (quase preto), nao em indigo/roxo. Cor fica
-//    reservada exclusivamente pra significado: verde = conectado, ambar =
-//    rodando, vermelho = parar. Nada de gradiente em lugar nenhum.
-//  - Bordas de 1px como separador principal; sombra quase inexistente.
-//    Superficie plana le como "desenhado", sombra pesada le como "bubbly".
-//  - Raios curtos (10/8/6px). Quanto mais arredondado, mais infantil.
-//  - DM Sans (geometrica, com personalidade) no lugar de Inter, que virou
-//    a fonte-padrao de interface gerada automaticamente.
-// -----------------------------------------------------------------------
-
 :root {
-  // Paleta tirada da foto de perfil do grupo (Garimpo Promoções): o fundo
-  // marrom-espresso, o ouro do capacete/pepitas e o creme do lettering.
-  // Espresso = acao/tinta, ouro = destaque e selecao, creme = base.
   --espresso: #2a1d12;
   --espresso-soft: #3d2c1c;
   --gold: #e0a520;
   --gold-deep: #c78c11;
-  // Ouro escurecido o suficiente pra ser legivel como TEXTO sobre claro
-  // (~4.8:1). O --gold puro so aparece em preenchimento, borda e ponto.
   --gold-ink: #8a5e05;
   --gold-soft: #fdf4e1;
   --gold-border: #eedcae;
@@ -39,8 +18,6 @@
   --ink: var(--espresso);
   --text: #241a11;
   --text-soft: #51453a;
-  // Contraste ~5:1 no branco: texto de apoio precisa ser legivel de verdade,
-  // nao um cinza decorativo.
   --text-muted: #726758;
 
   --ml-yellow: #ffe600;
@@ -104,10 +81,6 @@ svg {
   flex-shrink: 0;
 }
 
-/* ---------------------------------------------------------------------- */
-/* Cartoes                                                                */
-/* ---------------------------------------------------------------------- */
-
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -132,6 +105,14 @@ svg {
   letter-spacing: -0.015em;
 }
 
+.card-carregando {
+  color: var(--text-muted);
+  font-size: 13px;
+  min-height: 120px;
+  justify-content: center;
+  align-items: center;
+}
+
 .card-subtitle {
   font-size: 13px;
   color: var(--text-muted);
@@ -148,7 +129,6 @@ svg {
   border-top: 1px solid var(--border);
 }
 
-// Bloco repetido dentro de um cartao (um grupo, uma data sazonal...).
 .repeat-item {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -173,10 +153,6 @@ svg {
   color: var(--text);
   letter-spacing: -0.01em;
 }
-
-/* ---------------------------------------------------------------------- */
-/* Botoes                                                                 */
-/* ---------------------------------------------------------------------- */
 
 .btn {
   display: inline-flex;
@@ -211,8 +187,6 @@ svg {
   background: var(--espresso-soft);
 }
 
-// Acao principal do produto ("Ligar robô") — a unica que usa o ouro cheio da
-// marca, pra ficar claro qual botao e' O botao. Todo o resto e' espresso.
 .btn-hero {
   background: var(--gold);
   color: var(--espresso);
@@ -280,13 +254,6 @@ svg {
   width: 100%;
 }
 
-/* ---------------------------------------------------------------------- */
-/* Seletor segmentado                                                     */
-/* ---------------------------------------------------------------------- */
-
-// align-self: flex-start e' o que impede o seletor de esticar pela largura
-// toda quando ele e' filho de um container flex em coluna (o padrao dos
-// campos) — ele deve ocupar so a largura das opcoes.
 .segmented {
   display: inline-flex;
   align-self: flex-start;
@@ -323,10 +290,6 @@ svg {
   font-weight: 600;
   box-shadow: var(--shadow-sm);
 }
-
-/* ---------------------------------------------------------------------- */
-/* Badges de status                                                       */
-/* ---------------------------------------------------------------------- */
 
 .badge {
   display: inline-flex;
@@ -375,10 +338,6 @@ svg {
   }
 }
 
-/* ---------------------------------------------------------------------- */
-/* Avisos e textos auxiliares                                             */
-/* ---------------------------------------------------------------------- */
-
 .alert-banner {
   background: var(--warn-soft);
   color: var(--warn);
@@ -414,8 +373,6 @@ svg {
   font-weight: 500;
 }
 
-/* Tela remota do login do Mercado Livre, embutida no proprio painel. */
-/* Ocupa as duas colunas do .col-2 (ver connection-card.ts). */
 .card-largo {
   grid-column: 1 / -1;
 }
@@ -428,7 +385,6 @@ svg {
   background: var(--surface-2);
   display: block;
 }
-/* Numero do WhatsApp conectado, logo abaixo da descricao do card. */
 .conta-conectada {
   margin-top: 6px;
   font-size: 13px;
@@ -438,8 +394,6 @@ svg {
   color: var(--text-muted);
 }
 
-/* QR do WhatsApp: precisa ser grande e com fundo branco, porque quem le e'
-   a camera de um celular apontada pra tela. */
 .qr-whatsapp {
   width: 300px;
   max-width: 100%;
@@ -467,12 +421,6 @@ svg {
   font-size: 13px;
 }
 
-/* ---------------------------------------------------------------------- */
-/* TABELAS (Produtos garimpados, Painel do dono)                          */
-/* ---------------------------------------------------------------------- */
-
-/* A rolagem horizontal fica no ENVOLTORIO, nao na tabela: em tela estreita
-   a tabela desliza sozinha sem empurrar o layout inteiro pro lado. */
 .tabela-rolagem {
   overflow-x: auto;
   margin: 0 -4px;
@@ -511,9 +459,6 @@ svg {
   white-space: nowrap;
 }
 
-/* Titulo + linha de apoio na mesma celula. O titulo corta em 2 linhas: sem
-   isso um nome de anuncio do ML (que costuma ser enorme) esticaria a linha
-   toda e empurraria as colunas de numero pra fora da tela. */
 .prod-titulo {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -533,7 +478,7 @@ a.prod-titulo:hover {
   font-size: 12px;
   color: var(--text-muted);
 }
-/* Preco antigo, riscado, ao lado do atual. */
+
 .prod-de {
   display: block;
   font-size: 12px;
@@ -587,7 +532,7 @@ a.prod-titulo:hover {
   flex: 1;
   min-width: 200px;
   padding-left: 36px;
-  // Lupa desenhada no fundo: dispensa wrapper e icone extra no template.
+
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23726758' stroke-width='2' stroke-linecap='round' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: 12px center;
@@ -614,7 +559,6 @@ a.prod-titulo:hover {
   padding-top: 4px;
 }
 
-/* Numeros grandes do topo do Painel do dono. */
 .dono-totais {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -640,10 +584,6 @@ a.prod-titulo:hover {
   color: var(--text-muted);
 }
 
-/* JANELA SOBREPOSTA (verificacao de seguranca do Mercado Livre).
-   E' a unica situacao em que o robo para e depende de uma pessoa, entao a
-   tela vem por cima de tudo em vez de ficar dentro de um card: quem precisa
-   resolver o desafio tem que enxergar e clicar nele sem procurar. */
 .modal-fundo {
   position: fixed;
   inset: 0;
@@ -667,14 +607,10 @@ a.prod-titulo:hover {
   gap: 12px;
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
 }
-/* Dentro da janela a tela pode usar a altura toda que sobrar. */
+
 .modal-caixa .login-remoto {
   height: min(70vh, 720px);
 }
-
-/* ---------------------------------------------------------------------- */
-/* Login                                                                  */
-/* ---------------------------------------------------------------------- */
 
 .login-shell {
   min-height: 100vh;
@@ -689,10 +625,6 @@ a.prod-titulo:hover {
   width: 100%;
   max-width: 380px;
 }
-
-/* ---------------------------------------------------------------------- */
-/* Campos de formulario                                                   */
-/* ---------------------------------------------------------------------- */
 
 .field {
   display: flex;
@@ -806,29 +738,17 @@ a.prod-titulo:hover {
   flex-wrap: wrap;
 }
 
-/* ---------------------------------------------------------------------- */
-/* Grades                                                                 */
-/* ---------------------------------------------------------------------- */
-
 .grid-2 {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
 }
-
 @media (max-width: 720px) {
   .grid-2 {
     grid-template-columns: minmax(0, 1fr);
   }
 }
 
-/* ---------------------------------------------------------------------- */
-/* Faixa de metricas                                                      */
-/* ---------------------------------------------------------------------- */
-
-// Uma faixa unica dividida por filetes, em vez de tres cartoes soltos
-// iguais lado a lado — le como um painel de numeros, nao como uma galeria
-// de cards repetidos.
 .stat-strip {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -882,7 +802,6 @@ a.prod-titulo:hover {
   }
 }
 
-// Caixa de dado textual (data/hora), usada no cartao de controle.
 .stat-tile {
   display: flex;
   flex-direction: column;
@@ -902,10 +821,6 @@ a.prod-titulo:hover {
   color: var(--text-muted);
 }
 
-/* ---------------------------------------------------------------------- */
-/* Console                                                                */
-/* ---------------------------------------------------------------------- */
-
 .console {
   background: #1f160d;
   color: #cdc2b1;
@@ -918,8 +833,7 @@ a.prod-titulo:hover {
   max-height: 580px;
   overflow-y: auto;
   overflow-x: auto;
-  // pre (nao pre-wrap): o QR Code do WhatsApp e' ASCII art impresso linha a
-  // linha — se uma linha quebrar no meio, o padrao do QR fica ilegivel.
+
   white-space: pre;
 }
 .console-sm {
@@ -930,8 +844,6 @@ a.prod-titulo:hover {
   font-style: italic;
 }
 
-// Tons dessaturados de proposito: o log tem que ser legivel e discreto, nao
-// um letreiro neon.
 .log-ok {
   color: #93c9a3;
 }
@@ -948,10 +860,6 @@ a.prod-titulo:hover {
 .log-neutro {
   color: #8a7e6d;
 }
-
-/* ---------------------------------------------------------------------- */
-/* Feed de atividade (versao amigavel do console, com emoji e frases)     */
-/* ---------------------------------------------------------------------- */
 
 .activity-feed {
   display: flex;
@@ -1018,8 +926,6 @@ a.prod-titulo:hover {
   font-style: normal;
 }
 
-// Divisor de rodada: uma linha fina dos dois lados do rotulo, tipo
-// "──── Rodada 5 ────" — marca claramente onde comeca cada ciclo novo.
 .feed-rodada {
   display: flex;
   align-items: center;
@@ -1056,10 +962,6 @@ a.prod-titulo:hover {
   color: var(--text-soft);
 }
 
-/* ---------------------------------------------------------------------- */
-/* Diversos                                                               */
-/* ---------------------------------------------------------------------- */
-
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -1091,20 +993,11 @@ a.prod-titulo:hover {
   padding: 8px;
 }
 
-/* ---------------------------------------------------------------------- */
-/* GANHOS DE AFILIADO                                                     */
-/* ---------------------------------------------------------------------- */
-
-// Cores das lojas no grafico: a cor segue a LOJA (nunca a posicao) e e' a
-// mesma no grafico, na legenda e na tabela. Trio validado pra daltonismo
-// (paleta categorica de referencia, slots 1-3); o verde fica abaixo de 3:1
-// no branco, por isso a tabela com os valores sempre acompanha o grafico.
 :root {
   --serie-1: #2a78d6;
   --serie-2: #eb6834;
   --serie-3: #1baf7a;
 }
-
 .ganhos-pagina {
   display: flex;
   flex-direction: column;

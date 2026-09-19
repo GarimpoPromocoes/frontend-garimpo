@@ -1,5 +1,11 @@
 {
   "buildCommand": "node scripts/set-env.js && npx ng build --configuration production",
   "outputDirectory": "dist/dashboard/browser",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
+  "headers": [
+    {
+      "source": "/(.*)\\.(js|css|woff2)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    }
+  ]
 }
