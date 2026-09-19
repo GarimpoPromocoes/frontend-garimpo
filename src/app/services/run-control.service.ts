@@ -25,14 +25,18 @@ export class RunControlService {
     () => !!this.statusService.status()?.agendamento?.manual?.ativo
   );
 
-  readonly postandoAgora = computed(() => this.jobsService.rodando());
+  // A leitura avulsa de ganhos também é uma tarefa do robô, mas não posta
+  // nada — não pode aparecer como "Postando agora".
+  readonly lendoGanhos = computed(() => this.jobsService.rodando() && this.jobsService.tipo() === 'ganhos');
+
+  readonly postandoAgora = computed(() => this.jobsService.rodando() && !this.lendoGanhos());
 
   readonly processoExterno = computed(
     () => !!this.statusService.status()?.processoExterno?.rodando
   );
 
   readonly algoRodando = computed(
-    () => this.rodandoContinuo() || this.postandoAgora() || this.processoExterno()
+    () => this.rodandoContinuo() || this.postandoAgora() || this.lendoGanhos() || this.processoExterno()
   );
 
   readonly ultimaPublicacao = computed(

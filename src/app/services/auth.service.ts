@@ -5,6 +5,11 @@ import { firstValueFrom } from 'rxjs';
 export interface UsuarioLogado {
   id: number;
   email: string;
+  nome?: string | null;
+  // Dono do sistema: libera o "Painel do dono" no menu. Isso e apenas a CARA
+  // da interface — quem protege de verdade e o adminMiddleware no servidor,
+  // que confere no banco a cada chamada.
+  admin?: boolean;
 }
 
 const CHAVE_TOKEN = 'promobot:token';

@@ -18,7 +18,7 @@
     </div>
 
     <nav class="sidebar-nav">
-      @for (s of secoes; track s.nome) {
+      @for (s of secoes(); track s.nome) {
         <p class="nav-secao">{{ s.nome }}</p>
         @for (a of s.itens; track a.id) {
           <button
@@ -29,7 +29,10 @@
           >
             @switch (a.id) {
             @case ('painel') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.6"/></svg> }
+            @case ('ganhos') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M14.8 9.2c-.5-.9-1.6-1.4-2.8-1.4-1.6 0-2.8.8-2.8 2.1 0 2.9 5.8 1.5 5.8 4.3 0 1.3-1.3 2.1-3 2.1-1.3 0-2.4-.6-2.9-1.5M12 6.2v1.6M12 16.3v1.5"/></svg> }
             @case ('atividade') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l2.5-7 5 14 2.5-7h6"/></svg> }
+            @case ('produtos') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5Z"/><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"/></svg> }
+            @case ('dono') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 20 6v5.4c0 4.4-3.1 8.2-8 9.8-4.9-1.6-8-5.4-8-9.8V6Z"/><path d="m9.2 12.2 2 2 3.6-3.8"/></svg> }
             @case ('grupos') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 19v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V19"/><circle cx="9" cy="7" r="3.4"/><path d="M22 19v-1.5a4 4 0 0 0-3-3.87"/><path d="M16.5 4.2a3.4 3.4 0 0 1 0 6.6"/></svg> }
             @case ('agendamento') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></svg> }
             @case ('regras') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h7M14 7h7M3 17h4M11 17h10"/><circle cx="12" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg> }
@@ -89,6 +92,8 @@
             <span class="badge-dot"></span>
             {{ runControl.postandoAgora() ? 'Postando agora' : 'Robô ligado' }}
           </span>
+        } @else if (runControl.lendoGanhos()) {
+          <span class="badge badge-running"><span class="badge-dot"></span>Lendo ganhos</span>
         } @else {
           <span class="badge badge-off"><span class="badge-dot"></span>Robô parado</span>
         }
@@ -158,6 +163,18 @@
 
         @case ('grupos') {
           <app-groups-card />
+        }
+
+        @case ('ganhos') {
+          <app-ganhos-card />
+        }
+
+        @case ('produtos') {
+          <app-produtos-card />
+        }
+
+        @case ('dono') {
+          <app-owner-card />
         }
 
         @case ('whatsapp') {

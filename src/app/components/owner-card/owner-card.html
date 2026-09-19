@@ -1,0 +1,89 @@
+<div class="card">
+  <div class="card-header">
+    <div>
+      <h2>Clientes</h2>
+      <p class="card-subtitle">
+        Quem usa o sistema e quanto cada um usa. Aqui aparecem contagens e estado da conta — nunca o
+        conteúdo de ninguém (produtos, grupos ou mensagens).
+      </p>
+    </div>
+  </div>
+
+  <div class="dono-totais">
+    <div><strong>{{ totais().clientes }}</strong><span>clientes</span></div>
+    <div><strong>{{ totais().ativos }}</strong><span>contas ativas</span></div>
+    <div><strong>{{ totais().produtos }}</strong><span>produtos garimpados</span></div>
+    <div><strong>{{ totais().postagens }}</strong><span>promoções enviadas</span></div>
+  </div>
+
+  @if (admin.erro()) {
+    <p class="error-text">{{ admin.erro() }}</p>
+  }
+  @if (erroAcao()) {
+    <p class="error-text">{{ erroAcao() }}</p>
+  }
+
+  @if (admin.carregando() && !admin.clientes().length) {
+    <p class="hint-text">Carregando…</p>
+  } @else {
+    <div class="tabela-rolagem">
+      <table class="tabela">
+        <thead>
+          <tr>
+            <th>Conta</th>
+            <th class="col-num">Produtos</th>
+            <th class="col-num">Envios</th>
+            <th class="col-num">Lojas</th>
+            <th>Última promoção</th>
+            <th>Situação</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of admin.clientes(); track c.id) {
+            <tr>
+              <td>
+                <span class="prod-titulo">{{ c.nome || c.email }}</span>
+                <span class="prod-meta">
+                  {{ c.nome ? c.email + ' · ' : '' }}desde {{ quando(c.criadoEm) }}
+                  @if (c.admin) { · dono }
+                </span>
+              </td>
+              <td class="col-num">{{ c.produtos }}</td>
+              <td class="col-num">{{ c.postagens }}</td>
+              <td class="col-num">{{ c.lojasConectadas }}</td>
+              <td>{{ quando(c.ultimaPostagem) }}</td>
+              <td>
+                @if (c.ativo) {
+                  <span class="badge badge-ok"><span class="badge-dot"></span>Ativa</span>
+                } @else {
+                  <span class="badge badge-off"><span class="badge-dot"></span>Suspensa</span>
+                }
+              </td>
+              <td class="col-acao">
+                @if (souEu(c)) {
+                  <span class="hint-text">você</span>
+                } @else {
+                  <button
+                    type="button"
+                    class="btn btn-sm"
+                    [class.btn-danger-soft]="c.ativo"
+                    [disabled]="alterando() === c.id"
+                    (click)="alternar(c)"
+                  >
+                    {{ alterando() === c.id ? '…' : c.ativo ? 'Suspender' : 'Reativar' }}
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <p class="hint-text">
+      Suspender bloqueia o acesso sem apagar nada — o cliente volta exatamente como estava ao ser reativado.
+      Promover alguém a dono é feito direto no banco, de propósito: não existe tela que dê esse poder.
+    </p>
+  }
+</div>

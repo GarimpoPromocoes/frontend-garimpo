@@ -1,0 +1,130 @@
+<div class="card">
+  <div class="card-header">
+    <div>
+      <h2>Produtos garimpados</h2>
+      <p class="card-subtitle">
+        Tudo que o robô encontrou e ainda pode virar promoção. O que não deve sair pode ser removido aqui.
+      </p>
+    </div>
+    <div class="prod-resumo">
+      <span><strong>{{ produtos.total() }}</strong> no catálogo</span>
+      <span><strong>{{ naFila() }}</strong> na fila</span>
+      <span><strong>{{ produtos.postados() }}</strong> já postados</span>
+    </div>
+  </div>
+
+  <div class="prod-filtros">
+    <input
+      type="search"
+      placeholder="Buscar pelo nome do produto…"
+      [ngModel]="produtos.filtro().q"
+      (ngModelChange)="buscar($event)"
+    />
+    <select [ngModel]="produtos.filtro().loja" (ngModelChange)="mudarLoja($event)">
+      <option value="todas">Todas as lojas</option>
+      <option value="mercadolivre">Mercado Livre</option>
+      <option value="amazon">Amazon</option>
+      <option value="shopee">Shopee</option>
+    </select>
+    <select [ngModel]="produtos.filtro().situacao" (ngModelChange)="mudarSituacao($event)">
+      <option value="todos">Todos</option>
+      <option value="fila">Na fila</option>
+      <option value="postado">Já postados</option>
+    </select>
+    <select [ngModel]="produtos.filtro().ordem" (ngModelChange)="mudarOrdem($event)">
+      <option value="recentes">Mais recentes</option>
+      <option value="desconto">Maior desconto</option>
+      <option value="vendidos">Mais vendidos</option>
+      <option value="baratos">Menor preço</option>
+      <option value="caros">Maior preço</option>
+    </select>
+  </div>
+
+  @if (produtos.erro()) {
+    <p class="error-text">{{ produtos.erro() }}</p>
+  }
+  @if (erroAcao()) {
+    <p class="error-text">{{ erroAcao() }}</p>
+  }
+
+  @if (produtos.carregando() && !produtos.itens().length) {
+    <p class="hint-text">Carregando…</p>
+  } @else if (!produtos.itens().length) {
+    <div class="info-box">
+      Nenhum produto encontrado com esses filtros. Se o catálogo está vazio, ligue o robô — ele garimpa
+      enquanto posta.
+    </div>
+  } @else {
+    <div class="tabela-rolagem">
+      <table class="tabela">
+        <thead>
+          <tr>
+            <th>Produto</th>
+            <th>Loja</th>
+            <th class="col-num">Preço</th>
+            <th class="col-num">Desconto</th>
+            <th>Situação</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of produtos.itens(); track p.id) {
+            <tr>
+              <td>
+                <a class="prod-titulo" [href]="p.link" target="_blank" rel="noopener">{{ p.titulo }}</a>
+                <span class="prod-meta">{{ quando(p.criadoEm) }}{{ p.categoria ? ' · ' + p.categoria : '' }}</span>
+              </td>
+              <td>{{ nomeLoja(p.loja) }}</td>
+              <td class="col-num">
+                {{ preco(p.precoPor) }}
+                @if (p.precoDe && p.precoPor && p.precoDe > p.precoPor) {
+                  <span class="prod-de">{{ preco(p.precoDe) }}</span>
+                }
+              </td>
+              <td class="col-num">{{ p.desconto ? p.desconto + '%' : '—' }}</td>
+              <td>
+                @if (p.postado) {
+                  <span class="badge badge-ok"><span class="badge-dot"></span>Postado</span>
+                } @else {
+                  <span class="badge badge-off"><span class="badge-dot"></span>Na fila</span>
+                }
+              </td>
+              <td class="col-acao">
+                <button
+                  type="button"
+                  class="btn btn-danger-soft btn-sm"
+                  [disabled]="removendo() === p.id"
+                  (click)="remover(p.id, p.titulo)"
+                >
+                  {{ removendo() === p.id ? '…' : 'Remover' }}
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (paginas() > 1) {
+      <div class="paginacao">
+        <button
+          type="button"
+          class="btn btn-ghost btn-sm"
+          [disabled]="produtos.filtro().pagina <= 1"
+          (click)="irParaPagina(produtos.filtro().pagina - 1)"
+        >
+          Anterior
+        </button>
+        <span class="hint-text">Página {{ produtos.filtro().pagina }} de {{ paginas() }}</span>
+        <button
+          type="button"
+          class="btn btn-ghost btn-sm"
+          [disabled]="produtos.filtro().pagina >= paginas()"
+          (click)="irParaPagina(produtos.filtro().pagina + 1)"
+        >
+          Próxima
+        </button>
+      </div>
+    }
+  }
+</div>

@@ -15,6 +15,9 @@ import { ScheduleCard } from './components/schedule-card/schedule-card';
 import { StatsCard } from './components/stats-card/stats-card';
 import { CuponsCard } from './components/cupons-card/cupons-card';
 import { ConsoleCard } from './components/console-card/console-card';
+import { ProdutosCard } from './components/produtos-card/produtos-card';
+import { OwnerCard } from './components/owner-card/owner-card';
+import { GanhosCard } from './components/ganhos-card/ganhos-card';
 
 // NAVEGACAO EM SECOES (09/2026). Antes eram 5 itens soltos numa lista; o
 // menu crescia sem hierarquia e "Postagens" virava um deposito de quatro
@@ -30,17 +33,20 @@ import { ConsoleCard } from './components/console-card/console-card';
 export type AbaId =
   | 'painel'
   | 'atividade'
+  | 'ganhos'
   | 'grupos'
   | 'agendamento'
   | 'regras'
   | 'cupons'
   | 'temas'
+  | 'produtos'
   | 'whatsapp'
-  | 'lojas';
+  | 'lojas'
+  | 'dono';
 
 // Qual contador aparece na bolinha ao lado do item (ver badgeDe, no
 // componente). 'alerta' nao e' numero: e' o "!" de algo que precisa de gente.
-type BadgeId = 'grupos' | 'cupons' | 'lojas' | 'alerta' | null;
+type BadgeId = 'grupos' | 'cupons' | 'lojas' | 'produtos' | 'alerta' | null;
 
 interface Aba {
   id: AbaId;
@@ -67,7 +73,22 @@ const ABAS: Aba[] = [
     secao: 'Acompanhar',
     badge: 'alerta',
   },
+  {
+    id: 'ganhos',
+    label: 'Ganhos',
+    titulo: 'Ganhos',
+    descricao: 'Quanto as promoções renderam em comissão em cada loja, mês a mês.',
+    secao: 'Acompanhar',
+  },
 
+  {
+    id: 'produtos',
+    label: 'Produtos',
+    titulo: 'Produtos garimpados',
+    descricao: 'Tudo que o robô encontrou e ainda pode virar promoção.',
+    secao: 'Divulgação',
+    badge: 'produtos',
+  },
   {
     id: 'grupos',
     label: 'Grupos',
@@ -78,8 +99,8 @@ const ABAS: Aba[] = [
   },
   {
     id: 'agendamento',
-    label: 'Piloto automático',
-    titulo: 'Piloto automático',
+    label: 'Frequência',
+    titulo: 'Freuência',
     descricao: 'Em que horários o robô posta sozinho e com que intervalo entre uma promoção e outra.',
     secao: 'Divulgação',
   },
@@ -121,6 +142,14 @@ const ABAS: Aba[] = [
     secao: 'Conexões',
     badge: 'lojas',
   },
+
+  {
+    id: 'dono',
+    label: 'Painel do dono',
+    titulo: 'Painel do dono',
+    descricao: 'Quem usa o sistema e quanto cada um usa.',
+    secao: 'Administração',
+  },
 ];
 
 // Ordem das secoes no menu, e quais itens caem em cada uma. Derivado de ABAS
@@ -149,6 +178,9 @@ const CHAVE_ABA = 'promobot:aba';
     StatsCard,
     CuponsCard,
     ConsoleCard,
+    ProdutosCard,
+    OwnerCard,
+    GanhosCard,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
@@ -161,7 +193,15 @@ export class App implements OnInit, OnDestroy {
   protected auth = inject(AuthService);
 
   protected readonly abas = ABAS;
-  protected readonly secoes = SECOES;
+  // A seção Administração só aparece pra quem é dono. Esconder no menu é
+  // só aparência — o servidor confere o admin no banco a cada chamada (ver
+  // api-bot/src/auth.js). As duas camadas existem de propósito.
+  protected readonly secoes = computed(() =>
+    SECOES.map((s) => ({
+      nome: s.nome,
+      itens: s.itens.filter((i) => i.id !== 'dono' || !!this.auth.usuario()?.admin),
+    })).filter((s) => s.itens.length),
+  );
   protected readonly aba = signal<AbaId>('painel');
   protected readonly menuAberto = signal(false);
 
@@ -186,6 +226,10 @@ export class App implements OnInit, OnDestroy {
         if (!s) return null;
         const faltando = [s.mercadoLivre?.conectado, s.amazon?.logado, s.shopee?.logado].filter((c) => !c).length;
         return faltando ? String(faltando) : null;
+      }
+      case 'produtos': {
+        const n = s?.produtosCatalogo ?? 0;
+        return n ? String(n) : null;
       }
       case 'atividade':
         return this.jobsService.desafioMl() ? '!' : null;
