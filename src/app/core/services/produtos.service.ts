@@ -14,6 +14,8 @@ export interface Produto {
   link: string;
   loja: string;
   origem: string;
+  grupoId: string | null;
+  grupoNome: string;
   data: string | null;
   criadoEm: string;
   postado: boolean;
@@ -25,6 +27,8 @@ export type SituacaoProduto = 'todos' | 'fila' | 'postado';
 export interface FiltroProdutos {
   q: string;
   loja: string;
+  /** 'todos', 'sem' (produto sem grupo) ou o id do grupo. */
+  grupo: string;
   situacao: SituacaoProduto;
   ordem: OrdemProduto;
   pagina: number;
@@ -45,6 +49,7 @@ export class ProdutosService {
   readonly filtro = signal<FiltroProdutos>({
     q: '',
     loja: 'todas',
+    grupo: 'todos',
     situacao: 'todos',
     ordem: 'recentes',
     pagina: 1,
@@ -66,6 +71,7 @@ export class ProdutosService {
       .set('ordem', f.ordem);
     if (f.q.trim()) params = params.set('q', f.q.trim());
     if (f.loja !== 'todas') params = params.set('loja', f.loja);
+    if (f.grupo !== 'todos') params = params.set('grupo', f.grupo);
     if (f.situacao !== 'todos') params = params.set('situacao', f.situacao);
 
     try {

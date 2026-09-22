@@ -1,6 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ProdutosService, OrdemProduto, SituacaoProduto } from '../../../core/services/produtos.service';
+import { ConfigService } from '../../../core/services/config.service';
 
 const NOME_LOJA: Record<string, string> = {
   mercadolivre: 'Mercado Livre',
@@ -16,6 +17,8 @@ const NOME_LOJA: Record<string, string> = {
 })
 export class ProdutosCard implements OnInit {
   protected produtos = inject(ProdutosService);
+  private configService = inject(ConfigService);
+  protected readonly grupos = computed(() => this.configService.config()?.grupos ?? []);
   protected readonly removendo = signal<number | null>(null);
   protected readonly erroAcao = signal<string | null>(null);
 
@@ -48,6 +51,9 @@ export class ProdutosCard implements OnInit {
   }
   protected mudarLoja(loja: string): void {
     this.produtos.atualizarFiltro({ loja });
+  }
+  protected mudarGrupo(grupo: string): void {
+    this.produtos.atualizarFiltro({ grupo });
   }
   protected mudarSituacao(situacao: string): void {
     this.produtos.atualizarFiltro({ situacao: situacao as SituacaoProduto });
