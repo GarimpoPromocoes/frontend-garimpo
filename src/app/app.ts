@@ -4,27 +4,28 @@ import { StatusService } from './core/services/status.service';
 import { RunControlService } from './core/services/run-control.service';
 import { JobsService } from './core/services/jobs.service';
 import { AuthService } from './core/services/auth.service';
+import { ConexoesService } from './core/services/conexoes.service';
 import { LoginCard } from './features/auth/login-card/login-card';
-import { ConnectionCard } from './features/conexoes/connection-card/connection-card';
-import { MarketplaceCard } from './features/conexoes/marketplace-card/marketplace-card';
+import { WhatsappCard } from './features/conexoes/whatsapp-card/whatsapp-card';
+import { LojasCard } from './features/conexoes/lojas-card/lojas-card';
 import { PostingConfigCard } from './features/divulgacao/posting-config-card/posting-config-card';
 import { ThemesCard } from './features/divulgacao/themes-card/themes-card';
 import { GroupsCard } from './features/divulgacao/groups-card/groups-card';
 import { RunCard } from './features/acompanhar/run-card/run-card';
-import { ScheduleCard } from './features/divulgacao/schedule-card/schedule-card';
 import { StatsCard } from './features/acompanhar/stats-card/stats-card';
 import { CuponsCard } from './features/divulgacao/cupons-card/cupons-card';
 import { ConsoleCard } from './features/acompanhar/console-card/console-card';
 import { ProdutosCard } from './features/divulgacao/produtos-card/produtos-card';
 import { OwnerCard } from './features/admin/owner-card/owner-card';
 import { GanhosCard } from './features/acompanhar/ganhos-card/ganhos-card';
+import { LojaDialog } from './features/conexoes/loja-dialog/loja-dialog';
+import { ConfirmacaoDialog } from './shared/confirmacao-dialog/confirmacao-dialog';
 
 export type AbaId =
   | 'painel'
   | 'atividade'
   | 'ganhos'
   | 'grupos'
-  | 'agendamento'
   | 'regras'
   | 'cupons'
   | 'temas'
@@ -85,17 +86,10 @@ const ABAS: Aba[] = [
     badge: 'grupos',
   },
   {
-    id: 'agendamento',
-    label: 'Frequência',
-    titulo: 'Frequência',
-    descricao: 'Em que horários o robô posta sozinho e com que intervalo entre uma promoção e outra.',
-    secao: 'Divulgação',
-  },
-  {
     id: 'regras',
     label: 'Regras de postagem',
     titulo: 'Regras de postagem',
-    descricao: 'Quanto tempo até repetir um produto, variedade e o que nunca pode ser postado.',
+    descricao: 'Com que frequência o robô posta e quanto tempo até um produto poder repetir.',
     secao: 'Divulgação',
   },
   {
@@ -153,19 +147,20 @@ const CHAVE_ABA = 'promobot:aba';
   standalone: true,
   imports: [
     LoginCard,
-    ConnectionCard,
-    MarketplaceCard,
+    WhatsappCard,
+    LojasCard,
     PostingConfigCard,
     ThemesCard,
     GroupsCard,
     RunCard,
-    ScheduleCard,
     StatsCard,
     CuponsCard,
     ConsoleCard,
     ProdutosCard,
     OwnerCard,
     GanhosCard,
+    LojaDialog,
+    ConfirmacaoDialog,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
@@ -176,6 +171,7 @@ export class App implements OnInit, OnDestroy {
   protected runControl = inject(RunControlService);
   protected jobsService = inject(JobsService);
   protected auth = inject(AuthService);
+  private conexoes = inject(ConexoesService);
 
   protected readonly secoes = computed(() =>
     SECOES.map((s) => ({
@@ -199,7 +195,10 @@ export class App implements OnInit, OnDestroy {
       }
       case 'lojas': {
         if (!s) return null;
-        const faltando = [s.mercadoLivre?.conectado, s.amazon?.logado, s.shopee?.logado].filter((c) => !c).length;
+        // A Shopee nao tem sessao de navegador: ela conta como conectada quando
+        // as chaves da API estao validadas.
+        const shopeeConectada = this.conexoes.statusDe('shopee')?.status === 'conectado';
+        const faltando = [s.mercadoLivre?.conectado, s.amazon?.logado, shopeeConectada].filter((c) => !c).length;
         return faltando ? String(faltando) : null;
       }
       case 'produtos': {
@@ -236,6 +235,7 @@ export class App implements OnInit, OnDestroy {
       if (logado && !this.dashboardIniciado) {
         this.dashboardIniciado = true;
         this.configService.carregar();
+        this.conexoes.carregar();
         this.statusService.iniciarPolling();
         this.preCarregarAbas();
       } else if (!logado && this.dashboardIniciado) {
@@ -263,9 +263,8 @@ export class App implements OnInit, OnDestroy {
       void import('./features/divulgacao/groups-card/groups-card');
       void import('./features/acompanhar/ganhos-card/ganhos-card');
       void import('./features/divulgacao/produtos-card/produtos-card');
-      void import('./features/conexoes/connection-card/connection-card');
-      void import('./features/conexoes/marketplace-card/marketplace-card');
-      void import('./features/divulgacao/schedule-card/schedule-card');
+      void import('./features/conexoes/whatsapp-card/whatsapp-card');
+      void import('./features/conexoes/lojas-card/lojas-card');
       void import('./features/divulgacao/posting-config-card/posting-config-card');
       void import('./features/divulgacao/cupons-card/cupons-card');
       void import('./features/divulgacao/themes-card/themes-card');

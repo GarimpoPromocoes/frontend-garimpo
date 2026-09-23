@@ -1,0 +1,18 @@
+<div class="lojas-grade">
+  @for (loja of lojas(); track loja.provedor) {
+    <button type="button" class="loja-botao" (click)="abrir(loja.provedor)">
+      <span class="loja-logo-caixa"><img class="loja-logo" [src]="loja.logo" [alt]="loja.nome" /></span>
+      <span class="loja-estado" [class.loja-estado-ok]="loja.conectada">
+        <span class="badge-dot"></span>
+        {{ loja.conectada ? 'Conectada' : 'Conectar' }}
+      </span>
+    </button>
+  }
+</div>
+
+@if (erro(); as e) {
+  <div class="alert-banner">
+    {{ e }}
+    <button type="button" class="btn btn-ghost btn-sm" (click)="recarregar()">Tentar de novo</button>
+  </div>
+}

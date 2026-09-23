@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { AdminService, Cliente } from '../../../core/services/admin.service';
+import { ConfirmacaoService } from '../../../core/services/confirmacao.service';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -9,6 +10,7 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class OwnerCard implements OnInit {
   protected admin = inject(AdminService);
+  private confirmacao = inject(ConfirmacaoService);
   protected auth = inject(AuthService);
 
   protected readonly alterando = signal<number | null>(null);
@@ -39,8 +41,15 @@ export class OwnerCard implements OnInit {
   }
 
   protected async alternar(c: Cliente): Promise<void> {
-    const acao = c.ativo ? 'suspender' : 'reativar';
-    if (!window.confirm(`Deseja ${acao} a conta ${c.email}?`)) return;
+    const ok = await this.confirmacao.pedir({
+      titulo: c.ativo ? 'Suspender esta conta?' : 'Reativar esta conta?',
+      texto: c.ativo
+        ? `${c.email} perde o acesso ao painel e o robô dela para.`
+        : `${c.email} volta a ter acesso ao painel.`,
+      confirmar: c.ativo ? 'Suspender' : 'Reativar',
+      perigo: c.ativo,
+    });
+    if (!ok) return;
     this.erroAcao.set(null);
     this.alterando.set(c.id);
     const r = await this.admin.definirAtivo(c.id, !c.ativo);

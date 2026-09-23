@@ -1,0 +1,202 @@
+@if (aberto()) {
+  <div class="modal-fundo">
+    <div class="modal-caixa modal-login">
+      <div class="card-header">
+        <div class="loja-titulo">
+          <span class="loja-logo-caixa loja-logo-caixa-sm"><img class="loja-logo loja-logo-sm" [src]="logo()" [alt]="rotulo()" /></span>
+          <p class="card-subtitle">
+            @if (fim(); as f) {
+              {{ f.ok ? 'Tudo certo — a conta está conectada.' : 'O login não foi concluído.' }}
+            } @else if (pedido()) {
+              {{ artigoM() }} {{ rotulo() }} pediu mais uma confirmação. Responda aqui.
+            } @else if (emLogin()) {
+              O robô está entrando na sua conta. Isso leva alguns segundos.
+            } @else if (conectada()) {
+              Esta loja está conectada e trabalhando para você.
+            } @else if (usaNavegador()) {
+              Informe os dados abaixo e o robô entra na sua conta sozinho.
+            } @else {
+              Informe as chaves da API e o robô passa a garimpar e gerar links desta loja.
+            }
+          </p>
+        </div>
+        <button type="button" class="btn-fechar" (click)="aoFechar()" aria-label="Fechar" title="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <path d="M6 6 18 18M18 6 6 18" />
+          </svg>
+        </button>
+      </div>
+
+      @if (emLogin()) {
+        @if (etapas().length) {
+          <ol class="login-trilha">
+            @for (e of etapas(); track $index; let ultima = $last) {
+              <li [class.login-trilha-atual]="ultima && trabalhando()">
+                <span class="login-trilha-marca"></span>
+                <span>{{ e.texto }}</span>
+              </li>
+            }
+          </ol>
+        }
+
+        @if (fim(); as f) {
+          @if (f.ok) {
+            <div class="info-box info-box-ok">
+              A sessão fica salva e a senha guardada criptografada — se {{ artigo() }} {{ rotulo() }} derrubar a conexão no meio
+              do trabalho, o robô entra de novo sozinho, sem parar as postagens.
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-primary" (click)="fechar()">Fechar</button>
+            </div>
+          } @else {
+            <div class="info-box info-box-erro">{{ f.motivo }}</div>
+            @if (f.comoResolver) {
+              <p class="hint-text">{{ f.comoResolver }}</p>
+            }
+            @if (f.imagem) {
+              <details class="login-print">
+                <summary>Ver o que {{ artigo() }} {{ rotulo() }} mostrou</summary>
+                <img [src]="f.imagem" alt="Tela que a plataforma mostrou quando o login parou" />
+              </details>
+            }
+            <div class="form-actions">
+              <button type="button" class="btn btn-primary" (click)="entrarDeNovo()">Tentar de novo</button>
+              <button type="button" class="btn btn-ghost" (click)="fechar()">Fechar</button>
+            </div>
+          }
+        } @else if (pedido(); as p) {
+          <div class="login-pedido">
+            <h3>{{ p.titulo }}</h3>
+            @if (p.texto) {
+              <p class="hint-text">{{ p.texto }}</p>
+            }
+
+            @if (p.imagem) {
+              <img class="login-captcha" [src]="p.imagem" alt="Imagem de verificação enviada pela plataforma" />
+            }
+
+            @if (p.opcoes?.length) {
+              <div class="login-opcoes">
+                @for (o of p.opcoes ?? []; track o.valor) {
+                  <label class="login-opcao" [class.login-opcao-marcada]="valorDe('opcao') === o.valor">
+                    <input
+                      type="radio"
+                      name="opcao-verificacao"
+                      [value]="o.valor"
+                      [checked]="valorDe('opcao') === o.valor"
+                      (change)="definir('opcao', o.valor)"
+                    />
+                    <span>{{ o.rotulo }}</span>
+                  </label>
+                }
+              </div>
+            }
+
+            @for (campo of p.campos; track campo.nome) {
+              <div class="field">
+                <label [for]="'pedido-' + campo.nome">{{ campo.rotulo }}</label>
+                <input
+                  [id]="'pedido-' + campo.nome"
+                  [type]="campo.tipo === 'segredo' ? 'password' : 'text'"
+                  [attr.inputmode]="campo.tipo === 'codigo' ? 'numeric' : null"
+                  [attr.maxlength]="campo.tipo === 'codigo' ? campo.tamanho ?? 8 : null"
+                  [autocomplete]="campo.tipo === 'segredo' ? 'current-password' : 'off'"
+                  [class.campo-codigo]="campo.tipo === 'codigo'"
+                  [ngModel]="valorDe(campo.nome)"
+                  (ngModelChange)="definir(campo.nome, $event)"
+                  (keyup.enter)="responder()"
+                />
+              </div>
+            }
+
+            <div class="form-actions">
+              <button type="button" class="btn btn-primary" [disabled]="!podeResponder()" (click)="responder()">
+                {{ jobsService.respondendoLogin() ? 'Enviando…' : 'Continuar' }}
+              </button>
+              <button type="button" class="btn btn-ghost" (click)="cancelar()">Cancelar</button>
+            </div>
+          </div>
+        } @else {
+          <div class="login-trabalhando">
+            <span class="login-spinner"></span>
+            <span>Falando com {{ artigo() }} {{ rotulo() }}…</span>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-ghost" (click)="cancelar()">Cancelar</button>
+          </div>
+        }
+      } @else if (conectada()) {
+        @if (loginGuardado()?.salvo) {
+          <p class="hint-text">
+            A senha está guardada com criptografia: se {{ artigo() }} {{ rotulo() }} derrubar a sessão durante o
+            trabalho, o robô entra de novo sozinho.
+          </p>
+        }
+        <div class="form-actions">
+          <button type="button" class="btn btn-danger" [disabled]="enviando()" (click)="desconectar()">
+            {{ enviando() ? 'Desconectando…' : 'Desconectar' }}
+          </button>
+        </div>
+      } @else {
+        @if (ajuda(); as a) {
+          <div class="info-box">
+            {{ a.texto }}
+            <a [href]="a.link" target="_blank" rel="noopener">{{ a.rotuloLink }}</a>
+          </div>
+        }
+
+        @for (campo of campos(); track campo.nome) {
+          <div class="field">
+            <label [for]="'loja-' + campo.nome">
+              {{ campo.rotulo }}
+              @if (campo.opcional) { <span class="rotulo-opcional">opcional</span> }
+            </label>
+
+            @if (campo.tipo === 'opcoes') {
+              <select
+                [id]="'loja-' + campo.nome"
+                [ngModel]="valorDe(campo.nome) || campo.opcoes?.[0]"
+                (ngModelChange)="definir(campo.nome, $event)"
+              >
+                @for (opcao of campo.opcoes ?? []; track opcao) {
+                  <option [value]="opcao">{{ opcao }}</option>
+                }
+              </select>
+            } @else {
+              <input
+                [id]="'loja-' + campo.nome"
+                [type]="campo.tipo === 'segredo' ? 'password' : 'text'"
+                [autocomplete]="campo.tipo === 'segredo' ? 'current-password' : 'off'"
+                [ngModel]="valorDe(campo.nome)"
+                (ngModelChange)="definir(campo.nome, $event)"
+                (keyup.enter)="conectar()"
+              />
+            }
+          </div>
+        }
+
+        @if (usaNavegador()) {
+          <p class="hint-text">
+            A senha é criptografada aqui no Promobot. Ela nunca aparece no log.
+          </p>
+          <p class="hint-text">
+            Costuma entrar {{ artigo() }} {{ rotulo() }} pela conta Google? Então a conta não tem senha própria da
+            loja: crie uma pelo "esqueci minha senha" na própria {{ rotulo() }} e use ela aqui.
+          </p>
+        }
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-primary" [disabled]="!podeConectar()" (click)="conectar()">
+            {{ enviando() ? 'Conectando…' : 'Conectar' }}
+          </button>
+          <button type="button" class="btn btn-ghost" (click)="fechar()">Cancelar</button>
+        </div>
+
+      }
+
+      @if (erro()) {
+        <p class="error-text">{{ erro() }}</p>
+      }
+    </div>
+  </div>
+}

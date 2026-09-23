@@ -5,7 +5,6 @@ import { firstValueFrom } from 'rxjs';
 export interface StatusResponse {
   mercadoLivre: { conectado: boolean };
   amazon?: { logado: boolean; linkCurto: boolean; verificadoEm: string | null };
-  shopee?: { logado: boolean; verificadoEm: string | null };
   whatsapp: { conectado: boolean; numero: string | null; nome: string | null };
   produtosPublicados: number;
   produtosCatalogo: number;

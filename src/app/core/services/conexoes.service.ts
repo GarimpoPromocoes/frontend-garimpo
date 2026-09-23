@@ -5,11 +5,20 @@ import { firstValueFrom } from 'rxjs';
 export type Provedor = 'mercadolivre' | 'shopee' | 'amazon';
 export type StatusConexao = 'desconectado' | 'conectando' | 'conectado' | 'erro';
 
+export interface LoginGuardado {
+  /** true quando a senha da plataforma esta guardada e o robo pode reconectar sozinho. */
+  salvo: boolean;
+  status: 'conectado' | 'erro' | 'expirado' | null;
+  erro: string | null;
+  ultimoLogin: string | null;
+}
+
 export interface Conexao {
   provedor: Provedor;
   status: StatusConexao;
   ultimaValidacao: string | null;
   erro: string | null;
+  login: LoginGuardado;
 }
 
 export interface CampoConexao {
@@ -31,8 +40,12 @@ export class ConexoesService {
 
   readonly conexoes = signal<Conexao[]>([]);
   readonly formularios = signal<FormularioProvedor[]>([]);
+  /** Falha ao carregar: sem isso um erro da API apagaria os cards em silêncio. */
+  readonly erro = signal<string | null>(null);
+  readonly carregando = signal(false);
 
   async carregar(): Promise<void> {
+    this.carregando.set(true);
     try {
       const [conexoes, formularios] = await Promise.all([
         firstValueFrom(this.http.get<Conexao[]>('/api/conexoes')),
@@ -40,7 +53,11 @@ export class ConexoesService {
       ]);
       this.conexoes.set(conexoes);
       this.formularios.set(formularios);
-    } catch (_) {
+      this.erro.set(null);
+    } catch (e: any) {
+      this.erro.set(e?.error?.erro || 'Não consegui carregar suas conexões agora.');
+    } finally {
+      this.carregando.set(false);
     }
   }
 
@@ -59,6 +76,15 @@ export class ConexoesService {
       return { ok: true };
     } catch (e: any) {
       return { ok: false, erro: e?.error?.erro || 'Não foi possível conectar — tente novamente.' };
+    }
+  }
+
+  /** Apaga a senha guardada: o robo para de reconectar sozinho nesta loja. */
+  async esquecerLogin(provedor: Provedor): Promise<void> {
+    try {
+      await firstValueFrom(this.http.delete(`/api/conexoes/${provedor}/login`));
+      await this.carregar();
+    } catch (_) {
     }
   }
 

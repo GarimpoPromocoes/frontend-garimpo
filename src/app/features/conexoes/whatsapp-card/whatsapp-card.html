@@ -1,0 +1,63 @@
+<div class="card">
+  <div class="card-header">
+    <div>
+      <h2>WhatsApp</h2>
+      <p class="card-subtitle">O número que envia as promoções para os grupos.</p>
+      @if (conta(); as c) {
+        <p class="conta-conectada">
+          <strong>{{ c.numero }}</strong>
+          @if (c.nome) { <span>&nbsp;· {{ c.nome }}</span> }
+        </p>
+      }
+    </div>
+    @if (conectando() && qrImagem()) {
+      <span class="badge badge-running"><span class="badge-dot"></span>Aguardando leitura</span>
+    } @else {
+      <span class="badge" [class.badge-ok]="conectado()" [class.badge-off]="!conectado()">
+        <span class="badge-dot"></span>
+        {{ conectado() ? 'Conectado' : 'Não conectado' }}
+      </span>
+    }
+  </div>
+
+  @if (conectando()) {
+    <div class="card-section">
+      <p class="hint-text">
+        No celular, abra o WhatsApp → <strong>Aparelhos conectados</strong> →
+        <strong>Conectar um aparelho</strong> e aponte a câmera para o código abaixo.
+        Assim que ler, <strong>a conexão é salva sozinha</strong>.
+      </p>
+
+      @if (qrImagem(); as qr) {
+        <img [src]="qr" alt="QR Code para conectar o WhatsApp" class="qr-whatsapp" />
+      } @else {
+        <div class="qr-whatsapp qr-whatsapp-vazio">
+          <span class="login-spinner"></span>
+          <span>Preparando o código…</span>
+        </div>
+      }
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-ghost" (click)="cancelar()">Cancelar</button>
+      </div>
+    </div>
+  } @else {
+    <div class="form-actions">
+      <button type="button" class="btn btn-wpp" [disabled]="outroJobRodando()" (click)="conectar()">
+        {{ conectado() ? 'Trocar número' : 'Conectar agora' }}
+      </button>
+    </div>
+
+    @if (!conectado()) {
+      <div class="info-box">Sem esta conexão o robô não tem por onde enviar as promoções.</div>
+    }
+
+    @if (outroJobRodando()) {
+      <p class="hint-text">Aguarde: outra tarefa do robô está rodando no momento.</p>
+    }
+  }
+
+  @if (erro()) {
+    <p class="error-text">{{ erro() }}</p>
+  }
+</div>
