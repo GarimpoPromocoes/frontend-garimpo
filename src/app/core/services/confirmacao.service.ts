@@ -9,6 +9,8 @@ export interface PedidoConfirmacao {
   cancelar?: string;
   /** true quando a ação apaga ou desfaz algo: o botão fica vermelho. */
   perigo?: boolean;
+  /** true quando é só um aviso: some o botão de cancelar, fica só o "Ok". */
+  soAviso?: boolean;
 }
 
 /**

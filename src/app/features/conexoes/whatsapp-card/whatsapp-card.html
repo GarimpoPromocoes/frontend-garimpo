@@ -6,5 +6,19 @@
       {{ conectado() ? 'Conectado' : 'Conectar' }}
     </span>
   </button>
+
+  <!-- Telegram: ainda em desenvolvimento. Fica visivel, mas o clique so avisa. -->
+  <button
+    type="button"
+    class="loja-botao loja-botao-breve"
+    aria-label="Telegram — em desenvolvimento"
+    (click)="avisarTelegram()"
+  >
+    <span class="loja-logo-caixa"><img class="loja-logo" src="lojas/telegram.png" alt="Telegram" /></span>
+    <span class="loja-estado loja-estado-breve">
+      <span class="badge-dot"></span>
+      Em breve
+    </span>
+  </button>
 </div>
 

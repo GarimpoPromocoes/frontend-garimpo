@@ -29,7 +29,6 @@ export type AbaId =
   | 'grupos'
   | 'regras'
   | 'cupons'
-  | 'temas'
   | 'produtos'
   | 'whatsapp'
   | 'lojas'
@@ -90,7 +89,7 @@ const ABAS: Aba[] = [
     id: 'regras',
     label: 'Regras de postagem',
     titulo: 'Regras de postagem',
-    descricao: 'Com que frequência o robô posta e quanto tempo até um produto poder repetir.',
+    descricao: 'Com que frequência o robô posta, quando um produto pode repetir e as datas especiais.',
     secao: 'Divulgação',
   },
   {
@@ -101,19 +100,12 @@ const ABAS: Aba[] = [
     secao: 'Divulgação',
     badge: 'cupons',
   },
-  {
-    id: 'temas',
-    label: 'Datas e temas',
-    titulo: 'Datas e temas',
-    descricao: 'Datas comemorativas e estações que dão prioridade a certos produtos.',
-    secao: 'Divulgação',
-  },
 
   {
     id: 'whatsapp',
-    label: 'WhatsApp',
-    titulo: 'WhatsApp',
-    descricao: 'O número que envia as promoções para os grupos.',
+    label: 'WhatsApp e Telegram',
+    titulo: 'WhatsApp e Telegram',
+    descricao: 'Por onde o robô envia as promoções para os grupos.',
     secao: 'Conexões',
   },
   {
@@ -252,7 +244,9 @@ export class App implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     try {
-      const salva = localStorage.getItem(CHAVE_ABA) as AbaId | null;
+      let salva = localStorage.getItem(CHAVE_ABA) as AbaId | null;
+      // "Datas e temas" virou parte de Regras de postagem.
+      if ((salva as string) === 'temas') salva = 'regras';
       if (salva && ABAS.some((a) => a.id === salva)) this.aba.set(salva);
     } catch (_) {
     }
