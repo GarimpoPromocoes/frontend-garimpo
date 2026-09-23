@@ -8,6 +8,20 @@
       </span>
     </button>
   }
+  @for (loja of emBreve; track loja.id) {
+    <button
+      type="button"
+      class="loja-botao loja-botao-breve"
+      [attr.aria-label]="loja.nome + ' — em desenvolvimento'"
+      (click)="avisarEmBreve(loja.nome)"
+    >
+      <span class="loja-logo-caixa"><img class="loja-logo" [src]="loja.logo" [alt]="loja.nome" /></span>
+      <span class="loja-estado loja-estado-breve">
+        <span class="badge-dot"></span>
+        Em breve
+      </span>
+    </button>
+  }
 </div>
 
 @if (erro(); as e) {
