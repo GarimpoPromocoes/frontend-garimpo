@@ -4,14 +4,17 @@
       <div>
         <h2>O Mercado Livre pediu uma verificação de segurança</h2>
         <p class="card-subtitle">
-          Enquanto isso não passar, o robô não consegue abrir as páginas de produto do Mercado Livre — as outras
-          lojas seguem postando normalmente. O robô tenta de novo sozinho a cada rodada.
+          Enquanto isso não passar, o robô não abre as páginas de produto do Mercado Livre — as outras lojas
+          seguem postando normalmente. Abra a tela da verificação e resolva por ela: quando passar, o robô volta
+          a usar o ML sozinho.
         </p>
       </div>
     </div>
-    <div class="info-box">
-      Para destravar mais rápido: entre no Mercado Livre pelo seu celular ou computador com a mesma conta e
-      conclua a verificação por lá. Na rodada seguinte o robô volta a usar o ML.
+    <div class="info-box" style="display: flex; gap: 12px; align-items: center; justify-content: space-between">
+      <span>Se ninguém resolver em 15 minutos, o robô fecha a verificação e tenta de novo mais tarde.</span>
+      <button type="button" class="btn btn-sm" (click)="jobsService.desafioPopupAberto.set(true)">
+        Resolver verificação agora
+      </button>
     </div>
   </div>
 }

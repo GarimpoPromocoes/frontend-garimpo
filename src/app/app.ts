@@ -20,6 +20,7 @@ import { OwnerCard } from './features/admin/owner-card/owner-card';
 import { GanhosCard } from './features/acompanhar/ganhos-card/ganhos-card';
 import { LojaDialog } from './features/conexoes/loja-dialog/loja-dialog';
 import { WhatsappDialog } from './features/conexoes/whatsapp-dialog/whatsapp-dialog';
+import { DesafioMlDialog } from './features/acompanhar/desafio-ml-dialog/desafio-ml-dialog';
 import { ConfirmacaoDialog } from './shared/confirmacao-dialog/confirmacao-dialog';
 
 export type AbaId =
@@ -162,6 +163,7 @@ const CHAVE_ABA = 'promobot:aba';
     GanhosCard,
     LojaDialog,
     WhatsappDialog,
+    DesafioMlDialog,
     ConfirmacaoDialog,
   ],
   templateUrl: './app.html',

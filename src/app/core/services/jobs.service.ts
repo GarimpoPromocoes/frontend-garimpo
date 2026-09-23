@@ -15,6 +15,20 @@ export type JobTipo =
   | 'ganhos'
   | 'verificar-conexoes';
 
+/** Quadro da tela do desafio de segurança do ML (JPEG em base64, no tamanho real da página). */
+export interface QuadroDesafio {
+  seq: number;
+  w: number;
+  h: number;
+  img: string;
+}
+
+export type EntradaDesafio =
+  | { t: 'clique'; x: number; y: number }
+  | { t: 'texto'; texto: string }
+  | { t: 'tecla'; tecla: string }
+  | { t: 'rolar'; dy: number };
+
 export type AlvoGrupos = 'todos' | 'selecionados';
 
 export type Provedor = 'mercadolivre' | 'shopee' | 'amazon';
@@ -90,6 +104,8 @@ export class JobsService {
   readonly linhas = signal<string[]>([]);
   readonly qrWhatsapp = signal<string | null>(null);
   readonly desafioMl = signal<{ url: string; em: string } | null>(null);
+  /** Popup da verificação do ML: abre sozinho quando ela aparece; o X só esconde. */
+  readonly desafioPopupAberto = signal(false);
 
   /** Andamento do login automático — é o que a janela de conexão desenha. */
   readonly login = signal<EstadoLogin | null>(null);
@@ -136,7 +152,9 @@ export class JobsService {
         this.tipo.set(s.tipo ?? null);
         this.codigoSaida.set(s.codigoSaida ?? null);
         this.qrWhatsapp.set(s.qrWhatsapp ?? null);
-        this.desafioMl.set(s.desafioMl ?? null);
+        const desafio = s.desafioMl ?? null;
+        if (desafio && desafio.em !== this.desafioMl()?.em) this.desafioPopupAberto.set(true);
+        this.desafioMl.set(desafio);
         if (s.verificacao) this.verificacao.set(s.verificacao);
         this.aplicarLogin(s);
       } catch (_) {}
@@ -197,8 +215,22 @@ export class JobsService {
     this.codigoSaida.set(null);
     this.qrWhatsapp.set(null);
     this.desafioMl.set(null);
+    this.desafioPopupAberto.set(false);
     this.login.set(null);
     this.verificacao.set(null);
+  }
+
+  /** Último quadro da tela do desafio do ML (null = nenhum quadro novo desde `seq`). */
+  async quadroDoDesafio(seq: number): Promise<QuadroDesafio | null> {
+    const r = await firstValueFrom(
+      this.http.get<QuadroDesafio>('/api/jobs/desafio-tela', { params: { seq }, observe: 'response' }),
+    );
+    return r.status === 200 ? r.body : null;
+  }
+
+  /** Clique/tecla/rolagem do usuário no popup, repetido pelo robô na aba do desafio. */
+  async entradaNoDesafio(entrada: EntradaDesafio): Promise<void> {
+    await firstValueFrom(this.http.post('/api/jobs/desafio-entrada', entrada));
   }
 
   limparConsole(): void {

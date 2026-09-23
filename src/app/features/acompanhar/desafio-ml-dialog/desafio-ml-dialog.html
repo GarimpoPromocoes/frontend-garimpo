@@ -1,0 +1,53 @@
+@if (aberto()) {
+  <div class="modal-fundo" (click)="fechar()">
+    <div class="modal-caixa modal-login" style="max-width: 940px; width: 96vw" (click)="$event.stopPropagation()">
+      <div class="card-header">
+        <div>
+          <h2>Verificação de segurança do Mercado Livre</h2>
+          <p class="card-subtitle">
+            Esta é a tela do navegador do robô. Clique e digite aqui como faria no Mercado Livre — assim que a
+            verificação passar, este popup fecha sozinho e o robô volta a usar o ML.
+          </p>
+        </div>
+        <button type="button" class="btn-fechar" (click)="fechar()" aria-label="Fechar" title="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <path d="M6 6 18 18M18 6 6 18" />
+          </svg>
+        </button>
+      </div>
+
+      @if (src(); as s) {
+        <img
+          #imagem
+          [src]="s"
+          alt="Tela da verificação de segurança"
+          tabindex="0"
+          draggable="false"
+          style="width: 100%; height: auto; display: block; border: 1px solid var(--border, #d0d0d0); border-radius: 8px; cursor: pointer; outline: none; user-select: none"
+          (click)="aoClicar($event)"
+          (wheel)="aoRolar($event)"
+          (keydown)="aoTeclar($event)"
+        />
+        <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; align-items: center">
+          <input
+            type="text"
+            class="input"
+            style="flex: 1; min-width: 200px"
+            placeholder="Precisa digitar algo? Escreva aqui e envie"
+            [value]="texto()"
+            (input)="texto.set($any($event.target).value)"
+            (keydown.enter)="enviarTexto()"
+          />
+          <button type="button" class="btn btn-ghost btn-sm" (click)="enviarTexto()">Enviar texto</button>
+          <button type="button" class="btn btn-ghost btn-sm" (click)="tecla('Enter')">Enter</button>
+          <button type="button" class="btn btn-ghost btn-sm" (click)="tecla('Backspace')">Apagar</button>
+        </div>
+      } @else {
+        <div class="login-trabalhando">
+          <span class="login-spinner"></span>
+          <span>Abrindo a tela da verificação…</span>
+        </div>
+      }
+    </div>
+  </div>
+}
