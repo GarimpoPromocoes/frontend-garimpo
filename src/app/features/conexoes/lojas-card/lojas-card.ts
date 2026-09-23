@@ -2,12 +2,20 @@ import { Component, OnInit, computed, inject } from '@angular/core';
 import { ConexoesService, Provedor } from '../../../core/services/conexoes.service';
 import { LojasUiService } from '../../../core/services/lojas-ui.service';
 import { VerificacaoService } from '../../../core/services/verificacao.service';
+import { ConfirmacaoService } from '../../../core/services/confirmacao.service';
 
 interface Loja {
   provedor: Provedor;
   nome: string;
   logo: string;
   conectada: boolean;
+}
+
+/** Loja que aparece na grade mas ainda não tem integração. */
+interface LojaEmBreve {
+  id: string;
+  nome: string;
+  logo: string;
 }
 
 @Component({
@@ -19,6 +27,18 @@ export class LojasCard implements OnInit {
   private conexoes = inject(ConexoesService);
   protected verificacao = inject(VerificacaoService);
   protected lojasUi = inject(LojasUiService);
+  private confirmacao = inject(ConfirmacaoService);
+
+  // Ainda em desenvolvimento: ficam visíveis, mas o clique só avisa.
+  // Quando uma ficar pronta, ela sai daqui e entra em `lojas` com o provedor.
+  protected readonly emBreve: LojaEmBreve[] = [
+    { id: 'shein', nome: 'Shein', logo: 'lojas/shein.png' },
+    { id: 'aliexpress', nome: 'AliExpress', logo: 'lojas/aliexpress.png' },
+    { id: 'nike', nome: 'Nike', logo: 'lojas/nike.png' },
+    { id: 'netshoes', nome: 'Netshoes', logo: 'lojas/netshoes.png' },
+    { id: 'adidas', nome: 'Adidas', logo: 'lojas/adidas.png' },
+    { id: 'centauro', nome: 'Centauro', logo: 'lojas/centauro.png' },
+  ];
 
   protected readonly erro = computed(() => this.conexoes.erro());
 
@@ -58,6 +78,15 @@ export class LojasCard implements OnInit {
 
   abrir(provedor: Provedor): void {
     this.lojasUi.abrir(provedor);
+  }
+
+  avisarEmBreve(nome: string): void {
+    void this.confirmacao.pedir({
+      titulo: `${nome} ainda não está disponível`,
+      texto: `A integração com a ${nome} está em desenvolvimento. Assim que ficar pronta, é só voltar aqui e conectar.`,
+      confirmar: 'Entendi',
+      soAviso: true,
+    });
   }
 
   recarregar(): void {

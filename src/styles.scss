@@ -1450,6 +1450,17 @@ a.prod-titulo:hover {
   background: var(--ok);
 }
 
+/* Lojas ainda em desenvolvimento: mesmo card das outras, so com o selo "Em breve". */
+.loja-botao-breve {
+  cursor: help;
+}
+.loja-estado-breve {
+  color: var(--warn);
+}
+.loja-estado-breve .badge-dot {
+  background: var(--gold);
+}
+
 .loja-titulo {
   display: flex;
   flex-direction: column;

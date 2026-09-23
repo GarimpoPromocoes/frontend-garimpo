@@ -13,9 +13,11 @@
       }
 
       <div class="form-actions form-actions-fim">
-        <button type="button" class="btn btn-ghost" (click)="confirmacao.cancelar()">
-          {{ p.cancelar ?? 'Cancelar' }}
-        </button>
+        @if (!p.soAviso) {
+          <button type="button" class="btn btn-ghost" (click)="confirmacao.cancelar()">
+            {{ p.cancelar ?? 'Cancelar' }}
+          </button>
+        }
         <button
           #botaoConfirmar
           type="button"
