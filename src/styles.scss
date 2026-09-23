@@ -377,14 +377,6 @@ svg {
   grid-column: 1 / -1;
 }
 
-.login-remoto {
-  width: 100%;
-  height: 620px;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  background: var(--surface-2);
-  display: block;
-}
 .conta-conectada {
   margin-top: 6px;
   font-size: 13px;
@@ -413,20 +405,15 @@ svg {
   background: var(--surface-2);
 }
 
-.login-remoto-vazio {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-muted);
-  font-size: 13px;
-}
-
 .tabela-rolagem {
-  overflow-x: auto;
+  /* Sem overflow-x: a tabela usa table-layout:fixed com largura por coluna
+     em % — nunca fica mais larga que o card, então nunca precisa rolar. */
   margin: 0 -4px;
+  min-width: 0;
 }
 .tabela {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   font-size: 13.5px;
 }
@@ -440,23 +427,109 @@ svg {
   padding: 8px 10px;
   border-bottom: 1px solid var(--border);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .tabela td {
   padding: 10px;
   border-bottom: 1px solid var(--border);
   vertical-align: middle;
   color: var(--text-soft);
+  /* Padrão seguro pra célula de uma linha só: trunca com "…" em vez de
+     empurrar a coluna. A do produto (multi-linha) sobrescreve isso. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .tabela tbody tr:hover {
   background: var(--surface-2);
 }
 .tabela .col-num {
   text-align: right;
-  white-space: nowrap;
 }
 .tabela .col-acao {
   text-align: right;
-  white-space: nowrap;
+  /* 30px do botão-ícone + os 20px de padding da célula (box-sizing:
+     border-box conta os dois dentro do width) + uma folga de 4px. */
+  width: 54px;
+}
+
+/* Largura de cada coluna — é o que garante que a tabela nunca ultrapasse a
+   largura do card, em qualquer tamanho de tela. A de ação é em px (só tem um
+   ícone, tamanho fixo); as outras dividem o resto em %. */
+.tabela .col-produto {
+  width: 31%;
+}
+.tabela .col-loja {
+  width: 12%;
+}
+.tabela .col-grupo {
+  width: 14%;
+}
+.tabela .col-preco {
+  width: 13%;
+}
+.tabela .col-desconto {
+  width: 7%;
+}
+.tabela .col-situacao {
+  width: 16%;
+}
+
+/* Abaixo disso, 7 colunas não cabem de um jeito legível (nem truncando) —
+   o desconto já aparece riscado no preço, e o grupo é o menos essencial pra
+   decidir se o produto continua no catálogo. As outras ganham o espaço. */
+@media (max-width: 640px) {
+  .tabela .col-grupo,
+  .tabela .col-desconto {
+    display: none;
+  }
+  .tabela .col-produto {
+    width: 40%;
+  }
+  .tabela .col-loja {
+    width: 15%;
+  }
+  .tabela .col-preco {
+    width: 20%;
+  }
+  .tabela .col-situacao {
+    width: 25%;
+  }
+}
+
+/* Tela de celular estreita: nem 5 colunas cabem de um jeito legível — a loja
+   sai (o nome do produto já dá pistas) e o produto vira a única coluna
+   flexível (width:auto absorve o que sobrar das outras, que têm tamanho
+   fixo e previsível: preço, badge de situação, botão de remover). */
+@media (max-width: 460px) {
+  .tabela .col-loja {
+    display: none;
+  }
+  .tabela .col-produto {
+    width: auto;
+  }
+  .tabela .col-preco {
+    width: 88px;
+  }
+  /* A palavra some, sobra só a bolinha colorida — "Postado"/"Na fila" nessa
+     largura tomaria o espaço que falta pro nome do produto. O leitor de tela
+     continua lendo a palavra (ela só está escondida visualmente). */
+  .tabela .col-situacao {
+    width: 40px;
+  }
+  .tabela .col-situacao .badge {
+    padding: 4px;
+    gap: 0;
+  }
+  .tabela .col-situacao .badge-texto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
 }
 
 .prod-titulo {
@@ -464,7 +537,11 @@ svg {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  max-width: 460px;
+  /* A largura vem da coluna (table-layout:fixed, .col-produto) — não de um
+     valor fixo em px, senão ela não acompanha o card encolhendo. */
+  width: 100%;
+  white-space: normal;
+  overflow-wrap: break-word;
   color: var(--text);
   font-weight: 500;
   text-decoration: none;
@@ -475,6 +552,9 @@ a.prod-titulo:hover {
 .prod-meta {
   display: block;
   margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 12px;
   color: var(--text-muted);
 }
@@ -606,10 +686,6 @@ a.prod-titulo:hover {
   flex-direction: column;
   gap: 12px;
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
-}
-
-.modal-caixa .login-remoto {
-  height: min(70vh, 720px);
 }
 
 .login-shell {
@@ -1136,4 +1212,356 @@ a.prod-titulo:hover {
   .stat-strip-4 .stat-cell {
     border-top: 1px solid var(--border);
   }
+}
+/* Janela de conexao: o login das lojas acontece aqui dentro, nunca numa tela
+   de navegador. */
+.modal-login {
+  width: min(560px, 100%);
+  gap: 18px;
+  padding: 24px;
+}
+
+.login-trilha {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+}
+.login-trilha li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.login-trilha-marca {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--border-strong);
+  flex-shrink: 0;
+}
+.login-trilha-atual {
+  color: var(--text);
+  font-weight: 500;
+}
+.login-trilha-atual .login-trilha-marca {
+  background: var(--gold);
+  animation: pulse-dot 1.6s ease-in-out infinite;
+}
+
+.login-pedido {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.login-pedido h3 {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.login-captcha {
+  align-self: center;
+  max-width: 100%;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px;
+}
+
+.campo-codigo {
+  letter-spacing: 0.4em;
+  font-size: 18px;
+  text-align: center;
+}
+
+.login-opcoes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.login-opcao {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 13px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  font-size: 13px;
+  cursor: pointer;
+}
+.login-opcao-marcada {
+  border-color: var(--gold);
+  background: var(--gold-soft);
+  color: var(--text);
+}
+
+.login-trabalhando {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--text-soft);
+  padding: 6px 0;
+}
+.login-spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--border-strong);
+  border-top-color: var(--gold);
+  animation: girar 0.9s linear infinite;
+  flex-shrink: 0;
+}
+.login-spinner-grande {
+  width: 36px;
+  height: 36px;
+  border-width: 3px;
+}
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Véu translúcido enquanto confere se as conexões ainda valem de verdade — o
+   painel continua visível (borrado) por trás, pra ficar claro que é só uma
+   espera, não uma tela travada nem uma troca de página. */
+.carregando-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(250, 248, 244, 0.82);
+  backdrop-filter: blur(2px);
+}
+
+.carregando-central {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  color: var(--text-muted);
+  font-size: 13.5px;
+  text-align: center;
+}
+
+.info-box-ok {
+  border-left-color: var(--ok);
+  color: var(--text-soft);
+}
+.info-box-erro {
+  border-left-color: var(--danger);
+  color: var(--text);
+}
+
+.login-print summary {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.login-print img {
+  margin-top: 10px;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+/* Cartao de alerta (ex.: verificacao de seguranca pedida pela loja). */
+.card-alerta {
+  border-color: var(--danger-border);
+  background: var(--danger-soft);
+}
+/* Lojas de afiliados: um botao por loja, so a logo oficial e o estado. */
+.lojas-grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.loja-botao {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s,
+    transform 0.15s;
+}
+.loja-botao:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
+}
+.loja-botao:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* Cada logo tem a mesma area, e cada uma se ajusta dentro dela: as marcas tem
+   proporcoes bem diferentes (a da Shopee e vertical, a da Amazon e larga). */
+.loja-logo-caixa {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.loja-logo {
+  max-height: 100%;
+  max-width: 160px;
+  object-fit: contain;
+}
+.loja-logo-sm {
+  max-height: 34px;
+  max-width: 120px;
+}
+
+.loja-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+.loja-estado .badge-dot {
+  background: var(--border-strong);
+}
+.loja-estado-ok {
+  color: var(--ok);
+}
+.loja-estado-ok .badge-dot {
+  background: var(--ok);
+}
+
+.loja-titulo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.rotulo-opcional {
+  margin-left: 6px;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.modal-rodape {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+}
+
+.qr-whatsapp-vazio {
+  flex-direction: column;
+  gap: 12px;
+}
+.loja-logo-caixa-sm {
+  height: 34px;
+  justify-content: flex-start;
+}
+
+/* Confirmacao do sistema, no lugar do window.confirm do navegador. */
+.modal-confirmar {
+  width: min(420px, 100%);
+  gap: 14px;
+  padding: 24px;
+}
+.modal-confirmar h2 {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+.modal-confirmar .card-subtitle {
+  margin-top: 0;
+}
+.form-actions-fim {
+  justify-content: flex-end;
+}
+
+/* X que fecha uma janela (no lugar de um botao escrito "Fechar"). */
+.btn-fechar {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: var(--text-muted);
+  transition:
+    background-color 0.15s,
+    color 0.15s;
+}
+.btn-fechar svg {
+  width: 18px;
+  height: 18px;
+}
+.btn-fechar:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.btn-fechar:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* Botão só com ícone — pra ação de uma linha de tabela, onde um botão com
+   texto ("Remover") nunca tem largura garantida: a coluna precisaria de uma
+   largura fixa em px bem maior que o resto do conteúdo só por causa dele. */
+.btn-icone {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  background: var(--surface);
+  color: var(--text-muted);
+  transition:
+    background-color 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+}
+.btn-icone svg {
+  width: 16px;
+  height: 16px;
+}
+.btn-icone:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+.btn-icone-perigo:hover:not(:disabled) {
+  background: var(--danger-soft);
+  border-color: var(--danger-border);
+  color: var(--danger);
+}
+.btn-icone:disabled {
+  opacity: 0.5;
 }

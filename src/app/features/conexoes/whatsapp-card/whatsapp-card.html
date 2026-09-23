@@ -1,0 +1,10 @@
+<div class="lojas-grade">
+  <button type="button" class="loja-botao" (click)="abrir()">
+    <span class="loja-logo-caixa"><img class="loja-logo" src="lojas/whatsapp.svg" alt="WhatsApp" /></span>
+    <span class="loja-estado" [class.loja-estado-ok]="conectado()">
+      <span class="badge-dot"></span>
+      {{ conectado() ? 'Conectado' : 'Conectar' }}
+    </span>
+  </button>
+</div>
+

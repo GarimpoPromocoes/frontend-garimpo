@@ -1,6 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ProdutosService, OrdemProduto, SituacaoProduto } from '../../../core/services/produtos.service';
+import { ConfirmacaoService } from '../../../core/services/confirmacao.service';
 import { ConfigService } from '../../../core/services/config.service';
 
 const NOME_LOJA: Record<string, string> = {
@@ -17,6 +18,7 @@ const NOME_LOJA: Record<string, string> = {
 })
 export class ProdutosCard implements OnInit {
   protected produtos = inject(ProdutosService);
+  private confirmacao = inject(ConfirmacaoService);
   private configService = inject(ConfigService);
   protected readonly grupos = computed(() => this.configService.config()?.grupos ?? []);
   protected readonly removendo = signal<number | null>(null);
@@ -67,9 +69,13 @@ export class ProdutosCard implements OnInit {
   }
 
   protected async remover(id: number, titulo: string): Promise<void> {
-    if (!window.confirm(`Tirar "${titulo.slice(0, 60)}" do catálogo? O robô não vai mais postar este item.`)) {
-      return;
-    }
+    const ok = await this.confirmacao.pedir({
+      titulo: 'Tirar este produto do catálogo?',
+      texto: `"${titulo.slice(0, 80)}" sai do catálogo e o robô não posta mais este item.`,
+      confirmar: 'Tirar do catálogo',
+      perigo: true,
+    });
+    if (!ok) return;
     this.erroAcao.set(null);
     this.removendo.set(id);
     const r = await this.produtos.remover(id);

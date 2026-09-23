@@ -66,46 +66,54 @@
       <table class="tabela">
         <thead>
           <tr>
-            <th>Produto</th>
-            <th>Loja</th>
-            <th>Grupo</th>
-            <th class="col-num">Preço</th>
-            <th class="col-num">Desconto</th>
-            <th>Situação</th>
-            <th></th>
+            <th class="col-produto">Produto</th>
+            <th class="col-loja">Loja</th>
+            <th class="col-grupo">Grupo</th>
+            <th class="col-num col-preco">Preço</th>
+            <th class="col-num col-desconto">Desconto</th>
+            <th class="col-situacao">Situação</th>
+            <th class="col-acao"></th>
           </tr>
         </thead>
         <tbody>
           @for (p of produtos.itens(); track p.id) {
             <tr>
-              <td>
+              <td class="col-produto">
                 <a class="prod-titulo" [href]="p.link" target="_blank" rel="noopener">{{ p.titulo }}</a>
                 <span class="prod-meta">{{ quando(p.criadoEm) }}{{ p.categoria ? ' · ' + p.categoria : '' }}</span>
               </td>
-              <td>{{ nomeLoja(p.loja) }}</td>
-              <td>{{ p.grupoNome || '—' }}</td>
-              <td class="col-num">
+              <td class="col-loja">{{ nomeLoja(p.loja) }}</td>
+              <td class="col-grupo">{{ p.grupoNome || '—' }}</td>
+              <td class="col-num col-preco">
                 {{ preco(p.precoPor) }}
                 @if (p.precoDe && p.precoPor && p.precoDe > p.precoPor) {
                   <span class="prod-de">{{ preco(p.precoDe) }}</span>
                 }
               </td>
-              <td class="col-num">{{ p.desconto ? p.desconto + '%' : '—' }}</td>
-              <td>
+              <td class="col-num col-desconto">{{ p.desconto ? p.desconto + '%' : '—' }}</td>
+              <td class="col-situacao">
                 @if (p.postado) {
-                  <span class="badge badge-ok"><span class="badge-dot"></span>Postado</span>
+                  <span class="badge badge-ok"><span class="badge-dot"></span><span class="badge-texto">Postado</span></span>
                 } @else {
-                  <span class="badge badge-off"><span class="badge-dot"></span>Na fila</span>
+                  <span class="badge badge-off"><span class="badge-dot"></span><span class="badge-texto">Na fila</span></span>
                 }
               </td>
               <td class="col-acao">
                 <button
                   type="button"
-                  class="btn btn-danger-soft btn-sm"
+                  class="btn-icone btn-icone-perigo"
                   [disabled]="removendo() === p.id"
+                  [attr.aria-label]="'Remover ' + p.titulo"
+                  title="Remover do catálogo"
                   (click)="remover(p.id, p.titulo)"
                 >
-                  {{ removendo() === p.id ? '…' : 'Remover' }}
+                  @if (removendo() === p.id) {
+                    <span class="login-spinner"></span>
+                  } @else {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M4 7h16M9.5 7V5a1.5 1.5 0 0 1 1.5-1.5h4A1.5 1.5 0 0 1 16.5 5v2M6.5 7l1 12.5A1.5 1.5 0 0 0 9 21h6a1.5 1.5 0 0 0 1.5-1.5L17.5 7" />
+                    </svg>
+                  }
                 </button>
               </td>
             </tr>

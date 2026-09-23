@@ -1,0 +1,32 @@
+@if (pedido(); as p) {
+  <div class="modal-fundo" (click)="confirmacao.cancelar()">
+    <div
+      class="modal-caixa modal-confirmar"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="confirmacao-titulo"
+      (click)="$event.stopPropagation()"
+    >
+      <h2 id="confirmacao-titulo">{{ p.titulo }}</h2>
+      @if (p.texto) {
+        <p class="card-subtitle">{{ p.texto }}</p>
+      }
+
+      <div class="form-actions form-actions-fim">
+        <button type="button" class="btn btn-ghost" (click)="confirmacao.cancelar()">
+          {{ p.cancelar ?? 'Cancelar' }}
+        </button>
+        <button
+          #botaoConfirmar
+          type="button"
+          class="btn"
+          [class.btn-danger]="p.perigo"
+          [class.btn-primary]="!p.perigo"
+          (click)="confirmacao.confirmar()"
+        >
+          {{ p.confirmar ?? 'Confirmar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

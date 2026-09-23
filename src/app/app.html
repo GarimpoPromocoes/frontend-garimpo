@@ -1,6 +1,14 @@
 @if (auth.verificandoSessao()) {
+  <!--
+    Mesmo spinner e mesmo texto da tela de carregamento do painel (mais
+    abaixo) — pro usuário, do primeiro instante até o painel abrir é uma
+    coisa só, nunca duas telas diferentes nem um vazio no meio.
+  -->
   <div class="login-shell">
-    <p class="card-subtitle">Carregando…</p>
+    <div class="carregando-central">
+      <span class="login-spinner login-spinner-grande"></span>
+      <p>Carregando…</p>
+    </div>
   </div>
 } @else if (!auth.usuario()) {
   <app-login-card />
@@ -29,7 +37,6 @@
             @case ('produtos') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5Z"/><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"/></svg> }
             @case ('dono') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 20 6v5.4c0 4.4-3.1 8.2-8 9.8-4.9-1.6-8-5.4-8-9.8V6Z"/><path d="m9.2 12.2 2 2 3.6-3.8"/></svg> }
             @case ('grupos') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 19v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V19"/><circle cx="9" cy="7" r="3.4"/><path d="M22 19v-1.5a4 4 0 0 0-3-3.87"/><path d="M16.5 4.2a3.4 3.4 0 0 1 0 6.6"/></svg> }
-            @case ('agendamento') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></svg> }
             @case ('regras') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h7M14 7h7M3 17h4M11 17h10"/><circle cx="12" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg> }
             @case ('cupons') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5V7a1.5 1.5 0 0 1 1.5-1.5h15A1.5 1.5 0 0 1 21 7v2.5a2.5 2.5 0 0 0 0 5V17a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17v-2.5a2.5 2.5 0 0 0 0-5Z"/><path d="M14 5.5v13" stroke-dasharray="2 2.6"/></svg> }
             @case ('temas') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9.5h18M8 2.8v3.4M16 2.8v3.4"/></svg> }
@@ -190,7 +197,7 @@
 
         @case ('whatsapp') {
           @defer (on immediate) {
-            <app-connection-card servico="whatsapp" />
+            <app-whatsapp-card />
           } @placeholder {
             <div class="card card-carregando">Carregando…</div>
           }
@@ -198,19 +205,7 @@
 
         @case ('lojas') {
           @defer (on immediate) {
-            <div class="col-2">
-              <app-connection-card servico="ml" />
-              <app-marketplace-card provedor="amazon" />
-              <app-marketplace-card provedor="shopee" />
-            </div>
-          } @placeholder {
-            <div class="card card-carregando">Carregando…</div>
-          }
-        }
-
-        @case ('agendamento') {
-          @defer (on immediate) {
-            <app-schedule-card />
+            <app-lojas-card />
           } @placeholder {
             <div class="card card-carregando">Carregando…</div>
           }
@@ -247,4 +242,24 @@
     </main>
   </div>
 </div>
+
+<!-- Janela de conexao das lojas e do WhatsApp: o login acontece aqui, nunca numa tela de navegador. -->
+<app-loja-dialog />
+<app-whatsapp-dialog />
+<app-confirmacao-dialog />
+
+@if (!verificacao.pronto()) {
+  <!--
+    Um véu por cima do painel até saber de verdade quem está conectado — não
+    só o que o banco guardou. Translúcido de propósito: dá pra ver que o
+    sistema já carregou por trás, só falta confirmar as conexões — não parece
+    uma tela travada nem some tão rápido que ninguém entende o que viu.
+  -->
+  <div class="carregando-overlay">
+    <div class="carregando-central">
+      <span class="login-spinner login-spinner-grande"></span>
+      <p>Carregando…</p>
+    </div>
+  </div>
+}
 }
