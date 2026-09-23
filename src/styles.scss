@@ -406,11 +406,14 @@ svg {
 }
 
 .tabela-rolagem {
-  overflow-x: auto;
+  /* Sem overflow-x: a tabela usa table-layout:fixed com largura por coluna
+     em % — nunca fica mais larga que o card, então nunca precisa rolar. */
   margin: 0 -4px;
+  min-width: 0;
 }
 .tabela {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   font-size: 13.5px;
 }
@@ -424,23 +427,109 @@ svg {
   padding: 8px 10px;
   border-bottom: 1px solid var(--border);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .tabela td {
   padding: 10px;
   border-bottom: 1px solid var(--border);
   vertical-align: middle;
   color: var(--text-soft);
+  /* Padrão seguro pra célula de uma linha só: trunca com "…" em vez de
+     empurrar a coluna. A do produto (multi-linha) sobrescreve isso. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .tabela tbody tr:hover {
   background: var(--surface-2);
 }
 .tabela .col-num {
   text-align: right;
-  white-space: nowrap;
 }
 .tabela .col-acao {
   text-align: right;
-  white-space: nowrap;
+  /* 30px do botão-ícone + os 20px de padding da célula (box-sizing:
+     border-box conta os dois dentro do width) + uma folga de 4px. */
+  width: 54px;
+}
+
+/* Largura de cada coluna — é o que garante que a tabela nunca ultrapasse a
+   largura do card, em qualquer tamanho de tela. A de ação é em px (só tem um
+   ícone, tamanho fixo); as outras dividem o resto em %. */
+.tabela .col-produto {
+  width: 31%;
+}
+.tabela .col-loja {
+  width: 12%;
+}
+.tabela .col-grupo {
+  width: 14%;
+}
+.tabela .col-preco {
+  width: 13%;
+}
+.tabela .col-desconto {
+  width: 7%;
+}
+.tabela .col-situacao {
+  width: 16%;
+}
+
+/* Abaixo disso, 7 colunas não cabem de um jeito legível (nem truncando) —
+   o desconto já aparece riscado no preço, e o grupo é o menos essencial pra
+   decidir se o produto continua no catálogo. As outras ganham o espaço. */
+@media (max-width: 640px) {
+  .tabela .col-grupo,
+  .tabela .col-desconto {
+    display: none;
+  }
+  .tabela .col-produto {
+    width: 40%;
+  }
+  .tabela .col-loja {
+    width: 15%;
+  }
+  .tabela .col-preco {
+    width: 20%;
+  }
+  .tabela .col-situacao {
+    width: 25%;
+  }
+}
+
+/* Tela de celular estreita: nem 5 colunas cabem de um jeito legível — a loja
+   sai (o nome do produto já dá pistas) e o produto vira a única coluna
+   flexível (width:auto absorve o que sobrar das outras, que têm tamanho
+   fixo e previsível: preço, badge de situação, botão de remover). */
+@media (max-width: 460px) {
+  .tabela .col-loja {
+    display: none;
+  }
+  .tabela .col-produto {
+    width: auto;
+  }
+  .tabela .col-preco {
+    width: 88px;
+  }
+  /* A palavra some, sobra só a bolinha colorida — "Postado"/"Na fila" nessa
+     largura tomaria o espaço que falta pro nome do produto. O leitor de tela
+     continua lendo a palavra (ela só está escondida visualmente). */
+  .tabela .col-situacao {
+    width: 40px;
+  }
+  .tabela .col-situacao .badge {
+    padding: 4px;
+    gap: 0;
+  }
+  .tabela .col-situacao .badge-texto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
 }
 
 .prod-titulo {
@@ -448,7 +537,11 @@ svg {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  max-width: 460px;
+  /* A largura vem da coluna (table-layout:fixed, .col-produto) — não de um
+     valor fixo em px, senão ela não acompanha o card encolhendo. */
+  width: 100%;
+  white-space: normal;
+  overflow-wrap: break-word;
   color: var(--text);
   font-weight: 500;
   text-decoration: none;
@@ -459,6 +552,9 @@ a.prod-titulo:hover {
 .prod-meta {
   display: block;
   margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 12px;
   color: var(--text-muted);
 }
@@ -1226,10 +1322,39 @@ a.prod-titulo:hover {
   animation: girar 0.9s linear infinite;
   flex-shrink: 0;
 }
+.login-spinner-grande {
+  width: 36px;
+  height: 36px;
+  border-width: 3px;
+}
 @keyframes girar {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Véu translúcido enquanto confere se as conexões ainda valem de verdade — o
+   painel continua visível (borrado) por trás, pra ficar claro que é só uma
+   espera, não uma tela travada nem uma troca de página. */
+.carregando-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(250, 248, 244, 0.82);
+  backdrop-filter: blur(2px);
+}
+
+.carregando-central {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  color: var(--text-muted);
+  font-size: 13.5px;
+  text-align: center;
 }
 
 .info-box-ok {
@@ -1402,4 +1527,41 @@ a.prod-titulo:hover {
 .btn-fechar:focus-visible {
   outline: 2px solid var(--gold);
   outline-offset: 2px;
+}
+
+/* Botão só com ícone — pra ação de uma linha de tabela, onde um botão com
+   texto ("Remover") nunca tem largura garantida: a coluna precisaria de uma
+   largura fixa em px bem maior que o resto do conteúdo só por causa dele. */
+.btn-icone {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  background: var(--surface);
+  color: var(--text-muted);
+  transition:
+    background-color 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+}
+.btn-icone svg {
+  width: 16px;
+  height: 16px;
+}
+.btn-icone:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+.btn-icone-perigo:hover:not(:disabled) {
+  background: var(--danger-soft);
+  border-color: var(--danger-border);
+  color: var(--danger);
+}
+.btn-icone:disabled {
+  opacity: 0.5;
 }

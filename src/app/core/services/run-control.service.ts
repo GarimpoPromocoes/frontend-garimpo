@@ -23,7 +23,11 @@ export class RunControlService {
 
   readonly lendoGanhos = computed(() => this.jobsService.rodando() && this.jobsService.tipo() === 'ganhos');
 
-  readonly postandoAgora = computed(() => this.jobsService.rodando() && !this.lendoGanhos());
+  // Só o job de postagem em si conta como "rodando" pra esse botão. Os outros
+  // (verificar conexões, login das lojas, trocar/desconectar WhatsApp…) têm a
+  // própria tela e não devem fazer o topo do painel achar que o robô está
+  // trabalhando nem oferecer "Parar" pra quem não ligou nada.
+  readonly postandoAgora = computed(() => this.jobsService.rodando() && this.jobsService.tipo() === 'grupos');
 
   readonly processoExterno = computed(
     () => !!this.statusService.status()?.processoExterno?.rodando

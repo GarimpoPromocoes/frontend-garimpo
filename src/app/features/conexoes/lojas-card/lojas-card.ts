@@ -1,7 +1,7 @@
 import { Component, OnInit, computed, inject } from '@angular/core';
 import { ConexoesService, Provedor } from '../../../core/services/conexoes.service';
-import { StatusService } from '../../../core/services/status.service';
 import { LojasUiService } from '../../../core/services/lojas-ui.service';
+import { VerificacaoService } from '../../../core/services/verificacao.service';
 
 interface Loja {
   provedor: Provedor;
@@ -17,13 +17,12 @@ interface Loja {
 })
 export class LojasCard implements OnInit {
   private conexoes = inject(ConexoesService);
-  private statusService = inject(StatusService);
+  protected verificacao = inject(VerificacaoService);
   protected lojasUi = inject(LojasUiService);
 
   protected readonly erro = computed(() => this.conexoes.erro());
 
   protected readonly lojas = computed<Loja[]>(() => {
-    const s = this.statusService.status();
     const conexao = (p: Provedor) => this.conexoes.statusDe(p);
 
     return [
@@ -31,22 +30,24 @@ export class LojasCard implements OnInit {
         provedor: 'mercadolivre',
         nome: 'Mercado Livre',
         logo: 'lojas/mercadolivre.svg',
-        conectada: !!s?.mercadoLivre.conectado,
+        // O ML só tem essa sessão de navegador — sem ela, nada funciona.
+        conectada: this.verificacao.mercadoLivreConectado(),
       },
       {
         provedor: 'amazon',
         nome: 'Amazon',
         logo: 'lojas/amazon.svg',
         // Na Amazon quem garante comissão é a tag de associado; o login só
-        // acrescenta o link curto.
+        // acrescenta o link curto. A tag não "cai" — não precisa de checagem
+        // ao vivo pra decidir esse badge.
         conectada: conexao('amazon')?.status === 'conectado',
       },
       {
         provedor: 'shopee',
         nome: 'Shopee',
         logo: 'lojas/shopee.svg',
-        // Shopee e' 100% API: estar conectada = ter as chaves validadas.
-        conectada: conexao('shopee')?.status === 'conectado',
+        // Shopee e' 100% API: estar conectada = as chaves ainda serem aceitas.
+        conectada: this.verificacao.shopeeConectado(),
       },
     ];
   });

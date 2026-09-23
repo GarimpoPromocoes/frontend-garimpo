@@ -1,6 +1,6 @@
 @if (aberto()) {
-  <div class="modal-fundo">
-    <div class="modal-caixa modal-login">
+  <div class="modal-fundo" (click)="aoFechar()">
+    <div class="modal-caixa modal-login" (click)="$event.stopPropagation()">
       <div class="card-header">
         <div class="loja-titulo">
           <span class="loja-logo-caixa loja-logo-caixa-sm"><img class="loja-logo loja-logo-sm" [src]="logo()" [alt]="rotulo()" /></span>
@@ -45,9 +45,6 @@
               A sessão fica salva e a senha guardada criptografada — se {{ artigo() }} {{ rotulo() }} derrubar a conexão no meio
               do trabalho, o robô entra de novo sozinho, sem parar as postagens.
             </div>
-            <div class="form-actions">
-              <button type="button" class="btn btn-primary" (click)="fechar()">Fechar</button>
-            </div>
           } @else {
             <div class="info-box info-box-erro">{{ f.motivo }}</div>
             @if (f.comoResolver) {
@@ -61,7 +58,6 @@
             }
             <div class="form-actions">
               <button type="button" class="btn btn-primary" (click)="entrarDeNovo()">Tentar de novo</button>
-              <button type="button" class="btn btn-ghost" (click)="fechar()">Fechar</button>
             </div>
           }
         } @else if (pedido(); as p) {
@@ -113,16 +109,12 @@
               <button type="button" class="btn btn-primary" [disabled]="!podeResponder()" (click)="responder()">
                 {{ jobsService.respondendoLogin() ? 'Enviando…' : 'Continuar' }}
               </button>
-              <button type="button" class="btn btn-ghost" (click)="cancelar()">Cancelar</button>
             </div>
           </div>
         } @else {
           <div class="login-trabalhando">
             <span class="login-spinner"></span>
             <span>Falando com {{ artigo() }} {{ rotulo() }}…</span>
-          </div>
-          <div class="form-actions">
-            <button type="button" class="btn btn-ghost" (click)="cancelar()">Cancelar</button>
           </div>
         }
       } @else if (conectada()) {
@@ -189,9 +181,7 @@
           <button type="button" class="btn btn-primary" [disabled]="!podeConectar()" (click)="conectar()">
             {{ enviando() ? 'Conectando…' : 'Conectar' }}
           </button>
-          <button type="button" class="btn btn-ghost" (click)="fechar()">Cancelar</button>
         </div>
-
       }
 
       @if (erro()) {

@@ -5,6 +5,7 @@ import { JobsService, JobTipo, PedidoLogin } from '../../../core/services/jobs.s
 import { StatusService } from '../../../core/services/status.service';
 import { LojasUiService } from '../../../core/services/lojas-ui.service';
 import { ConfirmacaoService } from '../../../core/services/confirmacao.service';
+import { VerificacaoService } from '../../../core/services/verificacao.service';
 
 const ROTULO: Record<Provedor, string> = {
   mercadolivre: 'Mercado Livre',
@@ -73,6 +74,7 @@ export class LojaDialog {
   protected statusService = inject(StatusService);
   private lojasUi = inject(LojasUiService);
   private confirmacao = inject(ConfirmacaoService);
+  protected verificacao = inject(VerificacaoService);
 
   protected readonly estadoLogin = computed(() => this.jobsService.login());
   protected readonly pedido = computed<PedidoLogin | null>(() => this.estadoLogin()?.pedido ?? null);
@@ -120,24 +122,32 @@ export class LojaDialog {
   protected readonly dadosAfiliadoSalvos = computed(() => this.conexao()?.status === 'conectado');
 
   /**
-   * A loja esta valendo pro robo? No ML e' a sessao do navegador; nas outras sao
-   * os dados de afiliado (tag da Amazon, chaves da Shopee) — sem eles o link nao
-   * paga comissao, com ou sem sessao.
+   * A loja esta valendo pro robo — de verdade, agora, não só o que ficou
+   * guardado. No ML e na Shopee isso é a sessão/chave ainda ser aceita (a
+   * checagem ao vivo vence quando existe); na Amazon é a tag de associado,
+   * que não expira sozinha — sem ela o link não paga comissão, com ou sem
+   * sessão de navegador.
    */
-  protected readonly conectada = computed(() =>
-    this.provedor() === 'mercadolivre' ? this.sessao().logado : this.dadosAfiliadoSalvos(),
-  );
+  protected readonly conectada = computed(() => {
+    switch (this.provedor()) {
+      case 'mercadolivre':
+        return this.verificacao.mercadoLivreConectado();
+      case 'shopee':
+        return this.verificacao.shopeeConectado();
+      default:
+        return this.dadosAfiliadoSalvos();
+    }
+  });
   protected readonly loginGuardado = computed(() => this.conexao()?.login ?? null);
 
   protected readonly sessao = computed(() => {
-    const s = this.statusService.status();
     switch (this.provedor()) {
       case 'mercadolivre':
-        return { logado: !!s?.mercadoLivre.conectado, detalhe: null as string | null };
+        return { logado: this.verificacao.mercadoLivreConectado(), detalhe: null as string | null };
       case 'amazon':
         return {
-          logado: !!s?.amazon?.logado,
-          detalhe: s?.amazon?.linkCurto
+          logado: this.verificacao.amazonLogado(),
+          detalhe: this.verificacao.amazonSiteStripe()
             ? 'Os posts da Amazon saem com link curto (link.amazon).'
             : 'Sem a barra de Associados os posts saem com o link longo, que também dá comissão.',
         };
@@ -243,6 +253,10 @@ export class LojaDialog {
 
     this.erro.set(null);
     this.enviando.set(true);
+    // A partir daqui essa loja tem uma ação em curso que vai confirmar o
+    // estado dela por conta própria — uma checagem ao vivo antiga não pode
+    // continuar escondendo isso.
+    this.jobsService.esquecerVerificacao(p);
 
     const afiliado = this.campos().filter((c) => c.grupo === 'afiliado');
     const temAfiliado = afiliado.length > 0 && afiliado.some((c) => this.preenchido(c.nome) || c.tipo === 'opcoes');
@@ -306,11 +320,10 @@ export class LojaDialog {
     const job = p && JOB_DE[p];
     if (!job) return;
     this.erro.set(null);
+    this.jobsService.esquecerVerificacao(p);
     const r = await this.jobsService.iniciar(job);
     if (!r.ok) this.erro.set(r.erro ?? null);
   }
-
-
 
   async desconectar(): Promise<void> {
     const p = this.provedor();
@@ -329,11 +342,15 @@ export class LojaDialog {
 
     this.erro.set(null);
     this.enviando.set(true);
+    this.jobsService.esquecerVerificacao(p);
     await this.conexoes.esquecerLogin(p);
     await this.conexoes.desconectar(p);
 
     // No ML a "conexao" e' a sessao do navegador: so' o robo consegue apagar.
     if (p === 'mercadolivre') {
+      // Mesmo perfil de navegador: desconectar o ML derruba a sessão da
+      // Amazon junto (a tag de associado dela continua salva à parte).
+      this.jobsService.esquecerVerificacao('amazon');
       const r = await this.jobsService.iniciar('desconectar-ml');
       if (!r.ok) this.erro.set(r.erro ?? null);
     }
@@ -345,7 +362,10 @@ export class LojaDialog {
     return ARTIGO[p] === 'o' ? 'do' : 'da';
   }
 
-  async cancelar(): Promise<void> {
+  // Não fica exposto no template: com o modal fechável por X e por clique
+  // fora, o único jeito de chegar aqui é através do aoFechar() no meio de
+  // um login em andamento.
+  private async cancelar(): Promise<void> {
     const p = this.pedido();
     if (p) await this.jobsService.cancelarLogin(p.id);
     else if (this.emLogin() && this.jobsService.rodando()) await this.jobsService.parar();

@@ -4,7 +4,7 @@ import { StatusService } from './core/services/status.service';
 import { RunControlService } from './core/services/run-control.service';
 import { JobsService } from './core/services/jobs.service';
 import { AuthService } from './core/services/auth.service';
-import { ConexoesService } from './core/services/conexoes.service';
+import { VerificacaoService } from './core/services/verificacao.service';
 import { LoginCard } from './features/auth/login-card/login-card';
 import { WhatsappCard } from './features/conexoes/whatsapp-card/whatsapp-card';
 import { LojasCard } from './features/conexoes/lojas-card/lojas-card';
@@ -19,6 +19,7 @@ import { ProdutosCard } from './features/divulgacao/produtos-card/produtos-card'
 import { OwnerCard } from './features/admin/owner-card/owner-card';
 import { GanhosCard } from './features/acompanhar/ganhos-card/ganhos-card';
 import { LojaDialog } from './features/conexoes/loja-dialog/loja-dialog';
+import { WhatsappDialog } from './features/conexoes/whatsapp-dialog/whatsapp-dialog';
 import { ConfirmacaoDialog } from './shared/confirmacao-dialog/confirmacao-dialog';
 
 export type AbaId =
@@ -160,6 +161,7 @@ const CHAVE_ABA = 'promobot:aba';
     OwnerCard,
     GanhosCard,
     LojaDialog,
+    WhatsappDialog,
     ConfirmacaoDialog,
   ],
   templateUrl: './app.html',
@@ -171,7 +173,7 @@ export class App implements OnInit, OnDestroy {
   protected runControl = inject(RunControlService);
   protected jobsService = inject(JobsService);
   protected auth = inject(AuthService);
-  private conexoes = inject(ConexoesService);
+  protected verificacao = inject(VerificacaoService);
 
   protected readonly secoes = computed(() =>
     SECOES.map((s) => ({
@@ -195,10 +197,13 @@ export class App implements OnInit, OnDestroy {
       }
       case 'lojas': {
         if (!s) return null;
-        // A Shopee nao tem sessao de navegador: ela conta como conectada quando
-        // as chaves da API estao validadas.
-        const shopeeConectada = this.conexoes.statusDe('shopee')?.status === 'conectado';
-        const faltando = [s.mercadoLivre?.conectado, s.amazon?.logado, shopeeConectada].filter((c) => !c).length;
+        // A resposta ao vivo (quando existe) vence a guardada — é o que evita
+        // o badge dizer "tudo certo" com uma sessão que já caiu por fora.
+        const faltando = [
+          this.verificacao.mercadoLivreConectado(),
+          this.verificacao.amazonLogado(),
+          this.verificacao.shopeeConectado(),
+        ].filter((c) => !c).length;
         return faltando ? String(faltando) : null;
       }
       case 'produtos': {
@@ -220,11 +225,9 @@ export class App implements OnInit, OnDestroy {
     () => ABAS.find((a) => a.id === this.aba()) ?? ABAS[0]
   );
 
-  protected readonly mlConectado = computed(
-    () => !!this.statusService.status()?.mercadoLivre?.conectado
-  );
+  protected readonly mlConectado = computed(() => this.verificacao.mercadoLivreConectado());
   protected readonly zapConectado = computed(
-    () => !!this.statusService.status()?.whatsapp?.conectado && !this.jobsService.qrWhatsapp()
+    () => this.verificacao.whatsappConectado() && !this.jobsService.qrWhatsapp()
   );
 
   private dashboardIniciado = false;
@@ -235,7 +238,9 @@ export class App implements OnInit, OnDestroy {
       if (logado && !this.dashboardIniciado) {
         this.dashboardIniciado = true;
         this.configService.carregar();
-        this.conexoes.carregar();
+        // A dupla checagem (banco + ao vivo) já carrega conexões e status —
+        // é ela quem decide quando a tela de carregamento libera o painel.
+        void this.verificacao.executar();
         this.statusService.iniciarPolling();
         this.preCarregarAbas();
       } else if (!logado && this.dashboardIniciado) {

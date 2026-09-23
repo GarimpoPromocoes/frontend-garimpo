@@ -1,6 +1,14 @@
 @if (auth.verificandoSessao()) {
+  <!--
+    Mesmo spinner e mesmo texto da tela de carregamento do painel (mais
+    abaixo) — pro usuário, do primeiro instante até o painel abrir é uma
+    coisa só, nunca duas telas diferentes nem um vazio no meio.
+  -->
   <div class="login-shell">
-    <p class="card-subtitle">Carregando…</p>
+    <div class="carregando-central">
+      <span class="login-spinner login-spinner-grande"></span>
+      <p>Carregando…</p>
+    </div>
   </div>
 } @else if (!auth.usuario()) {
   <app-login-card />
@@ -235,7 +243,23 @@
   </div>
 </div>
 
-<!-- Janela de conexao das lojas: o login acontece aqui, nunca numa tela de navegador. -->
+<!-- Janela de conexao das lojas e do WhatsApp: o login acontece aqui, nunca numa tela de navegador. -->
 <app-loja-dialog />
+<app-whatsapp-dialog />
 <app-confirmacao-dialog />
+
+@if (!verificacao.pronto()) {
+  <!--
+    Um véu por cima do painel até saber de verdade quem está conectado — não
+    só o que o banco guardou. Translúcido de propósito: dá pra ver que o
+    sistema já carregou por trás, só falta confirmar as conexões — não parece
+    uma tela travada nem some tão rápido que ninguém entende o que viu.
+  -->
+  <div class="carregando-overlay">
+    <div class="carregando-central">
+      <span class="login-spinner login-spinner-grande"></span>
+      <p>Carregando…</p>
+    </div>
+  </div>
+}
 }

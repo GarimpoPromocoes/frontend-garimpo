@@ -10,12 +10,27 @@ export type JobTipo =
   | 'desconectar-ml'
   | 'login-amazon'
   | 'trocar-zap'
+  | 'desconectar-zap'
   | 'grupos'
-  | 'ganhos';
+  | 'ganhos'
+  | 'verificar-conexoes';
 
 export type AlvoGrupos = 'todos' | 'selecionados';
 
 export type Provedor = 'mercadolivre' | 'shopee' | 'amazon';
+
+/**
+ * Resultado da verificação ao vivo (bot-ml/src/contas/verificar.js): pergunta
+ * de verdade pra cada plataforma se a sessão salva ainda vale, em vez de
+ * confiar só no que o banco ou o arquivo local dizem. Uma chave ausente
+ * significa "não checada agora" — mantém o valor guardado.
+ */
+export interface VerificacaoConexoes {
+  mercadolivre?: { conectado: boolean };
+  amazon?: { conectado: boolean; siteStripe: boolean | null };
+  whatsapp?: { conectado: boolean };
+  shopee?: { conectado: boolean; motivo: string | null };
+}
 
 /** Uma pergunta da plataforma traduzida para uma tela nossa. */
 export interface PedidoLogin {
@@ -80,6 +95,9 @@ export class JobsService {
   readonly login = signal<EstadoLogin | null>(null);
   readonly respondendoLogin = signal(false);
 
+  /** Resultado mais recente da verificação ao vivo das conexões. */
+  readonly verificacao = signal<VerificacaoConexoes | null>(null);
+
   private eventSource: EventSource | null = null;
   /** Resultado de login que o usuário já fechou — não reabrir. */
   private fimJaFechado: string | null = null;
@@ -119,6 +137,7 @@ export class JobsService {
         this.codigoSaida.set(s.codigoSaida ?? null);
         this.qrWhatsapp.set(s.qrWhatsapp ?? null);
         this.desafioMl.set(s.desafioMl ?? null);
+        if (s.verificacao) this.verificacao.set(s.verificacao);
         this.aplicarLogin(s);
       } catch (_) {}
     });
@@ -179,6 +198,7 @@ export class JobsService {
     this.qrWhatsapp.set(null);
     this.desafioMl.set(null);
     this.login.set(null);
+    this.verificacao.set(null);
   }
 
   limparConsole(): void {
@@ -211,6 +231,21 @@ export class JobsService {
       this.respondendoLogin.set(false);
       return { ok: false, erro: e?.error?.erro || 'Não consegui enviar a resposta.' };
     }
+  }
+
+  /**
+   * Esquece o resultado ao vivo de UMA plataforma. Usado depois de uma ação
+   * que já confirma o novo estado por conta própria (login, conectar,
+   * desconectar) — sem isso, o resultado de uma checagem antiga (feita antes
+   * dessa ação) continuaria "vencendo" pra sempre até a próxima checagem, e a
+   * ação que o usuário acabou de fazer pareceria não ter efeito nenhum.
+   */
+  esquecerVerificacao(chave: keyof VerificacaoConexoes): void {
+    const atual = this.verificacao();
+    if (!atual || !(chave in atual)) return;
+    const resto = { ...atual };
+    delete resto[chave];
+    this.verificacao.set(Object.keys(resto).length ? resto : null);
   }
 
   async cancelarLogin(id: string): Promise<void> {

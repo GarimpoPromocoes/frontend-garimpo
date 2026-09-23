@@ -1,28 +1,24 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
-import * as QRCode from 'qrcode';
+import { Component, computed, inject } from '@angular/core';
 import { StatusService } from '../../../core/services/status.service';
-import { JobsService } from '../../../core/services/jobs.service';
-import { ConfirmacaoService } from '../../../core/services/confirmacao.service';
+import { VerificacaoService } from '../../../core/services/verificacao.service';
+import { WhatsappUiService } from '../../../core/services/whatsapp-ui.service';
 
+/**
+ * O botão que abre a janela de conexão do WhatsApp — mesmo tratamento visual
+ * do botão de cada loja (logo oficial + estado). A conexão em si acontece no
+ * modal (`app-whatsapp-dialog`, montado no shell).
+ */
 @Component({
   selector: 'app-whatsapp-card',
   standalone: true,
   templateUrl: './whatsapp-card.html',
 })
 export class WhatsappCard {
-  protected statusService = inject(StatusService);
-  protected jobsService = inject(JobsService);
-  private confirmacao = inject(ConfirmacaoService);
+  private statusService = inject(StatusService);
+  private verificacao = inject(VerificacaoService);
+  private ui = inject(WhatsappUiService);
 
-  protected readonly conectado = computed(() => !!this.statusService.status()?.whatsapp.conectado);
-
-  protected readonly conectando = computed(
-    () => this.jobsService.rodando() && this.jobsService.tipo() === 'trocar-zap',
-  );
-  protected readonly outroJobRodando = computed(() => this.jobsService.rodando() && !this.conectando());
-
-  protected readonly qrImagem = signal<string | null>(null);
-  protected readonly erro = signal<string | null>(null);
+  protected readonly conectado = computed(() => this.verificacao.whatsappConectado());
 
   protected readonly conta = computed(() => {
     if (!this.conectado()) return null;
@@ -37,36 +33,7 @@ export class WhatsappCard {
     return m ? `+${m[1]} (${m[2]}) ${m[3]}-${m[4]}` : bruto;
   }
 
-  constructor() {
-    effect(() => {
-      const conteudo = this.jobsService.qrWhatsapp();
-      if (!conteudo) {
-        this.qrImagem.set(null);
-        return;
-      }
-      QRCode.toDataURL(conteudo, { margin: 2, width: 300 })
-        .then((dataUrl) => this.qrImagem.set(dataUrl))
-        .catch(() => this.qrImagem.set(null));
-    });
-  }
-
-  async conectar(): Promise<void> {
-    this.erro.set(null);
-    if (this.conectado()) {
-      const ok = await this.confirmacao.pedir({
-        titulo: 'Trocar o número do WhatsApp?',
-        texto:
-          'O número conectado agora vai ser desligado e um novo QR Code aparece para você ler com o outro celular.',
-        confirmar: 'Trocar número',
-        perigo: true,
-      });
-      if (!ok) return;
-    }
-    const r = await this.jobsService.iniciar('trocar-zap');
-    if (!r.ok) this.erro.set(r.erro ?? null);
-  }
-
-  async cancelar(): Promise<void> {
-    await this.jobsService.parar();
+  abrir(): void {
+    this.ui.abrir();
   }
 }
