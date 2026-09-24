@@ -57,10 +57,12 @@
         WhatsApp
         <span class="conn-state">{{ zapConectado() ? 'Conectado' : 'Desligado' }}</span>
       </div>
-      <div class="conn-pill" [class.conn-pill-off]="!mlConectado()">
+      <div class="conn-pill" [class.conn-pill-off]="!lojasConectadas()">
         <span class="conn-dot"></span>
-        Mercado Livre
-        <span class="conn-state">{{ mlConectado() ? 'Conectado' : 'Desligado' }}</span>
+        Lojas
+        <span class="conn-state">{{
+          lojasConectadas() ? lojasConectadas() + (lojasConectadas() === 1 ? ' conectada' : ' conectadas') : 'Nenhuma'
+        }}</span>
       </div>
 
       <div class="usuario-pill">
@@ -119,6 +121,9 @@
             {{ runControl.parando() ? 'Parando…' : 'Parar' }}
           </button>
         }
+
+        <!-- Sino: o que caiu e precisa ser reconectado. -->
+        <app-sino />
       </div>
     </header>
 
@@ -241,6 +246,21 @@
 <app-whatsapp-dialog />
 <app-desafio-ml-dialog />
 <app-confirmacao-dialog />
+
+<!-- Mercado Livre em espera: fica no canto, sem travar nada, até alguém resolver. -->
+@if (mostrarEsperaMl()) {
+  <div class="espera-chip" role="status">
+    <span class="espera-faixa-logo"><img src="lojas/mercadolivre.svg" alt="" /></span>
+    <div class="espera-faixa-texto">
+      <strong>Mercado Livre em espera</strong>
+      <span>Verificação pendente — as outras lojas seguem postando.</span>
+    </div>
+    <button type="button" class="btn btn-primary btn-sm" (click)="jobsService.desafioPopupAberto.set(true)">Resolver</button>
+    <button type="button" class="btn-fechar" (click)="esconderEsperaMl()" aria-label="Esconder" title="Esconder (continua no sino)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6 18 18M18 6 6 18" /></svg>
+    </button>
+  </div>
+}
 
 @if (!verificacao.pronto()) {
   <!--

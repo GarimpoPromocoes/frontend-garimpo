@@ -1,21 +1,16 @@
 @if (desafio()) {
-  <div class="card card-alerta">
-    <div class="card-header">
-      <div>
-        <h2>O Mercado Livre pediu uma verificação de segurança</h2>
-        <p class="card-subtitle">
-          Enquanto isso não passar, o robô não abre as páginas de produto do Mercado Livre — as outras lojas
-          seguem postando normalmente. Abra a tela da verificação e resolva por ela: quando passar, o robô volta
-          a usar o ML sozinho.
-        </p>
-      </div>
+  <div class="espera-faixa">
+    <span class="espera-faixa-logo"><img src="lojas/mercadolivre.svg" alt="" /></span>
+    <div class="espera-faixa-texto">
+      <strong>Mercado Livre em espera</strong>
+      <span>
+        Ele pediu uma verificação de segurança. O robô continua postando pelas outras lojas e volta a usar o
+        Mercado Livre sozinho quando a verificação passar.
+      </span>
     </div>
-    <div class="info-box" style="display: flex; gap: 12px; align-items: center; justify-content: space-between">
-      <span>Se ninguém resolver em 15 minutos, o robô fecha a verificação e tenta de novo mais tarde.</span>
-      <button type="button" class="btn btn-sm" (click)="jobsService.desafioPopupAberto.set(true)">
-        Resolver verificação agora
-      </button>
-    </div>
+    <button type="button" class="btn btn-ghost btn-sm" (click)="jobsService.desafioPopupAberto.set(true)">
+      Resolver
+    </button>
   </div>
 }
 

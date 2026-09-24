@@ -5,6 +5,7 @@ import { RunControlService } from './core/services/run-control.service';
 import { JobsService } from './core/services/jobs.service';
 import { AuthService } from './core/services/auth.service';
 import { VerificacaoService } from './core/services/verificacao.service';
+import { AvisosService } from './core/services/avisos.service';
 import { LoginCard } from './features/auth/login-card/login-card';
 import { WhatsappCard } from './features/conexoes/whatsapp-card/whatsapp-card';
 import { LojasCard } from './features/conexoes/lojas-card/lojas-card';
@@ -22,6 +23,7 @@ import { LojaDialog } from './features/conexoes/loja-dialog/loja-dialog';
 import { WhatsappDialog } from './features/conexoes/whatsapp-dialog/whatsapp-dialog';
 import { DesafioMlDialog } from './features/acompanhar/desafio-ml-dialog/desafio-ml-dialog';
 import { ConfirmacaoDialog } from './shared/confirmacao-dialog/confirmacao-dialog';
+import { Sino } from './shared/sino/sino';
 
 export type AbaId =
   | 'painel'
@@ -157,6 +159,7 @@ const CHAVE_ABA = 'promobot:aba';
     WhatsappDialog,
     DesafioMlDialog,
     ConfirmacaoDialog,
+    Sino,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
@@ -168,6 +171,7 @@ export class App implements OnInit, OnDestroy {
   protected jobsService = inject(JobsService);
   protected auth = inject(AuthService);
   protected verificacao = inject(VerificacaoService);
+  protected avisos = inject(AvisosService);
 
   protected readonly secoes = computed(() =>
     SECOES.map((s) => ({
@@ -191,14 +195,11 @@ export class App implements OnInit, OnDestroy {
       }
       case 'lojas': {
         if (!s) return null;
-        // A resposta ao vivo (quando existe) vence a guardada — é o que evita
-        // o badge dizer "tudo certo" com uma sessão que já caiu por fora.
-        const faltando = [
-          this.verificacao.mercadoLivreConectado(),
-          this.verificacao.amazonLogado(),
-          this.verificacao.shopeeConectado(),
-        ].filter((c) => !c).length;
-        return faltando ? String(faltando) : null;
+        // Nenhuma loja é obrigatória: o badge só aparece quando não há nenhuma
+        // conectada, ou quando uma que funcionava caiu.
+        if (!this.runControl.lojasConectadas().length) return '!';
+        const caidas = this.avisos.avisos().filter((a) => ['mercadolivre', 'amazon', 'shopee'].includes(a.origem)).length;
+        return caidas ? String(caidas) : null;
       }
       case 'produtos': {
         const n = s?.produtosCatalogo ?? 0;
@@ -219,7 +220,17 @@ export class App implements OnInit, OnDestroy {
     () => ABAS.find((a) => a.id === this.aba()) ?? ABAS[0]
   );
 
-  protected readonly mlConectado = computed(() => this.verificacao.mercadoLivreConectado());
+  protected readonly lojasConectadas = computed(() => this.runControl.lojasConectadas().length);
+
+  /** Cartão do canto "Mercado Livre em espera": o X esconde só esta verificação. */
+  private readonly esperaFechadaEm = signal<string | null>(null);
+  protected readonly mostrarEsperaMl = computed(() => {
+    const d = this.jobsService.desafioMl();
+    return !!d && !this.jobsService.desafioPopupAberto() && this.esperaFechadaEm() !== d.em;
+  });
+  protected esconderEsperaMl(): void {
+    this.esperaFechadaEm.set(this.jobsService.desafioMl()?.em ?? null);
+  }
   protected readonly zapConectado = computed(
     () => this.verificacao.whatsappConectado() && !this.jobsService.qrWhatsapp()
   );

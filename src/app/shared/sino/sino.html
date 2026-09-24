@@ -1,0 +1,60 @@
+<button
+  type="button"
+  class="sino-botao"
+  [class.sino-botao-alerta]="avisos.naoLidos() > 0"
+  [class.sino-botao-aberto]="aberto()"
+  [attr.aria-label]="avisos.avisos().length ? avisos.avisos().length + ' avisos de conexão' : 'Avisos'"
+  [attr.aria-expanded]="aberto()"
+  (click)="alternar()"
+>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 8.5a6 6 0 0 1 12 0c0 6.2 2.5 8 2.5 8h-17S6 14.7 6 8.5Z" />
+    <path d="M10.2 20a2 2 0 0 0 3.6 0" />
+  </svg>
+  @if (avisos.naoLidos() > 0) {
+    <span class="sino-contador">{{ avisos.naoLidos() > 9 ? '9+' : avisos.naoLidos() }}</span>
+  } @else if (avisos.avisos().length) {
+    <span class="sino-ponto"></span>
+  }
+</button>
+
+@if (aberto()) {
+  <div class="sino-painel" role="dialog" aria-label="Avisos de conexão">
+    <div class="sino-cabeca">
+      <strong>Avisos</strong>
+      @if (avisos.avisos().length) {
+        <span>{{ avisos.avisos().length }} {{ avisos.avisos().length === 1 ? 'pendente' : 'pendentes' }}</span>
+      }
+    </div>
+
+    @for (a of avisos.avisos(); track a.id) {
+      <div class="sino-item" [class.sino-item-aviso]="a.gravidade === 'aviso'">
+        <span class="sino-icone" [attr.data-origem]="a.origem">
+          @if (logo[a.origem]; as l) {
+            <img [src]="l" alt="" />
+          } @else if (a.origem === 'whatsapp') {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 11.6a8.4 8.4 0 0 1-12.3 7.4L3.5 20.5l1.6-4.6A8.4 8.4 0 1 1 20.5 11.6Z"/><path d="M8.8 9.1c0 3 2.4 5.4 5.4 5.4"/></svg>
+          } @else {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 20 6v5.4c0 4.4-3.1 8.2-8 9.8-4.9-1.6-8-5.4-8-9.8V6Z"/><path d="M12 8v4.5M12 15.5v.01"/></svg>
+          }
+        </span>
+        <div class="sino-corpo">
+          <div class="sino-titulo">
+            <span>{{ a.titulo }}</span>
+            <time>{{ quando(a.em) }}</time>
+          </div>
+          <p>{{ a.texto }}</p>
+          <button type="button" class="btn btn-primary btn-sm" (click)="agir(a)">{{ a.acao }}</button>
+        </div>
+      </div>
+    } @empty {
+      <div class="sino-vazio">
+        <span class="sino-vazio-icone">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
+        </span>
+        <strong>Tudo conectado</strong>
+        <span>Se alguma conexão cair, o aviso aparece aqui.</span>
+      </div>
+    }
+  </div>
+}
