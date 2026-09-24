@@ -3,6 +3,7 @@ import { ProvedorConexao, StatusService } from './status.service';
 import { JobsService } from './jobs.service';
 import { VerificacaoService } from './verificacao.service';
 import { WhatsappUiService } from './whatsapp-ui.service';
+import { TelegramUiService } from './telegram-ui.service';
 import { LojasUiService } from './lojas-ui.service';
 
 export type OrigemAviso = ProvedorConexao | 'desafio';
@@ -20,6 +21,7 @@ export interface Aviso {
 
 const NOME: Record<ProvedorConexao, string> = {
   whatsapp: 'WhatsApp',
+  telegram: 'Telegram',
   mercadolivre: 'Mercado Livre',
   amazon: 'Amazon',
   shopee: 'Shopee',
@@ -27,6 +29,7 @@ const NOME: Record<ProvedorConexao, string> = {
 
 const TITULO: Record<ProvedorConexao, string> = {
   whatsapp: 'O WhatsApp caiu',
+  telegram: 'O Telegram caiu',
   mercadolivre: 'O Mercado Livre desconectou',
   amazon: 'A sessão da Amazon caiu',
   shopee: 'A Shopee desconectou',
@@ -34,12 +37,13 @@ const TITULO: Record<ProvedorConexao, string> = {
 
 const PADRAO: Record<ProvedorConexao, string> = {
   whatsapp: 'O robô não consegue postar nos grupos até você conectar de novo.',
+  telegram: 'As promoções param de sair nos grupos do Telegram até você conectar de novo.',
   mercadolivre: 'Sem a sessão, os links do Mercado Livre não geram comissão. Conecte de novo.',
   amazon: 'Os posts da Amazon continuam com a sua tag, mas saem com o link longo.',
   shopee: 'O robô não consegue garimpar nem gerar links da Shopee até você conectar de novo.',
 };
 
-const ORDEM: ProvedorConexao[] = ['whatsapp', 'mercadolivre', 'shopee', 'amazon'];
+const ORDEM: ProvedorConexao[] = ['whatsapp', 'telegram', 'mercadolivre', 'shopee', 'amazon'];
 const CHAVE_VISTOS = 'promobot:avisos-vistos';
 
 /**
@@ -54,12 +58,15 @@ export class AvisosService {
   private jobsService = inject(JobsService);
   private verificacao = inject(VerificacaoService);
   private whatsappUi = inject(WhatsappUiService);
+  private telegramUi = inject(TelegramUiService);
   private lojasUi = inject(LojasUiService);
 
   private conectadoAgora(p: ProvedorConexao): boolean {
     switch (p) {
       case 'whatsapp':
         return this.verificacao.whatsappConectado();
+      case 'telegram':
+        return this.verificacao.telegramConectado();
       case 'mercadolivre':
         return this.verificacao.mercadoLivreConectado();
       case 'amazon':
@@ -85,7 +92,7 @@ export class AvisosService {
         texto: e.motivo || PADRAO[p],
         em: e.em,
         gravidade: p === 'amazon' ? 'aviso' : 'erro',
-        acao: p === 'whatsapp' ? 'Conectar de novo' : `Reconectar ${NOME[p]}`,
+        acao: p === 'whatsapp' || p === 'telegram' ? 'Conectar de novo' : `Reconectar ${NOME[p]}`,
       });
     }
 
@@ -135,6 +142,9 @@ export class AvisosService {
     switch (aviso.origem) {
       case 'whatsapp':
         this.whatsappUi.abrir();
+        return;
+      case 'telegram':
+        this.telegramUi.abrir();
         return;
       case 'desafio':
         this.jobsService.desafioPopupAberto.set(true);

@@ -11,6 +11,8 @@ export type JobTipo =
   | 'login-amazon'
   | 'trocar-zap'
   | 'desconectar-zap'
+  | 'conectar-telegram'
+  | 'desconectar-telegram'
   | 'grupos'
   | 'ganhos'
   | 'verificar-conexoes';
@@ -44,6 +46,7 @@ export interface VerificacaoConexoes {
   amazon?: { conectado: boolean; siteStripe: boolean | null };
   whatsapp?: { conectado: boolean };
   shopee?: { conectado: boolean; motivo: string | null };
+  telegram?: { conectado: boolean };
   /** Quando a checagem ao vivo rodou — um estado guardado mais novo vence ela. */
   em?: string;
 }
@@ -116,6 +119,10 @@ export class JobsService {
   readonly codigoSaida = signal<number | null>(null);
   readonly linhas = signal<string[]>([]);
   readonly qrWhatsapp = signal<string | null>(null);
+  /** Conexão do Telegram por QR: o código (tg://login?token=…), o pedido de senha (2 etapas) e o erro. */
+  readonly qrTelegram = signal<string | null>(null);
+  readonly senhaTelegram = signal<{ dica: string | null; erro: string | null } | null>(null);
+  readonly erroTelegram = signal<string | null>(null);
   readonly desafioMl = signal<{ url: string; em: string } | null>(null);
   /** Popup da verificação do ML: abre sozinho quando ela aparece; o X só esconde. */
   readonly desafioPopupAberto = signal(false);
@@ -165,6 +172,9 @@ export class JobsService {
         this.tipo.set(s.tipo ?? null);
         this.codigoSaida.set(s.codigoSaida ?? null);
         this.qrWhatsapp.set(s.qrWhatsapp ?? null);
+        this.qrTelegram.set(s.qrTelegram ?? null);
+        this.senhaTelegram.set(s.senhaTelegram ?? null);
+        this.erroTelegram.set(s.erroTelegram ?? null);
         const desafio = s.desafioMl ?? null;
         // Não abre o popup sozinho: a verificação fica em segundo plano (sino +
         // cartão no canto) enquanto o robô segue pelas outras lojas.
@@ -229,6 +239,9 @@ export class JobsService {
     this.tipo.set(null);
     this.codigoSaida.set(null);
     this.qrWhatsapp.set(null);
+    this.qrTelegram.set(null);
+    this.senhaTelegram.set(null);
+    this.erroTelegram.set(null);
     this.desafioMl.set(null);
     this.desafioPopupAberto.set(false);
     this.login.set(null);
@@ -265,6 +278,16 @@ export class JobsService {
     } catch (e: any) {
       this.login.set(null);
       return { ok: false, erro: e?.error?.erro || 'Não foi possível iniciar essa ação.' };
+    }
+  }
+
+  /** Senha da verificação em duas etapas do Telegram — vai direto pro robô. */
+  async enviarSenhaTelegram(senha: string): Promise<{ ok: boolean; erro?: string }> {
+    try {
+      await firstValueFrom(this.http.post('/api/jobs/telegram/senha', { senha }));
+      return { ok: true };
+    } catch (e: any) {
+      return { ok: false, erro: e?.error?.erro || 'Não consegui enviar a senha.' };
     }
   }
 

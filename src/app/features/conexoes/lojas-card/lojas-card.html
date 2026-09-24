@@ -1,6 +1,11 @@
 <div class="lojas-grade">
   @for (loja of lojas(); track loja.provedor) {
-    <button type="button" class="loja-botao" (click)="abrir(loja.provedor)">
+    <button
+      type="button"
+      class="loja-botao"
+      [class.loja-botao-off]="!loja.conectada"
+      (click)="abrir(loja.provedor)"
+    >
       <span class="loja-logo-caixa"><img class="loja-logo" [src]="loja.logo" [alt]="loja.nome" /></span>
       <span class="loja-estado" [class.loja-estado-ok]="loja.conectada">
         <span class="badge-dot"></span>
@@ -11,7 +16,7 @@
   @for (loja of emBreve; track loja.id) {
     <button
       type="button"
-      class="loja-botao loja-botao-breve"
+      class="loja-botao loja-botao-breve loja-botao-off"
       [attr.aria-label]="loja.nome + ' — em desenvolvimento'"
       (click)="avisarEmBreve(loja.nome)"
     >

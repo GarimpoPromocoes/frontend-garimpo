@@ -2,7 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
-export type ProvedorConexao = 'whatsapp' | 'mercadolivre' | 'amazon' | 'shopee';
+export type ProvedorConexao = 'whatsapp' | 'telegram' | 'mercadolivre' | 'amazon' | 'shopee';
 
 /** Estado real de uma conexão, gravado por quem sabe (o robô, a checagem ao vivo). */
 export interface EstadoConexao {
@@ -19,6 +19,7 @@ export interface StatusResponse {
   mercadoLivre: { conectado: boolean };
   amazon?: { logado: boolean; linkCurto: boolean; verificadoEm: string | null };
   whatsapp: { conectado: boolean; numero: string | null; nome: string | null };
+  telegram?: { conectado: boolean; nome: string | null; usuario: string | null; numero: string | null };
   conexoes?: Partial<Record<ProvedorConexao, EstadoConexao>>;
   produtosPublicados: number;
   produtosCatalogo: number;

@@ -13,6 +13,7 @@ const GRUPO_VAZIO = (): GrupoTematico => ({
   coringa: false,
   geral: false,
   gruposEspelho: [],
+  grupoTelegram: '',
 });
 
 const copiar = (g: GrupoTematico): GrupoTematico => ({
@@ -24,6 +25,9 @@ const copiar = (g: GrupoTematico): GrupoTematico => ({
 
 /** Quantas palavras do assunto aparecem no card antes do "+N". */
 const MAX_PALAVRAS_CARD = 5;
+
+/** Limite de palavras em "Nunca incluir se aparecer" (o mesmo da API). */
+const MAX_EXCLUSOES = 100;
 
 /**
  * Grupos em grade, igual à tela de Lojas: cada grupo é um card com o resumo
@@ -49,6 +53,7 @@ export class GroupsCard {
   protected readonly erro = signal<string | null>(null);
 
   protected readonly maxPalavras = MAX_PALAVRAS_CARD;
+  protected readonly maxExclusoes = MAX_EXCLUSOES;
 
   /** Outro grupo já é o de sobras? Mostra no aviso da janela. */
   protected readonly coringaAtual = computed(() => {
@@ -94,9 +99,18 @@ export class GroupsCard {
     const r = this.rascunho();
     if (!r) return;
 
-    const g: GrupoTematico = { ...r, nome: r.nome.trim(), groupName: r.groupName.trim() };
+    const g: GrupoTematico = {
+      ...r,
+      nome: r.nome.trim(),
+      groupName: r.groupName.trim(),
+      grupoTelegram: (r.grupoTelegram ?? '').trim(),
+    };
     if (!g.nome || !g.groupName) {
       this.erro.set('Preencha o apelido e o nome exato do grupo no WhatsApp.');
+      return;
+    }
+    if (g.palavrasExcluir.length > MAX_EXCLUSOES) {
+      this.erro.set(`No máximo ${MAX_EXCLUSOES} palavras em "Nunca incluir se aparecer".`);
       return;
     }
     if (!g.coringa && !g.geral && g.palavras.length === 0) {
