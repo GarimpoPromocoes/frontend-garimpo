@@ -19,6 +19,8 @@ export interface GrupoTematico {
   coringa: boolean;
   geral: boolean;
   gruposEspelho: string[];
+  /** Grupo do Telegram que recebe a mesma postagem (vazio = só WhatsApp). */
+  grupoTelegram?: string;
 }
 
 export interface Agendamento {

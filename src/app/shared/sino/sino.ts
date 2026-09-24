@@ -5,6 +5,7 @@ const LOGO: Partial<Record<Aviso['origem'], string>> = {
   mercadolivre: 'lojas/mercadolivre.svg',
   amazon: 'lojas/amazon.svg',
   shopee: 'lojas/shopee.svg',
+  telegram: 'lojas/telegram.png',
 };
 
 /** Sino do topo: o que caiu e precisa ser reconectado. */

@@ -134,6 +134,12 @@ export class VerificacaoService {
       : !!this.jobsService.verificacao()?.whatsapp?.conectado,
   );
 
+  readonly telegramConectado = computed(() =>
+    this.guardadoVence('telegram')
+      ? !!this.statusService.status()?.telegram?.conectado
+      : !!this.jobsService.verificacao()?.telegram?.conectado,
+  );
+
   /** Shopee é 100% API: vale o estado guardado; sem ele, o que o banco de conexões diz. */
   readonly shopeeConectado = computed(() => {
     if (!this.guardadoVence('shopee')) return !!this.jobsService.verificacao()?.shopee?.conectado;

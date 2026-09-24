@@ -7,17 +7,12 @@
     </span>
   </button>
 
-  <!-- Telegram: ainda em desenvolvimento. Fica visivel, mas o clique so avisa. -->
-  <button
-    type="button"
-    class="loja-botao loja-botao-breve"
-    aria-label="Telegram — em desenvolvimento"
-    (click)="avisarTelegram()"
-  >
+  <!-- Telegram: mesmo fluxo do WhatsApp — QR Code no modal, a sessao fica salva. -->
+  <button type="button" class="loja-botao" (click)="abrirTelegram()">
     <span class="loja-logo-caixa"><img class="loja-logo" src="lojas/telegram.png" alt="Telegram" /></span>
-    <span class="loja-estado loja-estado-breve">
+    <span class="loja-estado" [class.loja-estado-ok]="telegramConectado()">
       <span class="badge-dot"></span>
-      Em breve
+      {{ telegramConectado() ? 'Conectado' : 'Conectar' }}
     </span>
   </button>
 </div>

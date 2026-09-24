@@ -1,0 +1,297 @@
+<p class="grupos-intro">
+  Como e quando o robô publica nos grupos. Clique num card para ajustar — salvar na janela já grava.
+</p>
+
+<div class="regras-secao">
+  <h3 class="regras-secao-titulo">Ritmo das mensagens</h3>
+
+  <div class="grupos-grade">
+    <!-- Frequência -->
+    <button type="button" class="grupo-card regra-card" (click)="abrir('frequencia')">
+      <div class="grupo-card-topo">
+        <span class="regra-icone">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        </span>
+        <div class="grupo-card-nomes">
+          <span class="grupo-card-nome">Frequência</span>
+          <span class="regra-card-sub">Tempo entre uma postagem e outra</span>
+        </div>
+      </div>
+      <div class="regra-card-valor">
+        <strong>{{ frequencia().min }}–{{ frequencia().max }}</strong>
+        <span>min</span>
+      </div>
+      <p class="regra-card-texto">
+        Cerca de <strong>{{ frequencia().porDia }} postagens por dia</strong> em cada grupo.
+      </p>
+      <div class="grupo-card-rodape">
+        <span>Ritmo {{ frequencia().ritmo.toLowerCase() }}</span>
+        <span>Ajustar →</span>
+      </div>
+    </button>
+
+    <!-- Repetição -->
+    <button type="button" class="grupo-card regra-card" (click)="abrir('repeticao')">
+      <div class="grupo-card-topo">
+        <span class="regra-icone">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2.5 20.5 6 17 9.5"/><path d="M3.5 11V9.5A3.5 3.5 0 0 1 7 6h13.5"/><path d="M7 21.5 3.5 18 7 14.5"/><path d="M20.5 13v1.5A3.5 3.5 0 0 1 17 18H3.5"/></svg>
+        </span>
+        <div class="grupo-card-nomes">
+          <span class="grupo-card-nome">Repetição de produtos</span>
+          <span class="regra-card-sub">Quando uma oferta pode voltar</span>
+        </div>
+      </div>
+      <div class="regra-card-valor">
+        <strong>{{ textoHoras(repeticao().cooldownHoras) }}</strong>
+        <span>de espera</span>
+      </div>
+      <p class="regra-card-texto">
+        @if (repeticao().repostarAposDias > 0) {
+          Depois de <strong>{{ repeticao().repostarAposDias }} dias</strong> volta mesmo sem baixar o preço.
+        } @else {
+          Só volta se <strong>o preço baixar</strong> ou o desconto subir.
+        }
+      </p>
+      <div class="grupo-card-rodape">
+        <span>Vale para cada grupo</span>
+        <span>Ajustar →</span>
+      </div>
+    </button>
+
+    <!-- Cupons -->
+    <button type="button" class="grupo-card regra-card" [class.regra-card-off]="!cupons().ativo" (click)="abrir('cupons')">
+      <div class="grupo-card-topo">
+        <span class="regra-icone">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5V7a1.5 1.5 0 0 1 1.5-1.5h15A1.5 1.5 0 0 1 21 7v2.5a2.5 2.5 0 0 0 0 5V17a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17v-2.5a2.5 2.5 0 0 0 0-5Z"/><path d="M14 5.5v13" stroke-dasharray="2 2.6"/></svg>
+        </span>
+        <div class="grupo-card-nomes">
+          <span class="grupo-card-nome">Cupons de desconto</span>
+          <span class="regra-card-sub">Mensagens com códigos de desconto</span>
+        </div>
+      </div>
+      @if (cupons().ativo) {
+        <div class="regra-card-valor">
+          <strong>{{ cupons().produto + cupons().lista }}%</strong>
+          <span>das mensagens</span>
+        </div>
+        <div class="regra-barra" aria-hidden="true">
+          <span class="regra-barra-ofertas" [style.width.%]="cupons().ofertas"></span>
+          <span class="regra-barra-produto" [style.width.%]="cupons().produto"></span>
+          <span class="regra-barra-lista" [style.width.%]="cupons().lista"></span>
+        </div>
+      } @else {
+        <div class="regra-card-valor">
+          <strong>Desligado</strong>
+        </div>
+        <p class="regra-card-texto">Só saem ofertas comuns.</p>
+      }
+      <div class="grupo-card-rodape">
+        <span>
+          @if (cuponsDisponiveis() !== null) {
+            {{ cuponsDisponiveis() }} {{ cuponsDisponiveis() === 1 ? 'cupom disponível' : 'cupons disponíveis' }}
+          } @else {
+            Cupons buscados sozinhos
+          }
+        </span>
+        <span>Ajustar →</span>
+      </div>
+    </button>
+  </div>
+</div>
+
+<app-datas-especiais />
+
+<!-- ================================ janelas ================================ -->
+@if (janela(); as j) {
+  <div class="modal-fundo" (click)="fechar()">
+    <div class="modal-caixa modal-grupo" (click)="$event.stopPropagation()">
+      <div class="card-header">
+        <div class="grupo-modal-titulo">
+          <span class="regra-icone">
+            @switch (j) {
+              @case ('frequencia') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> }
+              @case ('repeticao') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2.5 20.5 6 17 9.5"/><path d="M3.5 11V9.5A3.5 3.5 0 0 1 7 6h13.5"/><path d="M7 21.5 3.5 18 7 14.5"/><path d="M20.5 13v1.5A3.5 3.5 0 0 1 17 18H3.5"/></svg> }
+              @case ('cupons') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5V7a1.5 1.5 0 0 1 1.5-1.5h15A1.5 1.5 0 0 1 21 7v2.5a2.5 2.5 0 0 0 0 5V17a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17v-2.5a2.5 2.5 0 0 0 0-5Z"/><path d="M14 5.5v13" stroke-dasharray="2 2.6"/></svg> }
+            }
+          </span>
+          <div>
+            <h2>
+              @switch (j) {
+                @case ('frequencia') { Frequência das postagens }
+                @case ('repeticao') { Repetição de produtos }
+                @case ('cupons') { Cupons de desconto }
+              }
+            </h2>
+            <p class="card-subtitle">
+              @switch (j) {
+                @case ('frequencia') { O robô sorteia a espera dentro da faixa — assim o envio parece de gente, não de robô. }
+                @case ('repeticao') { Evita que a mesma oferta apareça de novo cedo demais no mesmo grupo. }
+                @case ('cupons') { De vez em quando, no lugar de uma oferta comum, sai uma mensagem com cupom. }
+              }
+            </p>
+          </div>
+        </div>
+        <button type="button" class="btn-fechar" (click)="fechar()" aria-label="Fechar" title="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6 18 18M18 6 6 18" /></svg>
+        </button>
+      </div>
+
+      @switch (j) {
+        @case ('frequencia') {
+          <div class="regra-opcoes regra-opcoes-3">
+            @for (r of ritmos; track r.id) {
+              <button
+                type="button"
+                class="regra-opcao"
+                [class.regra-opcao-ativa]="rRitmo() === r.id"
+                (click)="escolherRitmo(r)"
+              >
+                <strong>{{ r.nome }}</strong>
+                <span class="regra-opcao-valor">{{ r.min }}–{{ r.max }} min</span>
+                <small>{{ r.descricao }}</small>
+              </button>
+            }
+          </div>
+
+          <div class="field">
+            <label>Ou escolha a faixa exata</label>
+            <div class="regra-faixa">
+              <span>Esperar entre</span>
+              <input type="number" min="1" max="720" [ngModel]="rMin()" (ngModelChange)="rMin.set($event)" aria-label="Mínimo em minutos" />
+              <span>e</span>
+              <input type="number" min="1" max="720" [ngModel]="rMax()" (ngModelChange)="rMax.set($event)" aria-label="Máximo em minutos" />
+              <span>minutos</span>
+            </div>
+          </div>
+
+          <div class="regra-previa">
+            <span class="regra-previa-numero">{{ rPorDia() }}</span>
+            <span>postagens por dia em cada grupo, mais ou menos.</span>
+          </div>
+        }
+
+        @case ('repeticao') {
+          <div class="field">
+            <label>Tempo mínimo antes de repetir</label>
+            <span class="hint">Nesse período o mesmo produto não volta ao grupo — nem se o preço cair.</span>
+            <div class="regra-chips">
+              @for (o of opcoesCooldown; track o.horas) {
+                <button type="button" class="regra-chip" [class.regra-chip-ativa]="n(rCooldown()) === o.horas" (click)="rCooldown.set(o.horas)">
+                  {{ o.rotulo }}
+                </button>
+              }
+              <span class="regra-chip-campo">
+                <input type="number" min="0" max="720" [ngModel]="rCooldown()" (ngModelChange)="rCooldown.set($event)" aria-label="Horas" />
+                horas
+              </span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Repetir mesmo sem baixar o preço depois de</label>
+            <span class="hint">"Nunca" = o produto só volta quando ficar mais barato ou com desconto maior.</span>
+            <div class="regra-chips">
+              @for (o of opcoesRepostar; track o.dias) {
+                <button type="button" class="regra-chip" [class.regra-chip-ativa]="n(rRepostar()) === o.dias" (click)="rRepostar.set(o.dias)">
+                  {{ o.rotulo }}
+                </button>
+              }
+              <span class="regra-chip-campo">
+                <input type="number" min="0" max="90" [ngModel]="rRepostar()" (ngModelChange)="rRepostar.set($event)" aria-label="Dias" />
+                dias
+              </span>
+            </div>
+          </div>
+
+          <div class="regra-como">
+            <strong>Como fica, na prática</strong>
+            <ol>
+              <li>Postou um produto: ele fica <strong>{{ textoHoras(n(rCooldown())) }}</strong> sem voltar a esse grupo.</li>
+              <li>Depois disso, volta assim que <strong>o preço baixar ou o desconto subir</strong>.</li>
+              @if (n(rRepostar()) > 0) {
+                <li>E passados <strong>{{ rRepostar() }} dias</strong>, pode voltar mesmo com o mesmo preço.</li>
+              } @else {
+                <li>Com o mesmo preço, <strong>não volta nunca</strong>.</li>
+              }
+            </ol>
+            @if (rConflitoRepeticao()) {
+              <p class="regra-aviso">
+                O tempo mínimo ({{ textoHoras(n(rCooldown())) }}) é maior que {{ rRepostar() }} dias — na prática vale o tempo mínimo.
+              </p>
+            }
+          </div>
+        }
+
+        @case ('cupons') {
+          <div class="toggle-row">
+            <button
+              type="button"
+              class="toggle-switch"
+              role="switch"
+              [attr.aria-checked]="rCupomAtivo()"
+              [class.toggle-switch-on]="rCupomAtivo()"
+              (click)="rCupomAtivo.set(!rCupomAtivo())"
+            >
+              <span class="toggle-switch-thumb"></span>
+            </button>
+            <span class="toggle-label">Enviar cupons junto com as ofertas</span>
+          </div>
+
+          @if (rCupomAtivo()) {
+            <div class="regra-slider">
+              <div class="regra-slider-topo">
+                <span><i class="regra-ponto regra-ponto-produto"></i>Oferta com cupom</span>
+                <strong>{{ rCupomProduto() }}%</strong>
+              </div>
+              <input type="range" min="0" [max]="maxCupons" step="1" [ngModel]="rCupomProduto()" (ngModelChange)="mudarCupomProduto($event)" />
+              <small>Uma oferta comum que ganha um cupom que vale para aquele produto.</small>
+            </div>
+
+            <div class="regra-slider">
+              <div class="regra-slider-topo">
+                <span><i class="regra-ponto regra-ponto-lista"></i>Lista de cupons</span>
+                <strong>{{ rCupomLista() }}%</strong>
+              </div>
+              <input type="range" min="0" [max]="maxCupons" step="1" [ngModel]="rCupomLista()" (ngModelChange)="mudarCupomLista($event)" />
+              <small>Vários códigos numa mensagem só, sem produto.</small>
+            </div>
+
+            <div class="regra-previa regra-previa-coluna">
+              <span>A cada 100 mensagens, mais ou menos:</span>
+              <div class="regra-barra regra-barra-grande" aria-hidden="true">
+                <span class="regra-barra-ofertas" [style.width.%]="rOfertas()"></span>
+                <span class="regra-barra-produto" [style.width.%]="rCupomProduto()"></span>
+                <span class="regra-barra-lista" [style.width.%]="rCupomLista()"></span>
+              </div>
+              <div class="regra-legenda">
+                <span><i class="regra-ponto regra-ponto-ofertas"></i>{{ rOfertas() }} ofertas comuns</span>
+                <span><i class="regra-ponto regra-ponto-produto"></i>{{ rCupomProduto() }} com cupom</span>
+                <span><i class="regra-ponto regra-ponto-lista"></i>{{ rCupomLista() }} listas</span>
+              </div>
+            </div>
+            <span class="hint">
+              Os cupons juntos vão até {{ maxCupons }}% — oferta comum continua sendo a maioria.
+              @if (cuponsDisponiveis() !== null) {
+                Hoje há {{ cuponsDisponiveis() }} cupons disponíveis; quando acabam, o robô busca mais sozinho.
+              }
+            </span>
+          } @else {
+            <div class="info-box">Com os cupons desligados, só saem ofertas comuns.</div>
+          }
+        }
+      }
+
+      @if (erro(); as e) {
+        <div class="info-box info-box-erro">{{ e }}</div>
+      }
+
+      <div class="modal-rodape grupo-modal-rodape">
+        <span class="grupo-modal-espaco"></span>
+        <button type="button" class="btn btn-ghost" [disabled]="salvando()" (click)="fechar()">Cancelar</button>
+        <button type="button" class="btn btn-primary" [disabled]="salvando()" (click)="salvar()">
+          {{ salvando() ? 'Salvando…' : 'Salvar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

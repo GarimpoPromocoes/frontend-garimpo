@@ -2,7 +2,7 @@ import { Component, computed, inject } from '@angular/core';
 import { StatusService } from '../../../core/services/status.service';
 import { VerificacaoService } from '../../../core/services/verificacao.service';
 import { WhatsappUiService } from '../../../core/services/whatsapp-ui.service';
-import { ConfirmacaoService } from '../../../core/services/confirmacao.service';
+import { TelegramUiService } from '../../../core/services/telegram-ui.service';
 
 /**
  * O botão que abre a janela de conexão do WhatsApp — mesmo tratamento visual
@@ -18,9 +18,10 @@ export class WhatsappCard {
   private statusService = inject(StatusService);
   private verificacao = inject(VerificacaoService);
   private ui = inject(WhatsappUiService);
-  private confirmacao = inject(ConfirmacaoService);
+  private telegramUi = inject(TelegramUiService);
 
   protected readonly conectado = computed(() => this.verificacao.whatsappConectado());
+  protected readonly telegramConectado = computed(() => this.verificacao.telegramConectado());
 
   protected readonly conta = computed(() => {
     if (!this.conectado()) return null;
@@ -39,13 +40,7 @@ export class WhatsappCard {
     this.ui.abrir();
   }
 
-  avisarTelegram(): void {
-    void this.confirmacao.pedir({
-      titulo: 'Telegram ainda não está disponível',
-      texto:
-        'O envio das promoções pelo Telegram está em desenvolvimento. Assim que ficar pronto, é só voltar aqui e conectar.',
-      confirmar: 'Entendi',
-      soAviso: true,
-    });
+  abrirTelegram(): void {
+    this.telegramUi.abrir();
   }
 }

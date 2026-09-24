@@ -9,18 +9,18 @@ import { AvisosService } from './core/services/avisos.service';
 import { LoginCard } from './features/auth/login-card/login-card';
 import { WhatsappCard } from './features/conexoes/whatsapp-card/whatsapp-card';
 import { LojasCard } from './features/conexoes/lojas-card/lojas-card';
-import { PostingConfigCard } from './features/divulgacao/posting-config-card/posting-config-card';
-import { ThemesCard } from './features/divulgacao/themes-card/themes-card';
+import { RegrasPostagem } from './features/divulgacao/regras-postagem/regras-postagem';
 import { GroupsCard } from './features/divulgacao/groups-card/groups-card';
 import { RunCard } from './features/acompanhar/run-card/run-card';
 import { StatsCard } from './features/acompanhar/stats-card/stats-card';
-import { CuponsCard } from './features/divulgacao/cupons-card/cupons-card';
 import { ConsoleCard } from './features/acompanhar/console-card/console-card';
 import { ProdutosCard } from './features/divulgacao/produtos-card/produtos-card';
 import { OwnerCard } from './features/admin/owner-card/owner-card';
 import { GanhosCard } from './features/acompanhar/ganhos-card/ganhos-card';
 import { LojaDialog } from './features/conexoes/loja-dialog/loja-dialog';
 import { WhatsappDialog } from './features/conexoes/whatsapp-dialog/whatsapp-dialog';
+import { TelegramDialog } from './features/conexoes/telegram-dialog/telegram-dialog';
+import { StatusConexoes } from './shared/status-conexoes/status-conexoes';
 import { DesafioMlDialog } from './features/acompanhar/desafio-ml-dialog/desafio-ml-dialog';
 import { ConfirmacaoDialog } from './shared/confirmacao-dialog/confirmacao-dialog';
 import { Sino } from './shared/sino/sino';
@@ -31,13 +31,12 @@ export type AbaId =
   | 'ganhos'
   | 'grupos'
   | 'regras'
-  | 'cupons'
   | 'produtos'
   | 'whatsapp'
   | 'lojas'
   | 'dono';
 
-type BadgeId = 'grupos' | 'cupons' | 'lojas' | 'produtos' | 'alerta' | null;
+type BadgeId = 'grupos' | 'lojas' | 'produtos' | 'alerta' | null;
 
 interface Aba {
   id: AbaId;
@@ -92,16 +91,8 @@ const ABAS: Aba[] = [
     id: 'regras',
     label: 'Regras de postagem',
     titulo: 'Regras de postagem',
-    descricao: 'Com que frequência o robô posta, quando um produto pode repetir e as datas especiais.',
+    descricao: 'Frequência, repetição de produtos, cupons e datas especiais.',
     secao: 'Divulgação',
-  },
-  {
-    id: 'cupons',
-    label: 'Cupons',
-    titulo: 'Cupons',
-    descricao: 'Com que frequência saem mensagens de cupom e quais estão valendo agora.',
-    secao: 'Divulgação',
-    badge: 'cupons',
   },
 
   {
@@ -145,18 +136,18 @@ const CHAVE_ABA = 'promobot:aba';
     LoginCard,
     WhatsappCard,
     LojasCard,
-    PostingConfigCard,
-    ThemesCard,
+    RegrasPostagem,
     GroupsCard,
     RunCard,
     StatsCard,
-    CuponsCard,
     ConsoleCard,
     ProdutosCard,
     OwnerCard,
     GanhosCard,
     LojaDialog,
     WhatsappDialog,
+    TelegramDialog,
+    StatusConexoes,
     DesafioMlDialog,
     ConfirmacaoDialog,
     Sino,
@@ -189,10 +180,6 @@ export class App implements OnInit, OnDestroy {
         const n = this.configService.config()?.grupos?.length ?? 0;
         return n ? String(n) : null;
       }
-      case 'cupons': {
-        const n = s?.cuponsAtivos ?? 0;
-        return n ? String(n) : null;
-      }
       case 'lojas': {
         if (!s) return null;
         // Nenhuma loja é obrigatória: o badge só aparece quando não há nenhuma
@@ -220,8 +207,6 @@ export class App implements OnInit, OnDestroy {
     () => ABAS.find((a) => a.id === this.aba()) ?? ABAS[0]
   );
 
-  protected readonly lojasConectadas = computed(() => this.runControl.lojasConectadas().length);
-
   /** Cartão do canto "Mercado Livre em espera": o X esconde só esta verificação. */
   private readonly esperaFechadaEm = signal<string | null>(null);
   protected readonly mostrarEsperaMl = computed(() => {
@@ -231,9 +216,6 @@ export class App implements OnInit, OnDestroy {
   protected esconderEsperaMl(): void {
     this.esperaFechadaEm.set(this.jobsService.desafioMl()?.em ?? null);
   }
-  protected readonly zapConectado = computed(
-    () => this.verificacao.whatsappConectado() && !this.jobsService.qrWhatsapp()
-  );
 
   private dashboardIniciado = false;
 
@@ -260,6 +242,8 @@ export class App implements OnInit, OnDestroy {
       let salva = localStorage.getItem(CHAVE_ABA) as AbaId | null;
       // "Datas e temas" virou parte de Regras de postagem.
       if ((salva as string) === 'temas') salva = 'regras';
+      // Cupons viraram um card dentro de Regras de postagem.
+      if ((salva as string) === 'cupons') salva = 'regras';
       if (salva && ABAS.some((a) => a.id === salva)) this.aba.set(salva);
     } catch (_) {
     }
@@ -277,9 +261,7 @@ export class App implements OnInit, OnDestroy {
       void import('./features/divulgacao/produtos-card/produtos-card');
       void import('./features/conexoes/whatsapp-card/whatsapp-card');
       void import('./features/conexoes/lojas-card/lojas-card');
-      void import('./features/divulgacao/posting-config-card/posting-config-card');
-      void import('./features/divulgacao/cupons-card/cupons-card');
-      void import('./features/divulgacao/themes-card/themes-card');
+      void import('./features/divulgacao/regras-postagem/regras-postagem');
       if (this.auth.usuario()?.admin) void import('./features/admin/owner-card/owner-card');
     };
     if (typeof requestIdleCallback === 'function') requestIdleCallback(carregar, { timeout: 5000 });
