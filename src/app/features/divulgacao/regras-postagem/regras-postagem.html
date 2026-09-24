@@ -23,6 +23,7 @@
       </div>
       <p class="regra-card-texto">
         Cerca de <strong>{{ frequencia().porDia }} postagens por dia</strong> em cada grupo.
+        @if (frequencia().garimpoMax) { Garimpo de até {{ frequencia().garimpoMax }} produtos/dia por grupo. }
       </p>
       <div class="grupo-card-rodape">
         <span>Ritmo {{ frequencia().ritmo.toLowerCase() }}</span>
@@ -168,6 +169,9 @@
             <span class="regra-previa-numero">{{ rPorDia() }}</span>
             <span>postagens por dia em cada grupo, mais ou menos.</span>
           </div>
+          @if (rGarimpoMax()) {
+            <p class="regra-card-texto">O garimpo guarda no máximo <strong>{{ rGarimpoMax() }} produtos por dia</strong> em cada grupo.</p>
+          }
         }
 
         @case ('repeticao') {

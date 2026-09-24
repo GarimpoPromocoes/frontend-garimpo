@@ -54,6 +54,12 @@ function postsPorDia(min: number, max: number): string {
   return poucos === muitos ? `${poucos}` : `${poucos} a ${muitos}`;
 }
 
+/** Teto diário do garimpo por grupo = máximo de postagens/dia (mesma conta do backend: cotaDiaria.js). */
+function garimpoMaxPorDia(min: number, max: number): number | null {
+  const menor = Math.min(...[min, max].filter((v) => v > 0));
+  return Number.isFinite(menor) ? Math.max(1, Math.round((24 * 60) / menor)) : null;
+}
+
 /**
  * Regras de postagem em cards, igual às telas de Grupos e Lojas: cada card
  * mostra o que está valendo agora e o clique abre a janela para ajustar.
@@ -87,7 +93,13 @@ export class RegrasPostagem {
     const min = a?.intervaloMinMinutos ?? 20;
     const max = a?.intervaloMaxMinutos ?? 60;
     const ritmo = RITMOS.find((r) => r.min === min && r.max === max);
-    return { min, max, porDia: postsPorDia(min, max), ritmo: ritmo?.nome ?? 'Personalizado' };
+    return {
+      min,
+      max,
+      porDia: postsPorDia(min, max),
+      garimpoMax: garimpoMaxPorDia(min, max),
+      ritmo: ritmo?.nome ?? 'Personalizado',
+    };
   });
 
   protected readonly repeticao = computed(() => {
@@ -121,6 +133,7 @@ export class RegrasPostagem {
   protected readonly rCupomLista = signal(10);
 
   protected readonly rPorDia = computed(() => postsPorDia(Number(this.rMin()), Number(this.rMax())));
+  protected readonly rGarimpoMax = computed(() => garimpoMaxPorDia(Number(this.rMin()), Number(this.rMax())));
   protected readonly rRitmo = computed(
     () => RITMOS.find((r) => r.min === Number(this.rMin()) && r.max === Number(this.rMax()))?.id ?? 'personalizado',
   );
