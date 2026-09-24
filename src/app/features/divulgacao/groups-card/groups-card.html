@@ -1,115 +1,178 @@
-<div class="card">
-  <div class="card-header">
-    <div>
-      <h2>Seus grupos</h2>
-      <p class="card-subtitle">
-        O nome no WhatsApp precisa ser idêntico ao do grupo — é por ele que o robô encontra a conversa
-        para enviar a promoção.
-      </p>
-    </div>
-    <button type="button" class="btn btn-ghost btn-sm" (click)="adicionarGrupo()">+ Adicionar grupo</button>
-  </div>
+<p class="grupos-intro">
+  Cada card é um grupo do WhatsApp onde o robô publica. Clique para editar o assunto, as exclusões e o nome exato
+  do grupo.
+</p>
 
-  <div style="display: flex; flex-direction: column; gap: 16px">
-    @for (g of grupos(); track g.id) {
-      <div class="repeat-item">
-        <div class="repeat-item-header">
-          <span class="repeat-item-title">{{ g.nome || 'Novo grupo' }}</span>
-          <button type="button" class="btn btn-danger-soft btn-sm" (click)="removerGrupo($index)">Remover</button>
+<div class="grupos-grade">
+  @for (g of grupos(); track g.id) {
+    <button type="button" class="grupo-card" (click)="abrir(g)">
+      <div class="grupo-card-topo">
+        <span class="grupo-avatar" [class.grupo-avatar-tudo]="g.geral" [class.grupo-avatar-sobras]="g.coringa">
+          {{ inicial(g) }}
+        </span>
+        <div class="grupo-card-nomes">
+          <span class="grupo-card-nome">{{ g.nome }}</span>
+          <span class="grupo-card-zap" [title]="g.groupName">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 11.6a8.4 8.4 0 0 1-12.3 7.4L3.5 20.5l1.6-4.6A8.4 8.4 0 1 1 20.5 11.6Z"/></svg>
+            <span>{{ g.groupName }}</span>
+          </span>
         </div>
+      </div>
 
-        <div class="grid-2">
-          <div class="field">
-            <label>Apelido do grupo</label>
-            <input
-              type="text"
-              [ngModel]="g.nome"
-              (ngModelChange)="atualizarCampo($index, 'nome', $event)"
-              placeholder="Ex.: Eletrônicos"
-            />
-            <span class="hint">Só para você se organizar aqui no painel.</span>
-          </div>
-          <div class="field">
-            <label>Nome exato no WhatsApp</label>
-            <input
-              type="text"
-              [ngModel]="g.groupName"
-              (ngModelChange)="atualizarCampo($index, 'groupName', $event)"
-              placeholder="Copie e cole o nome do grupo"
-            />
-            <span class="hint">Precisa ser igual, com acentos e emojis.</span>
+      <div class="grupo-card-corpo">
+        @if (g.geral) {
+          <span class="grupo-selo grupo-selo-tudo">Recebe tudo</span>
+        }
+        @if (g.coringa) {
+          <span class="grupo-selo grupo-selo-sobras">Sobras</span>
+        }
+        @if (!g.geral) {
+          @for (p of g.palavras.slice(0, maxPalavras); track p) {
+            <span class="grupo-tag">{{ p }}</span>
+          }
+          @if (g.palavras.length > maxPalavras) {
+            <span class="grupo-tag grupo-tag-mais">+{{ g.palavras.length - maxPalavras }}</span>
+          }
+          @if (!g.palavras.length && !g.coringa) {
+            <span class="grupo-card-vazio">Sem assunto definido</span>
+          }
+        }
+      </div>
+
+      <div class="grupo-card-rodape">
+        <span>
+          @if (g.geral) {
+            Qualquer promoção
+          } @else {
+            {{ g.palavras.length }} {{ g.palavras.length === 1 ? 'palavra' : 'palavras' }}
+          }
+        </span>
+        @if (g.palavrasExcluir.length) {
+          <span class="grupo-card-exclui">
+            {{ g.palavrasExcluir.length }} {{ g.palavrasExcluir.length === 1 ? 'exclusão' : 'exclusões' }}
+          </span>
+        }
+      </div>
+    </button>
+  }
+
+  <button type="button" class="grupo-card grupo-card-novo" (click)="criar()">
+    <span class="grupo-novo-mais">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
+    </span>
+    <span class="grupo-novo-titulo">{{ grupos().length ? 'Adicionar grupo' : 'Adicionar o primeiro grupo' }}</span>
+    <span class="grupo-novo-texto">O robô só publica nos grupos cadastrados aqui.</span>
+  </button>
+</div>
+
+@if (rascunho(); as r) {
+  <div class="modal-fundo" (click)="fechar()">
+    <div class="modal-caixa modal-grupo" (click)="$event.stopPropagation()">
+      <div class="card-header">
+        <div class="grupo-modal-titulo">
+          <span class="grupo-avatar" [class.grupo-avatar-tudo]="r.geral" [class.grupo-avatar-sobras]="r.coringa">
+            {{ inicial(r) }}
+          </span>
+          <div>
+            <h2>{{ novo() ? 'Novo grupo' : r.nome || 'Grupo' }}</h2>
+            <p class="card-subtitle">O nome no WhatsApp precisa ser idêntico — é por ele que o robô acha a conversa.</p>
           </div>
         </div>
+        <button type="button" class="btn-fechar" (click)="fechar()" aria-label="Fechar" title="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <path d="M6 6 18 18M18 6 6 18" />
+          </svg>
+        </button>
+      </div>
 
+      <div class="grid-2">
+        <div class="field">
+          <label>Apelido do grupo</label>
+          <input
+            type="text"
+            [ngModel]="r.nome"
+            (ngModelChange)="atualizar('nome', $event)"
+            placeholder="Ex.: Eletrônicos"
+          />
+          <span class="hint">Só para você se organizar aqui no painel.</span>
+        </div>
+        <div class="field">
+          <label>Nome exato no WhatsApp</label>
+          <input
+            type="text"
+            [ngModel]="r.groupName"
+            (ngModelChange)="atualizar('groupName', $event)"
+            placeholder="Copie e cole o nome do grupo"
+          />
+          <span class="hint">Precisa ser igual, com acentos e emojis.</span>
+        </div>
+      </div>
+
+      <div class="grupo-modos">
+        <label class="grupo-modo" [class.grupo-modo-ativo]="r.geral">
+          <input type="checkbox" [ngModel]="r.geral" (ngModelChange)="atualizar('geral', $event)" />
+          <span>
+            <strong>Recebe tudo</strong>
+            <small>Qualquer promoção pode cair aqui, sem filtro de assunto.</small>
+          </span>
+        </label>
+        <label class="grupo-modo" [class.grupo-modo-ativo]="r.coringa">
+          <input type="checkbox" [ngModel]="r.coringa" (ngModelChange)="atualizar('coringa', $event)" />
+          <span>
+            <strong>Sobras</strong>
+            <small>
+              Recebe o que não combinou com nenhum grupo.
+              @if (r.coringa && coringaAtual(); as c) {
+                Substitui “{{ c.nome }}”.
+              }
+            </small>
+          </span>
+        </label>
+      </div>
+
+      @if (!r.geral) {
         <div class="field">
           <label>Assunto do grupo</label>
-          <span class="hint">
-            @if (g.geral) {
-              Este grupo está como "recebe tudo" — o assunto é ignorado.
-            } @else {
-              Produtos com essas palavras no título ou na categoria vão para este grupo.
-            }
-          </span>
+          <span class="hint">Produtos com essas palavras no título ou na categoria vão para este grupo.</span>
           <app-chip-input
-            [items]="g.palavras"
-            (itemsChange)="atualizarPalavras($index, $event)"
+            [items]="r.palavras"
+            (itemsChange)="atualizar('palavras', $event)"
             [separarPorVirgula]="true"
             placeholder="Digite e aperte Enter — ou vários separados por vírgula: bolsa, sapato"
           />
         </div>
+      }
 
-        <div class="field">
-          <label>Nunca incluir se aparecer</label>
-          <span class="hint">
-            @if (g.geral) {
-              Mesmo recebendo tudo, uma promoção é descartada se o título ou a categoria tiver alguma
-              dessas palavras. Use para assuntos que não devem aparecer de jeito nenhum neste grupo.
-            } @else {
-              Mesmo que uma promoção combine com o assunto acima, ela é descartada se o título ou a
-              categoria tiver alguma dessas palavras. Útil quando uma palavra do assunto é ambígua — ex.:
-              "sapato" também aparece em bota de trabalho; adicionar "masculino" ou "segurança" aqui evita
-              que ela entre por engano.
-            }
-          </span>
-          <app-chip-input
-            [items]="g.palavrasExcluir"
-            (itemsChange)="atualizarPalavrasExcluir($index, $event)"
-            [separarPorVirgula]="true"
-            placeholder="Digite e aperte Enter — ou vários separados por vírgula: masculino, infantil"
-          />
-        </div>
-
-        <label class="checkbox-row">
-          <input type="checkbox" [ngModel]="g.geral" (ngModelChange)="marcarGeral($index, $event)" />
-          <span>
-            <strong>Recebe tudo</strong> — qualquer promoção pode cair neste grupo, sem filtro de assunto.
-          </span>
-        </label>
-
-        <label class="checkbox-row">
-          <input type="checkbox" [ngModel]="g.coringa" (ngModelChange)="marcarCoringa($index, $event)" />
-          <span>
-            <strong>Sobras</strong> — recebe as promoções que não combinaram com o assunto de nenhum grupo.
-          </span>
-        </label>
-      </div>
-    } @empty {
-      <div class="empty-state">
-        <span class="empty-state-title">Nenhum grupo cadastrado</span>
-        <span class="empty-state-text">
-          Adicione o primeiro grupo para o robô saber onde publicar as promoções.
+      <div class="field">
+        <label>Nunca incluir se aparecer</label>
+        <span class="hint">
+          A promoção é descartada se o título ou a categoria tiver alguma dessas palavras — útil quando uma palavra do
+          assunto é ambígua (ex.: "sapato" também pega bota de segurança).
         </span>
-        <button type="button" class="btn btn-primary btn-sm" (click)="adicionarGrupo()">+ Adicionar grupo</button>
+        <app-chip-input
+          [items]="r.palavrasExcluir"
+          (itemsChange)="atualizar('palavrasExcluir', $event)"
+          [separarPorVirgula]="true"
+          placeholder="Digite e aperte Enter — ou vários separados por vírgula: masculino, infantil"
+        />
       </div>
-    }
-  </div>
 
-  <div class="form-actions">
-    <button type="button" class="btn btn-primary" [disabled]="salvando()" (click)="salvar()">
-      {{ salvando() ? 'Salvando…' : 'Salvar alterações' }}
-    </button>
-    @if (mensagem(); as m) {
-      <span [class]="m.tipo === 'ok' ? 'ok-text' : 'error-text'">{{ m.texto }}</span>
-    }
+      @if (erro(); as e) {
+        <div class="info-box info-box-erro">{{ e }}</div>
+      }
+
+      <div class="modal-rodape grupo-modal-rodape">
+        @if (!novo()) {
+          <button type="button" class="btn btn-danger-soft btn-sm" [disabled]="salvando()" (click)="remover(r)">
+            Remover grupo
+          </button>
+        }
+        <span class="grupo-modal-espaco"></span>
+        <button type="button" class="btn btn-ghost" [disabled]="salvando()" (click)="fechar()">Cancelar</button>
+        <button type="button" class="btn btn-primary" [disabled]="salvando()" (click)="salvar()">
+          {{ salvando() ? 'Salvando…' : novo() ? 'Adicionar grupo' : 'Salvar' }}
+        </button>
+      </div>
+    </div>
   </div>
-</div>
+}

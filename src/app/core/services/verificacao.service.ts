@@ -1,6 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { ConexoesService } from './conexoes.service';
-import { StatusService } from './status.service';
+import { EstadoConexao, ProvedorConexao, StatusService } from './status.service';
 import { JobsService } from './jobs.service';
 
 /**
@@ -89,32 +89,61 @@ export class VerificacaoService {
     }
   }
 
-  // ---- Status "de verdade": a resposta ao vivo vence quando existe. ----
+  // ---- Status "de verdade": vence a informação MAIS RECENTE. ----
+  //
+  // A checagem ao vivo roda quando o painel abre; depois disso o robô continua
+  // registrando quedas e reconexões no estado guardado. Antes a checagem ao vivo
+  // vencia pra sempre — e uma queda depois dela nunca aparecia.
 
-  readonly mercadoLivreConectado = computed(
-    () => this.jobsService.verificacao()?.mercadolivre?.conectado ?? !!this.statusService.status()?.mercadoLivre?.conectado,
+  private guardado(p: ProvedorConexao): EstadoConexao | null {
+    return this.statusService.status()?.conexoes?.[p] ?? null;
+  }
+
+  /** true quando o estado guardado é mais novo que a checagem ao vivo (ou ela não disse nada). */
+  private guardadoVence(p: ProvedorConexao): boolean {
+    const vivo = this.jobsService.verificacao();
+    if (!vivo?.[p]) return true;
+    const g = this.guardado(p);
+    if (!g) return false;
+    return (Date.parse(g.em) || 0) >= (Date.parse(vivo.em ?? '') || 0);
+  }
+
+  readonly mercadoLivreConectado = computed(() =>
+    this.guardadoVence('mercadolivre')
+      ? !!this.statusService.status()?.mercadoLivre?.conectado
+      : !!this.jobsService.verificacao()?.mercadolivre?.conectado,
   );
 
-  readonly amazonLogado = computed(
-    () => this.jobsService.verificacao()?.amazon?.conectado ?? !!this.statusService.status()?.amazon?.logado,
+  readonly amazonLogado = computed(() =>
+    this.guardadoVence('amazon')
+      ? !!this.statusService.status()?.amazon?.logado
+      : !!this.jobsService.verificacao()?.amazon?.conectado,
   );
 
   readonly amazonSiteStripe = computed(() => {
-    const aoVivo = this.jobsService.verificacao()?.amazon;
-    if (aoVivo) return aoVivo.conectado && !!aoVivo.siteStripe;
+    if (!this.guardadoVence('amazon')) {
+      const aoVivo = this.jobsService.verificacao()?.amazon;
+      return !!aoVivo?.conectado && !!aoVivo?.siteStripe;
+    }
     return !!this.statusService.status()?.amazon?.linkCurto;
   });
 
-  readonly whatsappConectado = computed(
-    () => this.jobsService.verificacao()?.whatsapp?.conectado ?? !!this.statusService.status()?.whatsapp.conectado,
+  readonly whatsappConectado = computed(() =>
+    this.guardadoVence('whatsapp')
+      ? !!this.statusService.status()?.whatsapp.conectado
+      : !!this.jobsService.verificacao()?.whatsapp?.conectado,
   );
 
-  /** Shopee é 100% API: "conectada" já vem do banco (chaves validadas ao salvar). */
+  /** Shopee é 100% API: vale o estado guardado; sem ele, o que o banco de conexões diz. */
   readonly shopeeConectado = computed(() => {
-    const aoVivo = this.jobsService.verificacao()?.shopee;
-    if (aoVivo) return aoVivo.conectado;
+    if (!this.guardadoVence('shopee')) return !!this.jobsService.verificacao()?.shopee?.conectado;
+    const g = this.guardado('shopee');
+    if (g) return g.conectado && this.conexoes.statusDe('shopee')?.status === 'conectado';
     return this.conexoes.statusDe('shopee')?.status === 'conectado';
   });
 
-  readonly shopeeMotivo = computed(() => this.jobsService.verificacao()?.shopee?.motivo ?? null);
+  readonly shopeeMotivo = computed(() => {
+    if (!this.guardadoVence('shopee')) return this.jobsService.verificacao()?.shopee?.motivo ?? null;
+    return this.guardado('shopee')?.motivo ?? null;
+  });
 }

@@ -44,19 +44,32 @@ export interface VerificacaoConexoes {
   amazon?: { conectado: boolean; siteStripe: boolean | null };
   whatsapp?: { conectado: boolean };
   shopee?: { conectado: boolean; motivo: string | null };
+  /** Quando a checagem ao vivo rodou — um estado guardado mais novo vence ela. */
+  em?: string;
+}
+
+/** Uma forma de continuar oferecida pela loja (QR, SMS, e-mail…). */
+export interface OpcaoVerificacao {
+  valor: string;
+  rotulo: string;
+  detalhe?: string | null;
+  tipo?: 'qrcode' | 'whatsapp' | 'sms' | 'email' | 'senha' | 'biometria' | 'app' | 'outro';
 }
 
 /** Uma pergunta da plataforma traduzida para uma tela nossa. */
 export interface PedidoLogin {
   id: string;
-  forma: 'credenciais' | 'senha' | 'codigo' | 'captcha' | 'escolha';
+  forma: 'credenciais' | 'senha' | 'codigo' | 'captcha' | 'escolha' | 'robo' | 'tela' | 'qrcode';
   provedor: Provedor;
   titulo: string;
   texto?: string | null;
   destino?: string | null;
   imagem?: string | null;
   campos: { nome: string; rotulo: string; tipo: 'texto' | 'segredo' | 'codigo'; tamanho?: number }[];
-  opcoes?: { valor: string; rotulo: string }[];
+  opcoes?: OpcaoVerificacao[];
+  /** Tamanho real da página da loja (forma 'tela'), só para referência. */
+  largura?: number;
+  altura?: number;
   expiraEm?: string;
 }
 
@@ -153,7 +166,9 @@ export class JobsService {
         this.codigoSaida.set(s.codigoSaida ?? null);
         this.qrWhatsapp.set(s.qrWhatsapp ?? null);
         const desafio = s.desafioMl ?? null;
-        if (desafio && desafio.em !== this.desafioMl()?.em) this.desafioPopupAberto.set(true);
+        // Não abre o popup sozinho: a verificação fica em segundo plano (sino +
+        // cartão no canto) enquanto o robô segue pelas outras lojas.
+        if (!desafio) this.desafioPopupAberto.set(false);
         this.desafioMl.set(desafio);
         if (s.verificacao) this.verificacao.set(s.verificacao);
         this.aplicarLogin(s);

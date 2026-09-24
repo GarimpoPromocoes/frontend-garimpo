@@ -2,12 +2,25 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { AlvoGrupos, JobsService } from './jobs.service';
 import { StatusService } from './status.service';
 import { ConfigService } from './config.service';
+import { VerificacaoService } from './verificacao.service';
+import { ConexoesService } from './conexoes.service';
 
 @Injectable({ providedIn: 'root' })
 export class RunControlService {
   private jobsService = inject(JobsService);
   private statusService = inject(StatusService);
   private configService = inject(ConfigService);
+  private verificacao = inject(VerificacaoService);
+  private conexoes = inject(ConexoesService);
+
+  /** Nenhuma loja é obrigatória: basta uma conectada (ML, Amazon ou Shopee). */
+  readonly lojasConectadas = computed(() => {
+    const lojas: string[] = [];
+    if (this.verificacao.mercadoLivreConectado()) lojas.push('mercadolivre');
+    if (this.conexoes.statusDe('amazon')?.status === 'conectado') lojas.push('amazon');
+    if (this.verificacao.shopeeConectado()) lojas.push('shopee');
+    return lojas;
+  });
 
   readonly alvo = signal<AlvoGrupos>('todos');
   readonly selecionados = signal<Set<string>>(new Set());
@@ -46,10 +59,11 @@ export class RunControlService {
   );
 
   readonly pendencias = computed<{ texto: string; aba: 'whatsapp' | 'lojas' | 'grupos' }[]>(() => {
-    const s = this.statusService.status();
     const itens: { texto: string; aba: 'whatsapp' | 'lojas' | 'grupos' }[] = [];
-    if (!s?.whatsapp?.conectado) itens.push({ texto: 'Conectar o WhatsApp', aba: 'whatsapp' });
-    if (!s?.mercadoLivre?.conectado) itens.push({ texto: 'Conectar o Mercado Livre', aba: 'lojas' });
+    if (!this.verificacao.whatsappConectado()) itens.push({ texto: 'Conectar o WhatsApp', aba: 'whatsapp' });
+    if (!this.lojasConectadas().length) {
+      itens.push({ texto: 'Conectar pelo menos uma loja de afiliado (Mercado Livre, Amazon ou Shopee)', aba: 'lojas' });
+    }
     if (this.grupos().length === 0) {
       itens.push({ texto: 'Cadastrar pelo menos um grupo', aba: 'grupos' });
     }

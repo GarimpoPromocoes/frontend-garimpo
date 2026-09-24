@@ -2,10 +2,24 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
+export type ProvedorConexao = 'whatsapp' | 'mercadolivre' | 'amazon' | 'shopee';
+
+/** Estado real de uma conexão, gravado por quem sabe (o robô, a checagem ao vivo). */
+export interface EstadoConexao {
+  conectado: boolean;
+  motivo: string | null;
+  /** Quem desligou foi a pessoa — não é queda. */
+  manual: boolean;
+  /** Já funcionou alguma vez — falhar na primeira tentativa não é "caiu". */
+  jaConectou: boolean;
+  em: string;
+}
+
 export interface StatusResponse {
   mercadoLivre: { conectado: boolean };
   amazon?: { logado: boolean; linkCurto: boolean; verificadoEm: string | null };
   whatsapp: { conectado: boolean; numero: string | null; nome: string | null };
+  conexoes?: Partial<Record<ProvedorConexao, EstadoConexao>>;
   produtosPublicados: number;
   produtosCatalogo: number;
   cuponsAtivos: number;

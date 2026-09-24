@@ -1,5 +1,6 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { NgTemplateOutlet } from '@angular/common';
 import { ConexoesService, Provedor } from '../../../core/services/conexoes.service';
 import { JobsService, JobTipo, PedidoLogin } from '../../../core/services/jobs.service';
 import { StatusService } from '../../../core/services/status.service';
@@ -65,7 +66,7 @@ interface CampoModal {
 @Component({
   selector: 'app-loja-dialog',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, NgTemplateOutlet],
   templateUrl: './loja-dialog.html',
 })
 export class LojaDialog {
@@ -187,6 +188,21 @@ export class LojaDialog {
     return 'E-mail, telefone ou usuário';
   }
 
+  /**
+   * Tela da loja ao vivo: depois de um clique o pedido some até a próxima foto
+   * chegar. Nesse meio tempo a última foto continua na tela (com "Atualizando…")
+   * em vez de piscar o spinner a cada clique.
+   */
+  private readonly ultimaTela = signal<{ pedido: PedidoLogin; etapas: number } | null>(null);
+  protected readonly telaEsperando = computed(() => {
+    const t = this.ultimaTela();
+    if (!t || this.pedido() || this.fim() || !this.emLogin()) return null;
+    return t.etapas === this.etapas().length ? t.pedido : null;
+  });
+  /** Onde a pessoa clicou por último — vira um pulso em cima da imagem. */
+  protected readonly marcaClique = signal<{ x: number; y: number } | null>(null);
+  protected readonly janelaLarga = computed(() => this.pedido()?.forma === 'tela' || !!this.telaEsperando());
+
   protected readonly valores = signal<Record<string, string>>({});
   protected readonly erro = signal<string | null>(null);
   protected readonly enviando = signal(false);
@@ -197,6 +213,16 @@ export class LojaDialog {
   private ultimoPedido = '';
 
   constructor() {
+    effect(() => {
+      const p = this.pedido();
+      if (p?.forma === 'tela') {
+        this.ultimaTela.set({ pedido: p, etapas: this.etapas().length });
+        this.marcaClique.set(null);
+      } else if (p || this.fim()) {
+        this.ultimaTela.set(null);
+      }
+    });
+
     // Cada pergunta nova do robô começa com os campos limpos.
     effect(() => {
       const p = this.pedido();
@@ -313,6 +339,53 @@ export class LojaDialog {
     const r = await this.jobsService.responderLogin(p.id, this.valores());
     if (!r.ok) this.erro.set(r.erro ?? null);
     else this.valores.set({});
+  }
+
+  // ---- verificações interativas (QR, "não sou um robô", tela da loja) -------
+
+  private async responderCom(valores: Record<string, string>): Promise<void> {
+    const p = this.pedido();
+    if (!p || this.jobsService.respondendoLogin()) return;
+    this.erro.set(null);
+    const r = await this.jobsService.responderLogin(p.id, valores);
+    if (!r.ok) this.erro.set(r.erro ?? null);
+  }
+
+  protected escolher(valor: string): void {
+    void this.responderCom({ opcao: valor });
+  }
+
+  protected marcarRobo(): void {
+    void this.responderCom({ acao: 'marcar' });
+  }
+
+  protected verTelaDaLoja(): void {
+    void this.responderCom({ acao: 'tela' });
+  }
+
+  protected outraForma(): void {
+    void this.responderCom({ acao: 'voltar' });
+  }
+
+  protected atualizarTela(): void {
+    void this.responderCom({ acao: 'atualizar' });
+  }
+
+  protected cliqueNaTela(ev: MouseEvent): void {
+    const img = ev.currentTarget as HTMLElement;
+    const r = img.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+    const x = Math.min(1, Math.max(0, (ev.clientX - r.left) / r.width));
+    const y = Math.min(1, Math.max(0, (ev.clientY - r.top) / r.height));
+    this.marcaClique.set({ x, y });
+    void this.responderCom({ acao: 'clique', x: x.toFixed(4), y: y.toFixed(4) });
+  }
+
+  protected enviarTextoNaTela(comEnter: boolean): void {
+    const texto = this.valorDe('telaTexto');
+    if (!texto && !comEnter) return;
+    this.definir('telaTexto', '');
+    void this.responderCom({ acao: 'texto', texto, enter: comEnter ? '1' : '0' });
   }
 
   async entrarDeNovo(): Promise<void> {

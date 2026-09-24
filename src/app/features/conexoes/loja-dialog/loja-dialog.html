@@ -1,6 +1,6 @@
 @if (aberto()) {
   <div class="modal-fundo" (click)="aoFechar()">
-    <div class="modal-caixa modal-login" (click)="$event.stopPropagation()">
+    <div class="modal-caixa modal-login" [class.modal-login-largo]="janelaLarga()" (click)="$event.stopPropagation()">
       <div class="card-header">
         <div class="loja-titulo">
           <span class="loja-logo-caixa loja-logo-caixa-sm"><img class="loja-logo loja-logo-sm" [src]="logo()" [alt]="rotulo()" /></span>
@@ -67,49 +67,134 @@
               <p class="hint-text">{{ p.texto }}</p>
             }
 
-            @if (p.imagem) {
-              <img class="login-captcha" [src]="p.imagem" alt="Imagem de verificação enviada pela plataforma" />
-            }
+            @switch (p.forma) {
+              @case ('escolha') {
+                <!-- Cada forma de continuar vira um botão: um clique e o robô segue por ela. -->
+                <div class="verif-opcoes">
+                  @for (o of p.opcoes ?? []; track o.valor) {
+                    <button
+                      type="button"
+                      class="verif-opcao"
+                      [disabled]="jobsService.respondendoLogin()"
+                      (click)="escolher(o.valor)"
+                    >
+                      <span class="verif-icone" [attr.data-tipo]="o.tipo || 'outro'">
+                        @switch (o.tipo) {
+                          @case ('qrcode') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.2"/><rect x="14" y="3" width="7" height="7" rx="1.2"/><rect x="3" y="14" width="7" height="7" rx="1.2"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></svg> }
+                          @case ('whatsapp') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 11.6a8.4 8.4 0 0 1-12.3 7.4L3.5 20.5l1.6-4.6A8.4 8.4 0 1 1 20.5 11.6Z"/><path d="M8.8 9.1c0 3 2.4 5.4 5.4 5.4"/></svg> }
+                          @case ('sms') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.2"/><path d="M10.5 18.5h3"/></svg> }
+                          @case ('email') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6.5 8.5 6.5 8.5-6.5"/></svg> }
+                          @case ('senha') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg> }
+                          @case ('biometria') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 11v3.5M8.5 9.5a3.5 3.5 0 0 1 7 0v5a6 6 0 0 1-1 3.3M5.5 10a6.5 6.5 0 0 1 13 0v3M5.5 13.5v1a9 9 0 0 0 1.4 4.8M12 18v2.5"/></svg> }
+                          @case ('app') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.2"/><path d="m9.5 12 2 2 3.5-4"/></svg> }
+                          @default { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 20 6v5.4c0 4.4-3.1 8.2-8 9.8-4.9-1.6-8-5.4-8-9.8V6Z"/><path d="m9.2 12.2 2 2 3.6-3.8"/></svg> }
+                        }
+                      </span>
+                      <span class="verif-textos">
+                        <span class="verif-rotulo">{{ o.rotulo }}</span>
+                        @if (o.detalhe) {
+                          <span class="verif-detalhe">{{ o.detalhe }}</span>
+                        }
+                      </span>
+                      <svg class="verif-seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+                    </button>
+                  }
+                </div>
+              }
 
-            @if (p.opcoes?.length) {
-              <div class="login-opcoes">
-                @for (o of p.opcoes ?? []; track o.valor) {
-                  <label class="login-opcao" [class.login-opcao-marcada]="valorDe('opcao') === o.valor">
-                    <input
-                      type="radio"
-                      name="opcao-verificacao"
-                      [value]="o.valor"
-                      [checked]="valorDe('opcao') === o.valor"
-                      (change)="definir('opcao', o.valor)"
-                    />
-                    <span>{{ o.rotulo }}</span>
-                  </label>
+              @case ('robo') {
+                <div class="robo-caixa">
+                  <button
+                    type="button"
+                    class="robo-botao"
+                    [class.robo-botao-enviando]="jobsService.respondendoLogin()"
+                    [disabled]="jobsService.respondendoLogin()"
+                    (click)="marcarRobo()"
+                  >
+                    <span class="robo-check">
+                      @if (jobsService.respondendoLogin()) {
+                        <span class="login-spinner"></span>
+                      }
+                    </span>
+                    <span>Não sou um robô</span>
+                  </button>
+                  <p class="hint-text">
+                    O robô marca a caixinha {{ artigo() === 'o' ? 'no' : 'na' }} {{ rotulo() }} com um movimento de mouse
+                    de gente. Se aparecer um desafio de imagens, ele vem para cá e você resolve clicando.
+                  </p>
+                </div>
+                <div class="verif-links">
+                  <button type="button" class="btn-link" [disabled]="jobsService.respondendoLogin()" (click)="verTelaDaLoja()">
+                    Prefiro ver a tela {{ artigo() === 'o' ? 'do' : 'da' }} {{ rotulo() }} e clicar eu mesmo
+                  </button>
+                </div>
+              }
+
+              @case ('qrcode') {
+                <div class="qr-login">
+                  <div class="qr-login-moldura">
+                    @if (p.imagem) {
+                      <img [src]="p.imagem" alt="Código QR para entrar pelo app" />
+                    }
+                  </div>
+                  <ol class="qr-login-passos">
+                    <li>Abra o app {{ artigo() === 'o' ? 'do' : 'da' }} {{ rotulo() }} no celular.</li>
+                    <li>Toque no leitor de código QR.</li>
+                    <li>Aponte a câmera para o código ao lado e confirme no celular.</li>
+                  </ol>
+                </div>
+                <div class="login-aguardando">
+                  <span class="login-spinner"></span>
+                  <span>Esperando a leitura — o código se renova sozinho.</span>
+                </div>
+                <div class="verif-links">
+                  <button type="button" class="btn-link" [disabled]="jobsService.respondendoLogin()" (click)="outraForma()">
+                    Usar outra forma de entrar
+                  </button>
+                </div>
+              }
+
+              @case ('tela') {
+                <ng-container *ngTemplateOutlet="telaDaLoja; context: { $implicit: p, atualizando: jobsService.respondendoLogin() }" />
+              }
+
+              @default {
+                @if (p.imagem) {
+                  <img class="login-captcha" [src]="p.imagem" alt="Imagem de verificação enviada pela plataforma" />
                 }
-              </div>
-            }
 
-            @for (campo of p.campos; track campo.nome) {
-              <div class="field">
-                <label [for]="'pedido-' + campo.nome">{{ campo.rotulo }}</label>
-                <input
-                  [id]="'pedido-' + campo.nome"
-                  [type]="campo.tipo === 'segredo' ? 'password' : 'text'"
-                  [attr.inputmode]="campo.tipo === 'codigo' ? 'numeric' : null"
-                  [attr.maxlength]="campo.tipo === 'codigo' ? campo.tamanho ?? 8 : null"
-                  [autocomplete]="campo.tipo === 'segredo' ? 'current-password' : 'off'"
-                  [class.campo-codigo]="campo.tipo === 'codigo'"
-                  [ngModel]="valorDe(campo.nome)"
-                  (ngModelChange)="definir(campo.nome, $event)"
-                  (keyup.enter)="responder()"
-                />
-              </div>
-            }
+                @for (campo of p.campos; track campo.nome) {
+                  <div class="field">
+                    <label [for]="'pedido-' + campo.nome">{{ campo.rotulo }}</label>
+                    <input
+                      [id]="'pedido-' + campo.nome"
+                      [type]="campo.tipo === 'segredo' ? 'password' : 'text'"
+                      [attr.inputmode]="campo.tipo === 'codigo' ? 'numeric' : null"
+                      [attr.maxlength]="campo.tipo === 'codigo' ? campo.tamanho ?? 8 : null"
+                      [autocomplete]="campo.tipo === 'segredo' ? 'current-password' : 'off'"
+                      [class.campo-codigo]="campo.tipo === 'codigo'"
+                      [ngModel]="valorDe(campo.nome)"
+                      (ngModelChange)="definir(campo.nome, $event)"
+                      (keyup.enter)="responder()"
+                    />
+                  </div>
+                }
 
-            <div class="form-actions">
-              <button type="button" class="btn btn-primary" [disabled]="!podeResponder()" (click)="responder()">
-                {{ jobsService.respondendoLogin() ? 'Enviando…' : 'Continuar' }}
-              </button>
-            </div>
+                <div class="form-actions">
+                  <button type="button" class="btn btn-primary" [disabled]="!podeResponder()" (click)="responder()">
+                    {{ jobsService.respondendoLogin() ? 'Enviando…' : 'Continuar' }}
+                  </button>
+                </div>
+              }
+            }
+          </div>
+        } @else if (telaEsperando(); as t) {
+          <div class="login-pedido">
+            <h3>{{ t.titulo }}</h3>
+            @if (t.texto) {
+              <p class="hint-text">{{ t.texto }}</p>
+            }
+            <ng-container *ngTemplateOutlet="telaDaLoja; context: { $implicit: t, atualizando: true }" />
           </div>
         } @else {
           <div class="login-trabalhando">
@@ -190,3 +275,36 @@
     </div>
   </div>
 }
+
+<!-- A página da loja, ao vivo: cada clique na imagem vira um clique lá. -->
+<ng-template #telaDaLoja let-t let-atualizando="atualizando">
+  <div class="tela-loja" [class.tela-loja-atualizando]="atualizando">
+    <div class="tela-loja-barra">
+      <span class="tela-loja-ponto"></span>
+      <span>{{ rotulo() }} — ao vivo</span>
+      <span class="tela-loja-espaco"></span>
+      @if (atualizando) {
+        <span class="tela-loja-estado"><span class="login-spinner"></span> Atualizando…</span>
+      } @else {
+        <button type="button" class="btn-link" (click)="atualizarTela()">Atualizar</button>
+      }
+    </div>
+    <div class="tela-loja-imagem" (click)="!atualizando && cliqueNaTela($event)">
+      <img [src]="t.imagem" [alt]="'Página ' + (artigo() === 'o' ? 'do ' : 'da ') + rotulo()" draggable="false" />
+      @if (marcaClique(); as m) {
+        <span class="tela-loja-clique" [style.left.%]="m.x * 100" [style.top.%]="m.y * 100"></span>
+      }
+    </div>
+  </div>
+  <div class="tela-loja-digitar">
+    <input
+      type="text"
+      placeholder="Precisa digitar algo na página? Clique no campo acima e escreva aqui"
+      [ngModel]="valorDe('telaTexto')"
+      (ngModelChange)="definir('telaTexto', $event)"
+      (keyup.enter)="enviarTextoNaTela(true)"
+      [disabled]="atualizando"
+    />
+    <button type="button" class="btn btn-ghost btn-sm" [disabled]="atualizando" (click)="enviarTextoNaTela(false)">Digitar</button>
+  </div>
+</ng-template>

@@ -1576,3 +1576,929 @@ a.prod-titulo:hover {
 .btn-icone:disabled {
   opacity: 0.5;
 }
+
+/* Grupos: grade de cards igual a de Lojas; o clique abre a janela de edicao. */
+.grupos-intro {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.grupos-grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+.grupo-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  text-align: left;
+  min-width: 0;
+  min-height: 180px;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s,
+    transform 0.15s;
+}
+.grupo-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
+}
+.grupo-card:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+.grupo-card-topo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.grupo-avatar {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  font-weight: 600;
+  background: var(--ok-soft);
+  color: var(--wpp-green-dark);
+  border: 1px solid var(--ok-border);
+}
+.grupo-avatar-tudo {
+  background: var(--gold-soft);
+  color: var(--gold-ink);
+  border-color: var(--gold-border);
+}
+.grupo-avatar-sobras {
+  background: var(--surface-2);
+  color: var(--text-soft);
+  border-color: var(--border-strong);
+}
+.grupo-card-nomes {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.grupo-card-nome {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.grupo-card-zap {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--text-muted);
+  min-width: 0;
+}
+.grupo-card-zap svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+  color: var(--wpp-green);
+}
+.grupo-card-zap span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.grupo-card-corpo {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 6px;
+  flex: 1;
+}
+.grupo-tag,
+.grupo-selo {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 1.4;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.grupo-tag {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-soft);
+}
+.grupo-tag-mais {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.grupo-selo {
+  font-weight: 500;
+}
+.grupo-selo-tudo {
+  background: var(--gold-soft);
+  border: 1px solid var(--gold-border);
+  color: var(--gold-ink);
+}
+.grupo-selo-sobras {
+  background: var(--surface-2);
+  border: 1px dashed var(--border-strong);
+  color: var(--text-soft);
+}
+.grupo-card-vazio {
+  font-size: 12.5px;
+  color: var(--warn);
+}
+.grupo-card-rodape {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.grupo-card-exclui {
+  color: var(--danger);
+}
+
+/* Card "adicionar": mesmo tamanho dos outros, pontilhado. */
+.grupo-card-novo {
+  border-style: dashed;
+  border-color: var(--border-strong);
+  background: transparent;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+}
+.grupo-card-novo:hover {
+  border-color: var(--gold);
+  background: var(--gold-soft);
+}
+.grupo-novo-mais {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--gold-deep);
+}
+.grupo-novo-mais svg {
+  width: 20px;
+  height: 20px;
+}
+.grupo-novo-titulo {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+.grupo-novo-texto {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Janela de edicao do grupo. */
+.modal-grupo {
+  width: min(640px, 100%);
+  gap: 18px;
+  padding: 24px;
+}
+.grupo-modal-titulo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.grupo-modal-titulo h2 {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+.grupo-modal-titulo .card-subtitle {
+  margin-top: 2px;
+}
+.grupo-modos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.grupo-modo {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s;
+}
+.grupo-modo input {
+  margin-top: 2px;
+  accent-color: var(--gold-deep);
+}
+.grupo-modo span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.grupo-modo strong {
+  font-size: 13px;
+  color: var(--text);
+}
+.grupo-modo small {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+.grupo-modo-ativo {
+  border-color: var(--gold-border);
+  background: var(--gold-soft);
+}
+.grupo-modal-rodape {
+  align-items: center;
+  padding-top: 14px;
+}
+.grupo-modal-espaco {
+  flex: 1;
+}
+@media (max-width: 560px) {
+  .grupo-modos {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---- Verificacoes do login (escolha, "nao sou um robo", QR, tela ao vivo) ---- */
+.modal-login-largo {
+  width: min(980px, 100%);
+}
+
+.btn-link {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--gold-ink);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--gold-border);
+}
+.btn-link:hover:not(:disabled) {
+  text-decoration-color: currentColor;
+}
+.btn-link:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.verif-links {
+  display: flex;
+  justify-content: center;
+}
+
+/* Escolha da forma de continuar: um botao grande por opcao. */
+.verif-opcoes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.verif-opcao {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s,
+    box-shadow 0.15s;
+}
+.verif-opcao:hover:not(:disabled) {
+  border-color: var(--gold);
+  background: var(--gold-soft);
+  box-shadow: var(--shadow-sm);
+}
+.verif-opcao:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+.verif-opcao:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+.verif-icone {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-soft);
+}
+.verif-icone svg {
+  width: 19px;
+  height: 19px;
+}
+.verif-icone[data-tipo='qrcode'] {
+  background: var(--gold-soft);
+  border-color: var(--gold-border);
+  color: var(--gold-ink);
+}
+.verif-icone[data-tipo='whatsapp'] {
+  background: var(--ok-soft);
+  border-color: var(--ok-border);
+  color: var(--wpp-green-dark);
+}
+.verif-textos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+.verif-rotulo {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+.verif-detalhe {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+.verif-seta {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+/* "Nao sou um robo": o botao imita a caixinha, no estilo do painel. */
+.robo-caixa {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  text-align: center;
+}
+.robo-botao {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 26px 14px 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s,
+    transform 0.15s;
+}
+.robo-botao:hover:not(:disabled) {
+  border-color: var(--gold);
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
+}
+.robo-botao:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+.robo-botao:disabled {
+  cursor: progress;
+}
+.robo-check {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--border-strong);
+  border-radius: 5px;
+  background: var(--surface);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s;
+}
+.robo-botao:hover:not(:disabled) .robo-check {
+  border-color: var(--gold-deep);
+}
+.robo-botao-enviando .robo-check {
+  border-color: transparent;
+}
+.robo-caixa .hint-text {
+  max-width: 400px;
+  margin: 0;
+}
+
+/* Codigo QR para entrar pelo app. */
+.qr-login {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+.qr-login-moldura {
+  flex-shrink: 0;
+  width: 220px;
+  height: 220px;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.qr-login-moldura img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.qr-login-passos {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-soft);
+  line-height: 1.5;
+}
+.qr-login-passos li::marker {
+  color: var(--gold-deep);
+  font-weight: 600;
+}
+.login-aguardando {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+@media (max-width: 560px) {
+  .qr-login {
+    flex-direction: column;
+  }
+}
+
+/* Pagina da loja ao vivo: cada clique na imagem vai para a loja. */
+.tela-loja {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+.tela-loja-barra {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-soft);
+}
+.tela-loja-ponto {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ok);
+  animation: pulse-dot 1.6s ease-in-out infinite;
+}
+.tela-loja-espaco {
+  flex: 1;
+}
+.tela-loja-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+}
+.tela-loja-estado .login-spinner {
+  width: 12px;
+  height: 12px;
+}
+.tela-loja-imagem {
+  position: relative;
+  cursor: pointer;
+  line-height: 0;
+}
+.tela-loja-imagem img {
+  width: 100%;
+  height: auto;
+  display: block;
+  user-select: none;
+}
+.tela-loja-atualizando .tela-loja-imagem {
+  cursor: progress;
+}
+.tela-loja-atualizando .tela-loja-imagem img {
+  opacity: 0.55;
+  transition: opacity 0.2s;
+}
+.tela-loja-clique {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  border-radius: 50%;
+  border: 2px solid var(--gold);
+  background: rgba(224, 165, 32, 0.25);
+  pointer-events: none;
+  animation: tela-clique 1s ease-out infinite;
+}
+@keyframes tela-clique {
+  from {
+    transform: scale(0.6);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+.tela-loja-digitar {
+  display: flex;
+  gap: 8px;
+}
+.tela-loja-digitar input {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---- Sino de avisos (topo, canto direito) ---- */
+app-sino {
+  position: relative;
+  display: inline-flex;
+}
+.sino-botao {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--text-soft);
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s,
+    color 0.15s;
+}
+.sino-botao svg {
+  width: 19px;
+  height: 19px;
+}
+.sino-botao:hover,
+.sino-botao-aberto {
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+  color: var(--text);
+}
+.sino-botao:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+.sino-botao-alerta svg {
+  transform-origin: 50% 10%;
+  animation: sino-balanco 2.4s ease-in-out infinite;
+}
+@keyframes sino-balanco {
+  0%, 70%, 100% { transform: rotate(0); }
+  75% { transform: rotate(14deg); }
+  80% { transform: rotate(-12deg); }
+  85% { transform: rotate(8deg); }
+  90% { transform: rotate(-5deg); }
+}
+.sino-contador {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  border: 2px solid var(--bg);
+  box-sizing: content-box;
+}
+.sino-ponto {
+  position: absolute;
+  top: 6px;
+  right: 7px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--danger);
+  border: 2px solid var(--surface);
+}
+
+.sino-painel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 60;
+  width: min(380px, calc(100vw - 32px));
+  max-height: min(520px, 75vh);
+  overflow: auto;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: 0 16px 40px rgba(26, 26, 24, 0.16);
+}
+.sino-cabeca {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 14px 16px 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.sino-cabeca strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+.sino-cabeca span {
+  font-size: 12px;
+  color: var(--danger);
+  font-weight: 500;
+}
+.sino-item {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  border-left: 3px solid var(--danger);
+}
+.sino-item:last-child {
+  border-bottom: 0;
+}
+.sino-item-aviso {
+  border-left-color: var(--gold);
+}
+.sino-icone {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--danger);
+  overflow: hidden;
+}
+.sino-icone img {
+  max-width: 24px;
+  max-height: 22px;
+  object-fit: contain;
+}
+.sino-icone svg {
+  width: 18px;
+  height: 18px;
+}
+.sino-icone[data-origem='whatsapp'] {
+  background: var(--ok-soft);
+  border-color: var(--ok-border);
+  color: var(--wpp-green-dark);
+}
+.sino-corpo {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+}
+.sino-titulo {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+.sino-titulo span {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+.sino-titulo time {
+  flex-shrink: 0;
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+.sino-corpo p {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-soft);
+}
+.sino-corpo .btn {
+  margin-top: 4px;
+}
+.sino-vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 28px 20px;
+  text-align: center;
+}
+.sino-vazio-icone {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ok-soft);
+  border: 1px solid var(--ok-border);
+  color: var(--ok);
+  margin-bottom: 4px;
+}
+.sino-vazio-icone svg {
+  width: 20px;
+  height: 20px;
+}
+.sino-vazio strong {
+  font-size: 13.5px;
+}
+.sino-vazio span {
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+/* Popup da verificacao do ML: quando a tela demora a chegar. */
+.desafio-demorou {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 28px 20px;
+  text-align: center;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.desafio-demorou-icone {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--warn-soft);
+  border: 1px solid var(--warn-border);
+  color: var(--warn);
+  margin-bottom: 4px;
+}
+.desafio-demorou-icone svg {
+  width: 20px;
+  height: 20px;
+}
+.desafio-demorou strong {
+  font-size: 14px;
+}
+.desafio-demorou p {
+  margin: 0;
+  max-width: 460px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+.desafio-demorou .form-actions {
+  margin-top: 6px;
+  justify-content: center;
+}
+
+/* Mercado Livre em espera (verificacao pendente): discreto, nunca bloqueia. */
+.espera-faixa,
+.espera-chip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--gold-border);
+  border-left: 3px solid var(--gold);
+  border-radius: var(--radius);
+}
+.espera-faixa {
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: var(--gold-soft);
+}
+.espera-chip {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 900;
+  width: min(420px, calc(100vw - 32px));
+  padding: 12px 10px 12px 14px;
+  box-shadow: 0 12px 32px rgba(26, 26, 24, 0.16);
+  animation: espera-entrar 0.25s ease-out;
+}
+@keyframes espera-entrar {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.espera-faixa-logo {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.espera-faixa-logo img {
+  max-width: 24px;
+  max-height: 20px;
+  object-fit: contain;
+}
+.espera-faixa-texto {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.espera-faixa-texto strong {
+  font-size: 13px;
+  color: var(--text);
+}
+.espera-faixa-texto span {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-soft);
+}
+@media (max-width: 560px) {
+  .espera-chip {
+    right: 16px;
+    bottom: 16px;
+  }
+}
