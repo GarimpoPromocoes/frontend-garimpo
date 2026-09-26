@@ -91,8 +91,8 @@
           <button
             type="button"
             class="btn btn-hero"
-            [disabled]="runControl.iniciando() || !runControl.podeLigar()"
-            [title]="runControl.podeLigar() ? '' : 'Complete a configuração no Painel antes de ligar'"
+            [disabled]="runControl.iniciando()"
+            [title]="runControl.podeLigar() ? '' : 'Faltam passos de configuração — ligar mostra o que falta'"
             (click)="runControl.executar()"
           >
             {{ runControl.iniciando() ? 'Ligando…' : 'Ligar robô' }}

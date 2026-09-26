@@ -27,17 +27,19 @@ const ARTIGO: Record<Provedor, 'o' | 'a'> = {
   shopee: 'a',
 };
 
-// A Shopee e' 100% API (garimpo e link saem do Open API), entao nao tem login
-// por navegador: conectar a Shopee e' so' informar as chaves.
+// Garimpo e link da Shopee saem da API (App ID/Secret). O login de navegador
+// abaixo e' um extra: serve so' pra ler os cliques no dashboard, que a API nao
+// entrega. Por isso conectar a Shopee pede as chaves E a conta.
 const JOB_DE: Partial<Record<Provedor, JobTipo>> = {
   mercadolivre: 'login-ml',
   amazon: 'login-amazon',
+  shopee: 'login-shopee',
 };
 
 const AJUDA: Partial<Record<Provedor, { texto: string; link: string; rotuloLink: string }>> = {
   shopee: {
     texto:
-      'A Shopee trabalha pela API: entre no painel de Afiliados, abra "Open API" no menu lateral e copie o App ID e o App Secret.',
+      'A Shopee usa a API (App ID/Secret) para o garimpo e os links. A conta e a senha abaixo servem para o robo abrir o dashboard e ler os cliques (a API nao entrega cliques). As chaves ficam em "Open API", no menu lateral do painel de Afiliados.',
     link: 'https://affiliate.shopee.com.br',
     rotuloLink: 'Abrir painel da Shopee',
   },
@@ -425,6 +427,11 @@ export class LojaDialog {
       // Amazon junto (a tag de associado dela continua salva à parte).
       this.jobsService.esquecerVerificacao('amazon');
       const r = await this.jobsService.iniciar('desconectar-ml');
+      if (!r.ok) this.erro.set(r.erro ?? null);
+    }
+    if (p === 'shopee') {
+      // Encerra a sessão de navegador do dashboard (a que lê os cliques).
+      const r = await this.jobsService.iniciar('desconectar-shopee');
       if (!r.ok) this.erro.set(r.erro ?? null);
     }
     this.enviando.set(false);

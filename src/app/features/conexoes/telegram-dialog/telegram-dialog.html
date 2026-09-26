@@ -87,9 +87,59 @@
           Conecte uma conta do Telegram que participe dos grupos onde as promoções devem sair (precisa poder enviar
           mensagens neles).
         </div>
-        <div class="form-actions">
-          <button type="button" class="btn btn-primary" (click)="conectar()">Conectar agora</button>
-        </div>
+
+        @if (precisaCreds()) {
+          <div class="field">
+            <label for="tg-api-id">api_id do Telegram</label>
+            <input
+              id="tg-api-id"
+              type="text"
+              inputmode="numeric"
+              autocomplete="off"
+              [ngModel]="apiId()"
+              (ngModelChange)="apiId.set($event)"
+              name="apiId"
+              placeholder="Ex.: 1234567"
+            />
+          </div>
+          <div class="field">
+            <label for="tg-api-hash">api_hash do Telegram</label>
+            <input
+              id="tg-api-hash"
+              type="text"
+              autocomplete="off"
+              [ngModel]="apiHash()"
+              (ngModelChange)="apiHash.set($event)"
+              name="apiHash"
+              placeholder="32 caracteres (a–f e números)"
+            />
+            <span class="hint">
+              Cada conta do Telegram precisa da sua própria API. Gere em <strong>my.telegram.org</strong> →
+              <strong>API development tools</strong> e copie o <strong>api_id</strong> e o <strong>api_hash</strong>.
+            </span>
+          </div>
+          <div class="form-actions">
+            @if (credsSalvo()) {
+              <button type="button" class="btn btn-ghost" (click)="editandoCreds.set(false)">Cancelar</button>
+            }
+            <button
+              type="button"
+              class="btn btn-primary"
+              [disabled]="!podeConectarCreds() || salvandoCreds()"
+              (click)="conectar()"
+            >
+              {{ salvandoCreds() ? 'Salvando…' : 'Salvar e conectar' }}
+            </button>
+          </div>
+        } @else {
+          <p class="hint-text">
+            API do Telegram configurada@if (credsApiId()) { (api_id {{ credsApiId() }})}.
+            <button type="button" class="btn btn-ghost btn-sm" (click)="editarCreds()">Usar outra</button>
+          </p>
+          <div class="form-actions">
+            <button type="button" class="btn btn-primary" (click)="conectar()">Conectar agora</button>
+          </div>
+        }
       }
 
       @if (erro() || erroConexao()) {

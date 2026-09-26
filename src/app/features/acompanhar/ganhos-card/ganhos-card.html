@@ -27,6 +27,9 @@
       <li>
         <span class="ganhos-swatch" [style.background]="l.cor"></span>
         <span class="ganhos-loja-nome">{{ l.nome }}</span>
+        @if (l.cliques != null) {
+          <span class="ganhos-cliques-badge">{{ inteiro(l.cliques) }} cliques no mês</span>
+        }
         @if (l.aguardando) {
           <span class="hint-text">Aguardando leitura…</span>
         } @else if (l.ok === false) {
@@ -41,7 +44,11 @@
   </ul>
 </div>
 
-<div class="stat-strip stat-strip-4">
+<div class="stat-strip stat-strip-5">
+  <div class="stat-cell">
+    <span class="stat-cell-label">Cliques este mês</span>
+    <span class="stat-cell-value">{{ inteiro(resumo().cliques) }}</span>
+  </div>
   <div class="stat-cell">
     <span class="stat-cell-label">Gerado este mês</span>
     <span class="stat-cell-value">{{ moeda(resumo().total) }}</span>
@@ -130,6 +137,7 @@
             <th class="col-num">Pendente</th>
             <th class="col-num">Aprovado</th>
             <th class="col-num">Pago</th>
+            <th class="col-num">Cliques</th>
           </tr>
         </thead>
         <tbody>
@@ -144,6 +152,7 @@
               <td class="col-num">{{ moeda(r.g?.pendente) }}</td>
               <td class="col-num">{{ moeda(r.g?.confirmado) }}</td>
               <td class="col-num">{{ moeda(r.g?.pago) }}</td>
+              <td class="col-num">{{ r.g?.cliques == null ? '—' : inteiro(r.g?.cliques) }}</td>
             </tr>
           }
         </tbody>

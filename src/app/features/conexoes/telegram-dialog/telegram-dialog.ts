@@ -5,6 +5,7 @@ import { StatusService } from '../../../core/services/status.service';
 import { JobsService } from '../../../core/services/jobs.service';
 import { ConfirmacaoService } from '../../../core/services/confirmacao.service';
 import { VerificacaoService } from '../../../core/services/verificacao.service';
+import { ConexoesService } from '../../../core/services/conexoes.service';
 import { TelegramUiService } from '../../../core/services/telegram-ui.service';
 
 /**
@@ -23,6 +24,7 @@ export class TelegramDialog {
   protected jobsService = inject(JobsService);
   protected verificacao = inject(VerificacaoService);
   private confirmacao = inject(ConfirmacaoService);
+  private conexoes = inject(ConexoesService);
   private ui = inject(TelegramUiService);
 
   protected readonly conectando = computed(
@@ -41,6 +43,21 @@ export class TelegramDialog {
   protected readonly senha = signal('');
   protected readonly enviandoSenha = signal(false);
 
+  // Credenciais de API do Telegram (api_id / api_hash) que o proprio cliente
+  // informa aqui — cada conta do Telegram exige as suas (my.telegram.org).
+  protected readonly apiId = signal('');
+  protected readonly apiHash = signal('');
+  protected readonly credsSalvo = signal(false);
+  protected readonly credsApiId = signal<string | null>(null);
+  protected readonly editandoCreds = signal(false);
+  protected readonly salvandoCreds = signal(false);
+
+  protected readonly apiIdValido = computed(() => /^\d{3,15}$/.test(this.apiId().trim()));
+  protected readonly apiHashValido = computed(() => /^[a-f0-9]{32}$/i.test(this.apiHash().trim()));
+  protected readonly podeConectarCreds = computed(() => this.apiIdValido() && this.apiHashValido());
+  /** Mostra o formulario de api_id/api_hash quando ainda nao ha credencial salva (ou ao editar). */
+  protected readonly precisaCreds = computed(() => !this.credsSalvo() || this.editandoCreds());
+
   /** Erro do último "Conectar" (o robô já terminou, mas a janela mostra o motivo). */
   protected readonly erroConexao = computed(() =>
     !this.conectando() && !this.conectado() ? this.jobsService.erroTelegram() : null,
@@ -58,6 +75,9 @@ export class TelegramDialog {
 
   constructor() {
     effect(() => {
+      if (this.ui.aberto()) void this.carregarCreds();
+    });
+    effect(() => {
       const conteudo = this.jobsService.qrTelegram();
       if (!conteudo) {
         this.qrImagem.set(null);
@@ -69,9 +89,42 @@ export class TelegramDialog {
     });
   }
 
+  private async carregarCreds(): Promise<void> {
+    const c = await this.conexoes.credenciaisTelegram();
+    this.credsSalvo.set(c.salvo);
+    this.credsApiId.set(c.apiId);
+    if (c.salvo && c.apiId) this.apiId.set(c.apiId);
+    this.editandoCreds.set(false);
+  }
+
+  editarCreds(): void {
+    this.editandoCreds.set(true);
+    this.apiHash.set('');
+  }
+
   async conectar(): Promise<void> {
     this.erro.set(null);
     this.jobsService.erroTelegram.set(null);
+
+    // Sem credencial salva (ou trocando): salva o api_id/api_hash antes do QR.
+    if (this.precisaCreds()) {
+      if (!this.podeConectarCreds()) {
+        this.erro.set('Confira o api_id (só números) e o api_hash (32 caracteres de a–f e números).');
+        return;
+      }
+      this.salvandoCreds.set(true);
+      const salvo = await this.conexoes.salvarCredenciaisTelegram(this.apiId().trim(), this.apiHash().trim());
+      this.salvandoCreds.set(false);
+      if (!salvo.ok) {
+        this.erro.set(salvo.erro ?? null);
+        return;
+      }
+      this.credsSalvo.set(true);
+      this.credsApiId.set(this.apiId().trim());
+      this.editandoCreds.set(false);
+      this.apiHash.set('');
+    }
+
     this.jobsService.esquecerVerificacao('telegram');
     const r = await this.jobsService.iniciar('conectar-telegram');
     if (!r.ok) this.erro.set(r.erro ?? null);
@@ -109,6 +162,8 @@ export class TelegramDialog {
     }
     this.erro.set(null);
     this.senha.set('');
+    this.editandoCreds.set(false);
+    this.apiHash.set('');
     this.jobsService.erroTelegram.set(null);
     this.ui.fechar();
   }

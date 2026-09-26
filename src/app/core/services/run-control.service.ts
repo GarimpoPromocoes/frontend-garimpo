@@ -4,6 +4,7 @@ import { StatusService } from './status.service';
 import { ConfigService } from './config.service';
 import { VerificacaoService } from './verificacao.service';
 import { ConexoesService } from './conexoes.service';
+import { ConfirmacaoService } from './confirmacao.service';
 
 @Injectable({ providedIn: 'root' })
 export class RunControlService {
@@ -12,6 +13,7 @@ export class RunControlService {
   private configService = inject(ConfigService);
   private verificacao = inject(VerificacaoService);
   private conexoes = inject(ConexoesService);
+  private confirmacao = inject(ConfirmacaoService);
 
   /** Nenhuma loja é obrigatória: basta uma conectada (ML, Amazon ou Shopee). */
   readonly lojasConectadas = computed(() => {
@@ -21,6 +23,11 @@ export class RunControlService {
     if (this.verificacao.shopeeConectado()) lojas.push('shopee');
     return lojas;
   });
+
+  /** Canal de envio: basta um conectado (WhatsApp ou Telegram). */
+  readonly canalConectado = computed(
+    () => this.verificacao.whatsappConectado() || this.verificacao.telegramConectado(),
+  );
 
   readonly alvo = signal<AlvoGrupos>('todos');
   readonly selecionados = signal<Set<string>>(new Set());
@@ -60,7 +67,9 @@ export class RunControlService {
 
   readonly pendencias = computed<{ texto: string; aba: 'whatsapp' | 'lojas' | 'grupos' }[]>(() => {
     const itens: { texto: string; aba: 'whatsapp' | 'lojas' | 'grupos' }[] = [];
-    if (!this.verificacao.whatsappConectado()) itens.push({ texto: 'Conectar o WhatsApp', aba: 'whatsapp' });
+    if (!this.canalConectado()) {
+      itens.push({ texto: 'Conectar um canal de envio (WhatsApp ou Telegram)', aba: 'whatsapp' });
+    }
     if (!this.lojasConectadas().length) {
       itens.push({ texto: 'Conectar pelo menos uma loja de afiliado (Mercado Livre, Amazon ou Shopee)', aba: 'lojas' });
     }
@@ -88,6 +97,41 @@ export class RunControlService {
 
   async executar(): Promise<void> {
     this.erro.set(null);
+
+    // Requisitos minimos: pelo menos um e-commerce E pelo menos um canal de
+    // envio. Sem isso o robo nao liga — avisa num modal explicando o que falta.
+    const temLoja = this.lojasConectadas().length > 0;
+    const temCanal = this.canalConectado();
+    if (!temLoja && !temCanal) {
+      await this.confirmacao.pedir({
+        titulo: 'Configuração incompleta',
+        texto:
+          'Para ligar o robô, conecte pelo menos um e-commerce (Mercado Livre, Amazon ou Shopee) e pelo menos um canal de envio (WhatsApp ou Telegram).',
+        confirmar: 'Entendi',
+        soAviso: true,
+      });
+      return;
+    }
+    if (!temLoja) {
+      await this.confirmacao.pedir({
+        titulo: 'Nenhum e-commerce conectado',
+        texto:
+          'Conecte pelo menos um e-commerce (Mercado Livre, Amazon ou Shopee) antes de ligar o robô — é de onde saem as ofertas.',
+        confirmar: 'Entendi',
+        soAviso: true,
+      });
+      return;
+    }
+    if (!temCanal) {
+      await this.confirmacao.pedir({
+        titulo: 'Nenhum canal de comunicação conectado',
+        texto:
+          'Conecte pelo menos um canal (WhatsApp ou Telegram) antes de ligar o robô — é por onde as promoções são enviadas.',
+        confirmar: 'Entendi',
+        soAviso: true,
+      });
+      return;
+    }
 
     if (this.grupos().length === 0) {
       this.erro.set('Cadastre pelo menos 1 grupo antes de rodar.');
