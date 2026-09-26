@@ -1086,6 +1086,20 @@ a.prod-titulo:hover {
 .stat-strip-4 .stat-cell-value {
   font-size: 24px;
 }
+.stat-strip-5 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+.stat-strip-5 .stat-cell-value {
+  font-size: 24px;
+}
+.ganhos-cliques-badge {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-soft);
+  background: var(--surface-2, rgba(127, 127, 127, 0.12));
+  border-radius: 999px;
+  padding: 1px 9px;
+}
 
 .ganhos-swatch {
   display: inline-block;
@@ -1210,6 +1224,12 @@ a.prod-titulo:hover {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .stat-strip-4 .stat-cell {
+    border-top: 1px solid var(--border);
+  }
+  .stat-strip-5 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .stat-strip-5 .stat-cell {
     border-top: 1px solid var(--border);
   }
 }

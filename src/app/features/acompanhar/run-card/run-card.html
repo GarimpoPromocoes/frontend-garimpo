@@ -76,13 +76,13 @@
       <button
         type="button"
         class="btn btn-lg btn-hero"
-        [disabled]="runControl.iniciando() || !runControl.podeLigar()"
+        [disabled]="runControl.iniciando()"
         (click)="runControl.executar()"
       >
         {{ runControl.iniciando() ? 'Ligando…' : 'Ligar robô' }}
       </button>
       @if (!runControl.podeLigar()) {
-        <span class="hint-text">Complete os passos acima para liberar.</span>
+        <span class="hint-text">Ainda faltam passos de configuração — o robô avisa o que falta ao ligar.</span>
       }
     } @else {
       <button

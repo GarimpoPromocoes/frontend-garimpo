@@ -26,6 +26,9 @@ const copiar = (g: GrupoTematico): GrupoTematico => ({
 /** Quantas palavras do assunto aparecem no card antes do "+N". */
 const MAX_PALAVRAS_CARD = 5;
 
+/** Limite de palavras do assunto "pode entrar" (o mesmo da API). */
+const MAX_ASSUNTO = 100;
+
 /** Limite de palavras em "Nunca incluir se aparecer" (o mesmo da API). */
 const MAX_EXCLUSOES = 100;
 
@@ -53,6 +56,7 @@ export class GroupsCard {
   protected readonly erro = signal<string | null>(null);
 
   protected readonly maxPalavras = MAX_PALAVRAS_CARD;
+  protected readonly maxAssunto = MAX_ASSUNTO;
   protected readonly maxExclusoes = MAX_EXCLUSOES;
 
   /** Outro grupo já é o de sobras? Mostra no aviso da janela. */
@@ -93,6 +97,11 @@ export class GroupsCard {
     this.rascunho.update((r) => (r ? { ...r, [campo]: valor } : r));
   }
 
+  /** Apaga de uma vez todas as tags de um dos campos do grupo (pode/não pode entrar). */
+  limparTags(campo: 'palavras' | 'palavrasExcluir'): void {
+    this.rascunho.update((r) => (r ? { ...r, [campo]: [] } : r));
+  }
+
   // ---- gravação -------------------------------------------------------------
 
   async salvar(): Promise<void> {
@@ -107,6 +116,10 @@ export class GroupsCard {
     };
     if (!g.nome || !g.groupName) {
       this.erro.set('Preencha o apelido e o nome exato do grupo no WhatsApp.');
+      return;
+    }
+    if (g.palavras.length > MAX_ASSUNTO) {
+      this.erro.set(`No máximo ${MAX_ASSUNTO} palavras no assunto do grupo.`);
       return;
     }
     if (g.palavrasExcluir.length > MAX_EXCLUSOES) {

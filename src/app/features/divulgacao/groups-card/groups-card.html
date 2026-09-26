@@ -149,11 +149,21 @@
 
       @if (!r.geral) {
         <div class="field">
-          <label>Assunto do grupo</label>
-          <span class="hint">Produtos com essas palavras no título ou na categoria vão para este grupo.</span>
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+            <label>Assunto do grupo</label>
+            @if (r.palavras.length) {
+              <button type="button" class="btn btn-ghost btn-sm" (click)="limparTags('palavras')">
+                Limpar todas
+              </button>
+            }
+          </div>
+          <span class="hint">
+            Produtos com essas palavras no título ou na categoria vão para este grupo.
+            Até {{ maxAssunto }} palavras ({{ r.palavras.length }}/{{ maxAssunto }}).
+          </span>
           <app-chip-input
             [items]="r.palavras"
-            (itemsChange)="atualizar('palavras', $event)"
+            (itemsChange)="atualizar('palavras', $event.slice(0, maxAssunto))"
             [separarPorVirgula]="true"
             placeholder="Digite e aperte Enter — ou vários separados por vírgula: bolsa, sapato"
           />
@@ -161,7 +171,14 @@
       }
 
       <div class="field">
-        <label>Nunca incluir se aparecer</label>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+          <label>Nunca incluir se aparecer</label>
+          @if (r.palavrasExcluir.length) {
+            <button type="button" class="btn btn-ghost btn-sm" (click)="limparTags('palavrasExcluir')">
+              Limpar todas
+            </button>
+          }
+        </div>
         <span class="hint">
           A promoção é descartada se o título ou a categoria tiver alguma dessas palavras — útil quando uma palavra do
           assunto é ambígua (ex.: "sapato" também pega bota de segurança). Até {{ maxExclusoes }} palavras

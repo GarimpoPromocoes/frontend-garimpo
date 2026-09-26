@@ -100,6 +100,40 @@
   </div>
 </div>
 
+<div class="regras-secao">
+  <h3 class="regras-secao-titulo">Divulgação</h3>
+
+  <div class="grupos-grade">
+    <button type="button" class="grupo-card regra-card" [class.regra-card-off]="!divulgacao().ativo" (click)="abrir('divulgacao')">
+      <div class="grupo-card-topo">
+        <span class="regra-icone">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-6-6 18-3.5-7.5L3 11Z"/></svg>
+        </span>
+        <div class="grupo-card-nomes">
+          <span class="grupo-card-nome">Mensagem de divulgação</span>
+          <span class="regra-card-sub">Uma chamada com o seu Linktree, de vez em quando</span>
+        </div>
+      </div>
+      @if (divulgacao().ativo) {
+        <div class="regra-card-valor">
+          <strong>{{ divulgacao().maxPorDia }}x</strong>
+          <span>por dia, no máximo</span>
+        </div>
+        <p class="regra-card-texto">
+          Aparece esporadicamente em cada grupo com o link dos seus outros grupos.
+        </p>
+      } @else {
+        <div class="regra-card-valor"><strong>Desligada</strong></div>
+        <p class="regra-card-texto">Nenhuma mensagem de divulgação é enviada.</p>
+      }
+      <div class="grupo-card-rodape">
+        <span>Vale para cada grupo</span>
+        <span>Ajustar →</span>
+      </div>
+    </button>
+  </div>
+</div>
+
 <app-datas-especiais />
 
 <!-- ================================ janelas ================================ -->
@@ -113,6 +147,7 @@
               @case ('frequencia') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> }
               @case ('repeticao') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2.5 20.5 6 17 9.5"/><path d="M3.5 11V9.5A3.5 3.5 0 0 1 7 6h13.5"/><path d="M7 21.5 3.5 18 7 14.5"/><path d="M20.5 13v1.5A3.5 3.5 0 0 1 17 18H3.5"/></svg> }
               @case ('cupons') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5V7a1.5 1.5 0 0 1 1.5-1.5h15A1.5 1.5 0 0 1 21 7v2.5a2.5 2.5 0 0 0 0 5V17a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17v-2.5a2.5 2.5 0 0 0 0-5Z"/><path d="M14 5.5v13" stroke-dasharray="2 2.6"/></svg> }
+              @case ('divulgacao') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-6-6 18-3.5-7.5L3 11Z"/></svg> }
             }
           </span>
           <div>
@@ -121,6 +156,7 @@
                 @case ('frequencia') { Frequência das postagens }
                 @case ('repeticao') { Repetição de produtos }
                 @case ('cupons') { Cupons de desconto }
+                @case ('divulgacao') { Mensagem de divulgação }
               }
             </h2>
             <p class="card-subtitle">
@@ -128,6 +164,7 @@
                 @case ('frequencia') { O robô sorteia a espera dentro da faixa — assim o envio parece de gente, não de robô. }
                 @case ('repeticao') { Evita que a mesma oferta apareça de novo cedo demais no mesmo grupo. }
                 @case ('cupons') { De vez em quando, no lugar de uma oferta comum, sai uma mensagem com cupom. }
+                @case ('divulgacao') { Um recado seu com o Linktree dos seus grupos, que sai esporadicamente — no máximo 1 ou 2 vezes por dia em cada grupo. }
               }
             </p>
           </div>
@@ -281,6 +318,70 @@
             </span>
           } @else {
             <div class="info-box">Com os cupons desligados, só saem ofertas comuns.</div>
+          }
+        }
+
+        @case ('divulgacao') {
+          <div class="toggle-row">
+            <button
+              type="button"
+              class="toggle-switch"
+              role="switch"
+              [attr.aria-checked]="rDivAtivo()"
+              [class.toggle-switch-on]="rDivAtivo()"
+              (click)="rDivAtivo.set(!rDivAtivo())"
+            >
+              <span class="toggle-switch-thumb"></span>
+            </button>
+            <span class="toggle-label">Enviar a mensagem de divulgação nos grupos</span>
+          </div>
+
+          @if (rDivAtivo()) {
+            <div class="field">
+              <label>Mensagem</label>
+              <span class="hint">
+                Sua chamada e assinatura. Escreva <strong>&#123;link&#125;</strong> onde o link deve aparecer — se não escrever,
+                o link entra automaticamente no fim.
+              </span>
+              <textarea
+                rows="6"
+                [ngModel]="rDivTexto()"
+                (ngModelChange)="rDivTexto.set($event)"
+                placeholder="🚨 NÃO PERCA NENHUMA PROMOÇÃO!&#10;Confira nossos outros grupos de ofertas 👇&#10;&#123;link&#125;"
+              ></textarea>
+            </div>
+
+            <div class="field">
+              <label>Link dos seus grupos (Linktree)</label>
+              <input
+                type="text"
+                [ngModel]="rDivLink()"
+                (ngModelChange)="rDivLink.set($event)"
+                placeholder="https://linktr.ee/seucanal"
+              />
+            </div>
+
+            <div class="field">
+              <label>No máximo por dia, em cada grupo</label>
+              <div class="regra-chips">
+                <button type="button" class="regra-chip" [class.regra-chip-ativa]="n(rDivMax()) === 1" (click)="rDivMax.set(1)">
+                  1 vez
+                </button>
+                <button type="button" class="regra-chip" [class.regra-chip-ativa]="n(rDivMax()) === 2" (click)="rDivMax.set(2)">
+                  2 vezes
+                </button>
+              </div>
+              <span class="hint">O robô envia de forma esporádica ao longo do dia, sem passar desse limite.</span>
+            </div>
+
+            @if (rDivPreview()) {
+              <div class="field">
+                <label>Prévia</label>
+                <div class="info-box" style="white-space: pre-wrap">{{ rDivPreview() }}</div>
+              </div>
+            }
+          } @else {
+            <div class="info-box">Com a divulgação desligada, o robô só publica as ofertas.</div>
           }
         }
       }

@@ -34,6 +34,16 @@ export interface Cupons {
   percentualSozinho: number;
 }
 
+export interface Divulgacao {
+  ativo: boolean;
+  /** Texto livre do cliente (chamada + "copyright"). Aceita {link} como marcador. */
+  texto: string;
+  /** Linktree (ou outro link) com os outros grupos do cliente. */
+  link: string;
+  /** Teto por dia por grupo: 1 ou 2. */
+  maxPorDia: number;
+}
+
 export interface DashboardConfig {
   grupos: GrupoTematico[];
   postagem: {
@@ -46,6 +56,7 @@ export interface DashboardConfig {
   };
   agendamento: Agendamento;
   cupons: Cupons;
+  divulgacao: Divulgacao;
 }
 
 @Injectable({ providedIn: 'root' })

@@ -4,7 +4,7 @@ import { ConfigService } from '../../../core/services/config.service';
 import { StatusService } from '../../../core/services/status.service';
 import { DatasEspeciais } from '../datas-especiais/datas-especiais';
 
-type Janela = 'frequencia' | 'repeticao' | 'cupons';
+type Janela = 'frequencia' | 'repeticao' | 'cupons' | 'divulgacao';
 
 interface Ritmo {
   id: string;
@@ -117,6 +117,16 @@ export class RegrasPostagem {
 
   protected readonly cuponsDisponiveis = computed(() => this.statusService.status()?.cuponsAtivos ?? null);
 
+  protected readonly divulgacao = computed(() => {
+    const d = this.cfg()?.divulgacao;
+    return {
+      ativo: d?.ativo ?? false,
+      texto: d?.texto ?? '',
+      link: d?.link ?? '',
+      maxPorDia: d?.maxPorDia ?? 1,
+    };
+  });
+
   // ---- janela de edição -------------------------------------------------------
 
   protected readonly janela = signal<Janela | null>(null);
@@ -131,6 +141,21 @@ export class RegrasPostagem {
   protected readonly rCupomAtivo = signal(true);
   protected readonly rCupomProduto = signal(15);
   protected readonly rCupomLista = signal(10);
+  protected readonly rDivAtivo = signal(false);
+  protected readonly rDivTexto = signal('');
+  protected readonly rDivLink = signal('');
+  protected readonly rDivMax = signal(1);
+
+  /** Previa de como a mensagem sai no grupo (mesma regra do backend). */
+  protected readonly rDivPreview = computed(() => {
+    const t = (this.rDivTexto() || '').trim();
+    const l = (this.rDivLink() || '').trim();
+    if (!t && !l) return '';
+    if (!l) return t;
+    if (t.includes('{link}')) return t.split('{link}').join(l);
+    if (t.includes('[LINK DOS GRUPOS]')) return t.split('[LINK DOS GRUPOS]').join(l);
+    return t ? `${t}\n\n🔗 ${l}` : l;
+  });
 
   protected readonly rPorDia = computed(() => postsPorDia(Number(this.rMin()), Number(this.rMax())));
   protected readonly rGarimpoMax = computed(() => garimpoMaxPorDia(Number(this.rMin()), Number(this.rMax())));
@@ -159,6 +184,11 @@ export class RegrasPostagem {
     this.rCupomAtivo.set(c?.ativo ?? true);
     this.rCupomProduto.set(c?.percentualProduto ?? 15);
     this.rCupomLista.set(c?.percentualSozinho ?? 10);
+    const d = this.divulgacao();
+    this.rDivAtivo.set(d.ativo);
+    this.rDivTexto.set(d.texto);
+    this.rDivLink.set(d.link);
+    this.rDivMax.set(d.maxPorDia === 2 ? 2 : 1);
     this.janela.set(j);
   }
 
@@ -212,6 +242,15 @@ export class RegrasPostagem {
         return;
       }
       partial = { postagem: { cooldownHoras: cooldown, repostarAposDias: repostar } };
+    } else if (j === 'divulgacao') {
+      const texto = (this.rDivTexto() || '').trim();
+      const link = (this.rDivLink() || '').trim();
+      const max = Number(this.rDivMax()) === 2 ? 2 : 1;
+      if (this.rDivAtivo() && !texto && !link) {
+        this.erro.set('Escreva a mensagem ou informe o link antes de ativar a divulgação.');
+        return;
+      }
+      partial = { divulgacao: { ativo: this.rDivAtivo(), texto, link, maxPorDia: max } };
     } else {
       if (this.rSomaCupons() > MAX_CUPONS) {
         this.erro.set(`Os dois tipos de cupom juntos não podem passar de ${MAX_CUPONS}% das mensagens.`);

@@ -98,13 +98,15 @@ export class GanhosCard implements OnInit, OnDestroy {
       pendente: somar(doMes.map((g) => g?.pendente ?? null)),
       confirmado: somar(doMes.map((g) => g?.confirmado ?? null)),
       pago: somar(doMes.map((g) => g?.pago ?? null)),
+      cliques: somar(doMes.map((g) => g?.cliques ?? null)),
     };
   });
 
   protected readonly temDados = computed(() => this.ganhos.meses().length > 0);
 
-  protected readonly estadoLojas = computed(() =>
-    LOJAS.map((l) => {
+  protected readonly estadoLojas = computed(() => {
+    const mes = mesAtual();
+    return LOJAS.map((l) => {
       const r = this.ganhos.leituras().find((x) => x.loja === l.id);
       return {
         ...l,
@@ -112,9 +114,10 @@ export class GanhosCard implements OnInit, OnDestroy {
         erro: r?.erro ?? null,
         lidoEm: r?.lidoEm ?? null,
         aguardando: !!(r?.pedidoEm && (!r.lidoEm || r.pedidoEm > r.lidoEm)),
+        cliques: this.valorDe(mes, l.id)?.cliques ?? null,
       };
-    })
-  );
+    });
+  });
 
   protected readonly grafico = computed(() => {
     const meses = mesesAte(mesAtual(), MESES_NO_GRAFICO);
@@ -198,6 +201,11 @@ export class GanhosCard implements OnInit, OnDestroy {
           ? 'Pedido registrado. A leitura acontece assim que o robô for ligado.'
           : 'Lendo os painéis das lojas agora. Leva de 1 a 3 minutos.'
     );
+  }
+
+  protected inteiro(v: number | null | undefined): string {
+    if (v == null) return '—';
+    return Math.round(v).toLocaleString('pt-BR');
   }
 
   protected moeda(v: number | null | undefined): string {

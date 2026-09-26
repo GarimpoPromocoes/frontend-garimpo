@@ -95,4 +95,32 @@ export class ConexoesService {
     } catch (_) {
     }
   }
+
+  // ---- Credenciais de API do Telegram (api_id / api_hash), por usuário ----
+
+  async credenciaisTelegram(): Promise<{ salvo: boolean; apiId: string | null }> {
+    try {
+      return await firstValueFrom(
+        this.http.get<{ salvo: boolean; apiId: string | null }>('/api/conexoes/telegram/credenciais'),
+      );
+    } catch (_) {
+      return { salvo: false, apiId: null };
+    }
+  }
+
+  async salvarCredenciaisTelegram(apiId: string, apiHash: string): Promise<{ ok: boolean; erro?: string }> {
+    try {
+      await firstValueFrom(this.http.post('/api/conexoes/telegram/credenciais', { apiId, apiHash }));
+      return { ok: true };
+    } catch (e: any) {
+      return { ok: false, erro: e?.error?.erro || 'Não consegui salvar as credenciais do Telegram.' };
+    }
+  }
+
+  async removerCredenciaisTelegram(): Promise<void> {
+    try {
+      await firstValueFrom(this.http.delete('/api/conexoes/telegram/credenciais'));
+    } catch (_) {
+    }
+  }
 }

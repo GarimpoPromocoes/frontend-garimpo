@@ -11,6 +11,7 @@ export interface GanhoMes {
   pendente: number | null;
   confirmado: number | null;
   pago: number | null;
+  cliques: number | null;
   lidoEm: string;
 }
 
