@@ -56,14 +56,6 @@ const ABAS: Aba[] = [
     secao: 'Acompanhar',
   },
   {
-    id: 'atividade',
-    label: 'Atividade',
-    titulo: 'Atividade',
-    descricao: 'Acompanhe em tempo real tudo que o robô está fazendo.',
-    secao: 'Acompanhar',
-    badge: 'alerta',
-  },
-  {
     id: 'ganhos',
     label: 'Ganhos',
     titulo: 'Ganhos',
@@ -172,6 +164,8 @@ export class App implements OnInit, OnDestroy {
   );
   protected readonly aba = signal<AbaId>('painel');
   protected readonly menuAberto = signal(false);
+  /** Modal grandão da atividade — abre pelo "Ver tudo" do painel, no lugar de trocar de aba. */
+  protected readonly atividadeModalAberta = signal(false);
 
   protected badgeDe(id: AbaId): string | null {
     const s = this.statusService.status();
@@ -244,6 +238,8 @@ export class App implements OnInit, OnDestroy {
       if ((salva as string) === 'temas') salva = 'regras';
       // Cupons viraram um card dentro de Regras de postagem.
       if ((salva as string) === 'cupons') salva = 'regras';
+      // Atividade deixou de ser aba — agora é um modal aberto pelo painel.
+      if ((salva as string) === 'atividade') salva = 'painel';
       if (salva && ABAS.some((a) => a.id === salva)) this.aba.set(salva);
     } catch (_) {
     }
