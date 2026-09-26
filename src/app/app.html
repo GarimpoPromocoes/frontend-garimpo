@@ -150,7 +150,7 @@
 
           <div class="col-2">
             <app-run-card />
-            <app-console-card [compacto]="true" (verTudo)="irPara('atividade')" />
+            <app-console-card [compacto]="true" (verTudo)="atividadeModalAberta.set(true)" />
           </div>
         }
 
@@ -211,9 +211,6 @@
           }
         }
 
-        @case ('atividade') {
-          <app-console-card />
-        }
       }
     </main>
   </div>
@@ -225,6 +222,18 @@
 <app-telegram-dialog />
 <app-desafio-ml-dialog />
 <app-confirmacao-dialog />
+
+<!-- Atividade em tela cheia: o "Ver tudo" do painel abre este modal, em vez de trocar de aba. -->
+@if (atividadeModalAberta()) {
+  <div class="modal-fundo" (click)="atividadeModalAberta.set(false)">
+    <div class="modal-caixa modal-atividade" role="dialog" aria-modal="true" aria-label="Atividade do robô" (click)="$event.stopPropagation()">
+      <button type="button" class="btn-fechar modal-atividade-fechar" (click)="atividadeModalAberta.set(false)" aria-label="Fechar" title="Fechar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6 18 18M18 6 6 18" /></svg>
+      </button>
+      <app-console-card />
+    </div>
+  </div>
+}
 
 <!-- Mercado Livre em espera: fica no canto, sem travar nada, até alguém resolver. -->
 @if (mostrarEsperaMl()) {
