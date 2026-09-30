@@ -1,0 +1,54 @@
+<div class="login-shell">
+  <form class="card login-card" (ngSubmit)="enviar()">
+    <div class="card-header">
+      <div>
+        <h2>{{ modo() === 'entrar' ? 'Entrar' : 'Criar conta' }}</h2>
+        <p class="card-subtitle">
+          {{ modo() === 'entrar' ? 'Acesse o seu painel do Promobot.' : 'Leva menos de um minuto.' }}
+        </p>
+      </div>
+    </div>
+
+    @if (auth.erro()) {
+      <div class="alert-banner">{{ auth.erro() }}</div>
+    }
+
+    <div class="field">
+      <label for="login-email">E-mail</label>
+      <input
+        id="login-email"
+        type="email"
+        name="email"
+        autocomplete="email"
+        placeholder="voce@exemplo.com"
+        [(ngModel)]="email"
+        required
+      />
+    </div>
+
+    <div class="field">
+      <label for="login-senha">Senha</label>
+      <input
+        id="login-senha"
+        type="password"
+        name="senha"
+        [autocomplete]="modo() === 'entrar' ? 'current-password' : 'new-password'"
+        placeholder="••••••••"
+        [(ngModel)]="senha"
+        required
+        minlength="8"
+      />
+      @if (modo() === 'criar') {
+        <span class="hint">Pelo menos 8 caracteres.</span>
+      }
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-block" [disabled]="auth.enviando()">
+      {{ auth.enviando() ? 'Um momento…' : modo() === 'entrar' ? 'Entrar' : 'Criar conta' }}
+    </button>
+
+    <button type="button" class="btn btn-ghost btn-block" (click)="alternarModo()">
+      {{ modo() === 'entrar' ? 'Ainda não tenho conta' : 'Já tenho conta' }}
+    </button>
+  </form>
+</div>

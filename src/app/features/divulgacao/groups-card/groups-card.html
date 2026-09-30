@@ -1,0 +1,235 @@
+<p class="grupos-intro">
+  Cada card é um grupo do WhatsApp onde o robô publica. Clique para editar o assunto, as exclusões e o nome exato
+  do grupo.
+</p>
+
+<div class="grupos-grade">
+  @for (g of grupos(); track g.id) {
+    <button type="button" class="grupo-card" (click)="abrir(g)">
+      <div class="grupo-card-topo">
+        <span class="grupo-avatar" [class.grupo-avatar-tudo]="g.geral" [class.grupo-avatar-sobras]="g.coringa">
+          {{ inicial(g) }}
+        </span>
+        <div class="grupo-card-nomes">
+          <span class="grupo-card-nome">{{ g.nome }}</span>
+          <span class="grupo-card-zap" [title]="g.groupName">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 11.6a8.4 8.4 0 0 1-12.3 7.4L3.5 20.5l1.6-4.6A8.4 8.4 0 1 1 20.5 11.6Z"/></svg>
+            <span>{{ g.groupName }}</span>
+          </span>
+          @if (g.grupoTelegram) {
+            <span class="grupo-card-zap grupo-card-tg" [title]="g.grupoTelegram">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 4.5 2.8 11.7c-.8.3-.8 1.4 0 1.7l4.6 1.6 1.8 5.6c.2.7 1.1.9 1.6.4l2.6-2.5 4.7 3.5c.6.4 1.4.1 1.6-.6l3.2-15.4c.2-.9-.6-1.6-1.4-1.5Z"/><path d="m7.4 15 11-8.3"/></svg>
+              <span>{{ g.grupoTelegram }}</span>
+            </span>
+          }
+        </div>
+      </div>
+
+      <div class="grupo-card-corpo">
+        @if (g.geral) {
+          <span class="grupo-selo grupo-selo-tudo">Recebe tudo</span>
+        }
+        @if (g.coringa) {
+          <span class="grupo-selo grupo-selo-sobras">Sobras</span>
+        }
+        @if (!g.geral) {
+          @for (p of g.palavras.slice(0, maxPalavras); track p) {
+            <span class="grupo-tag">{{ p }}</span>
+          }
+          @if (g.palavras.length > maxPalavras) {
+            <span class="grupo-tag grupo-tag-mais">+{{ g.palavras.length - maxPalavras }}</span>
+          }
+          @if (!g.palavras.length && !g.coringa) {
+            <span class="grupo-card-vazio">Sem assunto definido</span>
+          }
+        }
+      </div>
+
+      <div class="grupo-card-rodape">
+        <span>
+          @if (g.geral) {
+            Qualquer promoção
+          } @else {
+            {{ g.palavras.length }} {{ g.palavras.length === 1 ? 'palavra' : 'palavras' }}
+          }
+        </span>
+        @if (g.palavrasExcluir.length) {
+          <span class="grupo-card-exclui">
+            {{ g.palavrasExcluir.length }} {{ g.palavrasExcluir.length === 1 ? 'exclusão' : 'exclusões' }}
+          </span>
+        }
+      </div>
+    </button>
+  }
+
+  <button type="button" class="grupo-card grupo-card-novo" (click)="criar()">
+    <span class="grupo-novo-mais">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
+    </span>
+    <span class="grupo-novo-titulo">{{ grupos().length ? 'Adicionar grupo' : 'Adicionar o primeiro grupo' }}</span>
+    <span class="grupo-novo-texto">O robô só publica nos grupos cadastrados aqui.</span>
+  </button>
+</div>
+
+@if (rascunho(); as r) {
+  <div class="modal-fundo" (click)="fechar()">
+    <div class="modal-caixa modal-grupo" (click)="$event.stopPropagation()">
+      <div class="card-header">
+        <div class="grupo-modal-titulo">
+          <span class="grupo-avatar" [class.grupo-avatar-tudo]="r.geral" [class.grupo-avatar-sobras]="r.coringa">
+            {{ inicial(r) }}
+          </span>
+          <div>
+            <h2>{{ novo() ? 'Novo grupo' : r.nome || 'Grupo' }}</h2>
+            <p class="card-subtitle">O nome no WhatsApp precisa ser idêntico — é por ele que o robô acha a conversa.</p>
+          </div>
+        </div>
+        <button type="button" class="btn-fechar" (click)="fechar()" aria-label="Fechar" title="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <path d="M6 6 18 18M18 6 6 18" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label>Apelido do grupo</label>
+          <input
+            type="text"
+            [ngModel]="r.nome"
+            (ngModelChange)="atualizar('nome', $event)"
+            placeholder="Ex.: Eletrônicos"
+          />
+          <span class="hint">Só para você se organizar aqui no painel.</span>
+        </div>
+        <div class="field">
+          <label>Nome exato no WhatsApp</label>
+          <input
+            type="text"
+            [ngModel]="r.groupName"
+            (ngModelChange)="atualizar('groupName', $event)"
+            placeholder="Copie e cole o nome do grupo"
+          />
+          <span class="hint">Precisa ser igual, com acentos e emojis.</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Nome do grupo no Telegram <small>(opcional)</small></label>
+        <input
+          type="text"
+          [ngModel]="r.grupoTelegram ?? ''"
+          (ngModelChange)="atualizar('grupoTelegram', $event)"
+          placeholder="Deixe vazio para postar só no WhatsApp"
+        />
+        <span class="hint">Cada promoção que sair neste grupo do WhatsApp sai também neste grupo do Telegram.</span>
+      </div>
+
+      <div class="grupo-modos">
+        <label class="grupo-modo" [class.grupo-modo-ativo]="r.geral">
+          <input type="checkbox" [ngModel]="r.geral" (ngModelChange)="atualizar('geral', $event)" />
+          <span>
+            <strong>Recebe tudo</strong>
+            <small>Qualquer promoção pode cair aqui, sem filtro de assunto.</small>
+          </span>
+        </label>
+        <label class="grupo-modo" [class.grupo-modo-ativo]="r.coringa">
+          <input type="checkbox" [ngModel]="r.coringa" (ngModelChange)="atualizar('coringa', $event)" />
+          <span>
+            <strong>Sobras</strong>
+            <small>
+              Recebe o que não combinou com nenhum grupo.
+              @if (r.coringa && coringaAtual(); as c) {
+                Substitui “{{ c.nome }}”.
+              }
+            </small>
+          </span>
+        </label>
+      </div>
+
+      @if (!r.geral) {
+        <div class="grid-2">
+          <label class="grupo-modo" [class.grupo-modo-ativo]="r.temaEstrito">
+            <input type="checkbox" [ngModel]="r.temaEstrito ?? false" (ngModelChange)="atualizar('temaEstrito', $event)" />
+            <span>
+              <strong>Tema estrito</strong>
+              <small>Só entra o que casa de verdade com o assunto. Corta o vazamento de tema (Halloween, Natal, moda solta) e barra "de brinquedo"/miniatura.</small>
+            </span>
+          </label>
+          <div class="field">
+            <label>Público do grupo</label>
+            <select [ngModel]="r.publico ?? 'misto'" (ngModelChange)="atualizar('publico', $event)">
+              <option value="misto">Misto (sem trava)</option>
+              <option value="masculino">Masculino</option>
+              <option value="feminino">Feminino</option>
+              <option value="infantil">Infantil</option>
+            </select>
+            <span class="hint">Produto do outro público nunca é postado aqui — nem que a palavra do assunto apareça.</span>
+          </div>
+        </div>
+      }
+
+      @if (!r.geral) {
+        <div class="field">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+            <label>Assunto do grupo</label>
+            @if (r.palavras.length) {
+              <button type="button" class="btn btn-ghost btn-sm" (click)="limparTags('palavras')">
+                Limpar todas
+              </button>
+            }
+          </div>
+          <span class="hint">
+            Produtos com essas palavras no título ou na categoria vão para este grupo.
+            Até {{ maxAssunto }} palavras ({{ r.palavras.length }}/{{ maxAssunto }}).
+          </span>
+          <app-chip-input
+            [items]="r.palavras"
+            (itemsChange)="atualizar('palavras', $event.slice(0, maxAssunto))"
+            [separarPorVirgula]="true"
+            placeholder="Digite e aperte Enter — ou vários separados por vírgula: bolsa, sapato"
+          />
+        </div>
+      }
+
+      <div class="field">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+          <label>Nunca incluir se aparecer</label>
+          @if (r.palavrasExcluir.length) {
+            <button type="button" class="btn btn-ghost btn-sm" (click)="limparTags('palavrasExcluir')">
+              Limpar todas
+            </button>
+          }
+        </div>
+        <span class="hint">
+          A promoção é descartada se o título ou a categoria tiver alguma dessas palavras — útil quando uma palavra do
+          assunto é ambígua (ex.: "sapato" também pega bota de segurança). Até {{ maxExclusoes }} palavras
+          ({{ r.palavrasExcluir.length }}/{{ maxExclusoes }}).
+        </span>
+        <app-chip-input
+          [items]="r.palavrasExcluir"
+          (itemsChange)="atualizar('palavrasExcluir', $event.slice(0, maxExclusoes))"
+          [separarPorVirgula]="true"
+          placeholder="Digite e aperte Enter — ou vários separados por vírgula: masculino, infantil"
+        />
+      </div>
+
+      @if (erro(); as e) {
+        <div class="info-box info-box-erro">{{ e }}</div>
+      }
+
+      <div class="modal-rodape grupo-modal-rodape">
+        @if (!novo()) {
+          <button type="button" class="btn btn-danger-soft btn-sm" [disabled]="salvando()" (click)="remover(r)">
+            Remover grupo
+          </button>
+        }
+        <span class="grupo-modal-espaco"></span>
+        <button type="button" class="btn btn-ghost" [disabled]="salvando()" (click)="fechar()">Cancelar</button>
+        <button type="button" class="btn btn-primary" [disabled]="salvando()" (click)="salvar()">
+          {{ salvando() ? 'Salvando…' : novo() ? 'Adicionar grupo' : 'Salvar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

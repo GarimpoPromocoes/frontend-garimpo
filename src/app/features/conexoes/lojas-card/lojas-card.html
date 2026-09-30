@@ -1,0 +1,37 @@
+<div class="lojas-grade">
+  @for (loja of lojas(); track loja.provedor) {
+    <button
+      type="button"
+      class="loja-botao"
+      [class.loja-botao-off]="!loja.conectada"
+      (click)="abrir(loja.provedor)"
+    >
+      <span class="loja-logo-caixa"><img class="loja-logo" [src]="loja.logo" [alt]="loja.nome" /></span>
+      <span class="loja-estado" [class.loja-estado-ok]="loja.conectada">
+        <span class="badge-dot"></span>
+        {{ loja.conectada ? 'Conectada' : 'Conectar' }}
+      </span>
+    </button>
+  }
+  @for (loja of emBreve; track loja.id) {
+    <button
+      type="button"
+      class="loja-botao loja-botao-breve loja-botao-off"
+      [attr.aria-label]="loja.nome + ' — em desenvolvimento'"
+      (click)="avisarEmBreve(loja.nome)"
+    >
+      <span class="loja-logo-caixa"><img class="loja-logo" [src]="loja.logo" [alt]="loja.nome" /></span>
+      <span class="loja-estado loja-estado-breve">
+        <span class="badge-dot"></span>
+        Em breve
+      </span>
+    </button>
+  }
+</div>
+
+@if (erro(); as e) {
+  <div class="alert-banner">
+    {{ e }}
+    <button type="button" class="btn btn-ghost btn-sm" (click)="recarregar()">Tentar de novo</button>
+  </div>
+}

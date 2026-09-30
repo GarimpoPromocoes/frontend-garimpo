@@ -1,0 +1,54 @@
+<button
+  type="button"
+  class="status-botao"
+  [class.status-botao-alerta]="!tudoPronto()"
+  [class.status-botao-aberto]="aberto()"
+  [attr.aria-expanded]="aberto()"
+  aria-label="Status das conexões"
+  (click)="alternar()"
+>
+  <span class="status-ponto"></span>
+  <span class="status-rotulo">Status</span>
+  <span class="status-contagem">{{ totalConectado() }}/{{ total() }}</span>
+</button>
+
+@if (aberto()) {
+  <div class="sino-painel status-painel" role="dialog" aria-label="Status das conexões">
+    <div class="sino-cabeca">
+      <strong>Conexões</strong>
+      <span [class.status-cabeca-ok]="tudoPronto()">
+        {{ tudoPronto() ? 'Pronto para postar' : 'Falta conectar' }}
+      </span>
+    </div>
+
+    <p class="status-secao">Envio das promoções</p>
+    @for (i of envio(); track i.id) {
+      <button type="button" class="status-linha" (click)="abrir(i)">
+        <span class="status-logo"><img [src]="i.logo" alt="" /></span>
+        <span class="status-nome">
+          <strong>{{ i.nome }}</strong>
+          @if (i.detalhe) { <small>{{ i.detalhe }}</small> }
+        </span>
+        <span class="loja-estado" [class.loja-estado-ok]="i.conectado">
+          <span class="badge-dot"></span>
+          {{ i.conectado ? 'Conectado' : 'Desligado' }}
+        </span>
+      </button>
+    }
+
+    <p class="status-secao">Lojas de afiliado</p>
+    @for (i of lojas(); track i.id) {
+      <button type="button" class="status-linha" (click)="abrir(i)">
+        <span class="status-logo"><img [src]="i.logo" alt="" /></span>
+        <span class="status-nome">
+          <strong>{{ i.nome }}</strong>
+          @if (i.detalhe) { <small>{{ i.detalhe }}</small> }
+        </span>
+        <span class="loja-estado" [class.loja-estado-ok]="i.conectado">
+          <span class="badge-dot"></span>
+          {{ i.conectado ? 'Conectada' : 'Desligada' }}
+        </span>
+      </button>
+    }
+  </div>
+}

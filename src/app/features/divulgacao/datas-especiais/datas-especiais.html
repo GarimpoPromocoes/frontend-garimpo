@@ -1,0 +1,218 @@
+<div class="regras-secao">
+  <div class="regras-secao-cabeca">
+    <div>
+      <h3 class="regras-secao-titulo">Datas especiais</h3>
+      <p class="regras-secao-texto">
+        Perto de datas comemorativas, o robô passa na frente os produtos que combinam com a ocasião.
+      </p>
+    </div>
+    <div class="toggle-row">
+      <span class="toggle-label">{{ ativo() ? 'Ligado' : 'Desligado' }}</span>
+      <button
+        type="button"
+        class="toggle-switch"
+        role="switch"
+        aria-label="Priorizar produtos de datas especiais"
+        [attr.aria-checked]="ativo()"
+        [class.toggle-switch-on]="ativo()"
+        [disabled]="salvando()"
+        (click)="alternarAtivo()"
+      >
+        <span class="toggle-switch-thumb"></span>
+      </button>
+    </div>
+  </div>
+
+  @if (erro() && !rascunho()) {
+    <div class="info-box info-box-erro">{{ erro() }}</div>
+  }
+
+  @if (ativo()) {
+    <div class="datas-hoje">
+      <span class="datas-hoje-rotulo">
+        <span class="badge-dot"></span>
+        Valendo hoje
+      </span>
+      @for (a of ativasHoje().slice(0, 10); track a.nome) {
+        <span class="grupo-tag" [class.datas-tag-sua]="a.sua">{{ a.nome }}</span>
+      } @empty {
+        <span class="datas-hoje-vazio">Nenhuma data especial agora — sai a ordem normal de ofertas.</span>
+      }
+      @if (ativasHoje().length > 10) {
+        <span class="grupo-tag grupo-tag-mais">+{{ ativasHoje().length - 10 }}</span>
+      }
+    </div>
+
+    <div class="grupos-grade">
+      @for (c of cards(); track c.indice) {
+        <button type="button" class="grupo-card regra-card" (click)="abrir(c.ev, c.indice)">
+          <div class="grupo-card-topo">
+            <span class="regra-icone regra-icone-data">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+            </span>
+            <div class="grupo-card-nomes">
+              <span class="grupo-card-nome">{{ c.ev.nome }}</span>
+              <span class="regra-card-sub">{{ c.periodo }}</span>
+            </div>
+          </div>
+          <div class="grupo-card-corpo">
+            @for (p of c.ev.palavras.slice(0, 5); track p) {
+              <span class="grupo-tag">{{ p }}</span>
+            }
+            @if (c.ev.palavras.length > 5) {
+              <span class="grupo-tag grupo-tag-mais">+{{ c.ev.palavras.length - 5 }}</span>
+            }
+          </div>
+          <div class="grupo-card-rodape">
+            @if (c.faltam === 0) {
+              <span class="datas-ativa">Valendo agora</span>
+            } @else {
+              <span>Começa em {{ c.faltam }} {{ c.faltam === 1 ? 'dia' : 'dias' }}</span>
+            }
+            <span>Prioridade {{ c.nivel.toLowerCase() }}</span>
+          </div>
+        </button>
+      }
+
+      <button type="button" class="grupo-card grupo-card-novo" (click)="criar()">
+        <span class="grupo-novo-mais">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
+        </span>
+        <span class="grupo-novo-titulo">{{ cards().length ? 'Adicionar data' : 'Adicionar uma data sua' }}</span>
+        <span class="grupo-novo-texto">
+          As datas mais comuns já vêm prontas. Cadastre só ocasiões do seu público (aniversário da loja, evento local…).
+        </span>
+      </button>
+    </div>
+
+    @if (calendario().length) {
+      <button type="button" class="datas-calendario-botao" (click)="mostrarCalendario.set(!mostrarCalendario())">
+        <svg [class.datas-seta-aberta]="mostrarCalendario()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+        {{ mostrarCalendario() ? 'Esconder' : 'Ver' }} as {{ prontas().length }} datas que já vêm prontas
+      </button>
+
+      @if (mostrarCalendario()) {
+        <div class="datas-calendario">
+          @for (g of calendario(); track g.nome) {
+            <div class="datas-calendario-grupo">
+              <h4>{{ g.nome }}</h4>
+              <ul>
+                @for (d of g.datas; track d.nome) {
+                  <li [class.datas-item-ativa]="d.ativa" [title]="d.palavras.join(', ')">
+                    <span class="datas-item-nome">{{ d.nome }}</span>
+                    <span class="datas-item-periodo">{{ d.periodo }}</span>
+                    @if (d.ativa) {
+                      <span class="datas-ativa">agora</span>
+                    } @else {
+                      <span class="datas-item-falta">em {{ d.faltam }}d</span>
+                    }
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+        </div>
+      }
+    }
+  } @else {
+    <div class="info-box">
+      Desligado: o robô ignora as datas comemorativas e segue só pelo desconto e pelas vendas de cada produto.
+    </div>
+  }
+</div>
+
+@if (rascunho(); as r) {
+  <div class="modal-fundo" (click)="fechar()">
+    <div class="modal-caixa modal-grupo" (click)="$event.stopPropagation()">
+      <div class="card-header">
+        <div class="grupo-modal-titulo">
+          <span class="regra-icone regra-icone-data">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+          </span>
+          <div>
+            <h2>{{ r.indice === null ? 'Nova data especial' : r.nome || 'Data especial' }}</h2>
+            <p class="card-subtitle">Durante o período, produtos com essas palavras passam na frente na fila.</p>
+          </div>
+        </div>
+        <button type="button" class="btn-fechar" (click)="fechar()" aria-label="Fechar" title="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6 18 18M18 6 6 18" /></svg>
+        </button>
+      </div>
+
+      <div class="field">
+        <label>Nome da data</label>
+        <input type="text" maxlength="80" [ngModel]="r.nome" (ngModelChange)="atualizar('nome', $event)" placeholder="Ex.: Aniversário da loja" />
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label>Começa em</label>
+          <div class="datas-dia-mes">
+            <select [ngModel]="r.inicioDia" (ngModelChange)="atualizar('inicioDia', $event)" aria-label="Dia de início">
+              @for (d of diasInicio(); track d) { <option [ngValue]="d">{{ d }}</option> }
+            </select>
+            <select [ngModel]="r.inicioMes" (ngModelChange)="atualizar('inicioMes', $event)" aria-label="Mês de início">
+              @for (m of meses; track m; let i = $index) { <option [ngValue]="i + 1">{{ m }}</option> }
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Termina em</label>
+          <div class="datas-dia-mes">
+            <select [ngModel]="r.fimDia" (ngModelChange)="atualizar('fimDia', $event)" aria-label="Dia do fim">
+              @for (d of diasFim(); track d) { <option [ngValue]="d">{{ d }}</option> }
+            </select>
+            <select [ngModel]="r.fimMes" (ngModelChange)="atualizar('fimMes', $event)" aria-label="Mês do fim">
+              @for (m of meses; track m; let i = $index) { <option [ngValue]="i + 1">{{ m }}</option> }
+            </select>
+          </div>
+        </div>
+      </div>
+
+      @if (previa(); as p) {
+        <div class="regra-previa">
+          <span>
+            <strong>{{ p.periodo }}</strong>, todo ano
+            @if (p.viraAno) { (passa pela virada do ano) }
+            — {{ p.faltam === 0 ? 'já está valendo hoje' : 'começa daqui a ' + p.faltam + (p.faltam === 1 ? ' dia' : ' dias') }}.
+          </span>
+        </div>
+      }
+
+      <div class="regra-slider">
+        <div class="regra-slider-topo">
+          <span>Prioridade</span>
+          <strong>{{ nivel(r.peso) }}</strong>
+        </div>
+        <input type="range" min="1" max="30" step="1" [ngModel]="r.peso" (ngModelChange)="atualizar('peso', $event)" />
+        <small>Quanto mais forte, mais o robô insiste nesses produtos. As datas prontas ficam entre média e forte.</small>
+      </div>
+
+      <div class="field">
+        <label>Produtos que combinam com a data</label>
+        <span class="hint">Palavras do título ou da categoria. Ex.: presente, perfume, kit.</span>
+        <app-chip-input
+          [items]="r.palavras"
+          (itemsChange)="atualizar('palavras', $event)"
+          [separarPorVirgula]="true"
+          placeholder="Digite e aperte Enter — ou vários separados por vírgula"
+        />
+      </div>
+
+      @if (erro(); as e) {
+        <div class="info-box info-box-erro">{{ e }}</div>
+      }
+
+      <div class="modal-rodape grupo-modal-rodape">
+        @if (r.indice !== null) {
+          <button type="button" class="btn btn-danger-soft btn-sm" [disabled]="salvando()" (click)="remover()">Remover data</button>
+        }
+        <span class="grupo-modal-espaco"></span>
+        <button type="button" class="btn btn-ghost" [disabled]="salvando()" (click)="fechar()">Cancelar</button>
+        <button type="button" class="btn btn-primary" [disabled]="salvando()" (click)="salvar()">
+          {{ salvando() ? 'Salvando…' : r.indice === null ? 'Adicionar data' : 'Salvar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

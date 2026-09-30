@@ -1,0 +1,106 @@
+<div class="card">
+  <div class="card-header">
+    <div>
+      <h2>Controle do robô</h2>
+      <p class="card-subtitle">
+        Ligado, o robô procura ofertas sozinho e vai publicando nos grupos até você mandar parar.
+      </p>
+    </div>
+    @if (runControl.rodandoContinuo()) {
+      <span class="badge badge-running">
+        <span class="badge-dot"></span>
+        {{ runControl.postandoAgora() ? 'Postando' : 'Ligado' }}
+      </span>
+    } @else {
+      <span class="badge badge-off"><span class="badge-dot"></span>Parado</span>
+    }
+  </div>
+
+  <div class="grid-2">
+    <div class="stat-tile">
+      <span class="value">{{ formatarData(runControl.ultimaPublicacao()) }}</span>
+      <span class="label">Última publicação</span>
+    </div>
+    <div class="stat-tile">
+      <span class="value">{{ formatarData(runControl.proximaPublicacao()) }}</span>
+      <span class="label">Próxima publicação prevista</span>
+    </div>
+  </div>
+
+  <div class="card-section">
+    <div class="field">
+      <label>Publicar em quais grupos</label>
+      <div class="segmented">
+        <button
+          type="button"
+          class="segmented-option"
+          [class.segmented-option-active]="runControl.alvo() === 'todos'"
+          [disabled]="runControl.algoRodando()"
+          (click)="escolherAlvo('todos')"
+        >
+          Todos os grupos
+        </button>
+        <button
+          type="button"
+          class="segmented-option"
+          [class.segmented-option-active]="runControl.alvo() === 'selecionados'"
+          [disabled]="runControl.algoRodando()"
+          (click)="escolherAlvo('selecionados')"
+        >
+          Escolher grupos
+        </button>
+      </div>
+    </div>
+
+    @if (runControl.grupos().length === 0) {
+      <p class="hint-text">Nenhum grupo cadastrado ainda — cadastre na aba "Grupos".</p>
+    } @else if (runControl.alvo() === 'selecionados') {
+      <div style="display: flex; flex-direction: column; gap: 9px">
+        @for (g of runControl.grupos(); track g.id) {
+          <label class="checkbox-row">
+            <input
+              type="checkbox"
+              [disabled]="runControl.algoRodando()"
+              [checked]="runControl.selecionados().has(g.id)"
+              (change)="toggleSelecionado(g.id, $any($event.target).checked)"
+            />
+            <span>{{ g.nome }} <span class="hint-text">→ {{ g.groupName }}</span></span>
+          </label>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="form-actions">
+    @if (!runControl.algoRodando()) {
+      <button
+        type="button"
+        class="btn btn-lg btn-hero"
+        [disabled]="runControl.iniciando()"
+        (click)="runControl.executar()"
+      >
+        {{ runControl.iniciando() ? 'Ligando…' : 'Ligar robô' }}
+      </button>
+      @if (!runControl.podeLigar()) {
+        <span class="hint-text">Ainda faltam passos de configuração — o robô avisa o que falta ao ligar.</span>
+      }
+    } @else {
+      <button
+        type="button"
+        class="btn btn-lg btn-danger"
+        [disabled]="runControl.parando()"
+        (click)="runControl.parar()"
+      >
+        {{ runControl.parando() ? 'Parando…' : 'Parar robô' }}
+      </button>
+    }
+  </div>
+
+  @if (runControl.erro()) {
+    <p class="error-text">{{ runControl.erro() }}</p>
+  }
+
+  @if (runControl.processoExterno()) {
+    <p class="hint-text">O robô também está rodando fora do painel — clique em "Parar" para encerrá-lo.</p>
+  }
+</div>

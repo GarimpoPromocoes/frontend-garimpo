@@ -1,0 +1,70 @@
+@if (aberto()) {
+  <div class="modal-fundo" (click)="aoFechar()">
+    <div class="modal-caixa modal-login" (click)="$event.stopPropagation()">
+      <div class="card-header">
+        <div class="loja-titulo">
+          <span class="loja-logo-caixa loja-logo-caixa-sm">
+            <img class="loja-logo loja-logo-sm" src="lojas/whatsapp.svg" alt="WhatsApp" />
+          </span>
+          <p class="card-subtitle">
+            @if (desconectando()) {
+              Desconectando…
+            } @else if (conectando()) {
+              Aponte a câmera do celular para o código abaixo.
+            } @else if (conectado()) {
+              Conectado — é por aqui que as promoções saem para os grupos.
+            } @else {
+              O número que envia as promoções para os grupos.
+            }
+          </p>
+        </div>
+        <button type="button" class="btn-fechar" (click)="aoFechar()" aria-label="Fechar" title="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <path d="M6 6 18 18M18 6 6 18" />
+          </svg>
+        </button>
+      </div>
+
+      @if (conectando()) {
+        <p class="hint-text">
+          No celular, abra o WhatsApp → <strong>Aparelhos conectados</strong> →
+          <strong>Conectar um aparelho</strong> e aponte a câmera para o código abaixo.
+          Assim que ler, <strong>a conexão é salva sozinha</strong>.
+        </p>
+
+        @if (qrImagem(); as qr) {
+          <img [src]="qr" alt="QR Code para conectar o WhatsApp" class="qr-whatsapp" />
+        } @else {
+          <div class="qr-whatsapp qr-whatsapp-vazio">
+            <span class="login-spinner"></span>
+            <span>Preparando o código…</span>
+          </div>
+        }
+      } @else if (desconectando()) {
+        <div class="login-trabalhando">
+          <span class="login-spinner"></span>
+          <span>Encerrando a sessão do WhatsApp…</span>
+        </div>
+      } @else if (conectado()) {
+        @if (conta(); as c) {
+          <p class="conta-conectada">
+            <strong>{{ c.numero }}</strong>
+            @if (c.nome) { <span>&nbsp;· {{ c.nome }}</span> }
+          </p>
+        }
+        <div class="form-actions">
+          <button type="button" class="btn btn-danger" (click)="desconectar()">Desconectar</button>
+        </div>
+      } @else {
+        <div class="info-box">Sem esta conexão o robô não tem por onde enviar as promoções.</div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-wpp" (click)="conectar()">Conectar agora</button>
+        </div>
+      }
+
+      @if (erro()) {
+        <p class="error-text">{{ erro() }}</p>
+      }
+    </div>
+  </div>
+}
