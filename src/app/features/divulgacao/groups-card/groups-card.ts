@@ -12,6 +12,8 @@ const GRUPO_VAZIO = (): GrupoTematico => ({
   palavrasExcluir: [],
   coringa: false,
   geral: false,
+  temaEstrito: false,
+  publico: 'misto',
   gruposEspelho: [],
   grupoTelegram: '',
 });

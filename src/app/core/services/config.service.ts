@@ -21,6 +21,10 @@ export interface GrupoTematico {
   gruposEspelho: string[];
   /** Grupo do Telegram que recebe a mesma postagem (vazio = só WhatsApp). */
   grupoTelegram?: string;
+  /** Só aceita o que casa de verdade com o assunto (desliga o "dono do segmento") e barra "de brinquedo"/miniatura. */
+  temaEstrito?: boolean;
+  /** Trava de gênero do grupo: 'misto' | 'masculino' | 'feminino' | 'infantil'. */
+  publico?: string;
 }
 
 export interface Agendamento {
