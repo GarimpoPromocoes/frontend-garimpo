@@ -76,6 +76,7 @@
       </div>
 
       <div class="topbar-actions">
+        <!-- Status das conexoes (WhatsApp, Telegram e lojas) + sino do que caiu. -->
         @if (runControl.rodandoContinuo()) {
           <span class="badge badge-running">
             <span class="badge-dot"></span>
@@ -86,33 +87,49 @@
         } @else {
           <span class="badge badge-off"><span class="badge-dot"></span>Robô parado</span>
         }
-
-        @if (!runControl.algoRodando()) {
-          <button
-            type="button"
-            class="btn btn-hero"
-            [disabled]="runControl.iniciando()"
-            [title]="runControl.podeLigar() ? '' : 'Faltam passos de configuração — ligar mostra o que falta'"
-            (click)="runControl.executar()"
-          >
-            {{ runControl.iniciando() ? 'Ligando…' : 'Ligar robô' }}
-          </button>
-        } @else {
-          <button
-            type="button"
-            class="btn btn-danger"
-            [disabled]="runControl.parando()"
-            (click)="runControl.parar()"
-          >
-            {{ runControl.parando() ? 'Parando…' : 'Parar' }}
-          </button>
-        }
-
-        <!-- Status das conexoes (WhatsApp, Telegram e lojas) + sino do que caiu. -->
         <app-status-conexoes />
         <app-sino />
       </div>
     </header>
+
+    <!-- Ligar/parar o robô: botão redondo no canto de baixo, some quando abre qualquer janela. -->
+    <div
+      class="bot-control-fixo"
+      [class.bot-control-oculto]="algumModalAberto()"
+      [class.bot-control-acima]="mostrarEsperaMl()"
+    >
+      @if (!runControl.algoRodando()) {
+        <button
+          type="button"
+          class="bot-fab bot-fab-ligar"
+          [disabled]="runControl.iniciando()"
+          [title]="runControl.iniciando() ? 'Ligando…' : runControl.podeLigar() ? 'Ligar robô' : 'Faltam passos de configuração — ligar mostra o que falta'"
+          [attr.aria-label]="runControl.iniciando() ? 'Ligando…' : 'Ligar robô'"
+          (click)="runControl.executar()"
+        >
+          @if (runControl.iniciando()) {
+            <span class="bot-fab-spinner"></span>
+          } @else {
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.5 5.6v12.8a1 1 0 0 0 1.52.85l10.2-6.4a1 1 0 0 0 0-1.7l-10.2-6.4a1 1 0 0 0-1.52.85Z" /></svg>
+          }
+        </button>
+      } @else {
+        <button
+          type="button"
+          class="bot-fab bot-fab-parar"
+          [disabled]="runControl.parando()"
+          [title]="runControl.parando() ? 'Parando…' : 'Parar robô'"
+          [attr.aria-label]="runControl.parando() ? 'Parando…' : 'Parar robô'"
+          (click)="runControl.parar()"
+        >
+          @if (runControl.parando()) {
+            <span class="bot-fab-spinner"></span>
+          } @else {
+            <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="6.5" width="11" height="11" rx="2" /></svg>
+          }
+        </button>
+      }
+    </div>
 
     <main class="content">
       @if (configService.erro()) {

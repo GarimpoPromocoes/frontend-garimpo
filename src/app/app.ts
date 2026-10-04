@@ -6,6 +6,10 @@ import { JobsService } from './core/services/jobs.service';
 import { AuthService } from './core/services/auth.service';
 import { VerificacaoService } from './core/services/verificacao.service';
 import { AvisosService } from './core/services/avisos.service';
+import { LojasUiService } from './core/services/lojas-ui.service';
+import { WhatsappUiService } from './core/services/whatsapp-ui.service';
+import { TelegramUiService } from './core/services/telegram-ui.service';
+import { ConfirmacaoService } from './core/services/confirmacao.service';
 import { LoginCard } from './features/auth/login-card/login-card';
 import { WhatsappCard } from './features/conexoes/whatsapp-card/whatsapp-card';
 import { LojasCard } from './features/conexoes/lojas-card/lojas-card';
@@ -155,6 +159,10 @@ export class App implements OnInit, OnDestroy {
   protected auth = inject(AuthService);
   protected verificacao = inject(VerificacaoService);
   protected avisos = inject(AvisosService);
+  private lojasUi = inject(LojasUiService);
+  private whatsappUi = inject(WhatsappUiService);
+  private telegramUi = inject(TelegramUiService);
+  private confirmacaoService = inject(ConfirmacaoService);
 
   protected readonly secoes = computed(() =>
     SECOES.map((s) => ({
@@ -166,6 +174,16 @@ export class App implements OnInit, OnDestroy {
   protected readonly menuAberto = signal(false);
   /** Modal grandão da atividade — abre pelo "Ver tudo" do painel, no lugar de trocar de aba. */
   protected readonly atividadeModalAberta = signal(false);
+
+  protected readonly algumModalAberto = computed(() =>
+    !!this.lojasUi.aberta() ||
+    !!this.jobsService.login() ||
+    this.whatsappUi.aberto() ||
+    this.telegramUi.aberto() ||
+    this.jobsService.desafioPopupAberto() ||
+    !!this.confirmacaoService.pedido() ||
+    this.atividadeModalAberta(),
+  );
 
   protected badgeDe(id: AbaId): string | null {
     const s = this.statusService.status();

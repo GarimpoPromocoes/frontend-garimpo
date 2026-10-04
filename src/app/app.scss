@@ -218,6 +218,78 @@
   height: 16px;
 }
 
+.bot-control-fixo {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  z-index: 100;
+  transition:
+    opacity 0.15s ease,
+    visibility 0.15s ease,
+    bottom 0.2s ease;
+}
+/* O aviso do Mercado Livre em espera mora no mesmo canto: o botão sobe pra não brigar com ele. */
+.bot-control-acima {
+  bottom: 112px;
+}
+.bot-control-oculto {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.bot-fab {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 10px 26px rgba(26, 26, 24, 0.22);
+  transition:
+    background 0.14s ease,
+    transform 0.14s ease,
+    opacity 0.14s ease;
+}
+.bot-fab svg {
+  width: 24px;
+  height: 24px;
+}
+.bot-fab:hover:not(:disabled) {
+  transform: scale(1.06);
+}
+.bot-fab:active:not(:disabled) {
+  transform: scale(0.97);
+}
+.bot-fab:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+.bot-fab-ligar {
+  background: var(--gold);
+  color: var(--espresso);
+}
+.bot-fab-ligar:hover:not(:disabled) {
+  background: var(--gold-deep);
+}
+.bot-fab-parar {
+  background: var(--danger);
+  color: #fff;
+}
+.bot-fab-parar:hover:not(:disabled) {
+  background: #8f2a2a;
+}
+.bot-fab-spinner {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2.5px solid currentColor;
+  border-top-color: transparent;
+  animation: girar 0.9s linear infinite;
+}
+
 .content {
   width: 100%;
   max-width: 1060px;
@@ -327,6 +399,13 @@
   .topbar {
     padding: 14px 18px;
     flex-wrap: wrap;
+  }
+  .bot-control-fixo {
+    right: 16px;
+    bottom: 16px;
+  }
+  .bot-control-acima {
+    bottom: 124px;
   }
   .topbar-title {
     order: 3;

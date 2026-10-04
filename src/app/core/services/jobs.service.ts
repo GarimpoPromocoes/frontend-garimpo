@@ -72,6 +72,8 @@ export interface PedidoLogin {
   imagem?: string | null;
   campos: { nome: string; rotulo: string; tipo: 'texto' | 'segredo' | 'codigo'; tamanho?: number }[];
   opcoes?: OpcaoVerificacao[];
+  /** A loja também aceita entrar pela conta Google (forma 'credenciais'). */
+  google?: boolean;
   /** Tamanho real da página da loja (forma 'tela'), só para referência. */
   largura?: number;
   altura?: number;

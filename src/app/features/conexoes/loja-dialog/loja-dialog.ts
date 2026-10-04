@@ -36,6 +36,9 @@ const JOB_DE: Partial<Record<Provedor, JobTipo>> = {
   shopee: 'login-shopee',
 };
 
+// Lojas em que o robô também sabe entrar pela conta Google.
+const ACEITA_GOOGLE: Provedor[] = ['mercadolivre'];
+
 const AJUDA: Partial<Record<Provedor, { texto: string; link: string; rotuloLink: string }>> = {
   shopee: {
     texto:
@@ -103,6 +106,10 @@ export class LojaDialog {
   protected readonly usaNavegador = computed(() => {
     const p = this.provedor();
     return !!p && !!JOB_DE[p];
+  });
+  protected readonly aceitaGoogle = computed(() => {
+    const p = this.provedor();
+    return !!p && ACEITA_GOOGLE.includes(p);
   });
   protected readonly ajuda = computed(() => {
     const p = this.provedor();
@@ -209,8 +216,11 @@ export class LojaDialog {
   protected readonly erro = signal<string | null>(null);
   protected readonly enviando = signal(false);
 
-  /** O que o usuário já digitou, para o robô não perguntar de novo. */
-  private credenciaisDigitadas: { usuario: string; senha: string } | null = null;
+  /**
+   * O que o usuário já informou no formulário (conta e senha, ou "quero entrar
+   * pelo Google"), para o robô não perguntar de novo.
+   */
+  private credenciaisDigitadas: Record<string, string> | null = null;
   private pedidoJaRespondido = '';
   private ultimoPedido = '';
 
@@ -241,9 +251,9 @@ export class LojaDialog {
       // pergunta de novo e aí sim o campo aparece.
       if (p.forma === 'credenciais' && this.credenciaisDigitadas && this.pedidoJaRespondido !== p.id) {
         this.pedidoJaRespondido = p.id;
-        const { usuario, senha } = this.credenciaisDigitadas;
+        const resposta = this.credenciaisDigitadas;
         this.credenciaisDigitadas = null;
-        void this.jobsService.responderLogin(p.id, { usuario, senha });
+        void this.jobsService.responderLogin(p.id, resposta);
       }
     });
 
@@ -268,16 +278,17 @@ export class LojaDialog {
     return (this.valorDe(nome) || '').trim().length > 0;
   }
 
-  protected podeConectar(): boolean {
+  /** Pelo Google, conta e senha da loja não são necessárias — só os dados de afiliado. */
+  protected podeConectar(metodo: 'senha' | 'google' = 'senha'): boolean {
     if (this.enviando()) return false;
-    const obrigatorios = this.campos().filter((c) => !c.opcional);
+    const obrigatorios = this.campos().filter((c) => !c.opcional && (metodo === 'senha' || c.grupo !== 'login'));
     return obrigatorios.every((c) => this.preenchido(c.nome) || c.tipo === 'opcoes');
   }
 
   /** Um clique só: guarda os dados de afiliado e manda o robô entrar. */
-  async conectar(): Promise<void> {
+  async conectar(metodo: 'senha' | 'google' = 'senha'): Promise<void> {
     const p = this.provedor();
-    if (!p || !this.podeConectar()) return;
+    if (!p || !this.podeConectar(metodo)) return;
 
     this.erro.set(null);
     this.enviando.set(true);
@@ -312,10 +323,10 @@ export class LojaDialog {
       return;
     }
 
-    this.credenciaisDigitadas = {
-      usuario: this.valorDe('usuario').trim(),
-      senha: this.valorDe('senha'),
-    };
+    this.credenciaisDigitadas =
+      metodo === 'google'
+        ? { metodo: 'google' }
+        : { usuario: this.valorDe('usuario').trim(), senha: this.valorDe('senha') };
     this.valores.set({});
 
     const r = await this.jobsService.iniciar(job);
@@ -355,6 +366,11 @@ export class LojaDialog {
 
   protected escolher(valor: string): void {
     void this.responderCom({ opcao: valor });
+  }
+
+  /** No meio do login: troca conta e senha da loja pela conta Google. */
+  protected entrarComGoogle(): void {
+    void this.responderCom({ metodo: 'google' });
   }
 
   protected marcarRobo(): void {
