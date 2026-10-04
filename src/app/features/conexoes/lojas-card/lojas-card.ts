@@ -33,7 +33,6 @@ export class LojasCard implements OnInit {
   // Quando uma ficar pronta, ela sai daqui e entra em `lojas` com o provedor.
   protected readonly emBreve: LojaEmBreve[] = [
     { id: 'shein', nome: 'Shein', logo: 'lojas/shein.png' },
-    { id: 'aliexpress', nome: 'AliExpress', logo: 'lojas/aliexpress.png' },
     { id: 'nike', nome: 'Nike', logo: 'lojas/nike.png' },
     { id: 'netshoes', nome: 'Netshoes', logo: 'lojas/netshoes.png' },
     { id: 'adidas', nome: 'Adidas', logo: 'lojas/adidas.png' },
