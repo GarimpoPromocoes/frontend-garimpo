@@ -317,8 +317,9 @@
   </div>
   <div class="tela-loja-digitar">
     <input
-      type="text"
-      placeholder="Precisa digitar algo na página? Clique no campo acima e escreva aqui"
+      [type]="t.segredo ? 'password' : 'text'"
+      autocomplete="off"
+      [placeholder]="t.segredo ? 'Digite a senha aqui — ela vai direto para o campo selecionado acima' : 'Precisa digitar algo na página? Clique no campo acima e escreva aqui'"
       [ngModel]="valorDe('telaTexto')"
       (ngModelChange)="definir('telaTexto', $event)"
       (keyup.enter)="enviarTextoNaTela(true)"

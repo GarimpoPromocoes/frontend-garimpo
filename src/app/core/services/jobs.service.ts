@@ -74,6 +74,8 @@ export interface PedidoLogin {
   opcoes?: OpcaoVerificacao[];
   /** A loja também aceita entrar pela conta Google (forma 'credenciais'). */
   google?: boolean;
+  /** Na tela ao vivo: o campo em foco na loja é de senha — esconder o que for digitado. */
+  segredo?: boolean;
   /** Tamanho real da página da loja (forma 'tela'), só para referência. */
   largura?: number;
   altura?: number;
