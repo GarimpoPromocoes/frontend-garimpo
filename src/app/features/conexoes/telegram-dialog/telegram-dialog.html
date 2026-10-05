@@ -9,8 +9,12 @@
           <p class="card-subtitle">
             @if (desconectando()) {
               Desconectando…
+            } @else if (sucesso()) {
+              Telegram conectado!
             } @else if (pedidoSenha()) {
               Esta conta tem verificação em duas etapas.
+            } @else if (finalizando()) {
+              Código lido — finalizando a conexão.
             } @else if (conectando()) {
               Aponte a câmera do celular para o código abaixo.
             } @else if (conectado()) {
@@ -27,7 +31,18 @@
         </button>
       </div>
 
-      @if (pedidoSenha(); as p) {
+      @if (sucesso()) {
+        <div class="info-box info-box-ok">
+          <strong>Tudo certo — o Telegram está conectado.</strong>
+          @if (conta(); as c) {
+            {{ c.principal }}@if (c.extra) { · {{ c.extra }}}.
+          }
+          Esta janela fecha sozinha.
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-primary" (click)="aoFechar()">Fechar</button>
+        </div>
+      } @else if (pedidoSenha(); as p) {
         <form class="field" (submit)="$event.preventDefault(); enviarSenha()">
           <label for="tg-senha">Senha do Telegram</label>
           <input
@@ -48,6 +63,11 @@
             </button>
           </div>
         </form>
+      } @else if (finalizando()) {
+        <div class="login-trabalhando">
+          <span class="login-spinner"></span>
+          <span>Código lido! Salvando a sessão — só mais alguns segundos, não precisa ler de novo.</span>
+        </div>
       } @else if (conectando()) {
         <p class="hint-text">
           No celular, abra o Telegram → <strong>Configurações</strong> → <strong>Dispositivos</strong> →

@@ -9,6 +9,10 @@
           <p class="card-subtitle">
             @if (desconectando()) {
               Desconectando…
+            } @else if (sucesso()) {
+              WhatsApp conectado!
+            } @else if (finalizando()) {
+              Código lido — finalizando a conexão.
             } @else if (conectando()) {
               Aponte a câmera do celular para o código abaixo.
             } @else if (conectado()) {
@@ -25,7 +29,23 @@
         </button>
       </div>
 
-      @if (conectando()) {
+      @if (sucesso()) {
+        <div class="info-box info-box-ok">
+          <strong>Tudo certo — o WhatsApp está conectado.</strong>
+          @if (conta(); as c) {
+            {{ c.numero }}@if (c.nome) { · {{ c.nome }}}.
+          }
+          Esta janela fecha sozinha.
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-primary" (click)="aoFechar()">Fechar</button>
+        </div>
+      } @else if (finalizando() && !desconectando()) {
+        <div class="login-trabalhando">
+          <span class="login-spinner"></span>
+          <span>Código lido! Sincronizando a conta — pode levar até um minuto, não precisa ler de novo.</span>
+        </div>
+      } @else if (conectando()) {
         <p class="hint-text">
           No celular, abra o WhatsApp → <strong>Aparelhos conectados</strong> →
           <strong>Conectar um aparelho</strong> e aponte a câmera para o código abaixo.

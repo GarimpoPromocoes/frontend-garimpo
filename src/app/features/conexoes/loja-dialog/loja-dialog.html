@@ -43,7 +43,10 @@
           @if (f.ok) {
             <div class="info-box info-box-ok">
               A sessão fica salva e a senha guardada criptografada — se {{ artigo() }} {{ rotulo() }} derrubar a conexão no meio
-              do trabalho, o robô entra de novo sozinho, sem parar as postagens.
+              do trabalho, o robô entra de novo sozinho, sem parar as postagens. Esta janela fecha sozinha.
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-primary" (click)="fechar()">Fechar</button>
             </div>
           } @else {
             <div class="info-box info-box-erro">{{ f.motivo }}</div>

@@ -257,14 +257,18 @@ export class LojaDialog {
       }
     });
 
-    // Deu certo: atualiza o que está atrás da janela.
+    // Deu certo: atualiza o que está atrás da janela e fecha sozinha depois de
+    // um instante — ninguém fica olhando pra ela sem saber se já pode sair.
     effect(() => {
-      if (this.fim()?.ok) {
-        this.conexoes.carregar();
-        this.statusService.atualizar();
-      }
+      const f = this.fim();
+      if (!f?.ok) return;
+      this.conexoes.carregar();
+      this.statusService.atualizar();
+      if (!this.timerFechar) this.timerFechar = setTimeout(() => this.fechar(), 4000);
     });
   }
+
+  private timerFechar: ReturnType<typeof setTimeout> | null = null;
 
   protected valorDe(campo: string): string {
     return this.valores()[campo] ?? '';
@@ -482,6 +486,8 @@ export class LojaDialog {
   }
 
   fechar(): void {
+    if (this.timerFechar) clearTimeout(this.timerFechar);
+    this.timerFechar = null;
     this.credenciaisDigitadas = null;
     this.valores.set({});
     this.erro.set(null);

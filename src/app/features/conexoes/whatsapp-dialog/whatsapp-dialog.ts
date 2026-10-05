@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import * as QRCode from 'qrcode';
 import { StatusService } from '../../../core/services/status.service';
 import { JobsService } from '../../../core/services/jobs.service';
@@ -39,6 +39,19 @@ export class WhatsappDialog {
   protected readonly qrImagem = signal<string | null>(null);
   protected readonly erro = signal<string | null>(null);
 
+  /** O código já foi lido: o robô só está terminando de sincronizar a conta. */
+  protected readonly finalizando = computed(
+    () => this.confirmando() || (this.conectando() && this.jobsService.qrWhatsappLido()),
+  );
+  /** O robô terminou e o painel está buscando o estado novo — sem isso a janela piscaria o "Conectar agora". */
+  private readonly confirmando = signal(false);
+  /** Acabou de conectar: a janela avisa e fecha sozinha. */
+  protected readonly sucesso = signal(false);
+
+  private estavaOcupado = false;
+  private cancelado = false;
+  private timerFechar: ReturnType<typeof setTimeout> | null = null;
+
   protected readonly conta = computed(() => {
     if (!this.conectado()) return null;
     const wpp = this.statusService.status()?.whatsapp;
@@ -63,10 +76,56 @@ export class WhatsappDialog {
         .then((dataUrl) => this.qrImagem.set(dataUrl))
         .catch(() => this.qrImagem.set(null));
     });
+
+    // O robô terminou (conectar ou desconectar): confirma o estado novo na hora,
+    // em vez de esperar a próxima consulta periódica do painel.
+    effect(() => {
+      const ocupado = this.conectando() || this.desconectando();
+      const antes = this.estavaOcupado;
+      this.estavaOcupado = ocupado;
+      if (antes && !ocupado) untracked(() => void this.aoTerminar());
+    });
+  }
+
+  private async aoTerminar(): Promise<void> {
+    if (this.cancelado) {
+      this.cancelado = false;
+      void this.statusService.atualizar();
+      return;
+    }
+    const eraConexao = this.jobsService.tipo() === 'trocar-zap';
+    const deuCerto = this.jobsService.codigoSaida() === 0;
+    if (!eraConexao) {
+      await this.statusService.atualizar();
+      return;
+    }
+
+    this.ui.abrir();
+    this.confirmando.set(true);
+    await this.statusService.atualizar();
+    // Uma consulta que já estava a caminho pode ter saído antes do robô terminar.
+    if (deuCerto && !this.conectado()) await this.statusService.atualizar();
+    this.confirmando.set(false);
+
+    if (deuCerto && this.conectado()) {
+      this.sucesso.set(true);
+      this.timerFechar = setTimeout(() => this.fechar(), 3500);
+    } else if (!deuCerto) {
+      this.erro.set('Não consegui concluir a conexão do WhatsApp. Tente de novo.');
+    }
+  }
+
+  private fechar(): void {
+    if (this.timerFechar) clearTimeout(this.timerFechar);
+    this.timerFechar = null;
+    this.sucesso.set(false);
+    this.erro.set(null);
+    this.ui.fechar();
   }
 
   async conectar(): Promise<void> {
     this.erro.set(null);
+    this.cancelado = false;
     // Uma ação em curso vai confirmar o estado sozinha — uma checagem ao vivo
     // antiga não pode continuar escondendo isso.
     this.jobsService.esquecerVerificacao('whatsapp');
@@ -97,9 +156,9 @@ export class WhatsappDialog {
    */
   async aoFechar(): Promise<void> {
     if ((this.conectando() || this.desconectando()) && this.jobsService.rodando()) {
+      this.cancelado = true;
       await this.jobsService.parar();
     }
-    this.erro.set(null);
-    this.ui.fechar();
+    this.fechar();
   }
 }

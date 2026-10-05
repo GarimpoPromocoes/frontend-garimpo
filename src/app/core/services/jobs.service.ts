@@ -128,6 +128,9 @@ export class JobsService {
   readonly qrWhatsapp = signal<string | null>(null);
   /** Conexão do Telegram por QR: o código (tg://login?token=…), o pedido de senha (2 etapas) e o erro. */
   readonly qrTelegram = signal<string | null>(null);
+  /** O QR já foi lido no celular e o robô está terminando de sincronizar a conta. */
+  readonly qrWhatsappLido = signal(false);
+  readonly qrTelegramLido = signal(false);
   readonly senhaTelegram = signal<{ dica: string | null; erro: string | null } | null>(null);
   readonly erroTelegram = signal<string | null>(null);
   readonly desafioMl = signal<{ url: string; em: string } | null>(null);
@@ -178,6 +181,14 @@ export class JobsService {
         this.rodando.set(!!s.rodando);
         this.tipo.set(s.tipo ?? null);
         this.codigoSaida.set(s.codigoSaida ?? null);
+        // "Lido" = o código já apareceu e sumiu com o robô ainda trabalhando.
+        // Vale o que o servidor diz; o que esta aba já viu cobre um servidor antigo.
+        this.qrWhatsappLido.set(
+          !!s.rodando && !s.qrWhatsapp && (!!s.qrWhatsappLido || !!this.qrWhatsapp() || this.qrWhatsappLido()),
+        );
+        this.qrTelegramLido.set(
+          !!s.rodando && !s.qrTelegram && (!!s.qrTelegramLido || !!this.qrTelegram() || this.qrTelegramLido()),
+        );
         this.qrWhatsapp.set(s.qrWhatsapp ?? null);
         this.qrTelegram.set(s.qrTelegram ?? null);
         this.senhaTelegram.set(s.senhaTelegram ?? null);
@@ -247,6 +258,8 @@ export class JobsService {
     this.codigoSaida.set(null);
     this.qrWhatsapp.set(null);
     this.qrTelegram.set(null);
+    this.qrWhatsappLido.set(false);
+    this.qrTelegramLido.set(false);
     this.senhaTelegram.set(null);
     this.erroTelegram.set(null);
     this.desafioMl.set(null);

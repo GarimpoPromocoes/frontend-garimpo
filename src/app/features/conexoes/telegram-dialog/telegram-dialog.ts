@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import * as QRCode from 'qrcode';
 import { StatusService } from '../../../core/services/status.service';
@@ -42,6 +42,19 @@ export class TelegramDialog {
   protected readonly erro = signal<string | null>(null);
   protected readonly senha = signal('');
   protected readonly enviandoSenha = signal(false);
+
+  /** O código já foi lido: o robô só está terminando de salvar a sessão. */
+  protected readonly finalizando = computed(
+    () => this.confirmando() || (this.conectando() && !this.pedidoSenha() && this.jobsService.qrTelegramLido()),
+  );
+  /** O robô terminou e o painel está buscando o estado novo — sem isso a janela piscaria o "Conectar agora". */
+  private readonly confirmando = signal(false);
+  /** Acabou de conectar: a janela avisa e fecha sozinha. */
+  protected readonly sucesso = signal(false);
+
+  private estavaOcupado = false;
+  private cancelado = false;
+  private timerFechar: ReturnType<typeof setTimeout> | null = null;
 
   // Credenciais de API do Telegram (api_id / api_hash) que o proprio cliente
   // informa aqui — cada conta do Telegram exige as suas (my.telegram.org).
@@ -87,6 +100,55 @@ export class TelegramDialog {
         .then((dataUrl) => this.qrImagem.set(dataUrl))
         .catch(() => this.qrImagem.set(null));
     });
+
+    // O robô terminou (conectar ou desconectar): confirma o estado novo na hora,
+    // em vez de esperar a próxima consulta periódica do painel.
+    effect(() => {
+      const ocupado = this.conectando() || this.desconectando();
+      const antes = this.estavaOcupado;
+      this.estavaOcupado = ocupado;
+      if (antes && !ocupado) untracked(() => void this.aoTerminar());
+    });
+  }
+
+  private async aoTerminar(): Promise<void> {
+    if (this.cancelado) {
+      this.cancelado = false;
+      void this.statusService.atualizar();
+      return;
+    }
+    const eraConexao = this.jobsService.tipo() === 'conectar-telegram';
+    const deuCerto = this.jobsService.codigoSaida() === 0;
+    if (!eraConexao) {
+      await this.statusService.atualizar();
+      return;
+    }
+
+    this.ui.abrir();
+    this.confirmando.set(true);
+    await this.statusService.atualizar();
+    // Uma consulta que já estava a caminho pode ter saído antes do robô terminar.
+    if (deuCerto && !this.conectado()) await this.statusService.atualizar();
+    this.confirmando.set(false);
+
+    if (deuCerto && this.conectado()) {
+      this.sucesso.set(true);
+      this.timerFechar = setTimeout(() => this.fechar(), 3500);
+    } else if (!deuCerto && !this.jobsService.erroTelegram()) {
+      this.erro.set('Não consegui concluir a conexão do Telegram. Tente de novo.');
+    }
+  }
+
+  private fechar(): void {
+    if (this.timerFechar) clearTimeout(this.timerFechar);
+    this.timerFechar = null;
+    this.sucesso.set(false);
+    this.erro.set(null);
+    this.senha.set('');
+    this.editandoCreds.set(false);
+    this.apiHash.set('');
+    this.jobsService.erroTelegram.set(null);
+    this.ui.fechar();
   }
 
   private async carregarCreds(): Promise<void> {
@@ -104,6 +166,7 @@ export class TelegramDialog {
 
   async conectar(): Promise<void> {
     this.erro.set(null);
+    this.cancelado = false;
     this.jobsService.erroTelegram.set(null);
 
     // Sem credencial salva (ou trocando): salva o api_id/api_hash antes do QR.
@@ -158,13 +221,9 @@ export class TelegramDialog {
   /** O X (e o clique fora) no meio da conexão vale por cancelar. */
   async aoFechar(): Promise<void> {
     if ((this.conectando() || this.desconectando()) && this.jobsService.rodando()) {
+      this.cancelado = true;
       await this.jobsService.parar();
     }
-    this.erro.set(null);
-    this.senha.set('');
-    this.editandoCreds.set(false);
-    this.apiHash.set('');
-    this.jobsService.erroTelegram.set(null);
-    this.ui.fechar();
+    this.fechar();
   }
 }
