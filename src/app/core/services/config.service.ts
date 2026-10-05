@@ -48,6 +48,12 @@ export interface Divulgacao {
   maxPorDia: number;
 }
 
+export interface AlertaConexao {
+  ativo: boolean;
+  /** Grupo ou número do WhatsApp que recebe o aviso (vazio = a conversa do próprio número). */
+  grupo: string;
+}
+
 export interface DashboardConfig {
   grupos: GrupoTematico[];
   postagem: {
@@ -61,6 +67,7 @@ export interface DashboardConfig {
   agendamento: Agendamento;
   cupons: Cupons;
   divulgacao: Divulgacao;
+  alertaConexao?: AlertaConexao;
 }
 
 @Injectable({ providedIn: 'root' })

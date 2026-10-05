@@ -134,6 +134,43 @@
   </div>
 </div>
 
+<div class="regras-secao">
+  <h3 class="regras-secao-titulo">Avisos</h3>
+
+  <div class="grupos-grade">
+    <button type="button" class="grupo-card regra-card" [class.regra-card-off]="!alerta().ativo" (click)="abrir('alerta')">
+      <div class="grupo-card-topo">
+        <span class="regra-icone">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+        </span>
+        <div class="grupo-card-nomes">
+          <span class="grupo-card-nome">Aviso de queda</span>
+          <span class="regra-card-sub">Um recado no WhatsApp quando uma conexão cai</span>
+        </div>
+      </div>
+      @if (alerta().ativo) {
+        <div class="regra-card-valor"><strong>Ligado</strong></div>
+        <p class="regra-card-texto">
+          @if (alerta().grupo && ehNumero(alerta().grupo)) {
+            O aviso vai para o número <strong>{{ alerta().grupo }}</strong>.
+          } @else if (alerta().grupo) {
+            O aviso sai no grupo <strong>{{ alerta().grupo }}</strong>.
+          } @else {
+            O aviso sai na conversa do próprio número conectado.
+          }
+        </p>
+      } @else {
+        <div class="regra-card-valor"><strong>Desligado</strong></div>
+        <p class="regra-card-texto">As quedas só aparecem no sino do painel.</p>
+      }
+      <div class="grupo-card-rodape">
+        <span>Enquanto o robô está rodando</span>
+        <span>Ajustar →</span>
+      </div>
+    </button>
+  </div>
+</div>
+
 <app-datas-especiais />
 
 <!-- ================================ janelas ================================ -->
@@ -148,6 +185,7 @@
               @case ('repeticao') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2.5 20.5 6 17 9.5"/><path d="M3.5 11V9.5A3.5 3.5 0 0 1 7 6h13.5"/><path d="M7 21.5 3.5 18 7 14.5"/><path d="M20.5 13v1.5A3.5 3.5 0 0 1 17 18H3.5"/></svg> }
               @case ('cupons') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5V7a1.5 1.5 0 0 1 1.5-1.5h15A1.5 1.5 0 0 1 21 7v2.5a2.5 2.5 0 0 0 0 5V17a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17v-2.5a2.5 2.5 0 0 0 0-5Z"/><path d="M14 5.5v13" stroke-dasharray="2 2.6"/></svg> }
               @case ('divulgacao') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-6-6 18-3.5-7.5L3 11Z"/></svg> }
+              @case ('alerta') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg> }
             }
           </span>
           <div>
@@ -157,6 +195,7 @@
                 @case ('repeticao') { Repetição de produtos }
                 @case ('cupons') { Cupons de desconto }
                 @case ('divulgacao') { Mensagem de divulgação }
+                @case ('alerta') { Aviso de queda }
               }
             </h2>
             <p class="card-subtitle">
@@ -165,6 +204,7 @@
                 @case ('repeticao') { Evita que a mesma oferta apareça de novo cedo demais no mesmo grupo. }
                 @case ('cupons') { De vez em quando, no lugar de uma oferta comum, sai uma mensagem com cupom. }
                 @case ('divulgacao') { Um recado seu com o Linktree dos seus grupos, que sai esporadicamente — no máximo 1 ou 2 vezes por dia em cada grupo. }
+                @case ('alerta') { Se o Mercado Livre, a Amazon, a Shopee ou o Telegram cair enquanto o robô roda, ele avisa pelo WhatsApp para você reconectar. }
               }
             </p>
           </div>
@@ -382,6 +422,56 @@
             }
           } @else {
             <div class="info-box">Com a divulgação desligada, o robô só publica as ofertas.</div>
+          }
+        }
+
+        @case ('alerta') {
+          <div class="toggle-row">
+            <button
+              type="button"
+              class="toggle-switch"
+              role="switch"
+              [attr.aria-checked]="rAlertaAtivo()"
+              [class.toggle-switch-on]="rAlertaAtivo()"
+              (click)="rAlertaAtivo.set(!rAlertaAtivo())"
+            >
+              <span class="toggle-switch-thumb"></span>
+            </button>
+            <span class="toggle-label">Avisar no WhatsApp quando uma conexão cair</span>
+          </div>
+
+          @if (rAlertaAtivo()) {
+            <div class="field">
+              <label>Onde receber o aviso</label>
+              <span class="hint">
+                O nome de um grupo, exatamente como aparece no WhatsApp, ou um número com DDD. Em branco, o aviso vai
+                para a conversa do próprio número conectado.
+              </span>
+              <input
+                type="text"
+                maxlength="200"
+                [ngModel]="rAlertaGrupo()"
+                (ngModelChange)="rAlertaGrupo.set($event)"
+                placeholder="Ex.: Avisos do robô ou (11) 99999-9999"
+              />
+              @if ((rAlertaGrupo() || '').trim(); as destino) {
+                <span class="hint">
+                  @if (ehNumero(destino)) {
+                    Vai para o número <strong>{{ destino }}</strong>.
+                  } @else {
+                    Vai para o grupo <strong>{{ destino }}</strong>.
+                  }
+                </span>
+              }
+            </div>
+
+            <div class="info-box">
+              O WhatsApp não notifica o celular do próprio número que enviou a mensagem. Para o aviso tocar no seu
+              celular, use o seu número pessoal ou um grupo em que ele também esteja. A queda do próprio WhatsApp não
+              tem como ser avisada por aqui.
+            </div>
+          } @else {
+            <div class="info-box">Com o aviso desligado, as quedas só aparecem no sino do painel.</div>
           }
         }
       }

@@ -4,7 +4,7 @@ import { ConfigService } from '../../../core/services/config.service';
 import { StatusService } from '../../../core/services/status.service';
 import { DatasEspeciais } from '../datas-especiais/datas-especiais';
 
-type Janela = 'frequencia' | 'repeticao' | 'cupons' | 'divulgacao';
+type Janela = 'frequencia' | 'repeticao' | 'cupons' | 'divulgacao' | 'alerta';
 
 interface Ritmo {
   id: string;
@@ -60,6 +60,13 @@ function garimpoMaxPorDia(min: number, max: number): number | null {
   return Number.isFinite(menor) ? Math.max(1, Math.round((24 * 60) / menor)) : null;
 }
 
+/** Destino do aviso de queda: só dígitos é número, o resto é nome de grupo (mesma regra do backend: alertaConexao.js). */
+function ehNumero(texto: string): boolean {
+  if (!/^\+?[\d\s().-]+$/.test(texto)) return false;
+  const digitos = texto.replace(/\D/g, '').length;
+  return digitos >= 10 && digitos <= 15;
+}
+
 /**
  * Regras de postagem em cards, igual às telas de Grupos e Lojas: cada card
  * mostra o que está valendo agora e o clique abre a janela para ajustar.
@@ -82,6 +89,7 @@ export class RegrasPostagem {
   protected readonly opcoesRepostar = OPCOES_REPOSTAR;
   protected readonly maxCupons = MAX_CUPONS;
   protected readonly textoHoras = textoHoras;
+  protected readonly ehNumero = ehNumero;
   protected readonly n = (v: unknown): number => Number(v) || 0;
 
   // ---- o que está salvo (cards) ---------------------------------------------
@@ -127,6 +135,11 @@ export class RegrasPostagem {
     };
   });
 
+  protected readonly alerta = computed(() => {
+    const a = this.cfg()?.alertaConexao;
+    return { ativo: a?.ativo ?? false, grupo: a?.grupo ?? '' };
+  });
+
   // ---- janela de edição -------------------------------------------------------
 
   protected readonly janela = signal<Janela | null>(null);
@@ -145,6 +158,8 @@ export class RegrasPostagem {
   protected readonly rDivTexto = signal('');
   protected readonly rDivLink = signal('');
   protected readonly rDivMax = signal(1);
+  protected readonly rAlertaAtivo = signal(false);
+  protected readonly rAlertaGrupo = signal('');
 
   /** Previa de como a mensagem sai no grupo (mesma regra do backend). */
   protected readonly rDivPreview = computed(() => {
@@ -189,6 +204,9 @@ export class RegrasPostagem {
     this.rDivTexto.set(d.texto);
     this.rDivLink.set(d.link);
     this.rDivMax.set(d.maxPorDia === 2 ? 2 : 1);
+    const al = this.alerta();
+    this.rAlertaAtivo.set(al.ativo);
+    this.rAlertaGrupo.set(al.grupo);
     this.janela.set(j);
   }
 
@@ -251,6 +269,8 @@ export class RegrasPostagem {
         return;
       }
       partial = { divulgacao: { ativo: this.rDivAtivo(), texto, link, maxPorDia: max } };
+    } else if (j === 'alerta') {
+      partial = { alertaConexao: { ativo: this.rAlertaAtivo(), grupo: (this.rAlertaGrupo() || '').trim() } };
     } else {
       if (this.rSomaCupons() > MAX_CUPONS) {
         this.erro.set(`Os dois tipos de cupom juntos não podem passar de ${MAX_CUPONS}% das mensagens.`);
