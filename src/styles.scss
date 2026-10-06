@@ -1392,18 +1392,6 @@ body:has(.modal-fundo) .bot-control-fixo {
   color: var(--text);
 }
 
-.login-print summary {
-  font-size: 12.5px;
-  color: var(--text-muted);
-  cursor: pointer;
-}
-.login-print img {
-  margin-top: 10px;
-  width: 100%;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-}
-
 /* Cartao de alerta (ex.: verificacao de seguranca pedida pela loja). */
 .card-alerta {
   border-color: var(--danger-border);
@@ -1893,9 +1881,9 @@ body:has(.modal-fundo) .bot-control-fixo {
   }
 }
 
-/* ---- Verificacoes do login (escolha, "nao sou um robo", QR, tela ao vivo) ---- */
+/* ---- Verificacoes do login (escolha, "nao sou um robo", QR, pagina traduzida) ---- */
 .modal-login-largo {
-  width: min(980px, 100%);
+  width: min(720px, 100%);
 }
 
 .btn-link {
@@ -2175,90 +2163,189 @@ body:has(.modal-fundo) .bot-control-fixo {
   }
 }
 
-/* Pagina da loja ao vivo: cada clique na imagem vai para a loja. */
-.tela-loja {
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius);
-  overflow: hidden;
-  background: var(--surface);
-  box-shadow: var(--shadow-sm);
+.verif-icone[data-tipo='facial'],
+.verif-icone[data-tipo='authenticator'] {
+  background: var(--gold-soft);
+  border-color: var(--gold-border);
+  color: var(--gold-ink);
 }
-.tela-loja-barra {
+.verif-links-varios {
+  flex-wrap: wrap;
+  gap: 4px 18px;
+}
+
+/* Reconhecimento facial: a camera deste computador, que vai para a loja. */
+.camera-login {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: var(--surface-2);
-  border-bottom: 1px solid var(--border);
-  font-size: 12px;
-  color: var(--text-soft);
+  gap: 18px;
+  margin-bottom: 12px;
 }
-.tela-loja-ponto {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--ok);
-  animation: pulse-dot 1.6s ease-in-out infinite;
+.camera-login-video {
+  position: relative;
+  flex-shrink: 0;
+  width: 260px;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--espresso);
+  color: var(--surface-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.tela-loja-espaco {
-  flex: 1;
+.camera-login-video video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Espelhado so' aqui, como um espelho; para a loja o quadro vai normal. */
+  transform: scaleX(-1);
 }
-.tela-loja-estado {
+.camera-login-video svg {
+  width: 34px;
+  height: 34px;
+}
+.camera-login-selo {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--text-muted);
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(20, 14, 8, 0.72);
+  color: #fff;
+  font-size: 11px;
 }
-.tela-loja-estado .login-spinner {
-  width: 12px;
-  height: 12px;
+.camera-login-textos {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
 }
-.tela-loja-imagem {
-  position: relative;
+.camera-login-erro {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--danger);
+}
+@media (max-width: 560px) {
+  .camera-login {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .camera-login-video {
+    width: 100%;
+  }
+}
+
+/* Pagina traduzida: o que a loja pediu, em componentes nossos (a tela da loja
+   nunca aparece). */
+.pagina-subtitulo {
+  margin: -4px 0 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-soft);
+}
+.pagina-textos {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.pagina-textos p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-soft);
+}
+.pagina-caixa {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-soft);
   cursor: pointer;
+}
+.pagina-caixa input {
+  margin-top: 2px;
+}
+.pagina-botoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.pagina-botoes:empty,
+.verif-links:empty,
+.verif-opcoes:empty {
+  display: none;
+}
+
+/* Desafio de imagens: a imagem do desafio com uma grade de botoes por cima. */
+.grade-desafio {
+  position: relative;
+  width: min(400px, 100%);
+  margin: 0 auto;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
   line-height: 0;
 }
-.tela-loja-imagem img {
+.grade-desafio img {
   width: 100%;
   height: auto;
   display: block;
   user-select: none;
 }
-.tela-loja-atualizando .tela-loja-imagem {
-  cursor: progress;
-}
-.tela-loja-atualizando .tela-loja-imagem img {
-  opacity: 0.55;
-  transition: opacity 0.2s;
-}
-.tela-loja-clique {
+.grade-desafio-quadros {
   position: absolute;
-  width: 26px;
-  height: 26px;
-  margin: -13px 0 0 -13px;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--colunas, 3), 1fr);
+}
+.grade-desafio-quadro {
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: background-color 0.12s, box-shadow 0.12s;
+}
+.grade-desafio-quadro:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.15);
+}
+.grade-desafio-quadro:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: -3px;
+}
+.grade-desafio-marcado {
+  background: rgba(224, 165, 32, 0.35);
+  box-shadow: inset 0 0 0 4px var(--gold);
+}
+
+/* Camera do facial: moldura oval nossa por cima do video. */
+.camera-login-oval {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 46%;
+  height: 78%;
+  transform: translate(-50%, -52%);
+  border: 2px dashed rgba(255, 255, 255, 0.85);
   border-radius: 50%;
-  border: 2px solid var(--gold);
-  background: rgba(224, 165, 32, 0.25);
+  box-shadow: 0 0 0 999px rgba(20, 14, 8, 0.35);
   pointer-events: none;
-  animation: tela-clique 1s ease-out infinite;
 }
-@keyframes tela-clique {
-  from {
-    transform: scale(0.6);
-    opacity: 1;
-  }
-  to {
-    transform: scale(1.6);
-    opacity: 0;
-  }
-}
-.tela-loja-digitar {
-  display: flex;
-  gap: 8px;
-}
-.tela-loja-digitar input {
-  flex: 1;
-  min-width: 0;
+.camera-login-ponto {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e5484d;
+  animation: pulse-dot 1.6s ease-in-out infinite;
 }
 
 /* ---- Sino de avisos (topo, canto direito) ---- */
