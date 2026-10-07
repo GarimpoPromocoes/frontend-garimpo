@@ -58,27 +58,70 @@ export interface OpcaoVerificacao {
   valor: string;
   rotulo: string;
   detalhe?: string | null;
-  tipo?: 'qrcode' | 'whatsapp' | 'sms' | 'email' | 'senha' | 'biometria' | 'app' | 'outro';
+  tipo?:
+    | 'qrcode'
+    | 'whatsapp'
+    | 'sms'
+    | 'email'
+    | 'senha'
+    | 'facial'
+    | 'authenticator'
+    | 'biometria'
+    | 'app'
+    | 'ajuda'
+    | 'outro';
 }
 
-/** Uma pergunta da plataforma traduzida para uma tela nossa. */
+/** Um botão, link ou item de lista lido da página da loja (formas 'pagina' e 'camera'). */
+export interface AcaoPagina {
+  valor: string;
+  rotulo: string;
+  detalhe?: string | null;
+  /** 'principal' = botão de enviar; 'opcao' = item de lista; 'link' = o resto. */
+  tipo: 'principal' | 'opcao' | 'link';
+  desativado?: boolean;
+}
+
+/**
+ * Uma pergunta da plataforma traduzida para uma tela nossa. A tela da loja em
+ * si nunca chega aqui: as que o robô não conhece vêm como 'pagina' — título,
+ * textos, campos e botões lidos dela.
+ */
 export interface PedidoLogin {
   id: string;
-  forma: 'credenciais' | 'senha' | 'codigo' | 'captcha' | 'escolha' | 'robo' | 'tela' | 'qrcode';
+  forma: 'credenciais' | 'senha' | 'codigo' | 'captcha' | 'escolha' | 'robo' | 'qrcode' | 'pagina' | 'camera' | 'grade';
   provedor: Provedor;
   titulo: string;
+  /** Título da própria página, quando o nosso título é outro (forma 'pagina'). */
+  subtitulo?: string | null;
   texto?: string | null;
+  /** O que a página diz, em ordem (formas 'pagina' e 'camera'). */
+  textos?: string[];
+  /** Botões, links e opções da página (formas 'pagina' e 'camera'). */
+  acoes?: AcaoPagina[];
+  /** A loja recusou a última resposta (ex.: código incorreto). */
+  erro?: string | null;
+  /** Botões extras da forma 'codigo': pedir outro código, trocar de método. */
+  atalhos?: ('reenviar' | 'voltar')[];
+  /** Desafio de imagens (forma 'grade'): tamanho da grade e texto do botão. */
+  linhas?: number;
+  colunas?: number;
+  rotuloBotao?: string;
   destino?: string | null;
   imagem?: string | null;
-  campos: { nome: string; rotulo: string; tipo: 'texto' | 'segredo' | 'codigo'; tamanho?: number }[];
+  campos: {
+    nome: string;
+    rotulo: string;
+    tipo: 'texto' | 'segredo' | 'codigo' | 'opcoes' | 'caixa';
+    tamanho?: number;
+    /** Escolhas de uma lista suspensa da página (tipo 'opcoes'). */
+    opcoes?: string[];
+    /** Caixa de marcar que já vem marcada (tipo 'caixa'). */
+    marcado?: boolean;
+  }[];
   opcoes?: OpcaoVerificacao[];
   /** A loja também aceita entrar pela conta Google (forma 'credenciais'). */
   google?: boolean;
-  /** Na tela ao vivo: o campo em foco na loja é de senha — esconder o que for digitado. */
-  segredo?: boolean;
-  /** Tamanho real da página da loja (forma 'tela'), só para referência. */
-  largura?: number;
-  altura?: number;
   expiraEm?: string;
 }
 
@@ -92,8 +135,6 @@ export interface FimLogin {
   ok: boolean;
   motivo: string | null;
   comoResolver: string | null;
-  /** Print do que a plataforma mostrou, só quando deu errado. */
-  imagem: string | null;
   em?: string;
 }
 
@@ -320,6 +361,20 @@ export class JobsService {
     } catch (e: any) {
       this.respondendoLogin.set(false);
       return { ok: false, erro: e?.error?.erro || 'Não consegui enviar a resposta.' };
+    }
+  }
+
+  /**
+   * Um quadro da câmera durante o reconhecimento facial da loja. Vai direto
+   * para o navegador do robô; quadro recusado (a loja já saiu do facial) só
+   * cai — o próximo tenta de novo.
+   */
+  async enviarQuadroCamera(quadro: string): Promise<boolean> {
+    try {
+      await firstValueFrom(this.http.post('/api/jobs/login/camera', { quadro }));
+      return true;
+    } catch (_) {
+      return false;
     }
   }
 
