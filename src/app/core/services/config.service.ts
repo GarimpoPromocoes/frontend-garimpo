@@ -65,8 +65,6 @@ export interface Garimpo {
   fonte: FonteGarimpo;
   /** Pedaços do nome dos grupos de origem (vazio = todos os grupos em que o WhatsApp está). */
   grupos: string[];
-  /** A foto do grupo vai sempre; só com isto ligado a que tem a assinatura de outro afiliado é trocada pela do anúncio. */
-  descartarMarcaDagua?: boolean;
 }
 
 export interface DashboardConfig {
