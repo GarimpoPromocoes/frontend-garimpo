@@ -25,7 +25,11 @@ export interface GrupoTematico {
   temaEstrito?: boolean;
   /** Trava de gênero do grupo: 'misto' | 'masculino' | 'feminino' | 'infantil'. */
   publico?: string;
+  /** De onde vêm os produtos deste grupo: garimpo próprio nas lojas ou clonagem dos concorrentes. */
+  fonte?: FonteProdutos;
 }
+
+export type FonteProdutos = 'garimpo' | 'clonagem';
 
 export interface Agendamento {
   intervaloMinMinutos: number;
@@ -54,6 +58,17 @@ export interface AlertaConexao {
   grupo: string;
 }
 
+export type FonteGarimpo = 'mercadolivre' | 'grupos';
+
+export interface Garimpo {
+  /** De onde vêm os produtos: do site de cada loja ('mercadolivre', nome histórico) ou das mensagens dos grupos dos outros. */
+  fonte: FonteGarimpo;
+  /** Pedaços do nome dos grupos de origem (vazio = todos os grupos em que o WhatsApp está). */
+  grupos: string[];
+  /** A foto do grupo vai sempre; só com isto ligado a que tem a assinatura de outro afiliado é trocada pela do anúncio. */
+  descartarMarcaDagua?: boolean;
+}
+
 export interface DashboardConfig {
   grupos: GrupoTematico[];
   postagem: {
@@ -68,6 +83,7 @@ export interface DashboardConfig {
   cupons: Cupons;
   divulgacao: Divulgacao;
   alertaConexao?: AlertaConexao;
+  garimpo?: Garimpo;
 }
 
 @Injectable({ providedIn: 'root' })

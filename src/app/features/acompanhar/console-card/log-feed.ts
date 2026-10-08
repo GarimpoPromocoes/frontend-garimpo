@@ -26,7 +26,8 @@ const RE_LINHA_TAG = /^\[(\d{2}:\d{2}:\d{2})\]\s*\[([A-ZÇÃÕÁÉÍÓÚ]+)\]\s*
 const RE_HEADER = /^=+\s*(.+?)\s*=*$/;
 const RE_RODADA = /^===+\s*RODADA\s+(\d+):/i;
 const RE_GRUPO_HEADER = /^GRUPO\s+"(.+?)"\s*->\s*WhatsApp/i;
-const RE_CANDIDATO = /^\[(?:ML |amazon |shopee )?\d+\]\s+.+\s—\s*R\$\s*[\d.,]+/i;
+const RE_GARIMPADO = /^\[(?:ML |amazon |shopee )?\d+\]\s+(.+?)\s—\s*R\$\s*([\d.,]+).*\s—\sveio\s(.+)$/i;
+const RE_CANDIDATO =/^\[(?:ML |amazon |shopee )?\d+\]\s+.+\s—\s*R\$\s*[\d.,]+/i;
 
 function explicarMotivo(motivo: string): string {
   const m = motivo.trim();
@@ -56,6 +57,9 @@ function traduzirPorTag(tag: string, texto: string): { emoji: string; texto: str
       if (/^shopee: ofertas:/i.test(texto)) return { emoji: '🔎', texto: 'Shopee: procurando ofertas do dia...', tom: 'info' };
       m = texto.match(/^shopee: busca: (.+?):/i);
       if (m) return { emoji: '🔎', texto: `Shopee: buscando "${m[1]}"...`, tom: 'info' };
+
+      m = texto.match(/^Grupos: lendo (\d+) grupo/i);
+      if (m) return { emoji: '🔎', texto: `Lendo ${m[1]} grupo(s) do WhatsApp atrás de produtos...`, tom: 'info' };
 
       m = texto.match(/^Loja sorteada: (.+?) \(/i);
       if (m) return { emoji: '🎲', texto: `Próxima postagem: produto da ${m[1]}.`, tom: 'info' };
@@ -115,6 +119,14 @@ function traduzirPorTag(tag: string, texto: string): { emoji: string; texto: str
       }
       m = texto.match(/^Garimpo ligado: (.+?) \(/i);
       if (m) return { emoji: '🔎', texto: `Garimpo ligado: ${m[1]}, um produto de cada loja por vez.`, tom: 'info' };
+      m = texto.match(/^Foto do grupo descartada \((.+?)\): (.+?) — na postagem/i);
+      if (m) {
+        return {
+          emoji: '🖼️',
+          texto: `Foto do grupo descartada — ${m[1].replace(/d'agua/i, "d'água")}. "${m[2]}" vai com a foto do anúncio.`,
+          tom: 'info',
+        };
+      }
       m = texto.match(/^Garimpo pausado: ainda ha (\d+) produtos para postar/i);
       if (m) return { emoji: '⏸️', texto: `Garimpo pausado: ainda há ${m[1]} produtos para postar.`, tom: 'info' };
       if (/^Lote de garimpo:/i.test(texto)) return null;
@@ -274,6 +286,21 @@ function classificarLinha(raw: string): Token | null {
 
     const rodada = texto.match(RE_RODADA);
     if (rodada) return { item: { tipo: 'rodada', numero: Number(rodada[1]) }, ehCandidato: false };
+
+    // Produto garimpado, com a origem: de qual grupo veio, ou de qual loja.
+    const garimpado = tag === 'OK' && texto.match(RE_GARIMPADO);
+    if (garimpado) {
+      return {
+        item: {
+          tipo: 'linha',
+          hora,
+          emoji: '⛏️',
+          texto: `Garimpei ${garimpado[3]}: ${garimpado[1]} — R$ ${garimpado[2]}`,
+          tom: 'ok',
+        },
+        ehCandidato: false,
+      };
+    }
 
     if (tag === 'OK' && RE_CANDIDATO.test(texto)) {
       return { item: { tipo: 'scan', contagem: 1, hora }, ehCandidato: true };

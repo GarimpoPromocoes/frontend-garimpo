@@ -1,0 +1,128 @@
+<div class="card">
+  <div class="card-header">
+    <div>
+      <h2>Origem dos produtos de cada grupo</h2>
+      <p class="card-subtitle">
+        Escolha se o grupo recebe o seu garimpo nas lojas ou a clonagem dos concorrentes.
+      </p>
+    </div>
+  </div>
+
+  @if (gruposDestino().length) {
+    <div class="fonte-grupos">
+      @for (g of gruposDestino(); track g.id) {
+        <div class="fonte-grupo">
+          <div class="fonte-grupo-nome">
+            <strong>{{ g.nome }}</strong>
+            <small>{{ g.groupName }}</small>
+          </div>
+          <div class="fonte-grupo-opcoes" role="radiogroup" [attr.aria-label]="'Origem dos produtos de ' + g.nome">
+            <button
+              type="button"
+              class="regra-chip"
+              role="radio"
+              [class.regra-chip-ativa]="fonteDe(g.id) === 'garimpo'"
+              [attr.aria-checked]="fonteDe(g.id) === 'garimpo'"
+              title="Ofertas e buscas no Mercado Livre, Amazon e Shopee pelas palavras do grupo"
+              (click)="definirFonte(g.id, 'garimpo')"
+            >
+              Meu garimpo
+            </button>
+            <button
+              type="button"
+              class="regra-chip"
+              role="radio"
+              [class.regra-chip-ativa]="fonteDe(g.id) === 'clonagem'"
+              [attr.aria-checked]="fonteDe(g.id) === 'clonagem'"
+              title="Produtos dos grupos dos concorrentes, com o seu link de afiliado"
+              (click)="definirFonte(g.id, 'clonagem')"
+            >
+              Clonagem
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <span class="hint">Cadastre os seus grupos na aba Grupos para escolher a origem dos produtos de cada um.</span>
+  }
+
+  @if (algumClona()) {
+    <div class="field">
+      <label>Grupos de onde garimpar ({{ rGrupos().length }}/{{ maxGrupos }})</label>
+      <app-chip-input
+        [items]="rGrupos()"
+        (itemsChange)="mudarGrupos($event)"
+        placeholder="Digite o nome do grupo e aperte Enter"
+      />
+    </div>
+
+    @if (naoEncontrados().length) {
+      <div class="info-box info-box-erro">
+        Este WhatsApp não participa de: <strong>{{ naoEncontrados().join(', ') }}</strong>. Escolha pela lista abaixo
+        ou entre no grupo com este número.
+      </div>
+    }
+
+    <div class="field">
+      <label>Grupos em que este WhatsApp está</label>
+      @if (doWhatsapp().grupos.length) {
+        <div class="regra-chips">
+          @for (g of doWhatsapp().grupos; track g.nome) {
+            <button
+              type="button"
+              class="regra-chip"
+              [class.regra-chip-ativa]="naLista(g.nome) || (g.lendo && !alterado())"
+              [title]="naLista(g.nome) ? 'Na lista — clique para tirar' : g.lendo ? 'Já é lido por um nome da lista' : 'Clique para adicionar'"
+              (click)="alternarGrupo(g.nome)"
+            >
+              {{ g.nome }}@if (g.canal) { (canal) }
+            </button>
+          }
+        </div>
+      } @else {
+        <span class="hint">
+          A lista aparece depois da primeira leitura: salve esta opção, ligue o robô e volte aqui em alguns minutos.
+        </span>
+      }
+    </div>
+
+    <div class="field">
+      <label>Imagem da postagem</label>
+      <div class="toggle-row">
+        <button
+          type="button"
+          class="toggle-switch"
+          role="switch"
+          [attr.aria-checked]="rDescartar()"
+          [class.toggle-switch-on]="rDescartar()"
+          (click)="rDescartar.set(!rDescartar())"
+        >
+          <span class="toggle-switch-thumb"></span>
+        </button>
+        <span class="toggle-label">Trocar pela foto do anúncio quando a imagem tiver a marca de outro afiliado</span>
+      </div>
+      <span class="hint">
+        @if (rDescartar()) {
+          Imagem com @ de outro perfil, nome do grupo de origem ou “link do grupo” não vai para o seu grupo — nesses
+          casos sai a foto do anúncio.
+        } @else {
+          A imagem do grupo vai sempre, mesmo carimbada com o @ ou o nome do grupo de outra pessoa.
+        }
+      </span>
+    </div>
+  }
+
+  @if (erro(); as e) {
+    <div class="info-box info-box-erro">{{ e }}</div>
+  }
+
+  <div class="garimpo-rodape">
+    @if (alterado()) {
+      <button type="button" class="btn btn-ghost" [disabled]="salvando()" (click)="desfazer()">Desfazer</button>
+    }
+    <button type="button" class="btn btn-primary" [disabled]="salvando() || !alterado()" (click)="salvar()">
+      {{ salvando() ? 'Salvando…' : alterado() ? 'Salvar' : 'Salvo' }}
+    </button>
+  </div>
+</div>
