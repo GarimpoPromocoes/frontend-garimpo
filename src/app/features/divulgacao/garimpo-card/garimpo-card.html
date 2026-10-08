@@ -1,52 +1,55 @@
-<p class="grupos-intro">
-  De onde o robô tira os produtos. Vale para todas as lojas conectadas — Mercado Livre, Amazon e Shopee.
-</p>
-
 <div class="card">
   <div class="card-header">
     <div>
-      <h2>Fonte do garimpo</h2>
-      <p class="card-subtitle">Escolha uma das duas — a troca vale já na próxima rodada do robô.</p>
+      <h2>Origem dos produtos de cada grupo</h2>
+      <p class="card-subtitle">
+        Escolha se o grupo recebe o seu garimpo nas lojas ou a clonagem dos concorrentes.
+      </p>
     </div>
   </div>
 
-  <div class="regra-opcoes garimpo-opcoes">
-    <button
-      type="button"
-      class="regra-opcao"
-      [class.regra-opcao-ativa]="rFonte() === 'mercadolivre'"
-      [attr.aria-pressed]="rFonte() === 'mercadolivre'"
-      (click)="escolher('mercadolivre')"
-    >
-      <strong>Direto nas lojas</strong>
-      <span class="regra-opcao-valor">Ofertas e buscas do Mercado Livre, Amazon e Shopee</span>
-      <small>O robô varre as ofertas de cada loja conectada e busca pelas palavras do assunto de cada grupo.</small>
-    </button>
+  @if (gruposDestino().length) {
+    <div class="fonte-grupos">
+      @for (g of gruposDestino(); track g.id) {
+        <div class="fonte-grupo">
+          <div class="fonte-grupo-nome">
+            <strong>{{ g.nome }}</strong>
+            <small>{{ g.groupName }}</small>
+          </div>
+          <div class="fonte-grupo-opcoes" role="radiogroup" [attr.aria-label]="'Origem dos produtos de ' + g.nome">
+            <button
+              type="button"
+              class="regra-chip"
+              role="radio"
+              [class.regra-chip-ativa]="fonteDe(g.id) === 'garimpo'"
+              [attr.aria-checked]="fonteDe(g.id) === 'garimpo'"
+              title="Ofertas e buscas no Mercado Livre, Amazon e Shopee pelas palavras do grupo"
+              (click)="definirFonte(g.id, 'garimpo')"
+            >
+              Meu garimpo
+            </button>
+            <button
+              type="button"
+              class="regra-chip"
+              role="radio"
+              [class.regra-chip-ativa]="fonteDe(g.id) === 'clonagem'"
+              [attr.aria-checked]="fonteDe(g.id) === 'clonagem'"
+              title="Produtos dos grupos dos concorrentes, com o seu link de afiliado"
+              (click)="definirFonte(g.id, 'clonagem')"
+            >
+              Clonagem
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <span class="hint">Cadastre os seus grupos na aba Grupos para escolher a origem dos produtos de cada um.</span>
+  }
 
-    <button
-      type="button"
-      class="regra-opcao"
-      [class.regra-opcao-ativa]="rFonte() === 'grupos'"
-      [attr.aria-pressed]="rFonte() === 'grupos'"
-      (click)="escolher('grupos')"
-    >
-      <strong>Pelos grupos dos outros</strong>
-      <span class="regra-opcao-valor">O que já está sendo divulgado no WhatsApp</span>
-      <small>
-        O robô lê os grupos de oferta em que o seu WhatsApp está e reaproveita os produtos das lojas conectadas, com o
-        seu link.
-      </small>
-    </button>
-  </div>
-
-  @if (rFonte() === 'grupos') {
+  @if (algumClona()) {
     <div class="field">
-      <label>Grupos de onde garimpar</label>
-      <span class="hint">
-        Um pedaço do nome já basta — “promotech” pega “Promotech #42 🔥”. Em branco, o robô lê todos os grupos e
-        canais em que este WhatsApp está. Os grupos onde você posta nunca entram.
-        ({{ rGrupos().length }}/{{ maxGrupos }})
-      </span>
+      <label>Grupos de onde garimpar ({{ rGrupos().length }}/{{ maxGrupos }})</label>
       <app-chip-input
         [items]="rGrupos()"
         (itemsChange)="mudarGrupos($event)"
@@ -64,10 +67,6 @@
     <div class="field">
       <label>Grupos em que este WhatsApp está</label>
       @if (doWhatsapp().grupos.length) {
-        <span class="hint">
-          Clique para adicionar ou tirar. O número do grupo pode ser diferente do que você digitou — “AFNETO OFERTAS #
-          149” também lê o “# 152”. @if (lidoEm()) { Lista de {{ lidoEm() }}. }
-        </span>
         <div class="regra-chips">
           @for (g of doWhatsapp().grupos; track g.nome) {
             <button
@@ -90,9 +89,6 @@
 
     <div class="field">
       <label>Imagem da postagem</label>
-      <span class="hint">
-        A imagem que veio na mensagem do grupo (foto anexada ou a prévia do link) é sempre a que vai na sua postagem.
-      </span>
       <div class="toggle-row">
         <button
           type="button"
@@ -114,27 +110,6 @@
           A imagem do grupo vai sempre, mesmo carimbada com o @ ou o nome do grupo de outra pessoa.
         }
       </span>
-    </div>
-
-    <div class="regra-como">
-      <strong>Como funciona</strong>
-      <ol>
-        <li>
-          Lê as últimas mensagens de cada grupo e separa os links de produto por loja: Mercado Livre, Amazon e Shopee.
-          Só entram os das lojas que você conectou.
-        </li>
-        <li>
-          Busca o produto na loja, confere preço e qualidade e troca pelo <strong>seu link de afiliado</strong> — o do
-          outro nunca é usado.
-        </li>
-        <li>Produto repetido (mesmo link, mesmo anúncio ou já no catálogo) fica de fora.</li>
-        <li>Guarda a imagem e o texto da mensagem junto com o produto; a imagem é a que sai na sua postagem.</li>
-      </ol>
-    </div>
-
-    <div class="info-box">
-      Precisa do WhatsApp conectado para ler os grupos e de pelo menos uma loja conectada para gerar o seu link.
-      Produto de loja ainda sem integração (Shein, Nike, Netshoes, Adidas, Centauro) é ignorado por enquanto.
     </div>
   }
 

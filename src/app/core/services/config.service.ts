@@ -25,7 +25,11 @@ export interface GrupoTematico {
   temaEstrito?: boolean;
   /** Trava de gênero do grupo: 'misto' | 'masculino' | 'feminino' | 'infantil'. */
   publico?: string;
+  /** De onde vêm os produtos deste grupo: garimpo próprio nas lojas ou clonagem dos concorrentes. */
+  fonte?: FonteProdutos;
 }
+
+export type FonteProdutos = 'garimpo' | 'clonagem';
 
 export interface Agendamento {
   intervaloMinMinutos: number;

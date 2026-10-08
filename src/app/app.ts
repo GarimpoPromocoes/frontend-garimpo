@@ -87,9 +87,9 @@ const ABAS: Aba[] = [
   },
   {
     id: 'garimpo',
-    label: 'Garimpo',
-    titulo: 'Garimpo de produtos',
-    descricao: 'De onde o robô tira os produtos: direto das lojas ou dos grupos dos outros.',
+    label: 'Clonagem',
+    titulo: 'Clonagem de grupos',
+    descricao: 'Quais grupos recebem o seu garimpo nas lojas e quais recebem a clonagem dos concorrentes.',
     secao: 'Divulgação',
   },
   {

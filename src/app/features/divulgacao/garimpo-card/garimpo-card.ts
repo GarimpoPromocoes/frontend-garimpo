@@ -1,7 +1,7 @@
 import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { ConfigService, FonteGarimpo } from '../../../core/services/config.service';
+import { ConfigService, FonteProdutos } from '../../../core/services/config.service';
 import { ChipInput } from '../../../shared/chip-input/chip-input';
 
 const MAX_GRUPOS = 50;
@@ -13,8 +13,9 @@ interface GruposDoWhatsapp {
 }
 
 /**
- * De onde o robô tira os produtos de todas as lojas conectadas: do site de
- * cada uma ou das mensagens dos grupos dos outros.
+ * De onde vêm os produtos de cada grupo de destino: do garimpo próprio nas
+ * lojas ou da clonagem dos grupos dos concorrentes. Uns grupos podem receber
+ * o garimpo e outros a clonagem ao mesmo tempo.
  */
 @Component({
   selector: 'app-garimpo-card',
@@ -29,16 +30,23 @@ export class GarimpoCard {
 
   protected readonly maxGrupos = MAX_GRUPOS;
 
+  /** Os grupos onde o robô posta (aba Grupos). */
+  protected readonly gruposDestino = computed(() => this.configService.config()?.grupos ?? []);
+
   private readonly salvo = computed(() => {
-    const g = this.configService.config()?.garimpo;
+    const cfg = this.configService.config();
+    const g = cfg?.garimpo;
+    const padrao: FonteProdutos = g?.fonte === 'grupos' ? 'clonagem' : 'garimpo';
+    const fontes: Record<string, FonteProdutos> = {};
+    for (const grupo of cfg?.grupos ?? []) fontes[grupo.id] = grupo.fonte ?? padrao;
     return {
-      fonte: (g?.fonte ?? 'mercadolivre') as FonteGarimpo,
+      fontes,
       grupos: g?.grupos ?? [],
       descartar: g?.descartarMarcaDagua === true,
     };
   });
 
-  protected readonly rFonte = signal<FonteGarimpo>('mercadolivre');
+  protected readonly rFontes = signal<Record<string, FonteProdutos>>({});
   protected readonly rGrupos = signal<string[]>([]);
   protected readonly rDescartar = signal(false);
   protected readonly salvando = signal(false);
@@ -57,6 +65,18 @@ export class GarimpoCard {
     const em = this.doWhatsapp().em;
     return em ? new Date(em).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : null;
   });
+
+  /** Algum grupo recebe a clonagem: só aí os grupos dos concorrentes importam. */
+  protected readonly algumClona = computed(() => Object.values(this.rFontes()).includes('clonagem'));
+
+  protected fonteDe(id: string): FonteProdutos {
+    return this.rFontes()[id] ?? 'garimpo';
+  }
+
+  definirFonte(id: string, fonte: FonteProdutos): void {
+    this.erro.set(null);
+    this.rFontes.set({ ...this.rFontes(), [id]: fonte });
+  }
 
   protected naLista(nome: string): boolean {
     return this.rGrupos().some((g) => g.toLowerCase() === nome.toLowerCase());
@@ -78,7 +98,7 @@ export class GarimpoCard {
   protected readonly alterado = computed(() => {
     const s = this.salvo();
     return (
-      s.fonte !== this.rFonte() ||
+      Object.keys(s.fontes).some((id) => s.fontes[id] !== this.fonteDe(id)) ||
       s.descartar !== this.rDescartar() ||
       s.grupos.join('\n') !== this.rGrupos().join('\n')
     );
@@ -89,17 +109,12 @@ export class GarimpoCard {
     effect(() => {
       const s = this.salvo();
       untracked(() => {
-        this.rFonte.set(s.fonte);
+        this.rFontes.set({ ...s.fontes });
         this.rGrupos.set([...s.grupos]);
         this.rDescartar.set(s.descartar);
       });
     });
     void this.carregarGruposDoWhatsapp();
-  }
-
-  escolher(fonte: FonteGarimpo): void {
-    this.erro.set(null);
-    this.rFonte.set(fonte);
   }
 
   mudarGrupos(grupos: string[]): void {
@@ -110,7 +125,7 @@ export class GarimpoCard {
   desfazer(): void {
     const s = this.salvo();
     this.erro.set(null);
-    this.rFonte.set(s.fonte);
+    this.rFontes.set({ ...s.fontes });
     this.rGrupos.set([...s.grupos]);
     this.rDescartar.set(s.descartar);
   }
@@ -118,8 +133,11 @@ export class GarimpoCard {
   async salvar(): Promise<void> {
     this.erro.set(null);
     this.salvando.set(true);
+    // A origem fica gravada em cada grupo; a escolha antiga da conta ('fonte') volta para o
+    // garimpo, que é o padrão de um grupo novo cadastrado depois.
     const r = await this.configService.salvar({
-      garimpo: { fonte: this.rFonte(), grupos: this.rGrupos(), descartarMarcaDagua: this.rDescartar() },
+      grupos: this.gruposDestino().map((g) => ({ ...g, fonte: this.fonteDe(g.id) })),
+      garimpo: { fonte: 'mercadolivre', grupos: this.rGrupos(), descartarMarcaDagua: this.rDescartar() },
     });
     this.salvando.set(false);
     if (!r.ok) this.erro.set(r.erro ?? 'Erro ao salvar.');
