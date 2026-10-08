@@ -15,6 +15,7 @@ import { WhatsappCard } from './features/conexoes/whatsapp-card/whatsapp-card';
 import { LojasCard } from './features/conexoes/lojas-card/lojas-card';
 import { RegrasPostagem } from './features/divulgacao/regras-postagem/regras-postagem';
 import { GroupsCard } from './features/divulgacao/groups-card/groups-card';
+import { GarimpoCard } from './features/divulgacao/garimpo-card/garimpo-card';
 import { RunCard } from './features/acompanhar/run-card/run-card';
 import { StatsCard } from './features/acompanhar/stats-card/stats-card';
 import { ConsoleCard } from './features/acompanhar/console-card/console-card';
@@ -34,6 +35,7 @@ export type AbaId =
   | 'atividade'
   | 'ganhos'
   | 'grupos'
+  | 'garimpo'
   | 'regras'
   | 'produtos'
   | 'whatsapp'
@@ -82,6 +84,13 @@ const ABAS: Aba[] = [
     descricao: 'Escolha para quais grupos as promoções vão e o tema de cada um.',
     secao: 'Divulgação',
     badge: 'grupos',
+  },
+  {
+    id: 'garimpo',
+    label: 'Garimpo',
+    titulo: 'Garimpo de produtos',
+    descricao: 'De onde o robô tira os produtos: direto das lojas ou dos grupos dos outros.',
+    secao: 'Divulgação',
   },
   {
     id: 'regras',
@@ -134,6 +143,7 @@ const CHAVE_ABA = 'promobot:aba';
     LojasCard,
     RegrasPostagem,
     GroupsCard,
+    GarimpoCard,
     RunCard,
     StatsCard,
     ConsoleCard,
@@ -271,6 +281,7 @@ export class App implements OnInit, OnDestroy {
   private preCarregarAbas(): void {
     const carregar = () => {
       void import('./features/divulgacao/groups-card/groups-card');
+      void import('./features/divulgacao/garimpo-card/garimpo-card');
       void import('./features/acompanhar/ganhos-card/ganhos-card');
       void import('./features/divulgacao/produtos-card/produtos-card');
       void import('./features/conexoes/whatsapp-card/whatsapp-card');
