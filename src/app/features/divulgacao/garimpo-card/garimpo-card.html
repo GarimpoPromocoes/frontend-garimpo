@@ -86,31 +86,6 @@
         </span>
       }
     </div>
-
-    <div class="field">
-      <label>Imagem da postagem</label>
-      <div class="toggle-row">
-        <button
-          type="button"
-          class="toggle-switch"
-          role="switch"
-          [attr.aria-checked]="rDescartar()"
-          [class.toggle-switch-on]="rDescartar()"
-          (click)="rDescartar.set(!rDescartar())"
-        >
-          <span class="toggle-switch-thumb"></span>
-        </button>
-        <span class="toggle-label">Trocar pela foto do anúncio quando a imagem tiver a marca de outro afiliado</span>
-      </div>
-      <span class="hint">
-        @if (rDescartar()) {
-          Imagem com @ de outro perfil, nome do grupo de origem ou “link do grupo” não vai para o seu grupo — nesses
-          casos sai a foto do anúncio.
-        } @else {
-          A imagem do grupo vai sempre, mesmo carimbada com o @ ou o nome do grupo de outra pessoa.
-        }
-      </span>
-    </div>
   }
 
   @if (erro(); as e) {

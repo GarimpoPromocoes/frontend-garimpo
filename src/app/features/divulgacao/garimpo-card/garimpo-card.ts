@@ -42,13 +42,11 @@ export class GarimpoCard {
     return {
       fontes,
       grupos: g?.grupos ?? [],
-      descartar: g?.descartarMarcaDagua === true,
     };
   });
 
   protected readonly rFontes = signal<Record<string, FonteProdutos>>({});
   protected readonly rGrupos = signal<string[]>([]);
-  protected readonly rDescartar = signal(false);
   protected readonly salvando = signal(false);
   protected readonly erro = signal<string | null>(null);
 
@@ -99,7 +97,6 @@ export class GarimpoCard {
     const s = this.salvo();
     return (
       Object.keys(s.fontes).some((id) => s.fontes[id] !== this.fonteDe(id)) ||
-      s.descartar !== this.rDescartar() ||
       s.grupos.join('\n') !== this.rGrupos().join('\n')
     );
   });
@@ -111,7 +108,6 @@ export class GarimpoCard {
       untracked(() => {
         this.rFontes.set({ ...s.fontes });
         this.rGrupos.set([...s.grupos]);
-        this.rDescartar.set(s.descartar);
       });
     });
     void this.carregarGruposDoWhatsapp();
@@ -127,7 +123,6 @@ export class GarimpoCard {
     this.erro.set(null);
     this.rFontes.set({ ...s.fontes });
     this.rGrupos.set([...s.grupos]);
-    this.rDescartar.set(s.descartar);
   }
 
   async salvar(): Promise<void> {
@@ -137,7 +132,7 @@ export class GarimpoCard {
     // garimpo, que é o padrão de um grupo novo cadastrado depois.
     const r = await this.configService.salvar({
       grupos: this.gruposDestino().map((g) => ({ ...g, fonte: this.fonteDe(g.id) })),
-      garimpo: { fonte: 'mercadolivre', grupos: this.rGrupos(), descartarMarcaDagua: this.rDescartar() },
+      garimpo: { fonte: 'mercadolivre', grupos: this.rGrupos() },
     });
     this.salvando.set(false);
     if (!r.ok) this.erro.set(r.erro ?? 'Erro ao salvar.');
