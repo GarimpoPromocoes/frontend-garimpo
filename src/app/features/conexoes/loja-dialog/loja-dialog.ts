@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, DestroyRef, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgTemplateOutlet } from '@angular/common';
 import { ConexoesService, Provedor } from '../../../core/services/conexoes.service';
@@ -38,6 +38,17 @@ const JOB_DE: Partial<Record<Provedor, JobTipo>> = {
 
 // Lojas em que o robô também sabe entrar pela conta Google.
 const ACEITA_GOOGLE: Provedor[] = ['mercadolivre'];
+
+// Lojas que mostram "escolha como entrar" (senha, SMS, WhatsApp, e-mail,
+// Google Authenticator, reconhecimento facial...). Nelas o formulário pede só a
+// conta; a senha só aparece se a pessoa escolher entrar com ela.
+const ESCOLHE_METODO: Provedor[] = ['mercadolivre'];
+
+// Câmera que vai para a loja no reconhecimento facial: 4:3, como uma webcam.
+const CAMERA_LARGURA = 640;
+const CAMERA_ALTURA = 480;
+const CAMERA_QUALIDADE = 0.7;
+const CAMERA_INTERVALO_MS = 100;
 
 const AJUDA: Partial<Record<Provedor, { texto: string; link: string; rotuloLink: string }>> = {
   shopee: {
@@ -111,6 +122,10 @@ export class LojaDialog {
     const p = this.provedor();
     return !!p && ACEITA_GOOGLE.includes(p);
   });
+  protected readonly escolheMetodo = computed(() => {
+    const p = this.provedor();
+    return !!p && ESCOLHE_METODO.includes(p);
+  });
   protected readonly ajuda = computed(() => {
     const p = this.provedor();
     return (p && AJUDA[p]) || null;
@@ -183,10 +198,8 @@ export class LojaDialog {
 
     if (!this.usaNavegador()) return afiliado;
 
-    const login: CampoModal[] = [
-      { nome: 'usuario', rotulo: this.rotuloUsuario(p), tipo: 'texto', grupo: 'login' },
-      { nome: 'senha', rotulo: 'Senha', tipo: 'segredo', grupo: 'login' },
-    ];
+    const login: CampoModal[] = [{ nome: 'usuario', rotulo: this.rotuloUsuario(p), tipo: 'texto', grupo: 'login' }];
+    if (!ESCOLHE_METODO.includes(p)) login.push({ nome: 'senha', rotulo: 'Senha', tipo: 'segredo', grupo: 'login' });
 
     return [...afiliado, ...login];
   });
@@ -198,19 +211,36 @@ export class LojaDialog {
   }
 
   /**
-   * Tela da loja ao vivo: depois de um clique o pedido some até a próxima foto
-   * chegar. Nesse meio tempo a última foto continua na tela (com "Atualizando…")
-   * em vez de piscar o spinner a cada clique.
+   * Página traduzida (componente nosso com o que a loja pediu): depois de um
+   * clique o pedido some até o robô ler a página de novo. Nesse meio tempo o
+   * último componente continua na tela, travado com "Enviando…", em vez de
+   * piscar o spinner a cada clique.
    */
-  private readonly ultimaTela = signal<{ pedido: PedidoLogin; etapas: number } | null>(null);
-  protected readonly telaEsperando = computed(() => {
-    const t = this.ultimaTela();
+  private readonly ultimaPagina = signal<{ pedido: PedidoLogin; etapas: number } | null>(null);
+  protected readonly paginaEsperando = computed(() => {
+    const t = this.ultimaPagina();
     if (!t || this.pedido() || this.fim() || !this.emLogin()) return null;
     return t.etapas === this.etapas().length ? t.pedido : null;
   });
-  /** Onde a pessoa clicou por último — vira um pulso em cima da imagem. */
-  protected readonly marcaClique = signal<{ x: number; y: number } | null>(null);
-  protected readonly janelaLarga = computed(() => this.pedido()?.forma === 'tela' || !!this.telaEsperando());
+  protected readonly janelaLarga = computed(() => (this.pedido() ?? this.paginaEsperando())?.forma === 'camera');
+
+  /** Quadros marcados no desafio de imagens (forma 'grade'). */
+  protected readonly quadrosMarcados = signal<number[]>([]);
+
+  /**
+   * Reconhecimento facial: a câmera deste computador vai, quadro a quadro, para
+   * o navegador do robô — é por ela que a loja vê o rosto. Fica ligada enquanto
+   * a loja estiver no facial (inclusive no instante entre um clique e a próxima
+   * leitura da página).
+   */
+  protected readonly modoCamera = computed(() => (this.pedido() ?? this.paginaEsperando())?.forma === 'camera');
+  protected readonly cameraStream = signal<MediaStream | null>(null);
+  protected readonly cameraErro = signal<string | null>(null);
+  private cameraLigando = false;
+  private cameraVideo: HTMLVideoElement | null = null;
+  private cameraTimer: ReturnType<typeof setTimeout> | null = null;
+  private cameraFolga: ReturnType<typeof setTimeout> | null = null;
+  private readonly cameraCanvas = document.createElement('canvas');
 
   protected readonly valores = signal<Record<string, string>>({});
   protected readonly erro = signal<string | null>(null);
@@ -225,13 +255,28 @@ export class LojaDialog {
   private ultimoPedido = '';
 
   constructor() {
+    inject(DestroyRef).onDestroy(() => this.desligarCamera());
+
+    // Desliga com folga: entre um clique e a próxima foto a loja pode ficar um
+    // instante sem pedido — sem isso a câmera piscaria a cada clique.
+    effect(() => {
+      const ligar = this.modoCamera();
+      const acabou = !this.emLogin() || !!this.fim();
+      untracked(() => {
+        if (this.cameraFolga) clearTimeout(this.cameraFolga);
+        this.cameraFolga = null;
+        if (ligar) void this.ligarCamera();
+        else if (acabou) this.desligarCamera();
+        else this.cameraFolga = setTimeout(() => !this.modoCamera() && this.desligarCamera(), 4000);
+      });
+    });
+
     effect(() => {
       const p = this.pedido();
-      if (p?.forma === 'tela') {
-        this.ultimaTela.set({ pedido: p, etapas: this.etapas().length });
-        this.marcaClique.set(null);
+      if (p?.forma === 'pagina' || p?.forma === 'camera') {
+        this.ultimaPagina.set({ pedido: p, etapas: this.etapas().length });
       } else if (p || this.fim()) {
-        this.ultimaTela.set(null);
+        this.ultimaPagina.set(null);
       }
     });
 
@@ -244,6 +289,7 @@ export class LojaDialog {
       if (!p) return;
 
       this.erro.set(null);
+      this.quadrosMarcados.set([]);
       this.valores.set(p.opcoes?.length ? { opcao: p.opcoes[0].valor } : {});
 
       // Conta e senha já vieram no formulário desta janela: responde sozinho em
@@ -381,33 +427,127 @@ export class LojaDialog {
     void this.responderCom({ acao: 'marcar' });
   }
 
-  protected verTelaDaLoja(): void {
-    void this.responderCom({ acao: 'tela' });
-  }
-
   protected outraForma(): void {
     void this.responderCom({ acao: 'voltar' });
   }
 
-  protected atualizarTela(): void {
-    void this.responderCom({ acao: 'atualizar' });
+  protected reenviarCodigo(): void {
+    void this.responderCom({ acao: 'reenviar' });
   }
 
-  protected cliqueNaTela(ev: MouseEvent): void {
-    const img = ev.currentTarget as HTMLElement;
-    const r = img.getBoundingClientRect();
-    if (!r.width || !r.height) return;
-    const x = Math.min(1, Math.max(0, (ev.clientX - r.left) / r.width));
-    const y = Math.min(1, Math.max(0, (ev.clientY - r.top) / r.height));
-    this.marcaClique.set({ x, y });
-    void this.responderCom({ acao: 'clique', x: x.toFixed(4), y: y.toFixed(4) });
+  // ---- câmera do reconhecimento facial ---------------------------------------
+
+  protected async ligarCamera(): Promise<void> {
+    if (this.cameraStream() || this.cameraLigando) return;
+    if (!navigator.mediaDevices?.getUserMedia) {
+      this.cameraErro.set(
+        'Este navegador não libera a câmera nesta página. Abra o painel pelo endereço com https (ou em localhost) e tente de novo.',
+      );
+      return;
+    }
+    this.cameraLigando = true;
+    this.cameraErro.set(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: CAMERA_LARGURA }, height: { ideal: CAMERA_ALTURA }, facingMode: 'user' },
+        audio: false,
+      });
+      // A loja saiu do facial enquanto a pessoa liberava a câmera.
+      if (!this.modoCamera()) {
+        stream.getTracks().forEach((t) => t.stop());
+        return;
+      }
+      const video = document.createElement('video');
+      video.muted = true;
+      video.playsInline = true;
+      video.srcObject = stream;
+      await video.play().catch(() => {});
+      this.cameraVideo = video;
+      this.cameraStream.set(stream);
+      void this.mandarQuadros();
+    } catch (e: any) {
+      const nome = e?.name;
+      this.cameraErro.set(
+        nome === 'NotAllowedError'
+          ? 'A câmera foi bloqueada. Clique no cadeado ao lado do endereço do site, permita a câmera e depois em "Ligar câmera".'
+          : nome === 'NotFoundError' || nome === 'OverconstrainedError'
+            ? 'Não encontrei nenhuma câmera neste computador. Use outra forma de entrar.'
+            : nome === 'NotReadableError'
+              ? 'A câmera está em uso por outro programa. Feche-o e clique em "Ligar câmera".'
+              : 'Não consegui abrir a câmera.',
+      );
+    } finally {
+      this.cameraLigando = false;
+    }
   }
 
-  protected enviarTextoNaTela(comEnter: boolean): void {
-    const texto = this.valorDe('telaTexto');
-    if (!texto && !comEnter) return;
-    this.definir('telaTexto', '');
-    void this.responderCom({ acao: 'texto', texto, enter: comEnter ? '1' : '0' });
+  private desligarCamera(): void {
+    if (this.cameraFolga) clearTimeout(this.cameraFolga);
+    this.cameraFolga = null;
+    if (this.cameraTimer) clearTimeout(this.cameraTimer);
+    this.cameraTimer = null;
+    this.cameraStream()?.getTracks().forEach((t) => t.stop());
+    this.cameraStream.set(null);
+    this.cameraVideo = null;
+  }
+
+  /** Um quadro por vez: o próximo só sai quando o anterior chegou. */
+  private async mandarQuadros(): Promise<void> {
+    const video = this.cameraVideo;
+    if (!video || !this.cameraStream()) return;
+    if (video.readyState >= 2 && video.videoWidth && video.videoHeight) {
+      // Recorta o meio em 4:3 — webcam 16:9 esticada deixaria o rosto deformado.
+      const alvo = CAMERA_LARGURA / CAMERA_ALTURA;
+      let sw = video.videoWidth;
+      let sh = video.videoHeight;
+      if (sw / sh > alvo) sw = Math.round(sh * alvo);
+      else sh = Math.round(sw / alvo);
+      const sx = Math.round((video.videoWidth - sw) / 2);
+      const sy = Math.round((video.videoHeight - sh) / 2);
+      const c = this.cameraCanvas;
+      c.width = CAMERA_LARGURA;
+      c.height = CAMERA_ALTURA;
+      c.getContext('2d')?.drawImage(video, sx, sy, sw, sh, 0, 0, c.width, c.height);
+      await this.jobsService.enviarQuadroCamera(c.toDataURL('image/jpeg', CAMERA_QUALIDADE));
+    }
+    if (this.cameraVideo !== video) return;
+    this.cameraTimer = setTimeout(() => void this.mandarQuadros(), CAMERA_INTERVALO_MS);
+  }
+
+  // ---- página traduzida (o que a loja pediu, em componente nosso) ------------
+
+  /** Um botão/opção da página: vai junto com o que já foi preenchido nos campos. */
+  protected acionar(valor: string): void {
+    void this.responderCom({ ...this.valores(), acao: valor });
+  }
+
+  /** Enter num campo: aperta o botão principal da página (ou só Enter, se não houver). */
+  protected enviarPagina(p: PedidoLogin): void {
+    const principal = p.acoes?.find((a) => a.tipo === 'principal' && !a.desativado);
+    void this.responderCom(principal ? { ...this.valores(), acao: principal.valor } : this.valores());
+  }
+
+  protected alternarCaixa(campo: string): void {
+    this.definir(campo, this.valorDe(campo) === '1' ? '0' : '1');
+  }
+
+  // ---- desafio de imagens -----------------------------------------------------
+
+  protected alternarQuadro(i: number): void {
+    this.quadrosMarcados.update((q) => (q.includes(i) ? q.filter((x) => x !== i) : [...q, i]));
+  }
+
+  protected confirmarGrade(): void {
+    const quadros = [...this.quadrosMarcados()].sort((a, b) => a - b).join(',');
+    void this.responderCom({ quadros });
+  }
+
+  protected outraImagem(): void {
+    void this.responderCom({ acao: 'outra' });
+  }
+
+  protected indices(n: number): number[] {
+    return Array.from({ length: n }, (_, i) => i);
   }
 
   async entrarDeNovo(): Promise<void> {
@@ -488,6 +628,7 @@ export class LojaDialog {
   fechar(): void {
     if (this.timerFechar) clearTimeout(this.timerFechar);
     this.timerFechar = null;
+    this.desligarCamera();
     this.credenciaisDigitadas = null;
     this.valores.set({});
     this.erro.set(null);

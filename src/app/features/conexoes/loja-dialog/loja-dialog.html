@@ -42,8 +42,14 @@
         @if (fim(); as f) {
           @if (f.ok) {
             <div class="info-box info-box-ok">
-              A sessão fica salva e a senha guardada criptografada — se {{ artigo() }} {{ rotulo() }} derrubar a conexão no meio
-              do trabalho, o robô entra de novo sozinho, sem parar as postagens. Esta janela fecha sozinha.
+              @if (escolheMetodo()) {
+                A sessão fica salva no robô. Se você entrou com senha, ela fica guardada criptografada e o robô entra de novo
+                sozinho se {{ artigo() }} {{ rotulo() }} derrubar a conexão; pelos outros métodos, a loja aparece como
+                desconectada aqui e é só conectar de novo. Esta janela fecha sozinha.
+              } @else {
+                A sessão fica salva e a senha guardada criptografada — se {{ artigo() }} {{ rotulo() }} derrubar a conexão no meio
+                do trabalho, o robô entra de novo sozinho, sem parar as postagens. Esta janela fecha sozinha.
+              }
             </div>
             <div class="form-actions">
               <button type="button" class="btn btn-primary" (click)="fechar()">Fechar</button>
@@ -53,12 +59,6 @@
             @if (f.comoResolver) {
               <p class="hint-text">{{ f.comoResolver }}</p>
             }
-            @if (f.imagem) {
-              <details class="login-print">
-                <summary>Ver o que {{ artigo() }} {{ rotulo() }} mostrou</summary>
-                <img [src]="f.imagem" alt="Tela que a plataforma mostrou quando o login parou" />
-              </details>
-            }
             <div class="form-actions">
               <button type="button" class="btn btn-primary" (click)="entrarDeNovo()">Tentar de novo</button>
             </div>
@@ -66,6 +66,9 @@
         } @else if (pedido(); as p) {
           <div class="login-pedido">
             <h3>{{ p.titulo }}</h3>
+            @if (p.subtitulo) {
+              <p class="pagina-subtitulo">{{ p.subtitulo }}</p>
+            }
             @if (p.texto) {
               <p class="hint-text">{{ p.texto }}</p>
             }
@@ -88,6 +91,9 @@
                           @case ('sms') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.2"/><path d="M10.5 18.5h3"/></svg> }
                           @case ('email') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6.5 8.5 6.5 8.5-6.5"/></svg> }
                           @case ('senha') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg> }
+                          @case ('facial') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8V5.5a2 2 0 0 1 2-2H8M16 3.5h2.5a2 2 0 0 1 2 2V8M20.5 16v2.5a2 2 0 0 1-2 2H16M8 20.5H5.5a2 2 0 0 1-2-2V16"/><circle cx="12" cy="10" r="3"/><path d="M7.5 17a5 5 0 0 1 9 0"/></svg> }
+                          @case ('authenticator') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v17M4.6 7.75l14.8 8.5M4.6 16.25l14.8-8.5"/></svg> }
+                          @case ('ajuda') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.6M12 17h.01"/></svg> }
                           @case ('biometria') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 11v3.5M8.5 9.5a3.5 3.5 0 0 1 7 0v5a6 6 0 0 1-1 3.3M5.5 10a6.5 6.5 0 0 1 13 0v3M5.5 13.5v1a9 9 0 0 0 1.4 4.8M12 18v2.5"/></svg> }
                           @case ('app') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.2"/><path d="m9.5 12 2 2 3.5-4"/></svg> }
                           @default { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 20 6v5.4c0 4.4-3.1 8.2-8 9.8-4.9-1.6-8-5.4-8-9.8V6Z"/><path d="m9.2 12.2 2 2 3.6-3.8"/></svg> }
@@ -123,13 +129,8 @@
                   </button>
                   <p class="hint-text">
                     O robô marca a caixinha {{ artigo() === 'o' ? 'no' : 'na' }} {{ rotulo() }} com um movimento de mouse
-                    de gente. Se aparecer um desafio de imagens, ele vem para cá e você resolve clicando.
+                    de gente. Se aparecer um desafio de imagens, ele vem para cá como uma grade para você marcar.
                   </p>
-                </div>
-                <div class="verif-links">
-                  <button type="button" class="btn-link" [disabled]="jobsService.respondendoLogin()" (click)="verTelaDaLoja()">
-                    Prefiro ver a tela {{ artigo() === 'o' ? 'do' : 'da' }} {{ rotulo() }} e clicar eu mesmo
-                  </button>
                 </div>
               }
 
@@ -157,11 +158,54 @@
                 </div>
               }
 
-              @case ('tela') {
-                <ng-container *ngTemplateOutlet="telaDaLoja; context: { $implicit: p, atualizando: jobsService.respondendoLogin() }" />
+              @case ('pagina') {
+                <ng-container *ngTemplateOutlet="paginaTraduzida; context: { $implicit: p, travada: jobsService.respondendoLogin() }" />
+              }
+
+              @case ('camera') {
+                <ng-container *ngTemplateOutlet="cameraLocal" />
+                <ng-container *ngTemplateOutlet="paginaTraduzida; context: { $implicit: p, travada: jobsService.respondendoLogin() }" />
+                <div class="verif-links">
+                  <button type="button" class="btn-link" [disabled]="jobsService.respondendoLogin()" (click)="outraForma()">
+                    Usar outra forma de entrar
+                  </button>
+                </div>
+              }
+
+              @case ('grade') {
+                @if (p.erro) {
+                  <div class="info-box info-box-erro">{{ p.erro }}</div>
+                }
+                <div class="grade-desafio" [style.--colunas]="p.colunas ?? 3">
+                  <img [src]="p.imagem" alt="Imagens do desafio" draggable="false" />
+                  <div class="grade-desafio-quadros">
+                    @for (i of indices((p.linhas ?? 3) * (p.colunas ?? 3)); track i) {
+                      <button
+                        type="button"
+                        class="grade-desafio-quadro"
+                        [class.grade-desafio-marcado]="quadrosMarcados().includes(i)"
+                        [attr.aria-pressed]="quadrosMarcados().includes(i)"
+                        [attr.aria-label]="'Imagem ' + (i + 1)"
+                        [disabled]="jobsService.respondendoLogin()"
+                        (click)="alternarQuadro(i)"
+                      ></button>
+                    }
+                  </div>
+                </div>
+                <div class="form-actions">
+                  <button type="button" class="btn btn-ghost" [disabled]="jobsService.respondendoLogin()" (click)="outraImagem()">
+                    Outras imagens
+                  </button>
+                  <button type="button" class="btn btn-primary" [disabled]="jobsService.respondendoLogin()" (click)="confirmarGrade()">
+                    {{ jobsService.respondendoLogin() ? 'Enviando…' : quadrosMarcados().length ? (p.rotuloBotao || 'Verificar') : 'Nenhuma — ' + (p.rotuloBotao || 'Verificar').toLowerCase() }}
+                  </button>
+                </div>
               }
 
               @default {
+                @if (p.erro) {
+                  <div class="info-box info-box-erro">{{ p.erro }}</div>
+                }
                 @if (p.imagem) {
                   <img class="login-captcha" [src]="p.imagem" alt="Imagem de verificação enviada pela plataforma" />
                 }
@@ -189,6 +233,21 @@
                   </button>
                 </div>
 
+                @if (p.atalhos; as atalhos) {
+                  <div class="verif-links verif-links-varios">
+                    @if (atalhos.includes('reenviar')) {
+                      <button type="button" class="btn-link" [disabled]="jobsService.respondendoLogin()" (click)="reenviarCodigo()">
+                        Não recebi — reenviar código
+                      </button>
+                    }
+                    @if (atalhos.includes('voltar')) {
+                      <button type="button" class="btn-link" [disabled]="jobsService.respondendoLogin()" (click)="outraForma()">
+                        Usar outra forma de entrar
+                      </button>
+                    }
+                  </div>
+                }
+
                 @if (p.google) {
                 <div class="login-ou"><span>ou</span></div>
                 <button type="button" class="btn-google" [disabled]="jobsService.respondendoLogin()" (click)="entrarComGoogle()">
@@ -199,13 +258,19 @@
               }
             }
           </div>
-        } @else if (telaEsperando(); as t) {
+        } @else if (paginaEsperando(); as t) {
           <div class="login-pedido">
             <h3>{{ t.titulo }}</h3>
+            @if (t.subtitulo) {
+              <p class="pagina-subtitulo">{{ t.subtitulo }}</p>
+            }
             @if (t.texto) {
               <p class="hint-text">{{ t.texto }}</p>
             }
-            <ng-container *ngTemplateOutlet="telaDaLoja; context: { $implicit: t, atualizando: true }" />
+            @if (t.forma === 'camera') {
+              <ng-container *ngTemplateOutlet="cameraLocal" />
+            }
+            <ng-container *ngTemplateOutlet="paginaTraduzida; context: { $implicit: t, travada: true }" />
           </div>
         } @else {
           <div class="login-trabalhando">
@@ -264,7 +329,13 @@
           </div>
         }
 
-        @if (usaNavegador()) {
+        @if (escolheMetodo()) {
+          <p class="hint-text">
+            Na próxima etapa você escolhe como confirmar que é você — senha, código por SMS, WhatsApp ou e-mail, Google
+            Authenticator ou reconhecimento facial — e o robô faz o resto, trazendo para cá o que {{ artigo() }}
+            {{ rotulo() }} pedir.
+          </p>
+        } @else if (usaNavegador()) {
           <p class="hint-text">
             A senha é criptografada aqui no Promobot. Ela nunca aparece no log.
           </p>
@@ -278,7 +349,7 @@
 
         <div class="form-actions">
           <button type="button" class="btn btn-primary" [disabled]="!podeConectar()" (click)="conectar()">
-            {{ enviando() ? 'Conectando…' : 'Conectar' }}
+            {{ enviando() ? 'Conectando…' : escolheMetodo() ? 'Continuar' : 'Conectar' }}
           </button>
         </div>
 
@@ -298,36 +369,131 @@
   </div>
 }
 
-<!-- A página da loja, ao vivo: cada clique na imagem vira um clique lá. -->
-<ng-template #telaDaLoja let-t let-atualizando="atualizando">
-  <div class="tela-loja" [class.tela-loja-atualizando]="atualizando">
-    <div class="tela-loja-barra">
-      <span class="tela-loja-ponto"></span>
-      <span>{{ rotulo() }} — ao vivo</span>
-      <span class="tela-loja-espaco"></span>
-      @if (atualizando) {
-        <span class="tela-loja-estado"><span class="login-spinner"></span> Atualizando…</span>
+<!-- A câmera deste computador, que vai para a loja no reconhecimento facial. -->
+<ng-template #cameraLocal>
+  <div class="camera-login">
+    <div class="camera-login-video">
+      @if (cameraStream(); as s) {
+        <video [srcObject]="s" [muted]="true" autoplay playsinline></video>
+        <span class="camera-login-oval" aria-hidden="true"></span>
+        <span class="camera-login-selo"><span class="camera-login-ponto"></span> Indo para {{ artigo() }} {{ rotulo() }}</span>
+      } @else if (!cameraErro()) {
+        <span class="login-spinner"></span>
       } @else {
-        <button type="button" class="btn-link" (click)="atualizarTela()">Atualizar</button>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18M15.5 15.6V17a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 17V8A1.5 1.5 0 0 1 5 6.5h1.4M10 6.5h4A1.5 1.5 0 0 1 15.5 8v3.3l5-3.3v9"/></svg>
       }
     </div>
-    <div class="tela-loja-imagem" (click)="!atualizando && cliqueNaTela($event)">
-      <img [src]="t.imagem" [alt]="'Página ' + (artigo() === 'o' ? 'do ' : 'da ') + rotulo()" draggable="false" />
-      @if (marcaClique(); as m) {
-        <span class="tela-loja-clique" [style.left.%]="m.x * 100" [style.top.%]="m.y * 100"></span>
+    <div class="camera-login-textos">
+      @if (cameraErro(); as e) {
+        <p class="camera-login-erro">{{ e }}</p>
+        <button type="button" class="btn btn-ghost btn-sm" (click)="ligarCamera()">Ligar câmera</button>
+      } @else {
+        <ol class="qr-login-passos">
+          <li>Libere a câmera se o navegador pedir.</li>
+          <li>Fique num lugar iluminado, com o rosto dentro do oval.</li>
+          <li>Siga as instruções abaixo — são as {{ artigo() === 'o' ? 'do' : 'da' }} {{ rotulo() }}, e mudam sozinhas.</li>
+        </ol>
       }
     </div>
   </div>
-  <div class="tela-loja-digitar">
-    <input
-      [type]="t.segredo ? 'password' : 'text'"
-      autocomplete="off"
-      [placeholder]="t.segredo ? 'Digite a senha aqui — ela vai direto para o campo selecionado acima' : 'Precisa digitar algo na página? Clique no campo acima e escreva aqui'"
-      [ngModel]="valorDe('telaTexto')"
-      (ngModelChange)="definir('telaTexto', $event)"
-      (keyup.enter)="enviarTextoNaTela(true)"
-      [disabled]="atualizando"
-    />
-    <button type="button" class="btn btn-ghost btn-sm" [disabled]="atualizando" (click)="enviarTextoNaTela(false)">Digitar</button>
-  </div>
+</ng-template>
+
+<!--
+  O que a loja pediu numa tela que o robô não conhece, em componentes nossos:
+  textos, campos e botões lidos da página. A tela da loja nunca aparece aqui.
+-->
+<ng-template #paginaTraduzida let-p let-travada="travada">
+  @if (p.erro) {
+    <div class="info-box info-box-erro">{{ p.erro }}</div>
+  }
+  @if (p.textos?.length) {
+    <div class="pagina-textos">
+      @for (t of p.textos; track $index) {
+        <p>{{ t }}</p>
+      }
+    </div>
+  }
+
+  @for (campo of p.campos; track campo.nome) {
+    @if (campo.tipo === 'caixa') {
+      <label class="pagina-caixa">
+        <input
+          type="checkbox"
+          [checked]="valorDe(campo.nome) ? valorDe(campo.nome) === '1' : !!campo.marcado"
+          [disabled]="travada"
+          (change)="alternarCaixa(campo.nome)"
+        />
+        <span>{{ campo.rotulo }}</span>
+      </label>
+    } @else {
+      <div class="field">
+        <label [for]="'pagina-' + campo.nome">{{ campo.rotulo }}</label>
+        @if (campo.tipo === 'opcoes') {
+          <select [id]="'pagina-' + campo.nome" [disabled]="travada" [ngModel]="valorDe(campo.nome)" (ngModelChange)="definir(campo.nome, $event)">
+            <option value="">Escolha…</option>
+            @for (o of campo.opcoes ?? []; track o) {
+              <option [value]="o">{{ o }}</option>
+            }
+          </select>
+        } @else {
+          <input
+            [id]="'pagina-' + campo.nome"
+            [type]="campo.tipo === 'segredo' ? 'password' : 'text'"
+            [attr.inputmode]="campo.tipo === 'codigo' ? 'numeric' : null"
+            [attr.maxlength]="campo.tamanho ?? null"
+            [autocomplete]="campo.tipo === 'segredo' ? 'current-password' : 'off'"
+            [class.campo-codigo]="campo.tipo === 'codigo'"
+            [disabled]="travada"
+            [ngModel]="valorDe(campo.nome)"
+            (ngModelChange)="definir(campo.nome, $event)"
+            (keyup.enter)="enviarPagina(p)"
+          />
+        }
+      </div>
+    }
+  }
+
+  @if (p.acoes?.length) {
+    <div class="verif-opcoes">
+      @for (a of p.acoes; track a.valor) {
+        @if (a.tipo === 'opcao') {
+          <button type="button" class="verif-opcao" [disabled]="travada || a.desativado" (click)="acionar(a.valor)">
+            <span class="verif-textos">
+              <span class="verif-rotulo">{{ a.rotulo }}</span>
+              @if (a.detalhe) {
+                <span class="verif-detalhe">{{ a.detalhe }}</span>
+              }
+            </span>
+            <svg class="verif-seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+          </button>
+        }
+      }
+    </div>
+    <div class="pagina-botoes">
+      @for (a of p.acoes; track a.valor) {
+        @if (a.tipo === 'principal') {
+          <button type="button" class="btn btn-primary" [disabled]="travada || a.desativado" (click)="acionar(a.valor)">{{ a.rotulo }}</button>
+        }
+      }
+    </div>
+    <div class="verif-links verif-links-varios">
+      @for (a of p.acoes; track a.valor) {
+        @if (a.tipo === 'link') {
+          <button type="button" class="btn-link" [disabled]="travada || a.desativado" (click)="acionar(a.valor)">{{ a.rotulo }}</button>
+        }
+      }
+    </div>
+  }
+
+  @if (travada) {
+    <div class="login-aguardando">
+      <span class="login-spinner"></span>
+      <span>Enviando para {{ artigo() }} {{ rotulo() }}…</span>
+    </div>
+  } @else if (!p.campos.length && !p.acoes?.length) {
+    <div class="login-aguardando">
+      <span class="login-spinner"></span>
+      <span>Acompanhando {{ artigo() }} {{ rotulo() }} — esta janela se atualiza sozinha.</span>
+    </div>
+  }
 </ng-template>
