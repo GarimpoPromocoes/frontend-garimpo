@@ -206,7 +206,7 @@
               @switch (j) {
                 @case ('frequencia') { O robô sorteia a espera dentro da faixa — assim o envio parece de gente, não de robô. }
                 @case ('repeticao') { Evita que a mesma oferta apareça de novo cedo demais no mesmo grupo. }
-                @case ('cupons') { Enquanto garimpa, o robô procura na aba de cupons da loja um cupom que vale para cada produto e cria o código com o seu prefixo. }
+                @case ('cupons') { O cupom vai na mensagem como código: quem compra só digita no fim da compra, sem ativar nada na página do produto. }
                 @case ('divulgacao') { Um recado seu com o Linktree dos seus grupos, que sai esporadicamente — no máximo 1 ou 2 vezes por dia em cada grupo. }
                 @case ('alerta') { Se o Mercado Livre, a Amazon, a Shopee ou o Telegram cair enquanto o robô roda, ele avisa pelo WhatsApp para você reconectar. }
               }
@@ -372,7 +372,8 @@
             <div class="field">
               <label>Prefixo dos seus cupons</label>
               <span class="hint">
-                Todo código que o robô criar começa com ele. Só letras e números, de 3 a {{ prefixoMax }}. Em branco, usa
+                Começo dos códigos que o robô cria quando o Mercado Livre libera a ferramenta de cupons de afiliado para a
+                sua conta (hoje não está liberada). Só letras e números, de 3 a {{ prefixoMax }}. Em branco, usa
                 {{ prefixoPadrao }}.
               </span>
               <input
@@ -395,14 +396,17 @@
               <strong>Como fica, na prática</strong>
               <ol>
                 <li>
-                  O robô percorre todas as páginas da aba de cupons da loja e a lista de produtos de cada cupom, e confere cada
-                  produto garimpado (lista, categoria, loja, valor mínimo, validade).
+                  Só vai cupom com <strong>código</strong>, que a pessoa digita no fim da compra. Cupom de ativar na página do
+                  produto não entra — é trabalho a mais para quem compra.
+                </li>
+                <li>
+                  De onde vem o código: o que a página do produto da Amazon manda inserir, o código da loja que veio numa
+                  mensagem clonada (ex.: MELI20) e os códigos com o seu prefixo, quando o Mercado Livre liberar a ferramenta
+                  de cupons de afiliado para a sua conta.
                 </li>
                 <li><strong>Produto com cupom</strong>: a mensagem sai com o preço já com o cupom e a linha 🎟️ com o código.</li>
-                <li><strong>Só cupom</strong>: um cupom por mensagem — o que vale para tudo primeiro, depois os da categoria do grupo.</li>
                 <li>
-                  <strong>Clonagem</strong>: se a mensagem do concorrente tinha cupom da loja, ele vai igual; se era o código
-                  pessoal dele, o robô cria o seu código do mesmo cupom.
+                  <strong>Clonagem</strong>: código da loja na mensagem do concorrente vai igual; o código pessoal dele, não.
                 </li>
                 <li>Cupom de <strong>primeira compra</strong> é sempre ignorado.</li>
               </ol>
