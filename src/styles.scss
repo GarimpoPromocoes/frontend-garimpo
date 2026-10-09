@@ -3008,6 +3008,80 @@ app-status-conexoes {
   color: var(--text-muted);
 }
 
+/* Slider de duas alcas sobre a barra de 3 faixas (ritmo dos cupons). As duas entradas ficam
+   empilhadas; so as bolinhas recebem o clique. */
+.ritmo-slider {
+  position: relative;
+  height: 28px;
+  margin: 6px 0 2px;
+}
+.ritmo-slider .ritmo-trilho {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 7px;
+}
+.ritmo-slider input[type='range'] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 28px;
+  margin: 0;
+  background: transparent;
+  pointer-events: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.ritmo-slider input[type='range'].ritmo-alca-acima {
+  z-index: 2;
+}
+/* O anel de foco dos campos (.field input:focus) contornaria a barra toda: o foco fica na bolinha. */
+.field .ritmo-slider input[type='range']:focus {
+  border-color: transparent;
+  box-shadow: none;
+}
+.ritmo-slider input[type='range']::-webkit-slider-runnable-track {
+  height: 28px;
+  background: transparent;
+}
+.ritmo-slider input[type='range']::-moz-range-track {
+  background: transparent;
+}
+.ritmo-slider input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  pointer-events: auto;
+  width: 20px;
+  height: 20px;
+  margin-top: 4px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--gold-deep);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  cursor: grab;
+}
+.ritmo-slider input[type='range']::-moz-range-thumb {
+  pointer-events: auto;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--gold-deep);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  cursor: grab;
+}
+.ritmo-slider input[type='range']:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--gold-border);
+  outline-offset: 2px;
+}
+.ritmo-slider input[type='range']:focus-visible::-moz-range-thumb {
+  outline: 2px solid var(--gold-border);
+  outline-offset: 2px;
+}
+.regra-legenda strong {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
 /* Datas especiais */
 .datas-hoje {
   display: flex;

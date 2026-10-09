@@ -38,8 +38,12 @@ export interface Agendamento {
 
 export interface Cupons {
   ativo: boolean;
-  percentualProduto: number;
-  percentualSozinho: number;
+  /** Começo do nome dos códigos que o robô cria nas lojas (vazio = GARIMPO). */
+  prefixo?: string;
+  /** % das mensagens que são só um cupom. */
+  percentualSozinho?: number;
+  /** % das mensagens que são produto com cupom. O resto (100 − os dois) é produto sem cupom. */
+  percentualProduto?: number;
 }
 
 export interface Divulgacao {

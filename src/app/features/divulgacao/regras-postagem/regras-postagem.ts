@@ -36,7 +36,26 @@ const OPCOES_REPOSTAR = [
   { dias: 30, rotulo: '30 dias' },
 ];
 
-const MAX_CUPONS = 50;
+/** Prefixo dos códigos de cupom: mesma regra do backend (config.service.js / nomeCupom.js). */
+const PREFIXO_PADRAO = 'GARIMPO';
+const PREFIXO_MIN = 3;
+const PREFIXO_MAX = 12;
+
+/** Divisões prontas das mensagens: só cupom / produto com cupom (o resto é produto sem cupom). */
+const DIVISOES = [
+  { nome: 'Poucos cupons', soCupom: 5, produtoCupom: 10 },
+  { nome: 'Equilibrado', soCupom: 10, produtoCupom: 25 },
+  { nome: 'Muitos cupons', soCupom: 20, produtoCupom: 40 },
+];
+
+function limparPrefixo(p: string): string {
+  return (p || '')
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '')
+    .slice(0, PREFIXO_MAX);
+}
 
 function textoHoras(h: number): string {
   if (!h) return 'sem espera';
@@ -87,7 +106,9 @@ export class RegrasPostagem {
   protected readonly ritmos = RITMOS;
   protected readonly opcoesCooldown = OPCOES_COOLDOWN;
   protected readonly opcoesRepostar = OPCOES_REPOSTAR;
-  protected readonly maxCupons = MAX_CUPONS;
+  protected readonly divisoes = DIVISOES;
+  protected readonly prefixoPadrao = PREFIXO_PADRAO;
+  protected readonly prefixoMax = PREFIXO_MAX;
   protected readonly textoHoras = textoHoras;
   protected readonly ehNumero = ehNumero;
   protected readonly n = (v: unknown): number => Number(v) || 0;
@@ -117,10 +138,11 @@ export class RegrasPostagem {
 
   protected readonly cupons = computed(() => {
     const c = this.cfg()?.cupons;
+    const prefixo = limparPrefixo(c?.prefixo ?? '') || PREFIXO_PADRAO;
     const ativo = c?.ativo ?? true;
-    const produto = ativo ? c?.percentualProduto ?? 15 : 0;
-    const lista = ativo ? c?.percentualSozinho ?? 10 : 0;
-    return { ativo, produto, lista, ofertas: 100 - produto - lista };
+    const soCupom = ativo ? (c?.percentualSozinho ?? 10) : 0;
+    const produtoCupom = ativo ? (c?.percentualProduto ?? 15) : 0;
+    return { ativo, prefixo, exemplo: `${prefixo}10OFF`, soCupom, produtoCupom, produto: 100 - soCupom - produtoCupom };
   });
 
   protected readonly cuponsDisponiveis = computed(() => this.statusService.status()?.cuponsAtivos ?? null);
@@ -152,8 +174,13 @@ export class RegrasPostagem {
   protected readonly rCooldown = signal(48);
   protected readonly rRepostar = signal(14);
   protected readonly rCupomAtivo = signal(true);
-  protected readonly rCupomProduto = signal(15);
-  protected readonly rCupomLista = signal(10);
+  protected readonly rCupomPrefixo = signal('');
+  /** As duas alças do slider: fim do "só cupom" e fim do "produto com cupom" (0–100). */
+  protected readonly rCorte1 = signal(10);
+  protected readonly rCorte2 = signal(25);
+  protected readonly rSoCupom = computed(() => Number(this.rCorte1()));
+  protected readonly rProdutoCupom = computed(() => Number(this.rCorte2()) - Number(this.rCorte1()));
+  protected readonly rProdutoSem = computed(() => 100 - Number(this.rCorte2()));
   protected readonly rDivAtivo = signal(false);
   protected readonly rDivTexto = signal('');
   protected readonly rDivLink = signal('');
@@ -177,10 +204,11 @@ export class RegrasPostagem {
   protected readonly rRitmo = computed(
     () => RITMOS.find((r) => r.min === Number(this.rMin()) && r.max === Number(this.rMax()))?.id ?? 'personalizado',
   );
-  protected readonly rOfertas = computed(
-    () => 100 - (this.rCupomAtivo() ? Number(this.rCupomProduto()) + Number(this.rCupomLista()) : 0),
-  );
-  protected readonly rSomaCupons = computed(() => Number(this.rCupomProduto()) + Number(this.rCupomLista()));
+  /** Como os códigos vão sair com o prefixo digitado (mesma ordem de tentativa do robô). */
+  protected readonly rCupomExemplos = computed(() => {
+    const p = limparPrefixo(this.rCupomPrefixo()) || PREFIXO_PADRAO;
+    return [`${p}10OFF`, `${p}OFF10`, `${p}20REAIS`, `${p}FRETE`];
+  });
   /** O tempo mínimo vence a "repetição liberada": avisa quando um anula o outro. */
   protected readonly rConflitoRepeticao = computed(() => {
     const d = Number(this.rRepostar());
@@ -197,8 +225,10 @@ export class RegrasPostagem {
     this.rCooldown.set(r.cooldownHoras);
     this.rRepostar.set(r.repostarAposDias);
     this.rCupomAtivo.set(c?.ativo ?? true);
-    this.rCupomProduto.set(c?.percentualProduto ?? 15);
-    this.rCupomLista.set(c?.percentualSozinho ?? 10);
+    this.rCupomPrefixo.set(c?.prefixo ?? '');
+    const soCupom = c?.percentualSozinho ?? 10;
+    this.rCorte1.set(soCupom);
+    this.rCorte2.set(Math.min(100, soCupom + (c?.percentualProduto ?? 15)));
     const d = this.divulgacao();
     this.rDivAtivo.set(d.ativo);
     this.rDivTexto.set(d.texto);
@@ -216,13 +246,27 @@ export class RegrasPostagem {
     this.erro.set(null);
   }
 
-  /** Os dois sliders dividem os mesmos 50%: um nunca empurra a soma pra cima do teto. */
-  mudarCupomProduto(v: number): void {
-    this.rCupomProduto.set(Math.max(0, Math.min(Number(v) || 0, MAX_CUPONS - Number(this.rCupomLista()))));
+  /** As alças não se cruzam: a primeira nunca passa da segunda. */
+  mudarCorte1(v: number): void {
+    this.rCorte1.set(Math.max(0, Math.min(Number(v) || 0, Number(this.rCorte2()))));
   }
 
-  mudarCupomLista(v: number): void {
-    this.rCupomLista.set(Math.max(0, Math.min(Number(v) || 0, MAX_CUPONS - Number(this.rCupomProduto()))));
+  mudarCorte2(v: number): void {
+    this.rCorte2.set(Math.min(100, Math.max(Number(v) || 0, Number(this.rCorte1()))));
+  }
+
+  escolherDivisao(d: { soCupom: number; produtoCupom: number }): void {
+    this.rCorte1.set(d.soCupom);
+    this.rCorte2.set(d.soCupom + d.produtoCupom);
+  }
+
+  divisaoAtiva(d: { soCupom: number; produtoCupom: number }): boolean {
+    return this.rSoCupom() === d.soCupom && this.rProdutoCupom() === d.produtoCupom;
+  }
+
+  /** O campo já mostra o prefixo do jeito que vai sair: maiúsculo, sem espaço, acento ou símbolo. */
+  mudarPrefixo(v: string): void {
+    this.rCupomPrefixo.set(limparPrefixo(v));
   }
 
   escolherRitmo(r: Ritmo): void {
@@ -272,15 +316,17 @@ export class RegrasPostagem {
     } else if (j === 'alerta') {
       partial = { alertaConexao: { ativo: this.rAlertaAtivo(), grupo: (this.rAlertaGrupo() || '').trim() } };
     } else {
-      if (this.rSomaCupons() > MAX_CUPONS) {
-        this.erro.set(`Os dois tipos de cupom juntos não podem passar de ${MAX_CUPONS}% das mensagens.`);
+      const prefixo = limparPrefixo(this.rCupomPrefixo());
+      if (prefixo && prefixo.length < PREFIXO_MIN) {
+        this.erro.set(`O prefixo precisa de pelo menos ${PREFIXO_MIN} letras ou números (ou deixe em branco para usar ${PREFIXO_PADRAO}).`);
         return;
       }
       partial = {
         cupons: {
           ativo: this.rCupomAtivo(),
-          percentualProduto: Number(this.rCupomProduto()),
-          percentualSozinho: Number(this.rCupomLista()),
+          prefixo,
+          percentualSozinho: this.rSoCupom(),
+          percentualProduto: this.rProdutoCupom(),
         },
       };
     }

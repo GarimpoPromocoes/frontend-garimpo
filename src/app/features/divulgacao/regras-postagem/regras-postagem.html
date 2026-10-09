@@ -67,19 +67,23 @@
         </span>
         <div class="grupo-card-nomes">
           <span class="grupo-card-nome">Cupons de desconto</span>
-          <span class="regra-card-sub">Mensagens com códigos de desconto</span>
+          <span class="regra-card-sub">Códigos das lojas junto com as ofertas</span>
         </div>
       </div>
       @if (cupons().ativo) {
         <div class="regra-card-valor">
-          <strong>{{ cupons().produto + cupons().lista }}%</strong>
-          <span>das mensagens</span>
+          <strong>{{ cupons().soCupom + cupons().produtoCupom }}%</strong>
+          <span>das mensagens com cupom</span>
         </div>
         <div class="regra-barra" aria-hidden="true">
-          <span class="regra-barra-ofertas" [style.width.%]="cupons().ofertas"></span>
-          <span class="regra-barra-produto" [style.width.%]="cupons().produto"></span>
-          <span class="regra-barra-lista" [style.width.%]="cupons().lista"></span>
+          <span class="regra-barra-lista" [style.width.%]="cupons().soCupom"></span>
+          <span class="regra-barra-produto" [style.width.%]="cupons().produtoCupom"></span>
+          <span class="regra-barra-ofertas" [style.width.%]="cupons().produto"></span>
         </div>
+        <p class="regra-card-texto">
+          {{ cupons().soCupom }}% só cupom · {{ cupons().produtoCupom }}% produto com cupom ·
+          {{ cupons().produto }}% produto sem cupom. Códigos como <strong>{{ cupons().exemplo }}</strong>.
+        </p>
       } @else {
         <div class="regra-card-valor">
           <strong>Desligado</strong>
@@ -202,7 +206,7 @@
               @switch (j) {
                 @case ('frequencia') { O robô sorteia a espera dentro da faixa — assim o envio parece de gente, não de robô. }
                 @case ('repeticao') { Evita que a mesma oferta apareça de novo cedo demais no mesmo grupo. }
-                @case ('cupons') { De vez em quando, no lugar de uma oferta comum, sai uma mensagem com cupom. }
+                @case ('cupons') { Enquanto garimpa, o robô procura na aba de cupons da loja um cupom que vale para cada produto e cria o código com o seu prefixo. }
                 @case ('divulgacao') { Um recado seu com o Linktree dos seus grupos, que sai esporadicamente — no máximo 1 ou 2 vezes por dia em cada grupo. }
                 @case ('alerta') { Se o Mercado Livre, a Amazon, a Shopee ou o Telegram cair enquanto o robô roda, ele avisa pelo WhatsApp para você reconectar. }
               }
@@ -315,45 +319,98 @@
             >
               <span class="toggle-switch-thumb"></span>
             </button>
-            <span class="toggle-label">Enviar cupons junto com as ofertas</span>
+            <span class="toggle-label">Procurar cupons e colocar nas mensagens</span>
           </div>
 
           @if (rCupomAtivo()) {
-            <div class="regra-slider">
-              <div class="regra-slider-topo">
-                <span><i class="regra-ponto regra-ponto-produto"></i>Oferta com cupom</span>
-                <strong>{{ rCupomProduto() }}%</strong>
+            <div class="field">
+              <label>Como as mensagens se dividem</label>
+              <span class="hint">
+                Arraste as duas bolinhas. Em cada grupo o robô segue essa proporção: olha as últimas mensagens e manda
+                o tipo que está mais atrasado.
+              </span>
+              <div class="regra-chips">
+                @for (d of divisoes; track d.nome) {
+                  <button type="button" class="regra-chip" [class.regra-chip-ativa]="divisaoAtiva(d)" (click)="escolherDivisao(d)">
+                    {{ d.nome }}
+                  </button>
+                }
               </div>
-              <input type="range" min="0" [max]="maxCupons" step="1" [ngModel]="rCupomProduto()" (ngModelChange)="mudarCupomProduto($event)" />
-              <small>Uma oferta comum que ganha um cupom que vale para aquele produto.</small>
-            </div>
-
-            <div class="regra-slider">
-              <div class="regra-slider-topo">
-                <span><i class="regra-ponto regra-ponto-lista"></i>Lista de cupons</span>
-                <strong>{{ rCupomLista() }}%</strong>
-              </div>
-              <input type="range" min="0" [max]="maxCupons" step="1" [ngModel]="rCupomLista()" (ngModelChange)="mudarCupomLista($event)" />
-              <small>Vários códigos numa mensagem só, sem produto.</small>
-            </div>
-
-            <div class="regra-previa regra-previa-coluna">
-              <span>A cada 100 mensagens, mais ou menos:</span>
-              <div class="regra-barra regra-barra-grande" aria-hidden="true">
-                <span class="regra-barra-ofertas" [style.width.%]="rOfertas()"></span>
-                <span class="regra-barra-produto" [style.width.%]="rCupomProduto()"></span>
-                <span class="regra-barra-lista" [style.width.%]="rCupomLista()"></span>
+              <div class="ritmo-slider">
+                <div class="regra-barra regra-barra-grande ritmo-trilho" aria-hidden="true">
+                  <span class="regra-barra-lista" [style.width.%]="rSoCupom()"></span>
+                  <span class="regra-barra-produto" [style.width.%]="rProdutoCupom()"></span>
+                  <span class="regra-barra-ofertas" [style.width.%]="rProdutoSem()"></span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="1"
+                  aria-label="Fim da faixa só cupom"
+                  [class.ritmo-alca-acima]="rCorte1() >= rCorte2() && rCorte1() > 50"
+                  [ngModel]="rCorte1()"
+                  (ngModelChange)="mudarCorte1($event)"
+                />
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="1"
+                  aria-label="Fim da faixa produto com cupom"
+                  [ngModel]="rCorte2()"
+                  (ngModelChange)="mudarCorte2($event)"
+                />
               </div>
               <div class="regra-legenda">
-                <span><i class="regra-ponto regra-ponto-ofertas"></i>{{ rOfertas() }} ofertas comuns</span>
-                <span><i class="regra-ponto regra-ponto-produto"></i>{{ rCupomProduto() }} com cupom</span>
-                <span><i class="regra-ponto regra-ponto-lista"></i>{{ rCupomLista() }} listas</span>
+                <span><i class="regra-ponto regra-ponto-lista"></i>Só cupom <strong>{{ rSoCupom() }}%</strong></span>
+                <span><i class="regra-ponto regra-ponto-produto"></i>Produto com cupom <strong>{{ rProdutoCupom() }}%</strong></span>
+                <span><i class="regra-ponto regra-ponto-ofertas"></i>Produto sem cupom <strong>{{ rProdutoSem() }}%</strong></span>
               </div>
             </div>
+
+            <div class="field">
+              <label>Prefixo dos seus cupons</label>
+              <span class="hint">
+                Todo código que o robô criar começa com ele. Só letras e números, de 3 a {{ prefixoMax }}. Em branco, usa
+                {{ prefixoPadrao }}.
+              </span>
+              <input
+                type="text"
+                [attr.maxlength]="prefixoMax"
+                autocapitalize="characters"
+                spellcheck="false"
+                [ngModel]="rCupomPrefixo()"
+                (ngModelChange)="mudarPrefixo($event)"
+                [placeholder]="prefixoPadrao"
+              />
+              <div class="regra-chips">
+                @for (ex of rCupomExemplos(); track ex) {
+                  <span class="regra-chip">{{ ex }}</span>
+                }
+              </div>
+            </div>
+
+            <div class="regra-como">
+              <strong>Como fica, na prática</strong>
+              <ol>
+                <li>
+                  O robô percorre todas as páginas da aba de cupons da loja e a lista de produtos de cada cupom, e confere cada
+                  produto garimpado (lista, categoria, loja, valor mínimo, validade).
+                </li>
+                <li><strong>Produto com cupom</strong>: a mensagem sai com o preço já com o cupom e a linha 🎟️ com o código.</li>
+                <li><strong>Só cupom</strong>: um cupom por mensagem — o que vale para tudo primeiro, depois os da categoria do grupo.</li>
+                <li>
+                  <strong>Clonagem</strong>: se a mensagem do concorrente tinha cupom da loja, ele vai igual; se era o código
+                  pessoal dele, o robô cria o seu código do mesmo cupom.
+                </li>
+                <li>Cupom de <strong>primeira compra</strong> é sempre ignorado.</li>
+              </ol>
+            </div>
             <span class="hint">
-              Os cupons juntos vão até {{ maxCupons }}% — oferta comum continua sendo a maioria.
+              O passo a passo de cada cupom (de que loja veio, para qual produto vale ou por que não serviu) aparece no console do Painel.
               @if (cuponsDisponiveis() !== null) {
-                Hoje há {{ cuponsDisponiveis() }} cupons disponíveis; quando acabam, o robô busca mais sozinho.
+                Hoje há {{ cuponsDisponiveis() }} {{ cuponsDisponiveis() === 1 ? 'cupom guardado' : 'cupons guardados' }}.
               }
             </span>
           } @else {

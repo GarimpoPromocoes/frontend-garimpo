@@ -28,6 +28,14 @@ const RE_RODADA = /^===+\s*RODADA\s+(\d+):/i;
 const RE_GRUPO_HEADER = /^GRUPO\s+"(.+?)"\s*->\s*WhatsApp/i;
 const RE_GARIMPADO = /^\[(?:ML |amazon |shopee )?\d+\]\s+(.+?)\s—\s*R\$\s*([\d.,]+).*\s—\sveio\s(.+)$/i;
 const RE_CANDIDATO =/^\[(?:ML |amazon |shopee )?\d+\]\s+.+\s—\s*R\$\s*[\d.,]+/i;
+// Garimpo de cupons (bot-ml/src/garimpo/cupons.js): cada linha já vem explicada pelo robô.
+const RE_CUPOM = /^Cupo(?:m|ns)\b/;
+
+const TOM_DA_TAG: Record<string, Tom> = { OK: 'ok', AVISO: 'aviso', ERRO: 'erro', PASSO: 'destaque' };
+
+function linhaDeCupom(tag: string, texto: string): { emoji: string; texto: string; tom: Tom } {
+  return { emoji: '🎟️', texto: texto.replace(/^Cupo(?:m|ns):\s*/, ''), tom: TOM_DA_TAG[tag] ?? 'info' };
+}
 
 function explicarMotivo(motivo: string): string {
   const m = motivo.trim();
@@ -43,7 +51,6 @@ function traduzirPorTag(tag: string, texto: string): { emoji: string; texto: str
   switch (tag) {
     case 'PASSO': {
       if (/^Abrindo o navegador/i.test(texto)) return { emoji: '🌐', texto: 'Abrindo o navegador...', tom: 'destaque' };
-      if (/^Cupons:\s*https?:\/\//i.test(texto)) return { emoji: '🔎', texto: 'Procurando cupons disponíveis...', tom: 'destaque' };
       if (/^Ofertas:\s*https?:\/\//i.test(texto)) return { emoji: '🔎', texto: 'Procurando promoções novas...', tom: 'destaque' };
 
       if (/^ofertas: ML:/i.test(texto)) return { emoji: '🔎', texto: 'Mercado Livre: procurando ofertas...', tom: 'info' };
@@ -81,16 +88,7 @@ function traduzirPorTag(tag: string, texto: string): { emoji: string; texto: str
       if (/^Variedade: no maximo/i.test(texto)) return null;
       if (/^Fechando o (WhatsApp|navegador do ML)/i.test(texto)) return null;
 
-      let m = texto.match(/^ {0,2}(\d+) cupom\(ns\) com codigo encontrados na pagina\.?$/i);
-      if (m) return { emoji: '🎟️', texto: `Encontrei ${m[1]} cupom(ns) com código disponível.`, tom: 'ok' };
-
-      if (/^Envio misturado sorteou cupom, mas o catalogo de cupons esta vazio/i.test(texto)) {
-        return { emoji: '🎟️', texto: 'Vou buscar cupons novos antes de continuar...', tom: 'info' };
-      }
-      if (/^Nenhum cupom disponivel/i.test(texto)) {
-        return { emoji: '🎟️', texto: 'Não achei cupom dessa vez — seguindo com oferta normal.', tom: 'info' };
-      }
-      m = texto.match(/^Mercado Livre: (\d+) produto\(s\) examinado\(s\), (\d+) aprovado\(s\)(.*)\.$/i);
+      let m = texto.match(/^Mercado Livre: (\d+) produto\(s\) examinado\(s\), (\d+) aprovado\(s\)(.*)\.$/i);
       if (m) {
         const motivos = m[3] ? m[3].replace(/^ — motivos:/i, ' Recusados por:') : '';
         return {
@@ -152,7 +150,6 @@ function traduzirPorTag(tag: string, texto: string): { emoji: string; texto: str
       if (/^Conexao com o WhatsApp pronta\.?$/i.test(texto)) return null;
       if (/^WhatsApp ja esta aberto/i.test(texto)) return null;
       if (/^Grupo ".+" encontrado\.?$/i.test(texto)) return null;
-      if (/^Cupons com codigo gravados:/i.test(texto)) return null;
       if (/^\[PRODUTOS\] postado/i.test(texto)) return null;
       if (/^Postagem continua encerrada\.?$/i.test(texto)) return { emoji: '🛑', texto: 'Robô parado.', tom: 'destaque' };
       if (/produtos garimpados — garimpo pausado/i.test(texto)) return { emoji: '⏸️', texto, tom: 'destaque' };
@@ -304,6 +301,10 @@ function classificarLinha(raw: string): Token | null {
 
     if (tag === 'OK' && RE_CANDIDATO.test(texto)) {
       return { item: { tipo: 'scan', contagem: 1, hora }, ehCandidato: true };
+    }
+
+    if (RE_CUPOM.test(texto)) {
+      return { item: { tipo: 'linha', hora, ...linhaDeCupom(tag, texto) }, ehCandidato: false };
     }
 
     const traduzido = traduzirPorTag(tag, texto);
