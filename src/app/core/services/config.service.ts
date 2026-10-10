@@ -27,6 +27,8 @@ export interface GrupoTematico {
   publico?: string;
   /** De onde vêm os produtos deste grupo: garimpo próprio nas lojas ou clonagem dos concorrentes. */
   fonte?: FonteProdutos;
+  /** Na clonagem: de quais grupos dos concorrentes ele clona (pedaços do nome; vazio = todos). */
+  gruposClonagem?: string[];
 }
 
 export type FonteProdutos = 'garimpo' | 'clonagem';
@@ -67,7 +69,10 @@ export type FonteGarimpo = 'mercadolivre' | 'grupos';
 export interface Garimpo {
   /** De onde vêm os produtos: do site de cada loja ('mercadolivre', nome histórico) ou das mensagens dos grupos dos outros. */
   fonte: FonteGarimpo;
-  /** Pedaços do nome dos grupos de origem (vazio = todos os grupos em que o WhatsApp está). */
+  /**
+   * Lista antiga, da conta toda (vazio = todos). Hoje cada grupo tem a sua (gruposClonagem);
+   * esta só vale para grupo que ainda não escolheu.
+   */
   grupos: string[];
 }
 
