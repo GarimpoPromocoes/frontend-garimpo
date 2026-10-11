@@ -1,4 +1,4 @@
-import { Component, ElementRef, computed, effect, inject, input, output, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, computed, effect, inject, input, output, viewChild } from '@angular/core';
 import { JobsService } from '../../../core/services/jobs.service';
 import { FeedItem, construirFeed } from './log-feed';
 
@@ -15,8 +15,6 @@ export class ConsoleCard {
 
   protected readonly desafio = computed(() => this.jobsService.desafioMl());
 
-  protected readonly modoTecnico = signal(false);
-
   protected readonly linhasBrutas = computed(() => {
     const todas = this.jobsService.linhas();
     return this.compacto() ? todas.slice(-60) : todas;
@@ -24,18 +22,24 @@ export class ConsoleCard {
 
   protected readonly feed = computed<FeedItem[]>(() => construirFeed(this.linhasBrutas()));
 
-  private readonly consoleEl = viewChild<ElementRef<HTMLDivElement>>('consoleEl');
   private readonly feedEl = viewChild<ElementRef<HTMLDivElement>>('feedEl');
+
+  /** true enquanto o usuário está no fim do feed; se rolou pra cima, não puxamos de volta. */
+  private grudadoNoFim = true;
 
   constructor() {
     effect(() => {
       this.feed();
-      this.linhasBrutas();
-      const tecnico = this.modoTecnico();
       queueMicrotask(() => {
-        const el = (tecnico ? this.consoleEl() : this.feedEl())?.nativeElement;
-        if (el) el.scrollTop = el.scrollHeight;
+        const el = this.feedEl()?.nativeElement;
+        if (el && this.grudadoNoFim) el.scrollTop = el.scrollHeight;
       });
     });
+  }
+
+  protected aoRolar(): void {
+    const el = this.feedEl()?.nativeElement;
+    if (!el) return;
+    this.grudadoNoFim = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
   }
 }
