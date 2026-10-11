@@ -112,6 +112,42 @@
     <span class="hint">Cadastre os seus grupos na aba Grupos para escolher a origem dos produtos de cada um.</span>
   }
 
+  @if (algumClona()) {
+    <div class="marca-dagua">
+      <h3 class="regras-secao-titulo">Marca d'água dos concorrentes</h3>
+      <p class="regras-secao-texto">
+        Ligado: o robô cobre com pixelado só a marca (o &#64;perfil, a foto do perfil, o nome do grupo, "link do
+        grupo") e posta o produto. Ele aprende a marca comparando as fotos do grupo — o que se repete em todas é a
+        marca —, então as primeiras fotos de um grupo novo podem ficar de fora até ele ter com o que comparar.
+        Desligado: foto com marca é descartada e o produto fica de fora.
+      </p>
+      @if (concorrentes().length) {
+        <div class="marca-dagua-lista">
+          @for (nome of concorrentes(); track nome) {
+            <div class="toggle-row">
+              <button
+                type="button"
+                class="toggle-switch"
+                role="switch"
+                [attr.aria-checked]="pixela(nome)"
+                [attr.aria-label]="'Pixelar a marca d\'água de ' + nome"
+                [class.toggle-switch-on]="pixela(nome)"
+                (click)="alternarPixelar(nome)"
+              >
+                <span class="toggle-switch-thumb"></span>
+              </button>
+              <span class="toggle-label">{{ nome }}</span>
+            </div>
+          }
+        </div>
+      } @else {
+        <span class="hint-text">
+          Escolha os grupos que cada grupo clona (ou espere a primeira leitura do WhatsApp) para ligar aqui.
+        </span>
+      }
+    </div>
+  }
+
   @if (erro(); as e) {
     <div class="info-box info-box-erro">{{ e }}</div>
   }
