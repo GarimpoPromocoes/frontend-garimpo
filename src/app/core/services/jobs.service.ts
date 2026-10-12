@@ -17,7 +17,10 @@ export type JobTipo =
   | 'desconectar-telegram'
   | 'grupos'
   | 'ganhos'
-  | 'verificar-conexoes';
+  | 'verificar-conexoes'
+  | 'buscar-produto'
+  | 'preparar-busca'
+  | 'publicar-busca';
 
 /** Quadro da tela do desafio de segurança do ML (JPEG em base64, no tamanho real da página). */
 export interface QuadroDesafio {

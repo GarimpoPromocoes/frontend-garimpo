@@ -1,0 +1,490 @@
+<div class="busca-pagina">
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h2>Buscar ofertas de um produto</h2>
+        <p class="card-subtitle">
+          Digite o produto — marca e modelo ajudam ("iPhone 15 128GB", "Echo Dot 3"). O robô procura nas lojas
+          conectadas e lista as melhores ofertas, da mais barata pra cima. Você escolhe a que quer postar e ele
+          monta a postagem com o seu link de afiliado.
+        </p>
+      </div>
+    </div>
+
+    <form class="busca-form" (submit)="buscar($event)">
+      <input
+        type="search"
+        class="busca-input"
+        name="termo"
+        placeholder="Ex.: Fone JBL Tune 520BT"
+        maxlength="120"
+        autocomplete="off"
+        [(ngModel)]="termo"
+        [disabled]="busca.trabalhando()"
+      />
+      <button type="submit" class="btn btn-hero btn-lg" [disabled]="!podeBuscar()">
+        {{ comecando() ? 'Começando…' : 'Buscar ofertas' }}
+      </button>
+    </form>
+
+    <div class="busca-lojas">
+      @if (lojas().length) {
+        <span class="hint-text">Procura em:</span>
+        @for (l of lojas(); track l) {
+          <span class="busca-loja-chip"><img [src]="logo(l)" alt="" />{{ nomeLoja(l) }}</span>
+        }
+      } @else {
+        <span class="hint-text">Nenhuma loja de afiliado conectada — conecte uma em "Lojas de afiliado" para buscar.</span>
+      }
+    </div>
+
+    @if (busca.erro() && !busca.postagemAberta()) {
+      <p class="error-text">{{ busca.erro() }}</p>
+    }
+  </div>
+
+  @if (busca.atual(); as b) {
+    @if (b.status === 'pendente' || b.status === 'buscando') {
+      <div class="card busca-andamento" role="status">
+        <span class="login-spinner login-spinner-grande"></span>
+        <div class="busca-andamento-texto">
+          <strong>Buscando "{{ b.termo }}" · {{ decorrido(b.criadoEm) }}</strong>
+          <p>{{ b.etapa || 'Esperando o robô…' }}</p>
+          <p class="hint-text">Costuma levar de 20 a 40 segundos. Pode trocar de aba — a busca continua.</p>
+        </div>
+      </div>
+    }
+
+    @if (b.status === 'falhou') {
+      <div class="card busca-falhou">
+        <div class="card-header">
+          <div>
+            <h2>A busca por "{{ b.termo }}" não deu certo</h2>
+            <p class="card-subtitle">{{ b.erro }}</p>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-ghost btn-sm" [disabled]="busca.trabalhando()" (click)="buscarDeNovo(b.termo)">
+              Tentar de novo
+            </button>
+            <button type="button" class="btn btn-ghost btn-sm" (click)="novaBusca()">Nova busca</button>
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (b.status === 'pronta' && formatoAntigo()) {
+      <div class="card busca-falhou">
+        <div class="card-header">
+          <div>
+            <h2>Busca antiga: "{{ b.termo }}"</h2>
+            <p class="card-subtitle">
+              Esta busca é de antes da lista de ofertas (o robô escolhia sozinho). Busque de novo para ver as ofertas e
+              escolher a que vai postar.
+            </p>
+          </div>
+          <button type="button" class="btn btn-ghost btn-sm" [disabled]="busca.trabalhando()" (click)="buscarDeNovo(b.termo)">
+            Buscar de novo
+          </button>
+        </div>
+      </div>
+    }
+
+    @if (b.status === 'pronta' && !formatoAntigo() && resultado(); as r) {
+      <!-- A lista: as ofertas do produto, da mais barata pra cima. Escolher abre a janela da postagem. -->
+      <div class="card busca-lista">
+        <div class="card-header">
+          <div>
+            <h2>{{ r.ofertas.length }} oferta(s) de "{{ r.termo }}"</h2>
+            <p class="card-subtitle">
+              Da mais barata pra cima, pelo preço da listagem de cada loja (o preço é conferido na página quando você
+              escolhe) · busca de {{ quando(b.criadoEm) }}
+            </p>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-ghost btn-sm" [disabled]="busca.trabalhando()" (click)="buscarDeNovo(b.termo)">
+              Buscar de novo
+            </button>
+            <button type="button" class="btn btn-ghost btn-sm" [disabled]="busca.trabalhando()" (click)="novaBusca()">
+              Nova busca
+            </button>
+          </div>
+        </div>
+
+        <ul class="busca-lojas-resumo">
+          @for (l of r.lojas; track l.loja) {
+            <li>
+              <img [src]="logo(l.loja)" alt="" />
+              <span>
+                <strong>{{ nomeLoja(l.loja) }}:</strong>
+                @if (l.ok) {
+                  {{ l.doProduto }} de {{ l.encontradas }} anúncio(s) são o produto
+                } @else {
+                  ficou de fora — {{ l.motivo }}
+                }
+              </span>
+            </li>
+          }
+          @if (r.revisaoIa && r.revisaoIa !== 'feita') {
+            <li class="hint-text">Títulos conferidos só pelo filtro de texto ({{ r.revisaoIa }}).</li>
+          }
+        </ul>
+
+        @if (!r.ofertas.length) {
+          <div class="info-box">
+            Nenhum anúncio parece ser exatamente "{{ r.termo }}". Veja os ignorados abaixo — se algum servir, dá pra
+            escolher mesmo assim — ou tente escrever o nome como aparece na loja, com marca e modelo.
+          </div>
+        }
+
+        <ul class="busca-ofertas">
+          @for (o of r.ofertas; track o.chave) {
+            <ng-container *ngTemplateOutlet="linhaOferta; context: { $implicit: o, ignorada: false }" />
+          }
+        </ul>
+
+        @if (r.ignoradas?.length) {
+          <div class="busca-ignoradas">
+            <button type="button" class="busca-ignoradas-botao" (click)="verIgnoradas.set(!verIgnoradas())" [attr.aria-expanded]="verIgnoradas()">
+              <span>{{ verIgnoradas() ? '▾' : '▸' }}</span>
+              {{ r.ignoradasTotal ?? r.ignoradas!.length }} anúncio(s) ignorado(s) — outra versão, outro produto, acessório
+            </button>
+            @if (verIgnoradas()) {
+              <p class="hint-text">
+                Não parecem ser o produto buscado (o motivo está em cada um). Se algum for o que você quer, dá pra escolher
+                mesmo assim.
+              </p>
+              <ul class="busca-ofertas">
+                @for (o of r.ignoradas; track o.chave) {
+                  <ng-container *ngTemplateOutlet="linhaOferta; context: { $implicit: o, ignorada: true }" />
+                }
+              </ul>
+            }
+          </div>
+        }
+      </div>
+    }
+  }
+
+  @if (busca.recentes().length) {
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2>Buscas recentes</h2>
+          <p class="card-subtitle">Clique para voltar à lista de ofertas e à postagem montada, sem buscar outra vez.</p>
+        </div>
+      </div>
+      <ul class="busca-recentes">
+        @for (r of busca.recentes(); track r.id) {
+          <li>
+            <button
+              type="button"
+              class="busca-recente"
+              [class.busca-recente-ativa]="busca.atual()?.id === r.id"
+              [disabled]="busca.trabalhando() && busca.atual()?.id !== r.id"
+              (click)="busca.abrir(r.id)"
+            >
+              <span class="busca-recente-termo">{{ r.termo }}</span>
+              <span class="busca-recente-meta">
+                {{ quando(r.criadoEm) }} ·
+                @switch (r.status) {
+                  @case ('pronta') {
+                    {{ r.qtdOfertas }} oferta(s)@if (r.menorPreco != null) { a partir de {{ preco(r.menorPreco) }}}
+                    @if (r.lojaEscolhida) {
+                      · escolhida: {{ nomeLoja(r.lojaEscolhida) }} {{ preco(r.precoEscolhida) }}
+                    }
+                    @if (r.publicacaoStatus === 'concluida') {
+                      · postada
+                    }
+                  }
+                  @case ('falhou') {
+                    não deu certo
+                  }
+                  @default {
+                    buscando…
+                  }
+                }
+              </span>
+            </button>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+</div>
+
+<!-- Janela da postagem: abre ao escolher uma oferta. Prévia como no WhatsApp, editor da foto e postar. -->
+@if (busca.postagemAberta() && selecao(); as s) {
+  <div class="modal-fundo" (click)="fecharPostagem()">
+    <div
+      class="modal-caixa busca-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="busca-modal-titulo"
+      (click)="$event.stopPropagation()"
+      (keydown.escape)="fecharPostagem()"
+    >
+      <div class="busca-modal-topo">
+        <div class="busca-modal-titulo">
+          <h2 id="busca-modal-titulo">
+            @switch (s.status) {
+              @case ('pronta') {
+                {{ editandoFoto() ? 'Ajustar a foto' : 'Prévia da postagem' }}
+              }
+              @case ('falhou') {
+                Esta oferta não deu
+              }
+              @default {
+                Montando a postagem
+              }
+            }
+          </h2>
+          <p class="hint-text">
+            <span class="busca-loja-chip busca-loja-chip-pequeno"><img [src]="logo(s.oferta.loja)" alt="" />{{ nomeLoja(s.oferta.loja) }}</span>
+            {{ s.oferta.titulo }}
+          </p>
+        </div>
+        <button type="button" class="btn-fechar" (click)="fecharPostagem()" aria-label="Fechar" title="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6 18 18M18 6 6 18" /></svg>
+        </button>
+      </div>
+
+      @if (s.status === 'pendente' || s.status === 'preparando') {
+        <div class="busca-andamento busca-modal-andamento" role="status">
+          <span class="login-spinner login-spinner-grande"></span>
+          <div class="busca-andamento-texto">
+            <strong>{{ decorrido(s.pedidaEm) }}</strong>
+            <p>{{ s.etapa || 'Esperando o robô…' }}</p>
+            <p class="hint-text">O robô está abrindo a página da oferta, gerando o seu link e escolhendo a foto.</p>
+          </div>
+        </div>
+      } @else if (s.status === 'falhou') {
+        <p class="error-text">{{ s.erro }}</p>
+        <div class="form-actions">
+          <button type="button" class="btn btn-ghost" (click)="fecharPostagem()">Escolher outra oferta</button>
+        </div>
+      } @else if (escolhida(); as e) {
+        <div class="busca-modal-corpo">
+          <!-- Esquerda: a prévia (ou o editor da foto). -->
+          <div class="busca-modal-previa">
+            @if (editandoFoto()) {
+              <app-foto-editor
+                [fontes]="fontesFoto()"
+                [salvando]="busca.enviando()"
+                (aplicar)="salvarRecorte($event)"
+                (cancelar)="cancelarEdicaoFoto()"
+              />
+            } @else {
+              <div class="zap-bolha">
+                @if (busca.fotoUrl()) {
+                  <img class="zap-foto" [class.zap-foto-inteira]="!!s.precisaAjuste" [src]="busca.fotoUrl()" alt="Foto da postagem" />
+                } @else {
+                  <div class="zap-foto zap-foto-vazia">Carregando a foto…</div>
+                }
+                @if (editandoTexto()) {
+                  <textarea
+                    class="busca-texto"
+                    rows="10"
+                    aria-label="Texto da postagem"
+                    [ngModel]="legenda()"
+                    (ngModelChange)="textoEditado.set($event)"
+                  ></textarea>
+                } @else {
+                  <div class="zap-texto" [innerHTML]="legendaHtml()"></div>
+                }
+              </div>
+              <div class="form-actions">
+                <button type="button" class="btn btn-sm" [class.btn-primary]="!!s.precisaAjuste" [class.btn-ghost]="!s.precisaAjuste" [disabled]="busca.publicando()" (click)="editarFoto()">
+                  Ajustar foto
+                </button>
+                <button type="button" class="btn btn-ghost btn-sm" (click)="copiar()">
+                  {{ copiado() ? 'Copiado!' : 'Copiar texto' }}
+                </button>
+                @if (busca.fotoUrl() && !s.precisaAjuste) {
+                  <a class="btn btn-ghost btn-sm" [href]="busca.fotoUrl()" [attr.download]="nomeArquivo()">Baixar foto</a>
+                }
+                <button type="button" class="btn btn-ghost btn-sm" [disabled]="busca.publicando()" (click)="alternarEdicao()">
+                  {{ editandoTexto() ? 'Ver prévia' : 'Editar texto' }}
+                </button>
+                @if (textoEditado() !== null) {
+                  <button type="button" class="btn btn-ghost btn-sm" [disabled]="busca.publicando()" (click)="desfazerEdicao()">
+                    Texto original
+                  </button>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Direita: avisos, dados da oferta e postar nos grupos. -->
+          <div class="busca-modal-lado">
+            @if (s.precisaAjuste) {
+              <div class="busca-ajuste">
+                <strong>A foto do anúncio não cabe no quadrado da prévia.</strong>
+                Recorte ela no editor (arraste e use o zoom) — a postagem só sai depois do ajuste.
+                <span class="hint-text">{{ s.precisaAjuste }}</span>
+              </div>
+            }
+            @if (s.avisos?.length) {
+              <ul class="busca-avisos">
+                @for (a of s.avisos; track $index) {
+                  <li>{{ a }}</li>
+                }
+              </ul>
+            }
+
+            <dl class="busca-dados">
+              <dt>Preço na página</dt>
+              <dd>
+                @if (e.precoDe) {
+                  <span class="prod-de busca-de">{{ preco(e.precoDe) }}</span>
+                }
+                <strong>{{ preco(e.preco) }}</strong>
+                @if (e.desconto) {
+                  <span class="badge badge-ok">{{ e.desconto }}% OFF</span>
+                }
+              </dd>
+              @if (e.cupom) {
+                <dt>Cupom</dt>
+                <dd>
+                  <code class="busca-cupom-codigo">{{ e.cupom.codigo }}</code> {{ e.cupom.descricao }}
+                  @if (e.precoComCupom) {
+                    — sai por <strong>{{ preco(e.precoComCupom) }}</strong>
+                  }
+                </dd>
+              }
+              <dt>Link de afiliado</dt>
+              <dd><a class="busca-link" [href]="e.link" target="_blank" rel="noopener">{{ e.link }}</a></dd>
+              <dt>Foto</dt>
+              <dd>
+                {{ origemFoto(e.foto.origem) }}
+                @if (e.foto.largura) {
+                  ({{ e.foto.largura }}×{{ e.foto.altura }})
+                }
+              </dd>
+            </dl>
+
+            <div class="card-section">
+              <h3 class="busca-subtitulo">Postar nos grupos</h3>
+              @if (!grupos().length) {
+                <p class="hint-text">Nenhum grupo cadastrado ainda — cadastre na aba "Grupos".</p>
+              } @else {
+                <div class="busca-grupos">
+                  <label class="checkbox-row">
+                    <input
+                      type="checkbox"
+                      [checked]="todosMarcados()"
+                      [disabled]="busca.publicando()"
+                      (change)="marcarTodos($any($event.target).checked)"
+                    />
+                    <strong>Todos os grupos</strong>
+                  </label>
+                  @for (g of grupos(); track g.id) {
+                    <label class="checkbox-row">
+                      <input
+                        type="checkbox"
+                        [checked]="selecionados().has(g.id)"
+                        [disabled]="busca.publicando()"
+                        (change)="marcar(g.id, $any($event.target).checked)"
+                      />
+                      <span class="busca-grupo-nome">
+                        {{ g.nome }} <span class="hint-text">→ {{ g.groupName }}</span>
+                        @if (statusDoGrupo(g.id); as st) {
+                          @switch (st.status) {
+                            @case ('enviado') {
+                              <span class="badge badge-ok"><span class="badge-dot"></span>Postado</span>
+                            }
+                            @case ('falhou') {
+                              <span class="badge busca-badge-erro" [title]="st.motivo || ''"><span class="badge-dot"></span>Falhou</span>
+                            }
+                            @default {
+                              <span class="badge badge-running"><span class="badge-dot"></span>{{ st.status === 'enviando' ? 'Enviando…' : 'Na fila' }}</span>
+                            }
+                          }
+                        }
+                      </span>
+                    </label>
+                  }
+                </div>
+                <div class="form-actions">
+                  <button type="button" class="btn btn-wpp" [disabled]="!podePostar()" (click)="postar()">
+                    {{ busca.publicando() ? 'Postando…' : 'Postar agora' }}
+                  </button>
+                  @if (s.precisaAjuste) {
+                    <span class="hint-text">Ajuste a foto primeiro.</span>
+                  }
+                </div>
+                <p class="hint-text">
+                  Sai com a foto e o texto da prévia@if (textoEditado() !== null) { (editado)}. O robô anota no histórico de
+                  cada grupo, pra não repetir o produto.
+                </p>
+                @for (g of gruposDaPostagem(); track g.id) {
+                  @if (g.status === 'falhou' && g.motivo) {
+                    <p class="error-text">{{ g.nome }}: {{ g.motivo }}</p>
+                  }
+                }
+              }
+            </div>
+
+            @if (busca.erro()) {
+              <p class="error-text">{{ busca.erro() }}</p>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+<!-- Uma oferta da lista (ou das ignoradas). -->
+<ng-template #linhaOferta let-o let-ignorada="ignorada">
+  <li class="busca-oferta" [class.busca-oferta-escolhida]="ehEscolhida(o)" [class.busca-oferta-ignorada]="ignorada">
+    <div class="busca-oferta-foto">
+      @if (o.imagem) {
+        <img [src]="o.imagem" alt="" loading="lazy" referrerpolicy="no-referrer" (error)="esconderImagem($event)" />
+      }
+    </div>
+    <div class="busca-oferta-corpo">
+      <a class="busca-oferta-titulo" [href]="o.url" target="_blank" rel="noopener" [title]="o.titulo">{{ o.titulo }}</a>
+      <div class="busca-oferta-sinais">
+        <span class="busca-loja-chip busca-loja-chip-pequeno"><img [src]="logo(o.loja)" alt="" />{{ nomeLoja(o.loja) }}</span>
+        @if (o.lojaOficial) {
+          <span class="busca-sinal">Loja oficial</span>
+        }
+        @if (o.avaliacao) {
+          <span class="busca-sinal">★ {{ o.avaliacao }}@if (o.qtdAvaliacoes) { ({{ numero(o.qtdAvaliacoes) }})}</span>
+        }
+        @if (o.vendidos) {
+          <span class="busca-sinal">+{{ numero(o.vendidos) }} vendidos</span>
+        }
+        @if (o.patrocinado) {
+          <span class="busca-sinal">Patrocinado</span>
+        }
+      </div>
+      @if (o.alerta) {
+        <p class="busca-oferta-alerta">⚠ {{ o.alerta }}</p>
+      }
+      @if (ignorada && o.motivo) {
+        <p class="busca-oferta-motivo">Ignorado: {{ o.motivo }}</p>
+      }
+    </div>
+    <div class="busca-oferta-lado">
+      <div class="busca-oferta-preco">
+        @if (o.precoDe) {
+          <span class="prod-de">{{ preco(o.precoDe) }}</span>
+        }
+        <strong>{{ preco(o.preco) }}</strong>
+        @if (o.desconto) {
+          <span class="busca-oferta-desconto">{{ o.desconto }}% OFF</span>
+        }
+      </div>
+      @if (ehEscolhida(o)) {
+        <button type="button" class="btn btn-sm btn-wpp" (click)="busca.postagemAberta.set(true)">
+          {{ busca.preparando() ? 'Montando…' : 'Ver postagem' }}
+        </button>
+      } @else {
+        <button type="button" class="btn btn-sm" [class.btn-primary]="!ignorada" [class.btn-ghost]="ignorada" [disabled]="!podeEscolher()" (click)="escolher(o)">
+          {{ ignorada ? 'Usar mesmo assim' : 'Escolher' }}
+        </button>
+      }
+    </div>
+  </li>
+</ng-template>

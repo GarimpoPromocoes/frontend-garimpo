@@ -10,6 +10,7 @@ import { LojasUiService } from './core/services/lojas-ui.service';
 import { WhatsappUiService } from './core/services/whatsapp-ui.service';
 import { TelegramUiService } from './core/services/telegram-ui.service';
 import { ConfirmacaoService } from './core/services/confirmacao.service';
+import { BuscaService } from './core/services/busca.service';
 import { LoginCard } from './features/auth/login-card/login-card';
 import { WhatsappCard } from './features/conexoes/whatsapp-card/whatsapp-card';
 import { LojasCard } from './features/conexoes/lojas-card/lojas-card';
@@ -20,6 +21,7 @@ import { RunCard } from './features/acompanhar/run-card/run-card';
 import { StatsCard } from './features/acompanhar/stats-card/stats-card';
 import { ConsoleCard } from './features/acompanhar/console-card/console-card';
 import { ProdutosCard } from './features/divulgacao/produtos-card/produtos-card';
+import { BuscaCard } from './features/divulgacao/busca-card/busca-card';
 import { OwnerCard } from './features/admin/owner-card/owner-card';
 import { GanhosCard } from './features/acompanhar/ganhos-card/ganhos-card';
 import { LojaDialog } from './features/conexoes/loja-dialog/loja-dialog';
@@ -38,6 +40,7 @@ export type AbaId =
   | 'garimpo'
   | 'regras'
   | 'produtos'
+  | 'busca'
   | 'whatsapp'
   | 'lojas'
   | 'dono';
@@ -76,6 +79,13 @@ const ABAS: Aba[] = [
     descricao: 'Tudo que o robô encontrou e ainda pode virar promoção.',
     secao: 'Divulgação',
     badge: 'produtos',
+  },
+  {
+    id: 'busca',
+    label: 'Oferta personalizada',
+    titulo: 'Oferta personalizada',
+    descricao: 'Veja as melhores ofertas de um produto nas lojas conectadas e escolha qual postar.',
+    secao: 'Divulgação',
   },
   {
     id: 'grupos',
@@ -148,6 +158,7 @@ const CHAVE_ABA = 'promobot:aba';
     StatsCard,
     ConsoleCard,
     ProdutosCard,
+    BuscaCard,
     OwnerCard,
     GanhosCard,
     LojaDialog,
@@ -173,6 +184,7 @@ export class App implements OnInit, OnDestroy {
   private whatsappUi = inject(WhatsappUiService);
   private telegramUi = inject(TelegramUiService);
   private confirmacaoService = inject(ConfirmacaoService);
+  private buscaService = inject(BuscaService);
 
   protected readonly secoes = computed(() =>
     SECOES.map((s) => ({
@@ -192,6 +204,7 @@ export class App implements OnInit, OnDestroy {
     this.telegramUi.aberto() ||
     this.jobsService.desafioPopupAberto() ||
     !!this.confirmacaoService.pedido() ||
+    this.buscaService.postagemAberta() ||
     this.atividadeModalAberta(),
   );
 
@@ -284,6 +297,7 @@ export class App implements OnInit, OnDestroy {
       void import('./features/divulgacao/garimpo-card/garimpo-card');
       void import('./features/acompanhar/ganhos-card/ganhos-card');
       void import('./features/divulgacao/produtos-card/produtos-card');
+      void import('./features/divulgacao/busca-card/busca-card');
       void import('./features/conexoes/whatsapp-card/whatsapp-card');
       void import('./features/conexoes/lojas-card/lojas-card');
       void import('./features/divulgacao/regras-postagem/regras-postagem');

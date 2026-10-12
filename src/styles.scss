@@ -3353,3 +3353,16 @@ app-status-conexoes {
 .modal-atividade .activity-feed {
   max-height: min(70vh, 620px);
 }
+
+/* Buscar produto — o texto da prévia vem por [innerHTML] (formatação do WhatsApp), fora do escopo
+   do componente: link e código ficam aqui. */
+.zap-texto a {
+  color: #027eb5;
+}
+.zap-texto code {
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 12.5px;
+  background: rgba(0, 0, 0, 0.06);
+  padding: 1px 4px;
+  border-radius: 4px;
+}

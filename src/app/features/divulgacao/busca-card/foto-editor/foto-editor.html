@@ -1,0 +1,111 @@
+<div class="editor">
+  <div
+    #quadro
+    class="editor-quadro"
+    [class.editor-quadro-arrastando]="arrastando()"
+    tabindex="0"
+    role="application"
+    aria-label="Recorte da foto: arraste para posicionar, use + e - para aumentar ou diminuir"
+    (pointerdown)="aoApertar($event)"
+    (pointermove)="aoMover($event)"
+    (pointerup)="aoSoltar($event)"
+    (pointercancel)="aoSoltar($event)"
+    (wheel)="aoRolar($event)"
+    (keydown)="aoTeclar($event)"
+  >
+    @if (img(); as i) {
+      <img
+        class="editor-foto"
+        [src]="i.src"
+        alt=""
+        draggable="false"
+        [style.width.px]="posicao().w"
+        [style.height.px]="posicao().h"
+        [style.transform]="'translate3d(' + posicao().x + 'px,' + posicao().y + 'px,0)'"
+      />
+      <div class="editor-grade" aria-hidden="true"></div>
+    } @else {
+      <div class="editor-vazio">
+        @if (erro()) {
+          {{ erro() }}
+        } @else {
+          <span class="login-spinner"></span> Carregando a foto…
+        }
+      </div>
+    }
+  </div>
+
+  <div class="editor-zoom">
+    <button type="button" class="btn-icone" title="Diminuir" aria-label="Diminuir" [disabled]="!img()" (click)="afastar()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 12h12" /></svg>
+    </button>
+    <input
+      type="range"
+      aria-label="Zoom"
+      [min]="zoomMin()"
+      [max]="zoomMax"
+      step="any"
+      [value]="zoom()"
+      [disabled]="!img()"
+      (input)="aoMudarZoom($any($event.target).value)"
+    />
+    <button type="button" class="btn-icone" title="Aumentar" aria-label="Aumentar" [disabled]="!img()" (click)="aproximar()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 12h12M12 6v12" /></svg>
+    </button>
+  </div>
+
+  <div class="editor-atalhos">
+    <button type="button" class="btn btn-ghost btn-sm" [disabled]="!img()" (click)="preencher()">Preencher o quadrado</button>
+    <button type="button" class="btn btn-ghost btn-sm" [disabled]="!img()" (click)="encaixar()">Encaixar a foto inteira</button>
+    <button type="button" class="btn btn-ghost btn-sm" [disabled]="!img()" (click)="recentralizar()">Centralizar</button>
+  </div>
+
+  <p class="hint-text">
+    Arraste a foto para posicionar; aumente ou diminua com a barra, a roda do mouse ou dois dedos.
+    @if (sobraFundo()) {
+      <strong class="editor-aviso">O espaço que sobrar em volta da foto sai branco.</strong>
+    }
+  </p>
+
+  @if (fontes().length > 1) {
+    <div class="editor-fontes" role="list" aria-label="Fotos do anúncio">
+      @for (f of fontes(); track $index) {
+        <button
+          type="button"
+          role="listitem"
+          class="editor-fonte"
+          [class.editor-fonte-atual]="atual() === $index"
+          [title]="f.rotulo"
+          [attr.aria-label]="f.rotulo"
+          [disabled]="!urls()[$index] || gerando()"
+          (click)="escolher($index)"
+        >
+          @if (urls()[$index]; as u) {
+            <img [src]="u" alt="" />
+          } @else if (urls()[$index] === null) {
+            <span class="editor-fonte-falha">não abriu</span>
+          } @else {
+            <span class="login-spinner"></span>
+          }
+        </button>
+      }
+    </div>
+  }
+
+  @if (erro() && img()) {
+    <p class="error-text">{{ erro() }}</p>
+  }
+
+  <!-- Sempre visível no rodapé da janela: usar/cancelar. -->
+  <div class="editor-acoes">
+    <div class="form-actions">
+      <button type="button" class="btn btn-primary" [disabled]="!img() || gerando() || salvando()" (click)="confirmar()">
+        {{ gerando() || salvando() ? 'Salvando…' : 'Usar este recorte' }}
+      </button>
+      <button type="button" class="btn btn-ghost" [disabled]="salvando()" (click)="cancelar.emit()">Cancelar</button>
+      @if (medidas()) {
+        <span class="hint-text">Foto original: {{ medidas() }} · sai em 1200×1200</span>
+      }
+    </div>
+  </div>
+</div>
