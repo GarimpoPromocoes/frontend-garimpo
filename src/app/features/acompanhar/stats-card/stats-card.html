@@ -18,6 +18,7 @@
         <path d="M12 21v-8.9" />
       </svg>
       <span class="stat-cell-label">Produtos na fila</span>
+      <button type="button" class="btn btn-ghost btn-sm stat-cell-acao" (click)="verProdutos.emit()">Ver produtos</button>
     </div>
     <span class="stat-cell-value">{{ statusService.status()?.produtosCatalogo ?? '—' }}</span>
   </div>
