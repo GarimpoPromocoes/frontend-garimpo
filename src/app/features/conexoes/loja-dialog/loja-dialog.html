@@ -1,10 +1,10 @@
 @if (aberto()) {
   <div class="modal-fundo" (click)="aoFechar()">
-    <div class="modal-caixa modal-login" [class.modal-login-largo]="janelaLarga()" (click)="$event.stopPropagation()">
+    <div class="modal-caixa modal-login" role="dialog" aria-modal="true" aria-label="Conexão com a loja" [class.modal-login-largo]="janelaLarga()" (click)="$event.stopPropagation()">
       <div class="card-header">
         <div class="loja-titulo">
           <span class="loja-logo-caixa loja-logo-caixa-sm"><img class="loja-logo loja-logo-sm" [src]="logo()" [alt]="rotulo()" /></span>
-          <p class="card-subtitle">
+          <p class="card-subtitle" role="status">
             @if (fim(); as f) {
               {{ f.ok ? 'Tudo certo — a conta está conectada.' : 'O login não foi concluído.' }}
             } @else if (pedido()) {
@@ -21,7 +21,7 @@
           </p>
         </div>
         <button type="button" class="btn-fechar" (click)="aoFechar()" aria-label="Fechar" title="Fechar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
             <path d="M6 6 18 18M18 6 6 18" />
           </svg>
         </button>
@@ -55,7 +55,7 @@
               <button type="button" class="btn btn-primary" (click)="fechar()">Fechar</button>
             </div>
           } @else {
-            <div class="info-box info-box-erro">{{ f.motivo }}</div>
+            <div class="info-box info-box-erro" role="alert">{{ f.motivo }}</div>
             @if (f.comoResolver) {
               <p class="hint-text">{{ f.comoResolver }}</p>
             }
@@ -86,17 +86,17 @@
                     >
                       <span class="verif-icone" [attr.data-tipo]="o.tipo || 'outro'">
                         @switch (o.tipo) {
-                          @case ('qrcode') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.2"/><rect x="14" y="3" width="7" height="7" rx="1.2"/><rect x="3" y="14" width="7" height="7" rx="1.2"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></svg> }
-                          @case ('whatsapp') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 11.6a8.4 8.4 0 0 1-12.3 7.4L3.5 20.5l1.6-4.6A8.4 8.4 0 1 1 20.5 11.6Z"/><path d="M8.8 9.1c0 3 2.4 5.4 5.4 5.4"/></svg> }
-                          @case ('sms') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.2"/><path d="M10.5 18.5h3"/></svg> }
-                          @case ('email') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6.5 8.5 6.5 8.5-6.5"/></svg> }
-                          @case ('senha') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg> }
-                          @case ('facial') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8V5.5a2 2 0 0 1 2-2H8M16 3.5h2.5a2 2 0 0 1 2 2V8M20.5 16v2.5a2 2 0 0 1-2 2H16M8 20.5H5.5a2 2 0 0 1-2-2V16"/><circle cx="12" cy="10" r="3"/><path d="M7.5 17a5 5 0 0 1 9 0"/></svg> }
-                          @case ('authenticator') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v17M4.6 7.75l14.8 8.5M4.6 16.25l14.8-8.5"/></svg> }
-                          @case ('ajuda') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.6M12 17h.01"/></svg> }
-                          @case ('biometria') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 11v3.5M8.5 9.5a3.5 3.5 0 0 1 7 0v5a6 6 0 0 1-1 3.3M5.5 10a6.5 6.5 0 0 1 13 0v3M5.5 13.5v1a9 9 0 0 0 1.4 4.8M12 18v2.5"/></svg> }
-                          @case ('app') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.2"/><path d="m9.5 12 2 2 3.5-4"/></svg> }
-                          @default { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 20 6v5.4c0 4.4-3.1 8.2-8 9.8-4.9-1.6-8-5.4-8-9.8V6Z"/><path d="m9.2 12.2 2 2 3.6-3.8"/></svg> }
+                          @case ('qrcode') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.2"/><rect x="14" y="3" width="7" height="7" rx="1.2"/><rect x="3" y="14" width="7" height="7" rx="1.2"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></svg> }
+                          @case ('whatsapp') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 11.6a8.4 8.4 0 0 1-12.3 7.4L3.5 20.5l1.6-4.6A8.4 8.4 0 1 1 20.5 11.6Z"/><path d="M8.8 9.1c0 3 2.4 5.4 5.4 5.4"/></svg> }
+                          @case ('sms') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.2"/><path d="M10.5 18.5h3"/></svg> }
+                          @case ('email') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6.5 8.5 6.5 8.5-6.5"/></svg> }
+                          @case ('senha') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg> }
+                          @case ('facial') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8V5.5a2 2 0 0 1 2-2H8M16 3.5h2.5a2 2 0 0 1 2 2V8M20.5 16v2.5a2 2 0 0 1-2 2H16M8 20.5H5.5a2 2 0 0 1-2-2V16"/><circle cx="12" cy="10" r="3"/><path d="M7.5 17a5 5 0 0 1 9 0"/></svg> }
+                          @case ('authenticator') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v17M4.6 7.75l14.8 8.5M4.6 16.25l14.8-8.5"/></svg> }
+                          @case ('ajuda') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.6M12 17h.01"/></svg> }
+                          @case ('biometria') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 11v3.5M8.5 9.5a3.5 3.5 0 0 1 7 0v5a6 6 0 0 1-1 3.3M5.5 10a6.5 6.5 0 0 1 13 0v3M5.5 13.5v1a9 9 0 0 0 1.4 4.8M12 18v2.5"/></svg> }
+                          @case ('app') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.2"/><path d="m9.5 12 2 2 3.5-4"/></svg> }
+                          @default { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 20 6v5.4c0 4.4-3.1 8.2-8 9.8-4.9-1.6-8-5.4-8-9.8V6Z"/><path d="m9.2 12.2 2 2 3.6-3.8"/></svg> }
                         }
                       </span>
                       <span class="verif-textos">
@@ -105,7 +105,7 @@
                           <span class="verif-detalhe">{{ o.detalhe }}</span>
                         }
                       </span>
-                      <svg class="verif-seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+                      <svg aria-hidden="true" class="verif-seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
                     </button>
                   }
                 </div>
@@ -174,7 +174,7 @@
 
               @case ('grade') {
                 @if (p.erro) {
-                  <div class="info-box info-box-erro">{{ p.erro }}</div>
+                  <div class="info-box info-box-erro" role="alert">{{ p.erro }}</div>
                 }
                 <div class="grade-desafio" [style.--colunas]="p.colunas ?? 3">
                   <img [src]="p.imagem" alt="Imagens do desafio" draggable="false" />
@@ -204,7 +204,7 @@
 
               @default {
                 @if (p.erro) {
-                  <div class="info-box info-box-erro">{{ p.erro }}</div>
+                  <div class="info-box info-box-erro" role="alert">{{ p.erro }}</div>
                 }
                 @if (p.imagem) {
                   <img class="login-captcha" [src]="p.imagem" alt="Imagem de verificação enviada pela plataforma" />
@@ -363,7 +363,7 @@
       }
 
       @if (erro()) {
-        <p class="error-text">{{ erro() }}</p>
+        <p class="error-text" role="alert">{{ erro() }}</p>
       }
     </div>
   </div>
@@ -380,7 +380,7 @@
       } @else if (!cameraErro()) {
         <span class="login-spinner"></span>
       } @else {
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18M15.5 15.6V17a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 17V8A1.5 1.5 0 0 1 5 6.5h1.4M10 6.5h4A1.5 1.5 0 0 1 15.5 8v3.3l5-3.3v9"/></svg>
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18M15.5 15.6V17a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 17V8A1.5 1.5 0 0 1 5 6.5h1.4M10 6.5h4A1.5 1.5 0 0 1 15.5 8v3.3l5-3.3v9"/></svg>
       }
     </div>
     <div class="camera-login-textos">
@@ -404,7 +404,7 @@
 -->
 <ng-template #paginaTraduzida let-p let-travada="travada">
   @if (p.erro) {
-    <div class="info-box info-box-erro">{{ p.erro }}</div>
+    <div class="info-box info-box-erro" role="alert">{{ p.erro }}</div>
   }
   @if (p.textos?.length) {
     <div class="pagina-textos">
@@ -464,7 +464,7 @@
                 <span class="verif-detalhe">{{ a.detalhe }}</span>
               }
             </span>
-            <svg class="verif-seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+            <svg aria-hidden="true" class="verif-seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
           </button>
         }
       }

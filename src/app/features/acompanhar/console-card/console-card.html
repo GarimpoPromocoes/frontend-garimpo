@@ -22,7 +22,7 @@
         <p class="card-subtitle">Acompanhe em tempo real, passo a passo, o que o robô está fazendo.</p>
       }
     </div>
-    <div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0">
+    <div class="card-acoes">
       @if (compacto()) {
         <button type="button" class="btn btn-ghost btn-sm" (click)="verTudo.emit()">Ver tudo</button>
       } @else {
@@ -31,22 +31,31 @@
     </div>
   </div>
 
-  <div class="activity-feed" [class.activity-feed-sm]="compacto()" #feedEl (scroll)="aoRolar()">
+  <!-- role=log: linhas novas são lidas sem interromper. tabindex=0: dá para rolar pelo teclado. -->
+  <div
+    class="activity-feed"
+    [class.activity-feed-sm]="compacto()"
+    role="log"
+    aria-label="Atividade do robô"
+    tabindex="0"
+    #feedEl
+    (scroll)="aoRolar()"
+  >
     @for (item of feed(); track $index) {
       @switch (item.tipo) {
         @case ('rodada') {
           <div class="feed-rodada">
-            <span class="feed-rodada-linha"></span>
+            <span class="feed-rodada-linha" aria-hidden="true"></span>
             <span class="feed-rodada-texto">Rodada {{ item.numero }}</span>
-            <span class="feed-rodada-linha"></span>
+            <span class="feed-rodada-linha" aria-hidden="true"></span>
           </div>
         }
         @case ('grupo') {
-          <div class="feed-grupo">📦 Grupo: {{ item.nome }}</div>
+          <div class="feed-grupo"><span aria-hidden="true">📦 </span>Grupo: {{ item.nome }}</div>
         }
         @case ('scan') {
           <div class="feed-item feed-item-scan">
-            <span class="feed-emoji">🔎</span>
+            <span class="feed-emoji" aria-hidden="true">🔎</span>
             <span class="feed-texto">Garimpando... <strong>{{ item.contagem }}</strong> produto(s) novo(s)</span>
             @if (item.hora) {
               <span class="feed-hora">{{ item.hora }}</span>
@@ -55,7 +64,7 @@
         }
         @case ('linha') {
           <div class="feed-item" [class]="'feed-tom-' + item.tom">
-            <span class="feed-emoji">{{ item.emoji }}</span>
+            <span class="feed-emoji" aria-hidden="true">{{ item.emoji }}</span>
             <span class="feed-texto">{{ item.texto }}</span>
             @if (item.hora) {
               <span class="feed-hora">{{ item.hora }}</span>

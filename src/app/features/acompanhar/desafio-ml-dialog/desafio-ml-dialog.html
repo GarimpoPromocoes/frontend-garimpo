@@ -1,6 +1,6 @@
 @if (aberto()) {
   <div class="modal-fundo" (click)="fechar()">
-    <div class="modal-caixa modal-login modal-login-largo" (click)="$event.stopPropagation()">
+    <div class="modal-caixa modal-login modal-login-largo" role="dialog" aria-modal="true" aria-label="Verificação de segurança do Mercado Livre" (click)="$event.stopPropagation()">
       <div class="card-header">
         <div class="loja-titulo">
           <span class="loja-logo-caixa loja-logo-caixa-sm">
@@ -12,7 +12,7 @@
           </p>
         </div>
         <button type="button" class="btn-fechar" (click)="fechar()" aria-label="Fechar" title="Fechar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
             <path d="M6 6 18 18M18 6 6 18" />
           </svg>
         </button>
@@ -49,6 +49,7 @@
         <div class="tela-loja-digitar">
           <input
             type="text"
+            aria-label="Texto para digitar na tela do Mercado Livre"
             placeholder="Precisa digitar algo? Clique no campo da tela e escreva aqui"
             [value]="texto()"
             (input)="texto.set($any($event.target).value)"
@@ -61,7 +62,7 @@
       } @else if (demorou()) {
         <div class="desafio-demorou">
           <span class="desafio-demorou-icone">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 7.5V12l3 2" /></svg>
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 7.5V12l3 2" /></svg>
           </span>
           <strong>A tela da verificação ainda não chegou</strong>
           <p>

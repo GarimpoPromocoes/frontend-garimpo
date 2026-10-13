@@ -17,10 +17,10 @@
   </div>
 
   @if (admin.erro()) {
-    <p class="error-text">{{ admin.erro() }}</p>
+    <p class="error-text" role="alert">{{ admin.erro() }}</p>
   }
   @if (erroAcao()) {
-    <p class="error-text">{{ erroAcao() }}</p>
+    <p class="error-text" role="alert">{{ erroAcao() }}</p>
   }
 
   @if (admin.carregando() && !admin.clientes().length) {
@@ -30,13 +30,13 @@
       <table class="tabela">
         <thead>
           <tr>
-            <th>Conta</th>
-            <th class="col-num">Produtos</th>
-            <th class="col-num">Envios</th>
-            <th class="col-num">Lojas</th>
-            <th>Última promoção</th>
-            <th>Situação</th>
-            <th></th>
+            <th scope="col">Conta</th>
+            <th scope="col" class="col-num">Produtos</th>
+            <th scope="col" class="col-num">Envios</th>
+            <th scope="col" class="col-num">Lojas</th>
+            <th scope="col">Última promoção</th>
+            <th scope="col">Situação</th>
+            <th scope="col"><span class="sr-only">Ações</span></th>
           </tr>
         </thead>
         <tbody>

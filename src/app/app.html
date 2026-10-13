@@ -5,22 +5,23 @@
     coisa só, nunca duas telas diferentes nem um vazio no meio.
   -->
   <div class="login-shell">
-    <div class="carregando-central">
-      <span class="login-spinner login-spinner-grande"></span>
+    <div class="carregando-central" role="status">
+      <span class="login-spinner login-spinner-grande" aria-hidden="true"></span>
       <p>Carregando…</p>
     </div>
   </div>
 } @else if (!auth.usuario()) {
   <app-login-card />
 } @else {
+<a class="pular-link" href="#conteudo">Pular para o conteúdo</a>
 <div class="shell">
-  <aside class="sidebar" [class.sidebar-aberta]="menuAberto()">
+  <aside class="sidebar" id="menu-lateral" [class.sidebar-aberta]="menuAberto()">
     <div class="sidebar-brand">
-      <img class="brand-mark" src="logo.webp" alt="" width="42" height="42" />
+      <img class="brand-mark" src="logo.webp" alt="" width="46" height="46" />
       <span class="brand-text">Promobot</span>
     </div>
 
-    <nav class="sidebar-nav">
+    <nav class="sidebar-nav" aria-label="Páginas do painel">
       @for (s of secoes(); track s.nome) {
         <p class="nav-secao">{{ s.nome }}</p>
         @for (a of s.itens; track a.id) {
@@ -28,23 +29,27 @@
             type="button"
             class="nav-item"
             [class.nav-item-active]="aba() === a.id"
+            [attr.aria-current]="aba() === a.id ? 'page' : null"
             (click)="irPara(a.id)"
           >
             @switch (a.id) {
-            @case ('painel') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.6"/></svg> }
-            @case ('ganhos') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M14.8 9.2c-.5-.9-1.6-1.4-2.8-1.4-1.6 0-2.8.8-2.8 2.1 0 2.9 5.8 1.5 5.8 4.3 0 1.3-1.3 2.1-3 2.1-1.3 0-2.4-.6-2.9-1.5M12 6.2v1.6M12 16.3v1.5"/></svg> }
-            @case ('atividade') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l2.5-7 5 14 2.5-7h6"/></svg> }
-            @case ('busca') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20.5 20.5-5.2-5.2"/><path d="m10.5 7.4 1 2 2.2.3-1.6 1.5.4 2.2-2-1-2 1 .4-2.2-1.6-1.5 2.2-.3Z"/></svg> }
-            @case ('dono') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 20 6v5.4c0 4.4-3.1 8.2-8 9.8-4.9-1.6-8-5.4-8-9.8V6Z"/><path d="m9.2 12.2 2 2 3.6-3.8"/></svg> }
-            @case ('grupos') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 19v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V19"/><circle cx="9" cy="7" r="3.4"/><path d="M22 19v-1.5a4 4 0 0 0-3-3.87"/><path d="M16.5 4.2a3.4 3.4 0 0 1 0 6.6"/></svg> }
-            @case ('garimpo') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20.5 20.5-5.2-5.2"/><path d="M8 10.5h5M10.5 8v5"/></svg> }
-            @case ('regras') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h7M14 7h7M3 17h4M11 17h10"/><circle cx="12" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg> }
-            @case ('whatsapp') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 11.6a8.4 8.4 0 0 1-12.3 7.4L3.5 20.5l1.6-4.6A8.4 8.4 0 1 1 20.5 11.6Z"/><path d="M8.8 9.1c0 3 2.4 5.4 5.4 5.4"/></svg> }
-            @case ('lojas') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9 5 4.5h14L20.5 9"/><path d="M3.5 9h17v9.5a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5Z"/><path d="M9.5 20v-5.5h5V20"/></svg> }
+            @case ('painel') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.6"/></svg> }
+            @case ('ganhos') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M14.8 9.2c-.5-.9-1.6-1.4-2.8-1.4-1.6 0-2.8.8-2.8 2.1 0 2.9 5.8 1.5 5.8 4.3 0 1.3-1.3 2.1-3 2.1-1.3 0-2.4-.6-2.9-1.5M12 6.2v1.6M12 16.3v1.5"/></svg> }
+            @case ('atividade') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l2.5-7 5 14 2.5-7h6"/></svg> }
+            @case ('busca') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20.5 20.5-5.2-5.2"/><path d="m10.5 7.4 1 2 2.2.3-1.6 1.5.4 2.2-2-1-2 1 .4-2.2-1.6-1.5 2.2-.3Z"/></svg> }
+            @case ('dono') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 20 6v5.4c0 4.4-3.1 8.2-8 9.8-4.9-1.6-8-5.4-8-9.8V6Z"/><path d="m9.2 12.2 2 2 3.6-3.8"/></svg> }
+            @case ('grupos') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 19v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V19"/><circle cx="9" cy="7" r="3.4"/><path d="M22 19v-1.5a4 4 0 0 0-3-3.87"/><path d="M16.5 4.2a3.4 3.4 0 0 1 0 6.6"/></svg> }
+            @case ('garimpo') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20.5 20.5-5.2-5.2"/><path d="M8 10.5h5M10.5 8v5"/></svg> }
+            @case ('regras') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h7M14 7h7M3 17h4M11 17h10"/><circle cx="12" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg> }
+            @case ('whatsapp') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 11.6a8.4 8.4 0 0 1-12.3 7.4L3.5 20.5l1.6-4.6A8.4 8.4 0 1 1 20.5 11.6Z"/><path d="M8.8 9.1c0 3 2.4 5.4 5.4 5.4"/></svg> }
+            @case ('lojas') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9 5 4.5h14L20.5 9"/><path d="M3.5 9h17v9.5a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5Z"/><path d="M9.5 20v-5.5h5V20"/></svg> }
             }
             <span class="nav-label">{{ a.label }}</span>
             @if (badgeDe(a.id); as b) {
-              <span class="nav-badge" [class.nav-badge-urgente]="badgeUrgente(a.id)">{{ b }}</span>
+              <span class="nav-badge" [class.nav-badge-urgente]="badgeUrgente(a.id)">
+                <span aria-hidden="true">{{ b }}</span>
+                <span class="sr-only">{{ b === '!' ? 'precisa de atenção' : a.id === 'grupos' ? b + ' cadastrados' : b + ' com problema' }}</span>
+              </span>
             }
           </button>
         }
@@ -52,6 +57,13 @@
     </nav>
 
     <div class="sidebar-footer">
+      <!-- Troca de tema: quem trata o clique é core/tema/tema.ts (data-alternar-tema). O texto certo
+           aparece por CSS conforme o tema em uso. -->
+      <button type="button" class="tema-botao" data-alternar-tema>
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>
+        <span class="so-no-claro">Usar tema escuro</span>
+        <span class="so-no-escuro">Usar tema claro</span>
+      </button>
       <div class="usuario-pill">
         <span class="usuario-email">{{ auth.usuario()?.email }}</span>
         <button type="button" class="btn btn-ghost btn-sm" (click)="sair()">Sair</button>
@@ -60,13 +72,20 @@
   </aside>
 
   @if (menuAberto()) {
-    <div class="sidebar-backdrop" (click)="menuAberto.set(false)"></div>
+    <div class="sidebar-backdrop" aria-hidden="true" (click)="menuAberto.set(false)"></div>
   }
 
   <div class="main-area">
     <header class="topbar">
-      <button type="button" class="menu-toggle" (click)="menuAberto.set(!menuAberto())" aria-label="Abrir menu">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+      <button
+        type="button"
+        class="menu-toggle"
+        aria-controls="menu-lateral"
+        [attr.aria-expanded]="menuAberto()"
+        [attr.aria-label]="menuAberto() ? 'Fechar menu' : 'Abrir menu'"
+        (click)="menuAberto.set(!menuAberto())"
+      >
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
           <path d="M4 7h16M4 12h16M4 17h16" />
         </svg>
       </button>
@@ -78,6 +97,8 @@
 
       <div class="topbar-actions">
         <!-- Status das conexoes (WhatsApp, Telegram e lojas) + sino do que caiu. -->
+        <!-- role=status: quando o robô liga ou para, o leitor de tela avisa sem tirar o foco de onde está. -->
+        <span class="topbar-robo" role="status">
         @if (runControl.rodandoContinuo()) {
           <span class="badge badge-running">
             <span class="badge-dot"></span>
@@ -88,15 +109,17 @@
         } @else {
           <span class="badge badge-off"><span class="badge-dot"></span>Robô parado</span>
         }
+        </span>
         <app-status-conexoes />
         <app-sino />
       </div>
     </header>
 
-    <!-- Ligar/parar o robô: botão redondo no canto de baixo, some quando abre qualquer janela. -->
+    <!-- Ligar/parar o robô nas outras páginas: fica no canto de baixo e some quando abre qualquer
+         janela. No Painel o controle grande já está na tela, então este não aparece. -->
     <div
       class="bot-control-fixo"
-      [class.bot-control-oculto]="algumModalAberto()"
+      [class.bot-control-oculto]="algumModalAberto() || aba() === 'painel'"
       [class.bot-control-acima]="mostrarEsperaMl()"
     >
       @if (!runControl.algoRodando()) {
@@ -104,37 +127,36 @@
           type="button"
           class="bot-fab bot-fab-ligar"
           [disabled]="runControl.iniciando()"
-          [title]="runControl.iniciando() ? 'Ligando…' : runControl.podeLigar() ? 'Ligar robô' : 'Faltam passos de configuração — ligar mostra o que falta'"
-          [attr.aria-label]="runControl.iniciando() ? 'Ligando…' : 'Ligar robô'"
+          [title]="runControl.podeLigar() ? null : 'Faltam passos de configuração — ligar mostra o que falta'"
           (click)="runControl.executar()"
         >
           @if (runControl.iniciando()) {
             <span class="bot-fab-spinner"></span>
           } @else {
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.5 5.6v12.8a1 1 0 0 0 1.52.85l10.2-6.4a1 1 0 0 0 0-1.7l-10.2-6.4a1 1 0 0 0-1.52.85Z" /></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8.5 5.6v12.8a1 1 0 0 0 1.52.85l10.2-6.4a1 1 0 0 0 0-1.7l-10.2-6.4a1 1 0 0 0-1.52.85Z" /></svg>
           }
+          <span>{{ runControl.iniciando() ? 'Ligando…' : 'Ligar robô' }}</span>
         </button>
       } @else {
         <button
           type="button"
           class="bot-fab bot-fab-parar"
           [disabled]="runControl.parando()"
-          [title]="runControl.parando() ? 'Parando…' : 'Parar robô'"
-          [attr.aria-label]="runControl.parando() ? 'Parando…' : 'Parar robô'"
           (click)="runControl.parar()"
         >
           @if (runControl.parando()) {
             <span class="bot-fab-spinner"></span>
           } @else {
-            <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="6.5" width="11" height="11" rx="2" /></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6.5" y="6.5" width="11" height="11" rx="2" /></svg>
           }
+          <span>{{ runControl.parando() ? 'Parando…' : 'Parar robô' }}</span>
         </button>
       }
     </div>
 
-    <main class="content">
+    <main class="content" id="conteudo" tabindex="-1" [class.content-painel]="aba() === 'painel'">
       @if (configService.erro()) {
-        <div class="alert-banner">{{ configService.erro() }}</div>
+        <div class="alert-banner" role="alert">{{ configService.erro() }}</div>
       }
 
       @if (statusService.status()?.processoExterno?.rodando) {
@@ -150,12 +172,12 @@
             <div class="setup-card">
               <div class="setup-head">
                 <h2>Falta pouco para começar</h2>
-                <p>Complete os passos abaixo e o robô já pode ser ligado.</p>
+                <p>Resolva o que está na lista e o robô já pode ser ligado.</p>
               </div>
               <ul class="setup-list">
-                @for (p of runControl.pendencias(); track p.texto; let i = $index) {
+                @for (p of runControl.pendencias(); track p.texto) {
                   <li>
-                    <span class="setup-index">{{ i + 1 }}</span>
+                    <span class="setup-marca" aria-hidden="true"></span>
                     <span class="setup-text">{{ p.texto }}</span>
                     <button type="button" class="btn btn-ghost btn-sm" (click)="irPara(p.aba)">Resolver</button>
                   </li>
@@ -164,11 +186,12 @@
             </div>
           }
 
-          <app-stats-card (verProdutos)="produtosModalAberto.set(true)" />
-
-          <div class="col-2">
-            <app-run-card />
-            <app-console-card [compacto]="true" (verTudo)="atividadeModalAberta.set(true)" />
+          <!-- Controle e números lado a lado em cima, atividade embaixo ocupando o resto da altura:
+               cabe tudo na tela, sem rolar. -->
+          <div class="painel-grade">
+            <app-run-card class="painel-robo" />
+            <app-stats-card class="painel-numeros" (verProdutos)="produtosModalAberto.set(true)" />
+            <app-console-card class="painel-atividade" [compacto]="true" (verTudo)="atividadeModalAberta.set(true)" />
           </div>
         }
 
@@ -248,7 +271,7 @@
   <div class="modal-fundo" (click)="produtosModalAberto.set(false)">
     <div class="modal-caixa modal-produtos" role="dialog" aria-modal="true" aria-label="Produtos garimpados" (click)="$event.stopPropagation()">
       <button type="button" class="btn-fechar modal-atividade-fechar" (click)="produtosModalAberto.set(false)" aria-label="Fechar" title="Fechar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6 18 18M18 6 6 18" /></svg>
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6 18 18M18 6 6 18" /></svg>
       </button>
       @defer (on immediate) {
         <app-produtos-card />
@@ -271,7 +294,7 @@
   <div class="modal-fundo" (click)="atividadeModalAberta.set(false)">
     <div class="modal-caixa modal-atividade" role="dialog" aria-modal="true" aria-label="Atividade do robô" (click)="$event.stopPropagation()">
       <button type="button" class="btn-fechar modal-atividade-fechar" (click)="atividadeModalAberta.set(false)" aria-label="Fechar" title="Fechar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6 18 18M18 6 6 18" /></svg>
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6 18 18M18 6 6 18" /></svg>
       </button>
       <app-console-card />
     </div>
@@ -288,7 +311,7 @@
     </div>
     <button type="button" class="btn btn-primary btn-sm" (click)="jobsService.desafioPopupAberto.set(true)">Resolver</button>
     <button type="button" class="btn-fechar" (click)="esconderEsperaMl()" aria-label="Esconder" title="Esconder (continua no sino)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6 18 18M18 6 6 18" /></svg>
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6 18 18M18 6 6 18" /></svg>
     </button>
   </div>
 }
@@ -301,8 +324,8 @@
     uma tela travada nem some tão rápido que ninguém entende o que viu.
   -->
   <div class="carregando-overlay">
-    <div class="carregando-central">
-      <span class="login-spinner login-spinner-grande"></span>
+    <div class="carregando-central" role="status">
+      <span class="login-spinner login-spinner-grande" aria-hidden="true"></span>
       <p>Carregando…</p>
     </div>
   </div>

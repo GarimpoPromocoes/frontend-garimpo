@@ -1,16 +1,23 @@
-<div class="login-shell">
-  <form class="card login-card" (ngSubmit)="enviar()">
-    <div class="card-header">
-      <div>
-        <h2>{{ modo() === 'entrar' ? 'Entrar' : 'Criar conta' }}</h2>
-        <p class="card-subtitle">
-          {{ modo() === 'entrar' ? 'Acesse o seu painel do Promobot.' : 'Leva menos de um minuto.' }}
-        </p>
-      </div>
+<main class="login-shell">
+  <div class="login-palco">
+  <div class="login-marca">
+    <img src="logo.webp" alt="" width="112" height="112" />
+    <p class="login-marca-nome">Promobot</p>
+    <p class="login-marca-texto">
+      O robô que garimpa ofertas nas lojas e publica nos seus grupos, com o seu link de afiliado.
+    </p>
+  </div>
+
+  <form class="login-card" (ngSubmit)="enviar()">
+    <div>
+      <h1>{{ modo() === 'entrar' ? 'Entrar' : 'Criar conta' }}</h1>
+      <p class="card-subtitle">
+        {{ modo() === 'entrar' ? 'Acesse o seu painel.' : 'Leva menos de um minuto.' }}
+      </p>
     </div>
 
     @if (auth.erro()) {
-      <div class="alert-banner">{{ auth.erro() }}</div>
+      <div class="alert-banner" role="alert">{{ auth.erro() }}</div>
     }
 
     <div class="field">
@@ -43,7 +50,7 @@
       }
     </div>
 
-    <button type="submit" class="btn btn-primary btn-block" [disabled]="auth.enviando()">
+    <button type="submit" class="btn btn-lg btn-hero btn-block" [disabled]="auth.enviando()">
       {{ auth.enviando() ? 'Um momento…' : modo() === 'entrar' ? 'Entrar' : 'Criar conta' }}
     </button>
 
@@ -51,4 +58,5 @@
       {{ modo() === 'entrar' ? 'Ainda não tenho conta' : 'Já tenho conta' }}
     </button>
   </form>
-</div>
+  </div>
+</main>

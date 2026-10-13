@@ -3,7 +3,9 @@
     @for (item of items(); track item + '' + $index; let i = $index) {
       <span class="chip">
         {{ item }}
-        <button type="button" class="chip-remove" (click)="remover(i)" aria-label="Remover">×</button>
+        <button type="button" class="chip-remove" (click)="remover(i)" [attr.aria-label]="'Remover ' + item">
+          <span aria-hidden="true">×</span>
+        </button>
       </span>
     }
     @if (items().length === 0) {
@@ -13,6 +15,7 @@
   <div class="chip-add">
     <input
       type="text"
+      aria-label="Novo item"
       [ngModel]="novoItem()"
       (ngModelChange)="novoItem.set($event)"
       [placeholder]="placeholder()"
