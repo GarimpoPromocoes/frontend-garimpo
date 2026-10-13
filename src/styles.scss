@@ -3354,6 +3354,24 @@ app-status-conexoes {
   max-height: min(70vh, 620px);
 }
 
+/* Produtos garimpados dentro do modal do painel: o card perde a moldura, o modal já é a caixa. */
+.modal-produtos {
+  padding: 20px 22px;
+  position: relative;
+}
+.modal-produtos app-produtos-card > .card {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  box-shadow: none;
+}
+.modal-produtos .card-header {
+  padding-right: 44px;
+}
+.stat-cell-acao {
+  margin: -6px 0 -6px auto;
+}
+
 /* Buscar produto — o texto da prévia vem por [innerHTML] (formatação do WhatsApp), fora do escopo
    do componente: link e código ficam aqui. */
 .zap-texto a {

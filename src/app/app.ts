@@ -39,13 +39,12 @@ export type AbaId =
   | 'grupos'
   | 'garimpo'
   | 'regras'
-  | 'produtos'
   | 'busca'
   | 'whatsapp'
   | 'lojas'
   | 'dono';
 
-type BadgeId = 'grupos' | 'lojas' | 'produtos' | 'alerta' | null;
+type BadgeId = 'grupos' | 'lojas' | 'alerta' | null;
 
 interface Aba {
   id: AbaId;
@@ -72,14 +71,6 @@ const ABAS: Aba[] = [
     secao: 'Acompanhar',
   },
 
-  {
-    id: 'produtos',
-    label: 'Produtos',
-    titulo: 'Produtos garimpados',
-    descricao: 'Tudo que o robô encontrou e ainda pode virar promoção.',
-    secao: 'Divulgação',
-    badge: 'produtos',
-  },
   {
     id: 'busca',
     label: 'Oferta personalizada',
@@ -196,6 +187,8 @@ export class App implements OnInit, OnDestroy {
   protected readonly menuAberto = signal(false);
   /** Modal grandão da atividade — abre pelo "Ver tudo" do painel, no lugar de trocar de aba. */
   protected readonly atividadeModalAberta = signal(false);
+  /** Produtos garimpados — abre pelo "Ver produtos" do painel, no lugar de ser uma aba. */
+  protected readonly produtosModalAberto = signal(false);
 
   protected readonly algumModalAberto = computed(() =>
     !!this.lojasUi.aberta() ||
@@ -205,7 +198,8 @@ export class App implements OnInit, OnDestroy {
     this.jobsService.desafioPopupAberto() ||
     !!this.confirmacaoService.pedido() ||
     this.buscaService.postagemAberta() ||
-    this.atividadeModalAberta(),
+    this.atividadeModalAberta() ||
+    this.produtosModalAberto(),
   );
 
   protected badgeDe(id: AbaId): string | null {
@@ -222,10 +216,6 @@ export class App implements OnInit, OnDestroy {
         if (!this.runControl.lojasConectadas().length) return '!';
         const caidas = this.avisos.avisos().filter((a) => ['mercadolivre', 'amazon', 'shopee'].includes(a.origem)).length;
         return caidas ? String(caidas) : null;
-      }
-      case 'produtos': {
-        const n = s?.produtosCatalogo ?? 0;
-        return n ? String(n) : null;
       }
       case 'atividade':
         return this.jobsService.desafioMl() ? '!' : null;
@@ -281,6 +271,8 @@ export class App implements OnInit, OnDestroy {
       if ((salva as string) === 'cupons') salva = 'regras';
       // Atividade deixou de ser aba — agora é um modal aberto pelo painel.
       if ((salva as string) === 'atividade') salva = 'painel';
+      // Produtos também: agora é um modal aberto pelo painel.
+      if ((salva as string) === 'produtos') salva = 'painel';
       if (salva && ABAS.some((a) => a.id === salva)) this.aba.set(salva);
     } catch (_) {
     }

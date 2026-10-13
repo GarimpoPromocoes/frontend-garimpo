@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, output } from '@angular/core';
 import { StatusService } from '../../../core/services/status.service';
 
 @Component({
@@ -8,4 +8,5 @@ import { StatusService } from '../../../core/services/status.service';
 })
 export class StatsCard {
   protected statusService = inject(StatusService);
+  verProdutos = output<void>();
 }
