@@ -59,7 +59,7 @@
               </div>
 
               @if (naoEncontradosDe(g.id).length) {
-                <div class="info-box info-box-erro">
+                <div class="info-box info-box-erro" role="alert">
                   Este WhatsApp não participa de: <strong>{{ naoEncontradosDe(g.id).join(', ') }}</strong>. Escolha
                   pela lista ou entre no grupo com este número.
                 </div>
@@ -68,8 +68,10 @@
               @if (aberto() === g.id) {
                 <div class="clona-de-escolha">
                   <div class="field">
-                    <label>Grupos que o {{ g.nome }} clona ({{ clonaDe(g.id).length }}/{{ maxGrupos }})</label>
+                    <span class="field-rotulo">Grupos que o {{ g.nome }} clona ({{ clonaDe(g.id).length }}/{{ maxGrupos }})</span>
                     <app-chip-input
+                      role="group"
+                      [attr.aria-label]="'Grupos que ' + g.nome + ' clona'"
                       [items]="clonaDe(g.id)"
                       (itemsChange)="definirClonagem(g.id, $event)"
                       placeholder="Digite o nome (ou parte dele) e aperte Enter"
@@ -79,7 +81,7 @@
 
                   <div class="field">
                     <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
-                      <label>Grupos em que este WhatsApp está</label>
+                      <span class="field-rotulo">Grupos em que este WhatsApp está</span>
                       <button
                         type="button"
                         class="btn btn-ghost btn-sm"
@@ -90,10 +92,10 @@
                       </button>
                     </div>
                     @if (erroGrupos(); as e) {
-                      <span class="hint error-text">{{ e }}</span>
+                      <span class="hint error-text" role="alert">{{ e }}</span>
                     }
                     @if (doWhatsapp().grupos.length) {
-                      <div class="regra-chips">
+                      <div class="regra-chips" role="group" aria-label="Grupos em que este WhatsApp está">
                         @for (w of doWhatsapp().grupos; track w.nome) {
                           <button
                             type="button"
@@ -162,7 +164,7 @@
   }
 
   @if (erro(); as e) {
-    <div class="info-box info-box-erro">{{ e }}</div>
+    <div class="info-box info-box-erro" role="alert">{{ e }}</div>
   }
 
   <div class="garimpo-rodape">

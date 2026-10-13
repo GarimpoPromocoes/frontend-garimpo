@@ -3,14 +3,12 @@
 </p>
 
 <div class="regras-secao">
-  <h3 class="regras-secao-titulo">Ritmo das mensagens</h3>
-
   <div class="grupos-grade">
     <!-- Frequência -->
     <button type="button" class="grupo-card regra-card" (click)="abrir('frequencia')">
       <div class="grupo-card-topo">
         <span class="regra-icone">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
         </span>
         <div class="grupo-card-nomes">
           <span class="grupo-card-nome">Frequência</span>
@@ -27,7 +25,7 @@
       </p>
       <div class="grupo-card-rodape">
         <span>Ritmo {{ frequencia().ritmo.toLowerCase() }}</span>
-        <span>Ajustar →</span>
+        <span>Ajustar</span>
       </div>
     </button>
 
@@ -35,7 +33,7 @@
     <button type="button" class="grupo-card regra-card" (click)="abrir('repeticao')">
       <div class="grupo-card-topo">
         <span class="regra-icone">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2.5 20.5 6 17 9.5"/><path d="M3.5 11V9.5A3.5 3.5 0 0 1 7 6h13.5"/><path d="M7 21.5 3.5 18 7 14.5"/><path d="M20.5 13v1.5A3.5 3.5 0 0 1 17 18H3.5"/></svg>
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2.5 20.5 6 17 9.5"/><path d="M3.5 11V9.5A3.5 3.5 0 0 1 7 6h13.5"/><path d="M7 21.5 3.5 18 7 14.5"/><path d="M20.5 13v1.5A3.5 3.5 0 0 1 17 18H3.5"/></svg>
         </span>
         <div class="grupo-card-nomes">
           <span class="grupo-card-nome">Repetição de produtos</span>
@@ -55,7 +53,7 @@
       </p>
       <div class="grupo-card-rodape">
         <span>Vale para cada grupo</span>
-        <span>Ajustar →</span>
+        <span>Ajustar</span>
       </div>
     </button>
 
@@ -63,7 +61,7 @@
     <button type="button" class="grupo-card regra-card" [class.regra-card-off]="!cupons().ativo" (click)="abrir('cupons')">
       <div class="grupo-card-topo">
         <span class="regra-icone">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5V7a1.5 1.5 0 0 1 1.5-1.5h15A1.5 1.5 0 0 1 21 7v2.5a2.5 2.5 0 0 0 0 5V17a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17v-2.5a2.5 2.5 0 0 0 0-5Z"/><path d="M14 5.5v13" stroke-dasharray="2 2.6"/></svg>
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5V7a1.5 1.5 0 0 1 1.5-1.5h15A1.5 1.5 0 0 1 21 7v2.5a2.5 2.5 0 0 0 0 5V17a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17v-2.5a2.5 2.5 0 0 0 0-5Z"/><path d="M14 5.5v13" stroke-dasharray="2 2.6"/></svg>
         </span>
         <div class="grupo-card-nomes">
           <span class="grupo-card-nome">Cupons de desconto</span>
@@ -98,20 +96,14 @@
             Cupons buscados sozinhos
           }
         </span>
-        <span>Ajustar →</span>
+        <span>Ajustar</span>
       </div>
     </button>
-  </div>
-</div>
 
-<div class="regras-secao">
-  <h3 class="regras-secao-titulo">Divulgação</h3>
-
-  <div class="grupos-grade">
     <button type="button" class="grupo-card regra-card" [class.regra-card-off]="!divulgacao().ativo" (click)="abrir('divulgacao')">
       <div class="grupo-card-topo">
         <span class="regra-icone">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-6-6 18-3.5-7.5L3 11Z"/></svg>
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-6-6 18-3.5-7.5L3 11Z"/></svg>
         </span>
         <div class="grupo-card-nomes">
           <span class="grupo-card-nome">Mensagem de divulgação</span>
@@ -132,20 +124,14 @@
       }
       <div class="grupo-card-rodape">
         <span>Vale para cada grupo</span>
-        <span>Ajustar →</span>
+        <span>Ajustar</span>
       </div>
     </button>
-  </div>
-</div>
 
-<div class="regras-secao">
-  <h3 class="regras-secao-titulo">Avisos</h3>
-
-  <div class="grupos-grade">
     <button type="button" class="grupo-card regra-card" [class.regra-card-off]="!alerta().ativo" (click)="abrir('alerta')">
       <div class="grupo-card-topo">
         <span class="regra-icone">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
         </span>
         <div class="grupo-card-nomes">
           <span class="grupo-card-nome">Aviso de queda</span>
@@ -169,7 +155,7 @@
       }
       <div class="grupo-card-rodape">
         <span>Enquanto o robô está rodando</span>
-        <span>Ajustar →</span>
+        <span>Ajustar</span>
       </div>
     </button>
   </div>
@@ -180,16 +166,16 @@
 <!-- ================================ janelas ================================ -->
 @if (janela(); as j) {
   <div class="modal-fundo" (click)="fechar()">
-    <div class="modal-caixa modal-grupo" (click)="$event.stopPropagation()">
+    <div class="modal-caixa modal-grupo" role="dialog" aria-modal="true" aria-label="Ajustar regra de postagem" (click)="$event.stopPropagation()">
       <div class="card-header">
         <div class="grupo-modal-titulo">
           <span class="regra-icone">
             @switch (j) {
-              @case ('frequencia') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> }
-              @case ('repeticao') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2.5 20.5 6 17 9.5"/><path d="M3.5 11V9.5A3.5 3.5 0 0 1 7 6h13.5"/><path d="M7 21.5 3.5 18 7 14.5"/><path d="M20.5 13v1.5A3.5 3.5 0 0 1 17 18H3.5"/></svg> }
-              @case ('cupons') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5V7a1.5 1.5 0 0 1 1.5-1.5h15A1.5 1.5 0 0 1 21 7v2.5a2.5 2.5 0 0 0 0 5V17a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17v-2.5a2.5 2.5 0 0 0 0-5Z"/><path d="M14 5.5v13" stroke-dasharray="2 2.6"/></svg> }
-              @case ('divulgacao') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-6-6 18-3.5-7.5L3 11Z"/></svg> }
-              @case ('alerta') { <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg> }
+              @case ('frequencia') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> }
+              @case ('repeticao') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2.5 20.5 6 17 9.5"/><path d="M3.5 11V9.5A3.5 3.5 0 0 1 7 6h13.5"/><path d="M7 21.5 3.5 18 7 14.5"/><path d="M20.5 13v1.5A3.5 3.5 0 0 1 17 18H3.5"/></svg> }
+              @case ('cupons') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5V7a1.5 1.5 0 0 1 1.5-1.5h15A1.5 1.5 0 0 1 21 7v2.5a2.5 2.5 0 0 0 0 5V17a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17v-2.5a2.5 2.5 0 0 0 0-5Z"/><path d="M14 5.5v13" stroke-dasharray="2 2.6"/></svg> }
+              @case ('divulgacao') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-6-6 18-3.5-7.5L3 11Z"/></svg> }
+              @case ('alerta') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg> }
             }
           </span>
           <div>
@@ -214,7 +200,7 @@
           </div>
         </div>
         <button type="button" class="btn-fechar" (click)="fechar()" aria-label="Fechar" title="Fechar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6 18 18M18 6 6 18" /></svg>
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6 18 18M18 6 6 18" /></svg>
         </button>
       </div>
 
@@ -236,8 +222,8 @@
           </div>
 
           <div class="field">
-            <label>Ou escolha a faixa exata</label>
-            <div class="regra-faixa">
+            <span class="field-rotulo" id="regras-postagem-1">Ou escolha a faixa exata</span>
+            <div role="group" aria-labelledby="regras-postagem-1" class="regra-faixa">
               <span>Esperar entre</span>
               <input type="number" min="1" max="720" [ngModel]="rMin()" (ngModelChange)="rMin.set($event)" aria-label="Mínimo em minutos" />
               <span>e</span>
@@ -257,9 +243,9 @@
 
         @case ('repeticao') {
           <div class="field">
-            <label>Tempo mínimo antes de repetir</label>
+            <span class="field-rotulo" id="regras-postagem-2">Tempo mínimo antes de repetir</span>
             <span class="hint">Nesse período o mesmo produto não volta ao grupo — nem se o preço cair.</span>
-            <div class="regra-chips">
+            <div role="group" aria-labelledby="regras-postagem-2" class="regra-chips">
               @for (o of opcoesCooldown; track o.horas) {
                 <button type="button" class="regra-chip" [class.regra-chip-ativa]="n(rCooldown()) === o.horas" (click)="rCooldown.set(o.horas)">
                   {{ o.rotulo }}
@@ -273,9 +259,9 @@
           </div>
 
           <div class="field">
-            <label>Repetir mesmo sem baixar o preço depois de</label>
+            <span class="field-rotulo" id="regras-postagem-3">Repetir mesmo sem baixar o preço depois de</span>
             <span class="hint">"Nunca" = o produto só volta quando ficar mais barato ou com desconto maior.</span>
-            <div class="regra-chips">
+            <div role="group" aria-labelledby="regras-postagem-3" class="regra-chips">
               @for (o of opcoesRepostar; track o.dias) {
                 <button type="button" class="regra-chip" [class.regra-chip-ativa]="n(rRepostar()) === o.dias" (click)="rRepostar.set(o.dias)">
                   {{ o.rotulo }}
@@ -324,12 +310,12 @@
 
           @if (rCupomAtivo()) {
             <div class="field">
-              <label>Como as mensagens se dividem</label>
+              <span class="field-rotulo" id="regras-postagem-4">Como as mensagens se dividem</span>
               <span class="hint">
                 Arraste as duas bolinhas. Em cada grupo o robô segue essa proporção: olha as últimas mensagens e manda
                 o tipo que está mais atrasado.
               </span>
-              <div class="regra-chips">
+              <div role="group" aria-labelledby="regras-postagem-4" class="regra-chips">
                 @for (d of divisoes; track d.nome) {
                   <button type="button" class="regra-chip" [class.regra-chip-ativa]="divisaoAtiva(d)" (click)="escolherDivisao(d)">
                     {{ d.nome }}
@@ -370,13 +356,13 @@
             </div>
 
             <div class="field">
-              <label>Prefixo dos seus cupons</label>
+              <label for="regras-postagem-5">Prefixo dos seus cupons</label>
               <span class="hint">
                 Começo dos códigos que o robô cria quando o Mercado Livre libera a ferramenta de cupons de afiliado para a
                 sua conta (hoje não está liberada). Só letras e números, de 3 a {{ prefixoMax }}. Em branco, usa
                 {{ prefixoPadrao }}.
               </span>
-              <input
+              <input id="regras-postagem-5"
                 type="text"
                 [attr.maxlength]="prefixoMax"
                 autocapitalize="characters"
@@ -439,12 +425,12 @@
 
           @if (rDivAtivo()) {
             <div class="field">
-              <label>Mensagem</label>
+              <label for="regras-postagem-6">Mensagem</label>
               <span class="hint">
                 Sua chamada e assinatura. Escreva <strong>&#123;link&#125;</strong> onde o link deve aparecer — se não escrever,
                 o link entra automaticamente no fim.
               </span>
-              <textarea
+              <textarea id="regras-postagem-6"
                 rows="6"
                 [ngModel]="rDivTexto()"
                 (ngModelChange)="rDivTexto.set($event)"
@@ -453,8 +439,8 @@
             </div>
 
             <div class="field">
-              <label>Link dos seus grupos (Linktree)</label>
-              <input
+              <label for="regras-postagem-7">Link dos seus grupos (Linktree)</label>
+              <input id="regras-postagem-7"
                 type="text"
                 [ngModel]="rDivLink()"
                 (ngModelChange)="rDivLink.set($event)"
@@ -463,8 +449,8 @@
             </div>
 
             <div class="field">
-              <label>No máximo por dia, em cada grupo</label>
-              <div class="regra-chips">
+              <span class="field-rotulo" id="regras-postagem-8">No máximo por dia, em cada grupo</span>
+              <div role="group" aria-labelledby="regras-postagem-8" class="regra-chips">
                 <button type="button" class="regra-chip" [class.regra-chip-ativa]="n(rDivMax()) === 1" (click)="rDivMax.set(1)">
                   1 vez
                 </button>
@@ -477,8 +463,8 @@
 
             @if (rDivPreview()) {
               <div class="field">
-                <label>Prévia</label>
-                <div class="info-box" style="white-space: pre-wrap">{{ rDivPreview() }}</div>
+                <span class="field-rotulo" id="regras-postagem-9">Prévia</span>
+                <div role="group" aria-labelledby="regras-postagem-9" class="info-box" style="white-space: pre-wrap">{{ rDivPreview() }}</div>
               </div>
             }
           } @else {
@@ -503,12 +489,12 @@
 
           @if (rAlertaAtivo()) {
             <div class="field">
-              <label>Onde receber o aviso</label>
+              <label for="regras-postagem-10">Onde receber o aviso</label>
               <span class="hint">
                 O nome de um grupo, exatamente como aparece no WhatsApp, ou um número com DDD. Em branco, o aviso vai
                 para a conversa do próprio número conectado.
               </span>
-              <input
+              <input id="regras-postagem-10"
                 type="text"
                 maxlength="200"
                 [ngModel]="rAlertaGrupo()"
@@ -538,7 +524,7 @@
       }
 
       @if (erro(); as e) {
-        <div class="info-box info-box-erro">{{ e }}</div>
+        <div class="info-box info-box-erro" role="alert">{{ e }}</div>
       }
 
       <div class="modal-rodape grupo-modal-rodape">

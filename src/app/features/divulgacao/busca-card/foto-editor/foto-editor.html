@@ -37,7 +37,7 @@
 
   <div class="editor-zoom">
     <button type="button" class="btn-icone" title="Diminuir" aria-label="Diminuir" [disabled]="!img()" (click)="afastar()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 12h12" /></svg>
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 12h12" /></svg>
     </button>
     <input
       type="range"
@@ -50,7 +50,7 @@
       (input)="aoMudarZoom($any($event.target).value)"
     />
     <button type="button" class="btn-icone" title="Aumentar" aria-label="Aumentar" [disabled]="!img()" (click)="aproximar()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 12h12M12 6v12" /></svg>
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 12h12M12 6v12" /></svg>
     </button>
   </div>
 
@@ -93,7 +93,7 @@
   }
 
   @if (erro() && img()) {
-    <p class="error-text">{{ erro() }}</p>
+    <p class="error-text" role="alert">{{ erro() }}</p>
   }
 
   <!-- Sempre visível no rodapé da janela: usar/cancelar. -->

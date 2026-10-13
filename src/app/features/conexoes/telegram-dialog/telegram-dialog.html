@@ -1,12 +1,12 @@
 @if (aberto()) {
   <div class="modal-fundo" (click)="aoFechar()">
-    <div class="modal-caixa modal-login" (click)="$event.stopPropagation()">
+    <div class="modal-caixa modal-login" role="dialog" aria-modal="true" aria-label="Conexão com o Telegram" (click)="$event.stopPropagation()">
       <div class="card-header">
         <div class="loja-titulo">
           <span class="loja-logo-caixa loja-logo-caixa-sm">
             <img class="loja-logo loja-logo-sm" src="lojas/telegram.png" alt="Telegram" />
           </span>
-          <p class="card-subtitle">
+          <p class="card-subtitle" role="status">
             @if (desconectando()) {
               Desconectando…
             } @else if (sucesso()) {
@@ -25,7 +25,7 @@
           </p>
         </div>
         <button type="button" class="btn-fechar" (click)="aoFechar()" aria-label="Fechar" title="Fechar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
             <path d="M6 6 18 18M18 6 6 18" />
           </svg>
         </button>
@@ -55,7 +55,7 @@
             [placeholder]="p.dica ? 'Dica: ' + p.dica : 'A senha da verificação em duas etapas'"
           />
           @if (p.erro) {
-            <span class="error-text">{{ p.erro }}</span>
+            <span class="error-text" role="alert">{{ p.erro }}</span>
           }
           <div class="form-actions">
             <button type="submit" class="btn btn-primary" [disabled]="!senha() || enviandoSenha()">
@@ -163,7 +163,7 @@
       }
 
       @if (erro() || erroConexao()) {
-        <p class="error-text">{{ erro() || erroConexao() }}</p>
+        <p class="error-text" role="alert">{{ erro() || erroConexao() }}</p>
       }
     </div>
   </div>

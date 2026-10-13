@@ -13,7 +13,7 @@
 
     <form class="busca-form" (submit)="buscar($event)">
       <input
-        type="search"
+        aria-label="Produto para buscar" type="search"
         class="busca-input"
         name="termo"
         placeholder="Ex.: Fone JBL Tune 520BT"
@@ -39,7 +39,7 @@
     </div>
 
     @if (busca.erro() && !busca.postagemAberta()) {
-      <p class="error-text">{{ busca.erro() }}</p>
+      <p class="error-text" role="alert">{{ busca.erro() }}</p>
     }
   </div>
 
@@ -199,7 +199,7 @@
           </p>
         </div>
         <button type="button" class="btn-fechar" (click)="fecharPostagem()" aria-label="Fechar" title="Fechar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6 18 18M18 6 6 18" /></svg>
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6 18 18M18 6 6 18" /></svg>
         </button>
       </div>
 
@@ -213,7 +213,7 @@
           </div>
         </div>
       } @else if (s.status === 'falhou') {
-        <p class="error-text">{{ s.erro }}</p>
+        <p class="error-text" role="alert">{{ s.erro }}</p>
         <div class="form-actions">
           <button type="button" class="btn btn-ghost" (click)="fecharPostagem()">Escolher outra oferta</button>
         </div>
@@ -373,14 +373,14 @@
                 </p>
                 @for (g of gruposDaPostagem(); track g.id) {
                   @if (g.status === 'falhou' && g.motivo) {
-                    <p class="error-text">{{ g.nome }}: {{ g.motivo }}</p>
+                    <p class="error-text" role="alert">{{ g.nome }}: {{ g.motivo }}</p>
                   }
                 }
               }
             </div>
 
             @if (busca.erro()) {
-              <p class="error-text">{{ busca.erro() }}</p>
+              <p class="error-text" role="alert">{{ busca.erro() }}</p>
             }
           </div>
         </div>

@@ -1,40 +1,79 @@
-<div class="card">
-  <div class="card-header">
-    <div>
-      <h2>Controle do robô</h2>
-      <p class="card-subtitle">
-        Ligado, o robô procura ofertas sozinho e vai publicando nos grupos até você mandar parar.
+<!-- A lanterna: o bloco que diz se o robô está ligado e onde se liga ou para. Apagada (escura) com
+     o robô parado, acesa (amarela) com ele trabalhando. -->
+<section class="lanterna" [class.lanterna-acesa]="runControl.algoRodando()" aria-labelledby="lanterna-titulo">
+  <div class="lanterna-topo">
+    <span class="lanterna-luz" aria-hidden="true"></span>
+
+    <div class="lanterna-estado">
+      <h2 id="lanterna-titulo">
+        @if (runControl.postandoAgora()) {
+          Postando agora
+        } @else if (runControl.rodandoContinuo()) {
+          Robô ligado
+        } @else if (runControl.lendoGanhos()) {
+          Lendo ganhos
+        } @else if (runControl.processoExterno()) {
+          Rodando fora do painel
+        } @else {
+          Robô parado
+        }
+      </h2>
+      <p>
+        @if (runControl.rodandoContinuo()) {
+          Ele procura ofertas e publica nos grupos sozinho, até você mandar parar.
+        } @else if (runControl.processoExterno()) {
+          O robô está rodando fora do painel. Pare por aqui para encerrá-lo.
+        } @else if (runControl.lendoGanhos()) {
+          Ele está lendo os ganhos nas lojas. Dá para ligar a postagem assim que terminar.
+        } @else {
+          Ligado, ele procura ofertas e publica nos grupos sozinho, até você mandar parar.
+        }
       </p>
     </div>
-    @if (runControl.rodandoContinuo()) {
-      <span class="badge badge-running">
-        <span class="badge-dot"></span>
-        {{ runControl.postandoAgora() ? 'Postando' : 'Ligado' }}
-      </span>
-    } @else {
-      <span class="badge badge-off"><span class="badge-dot"></span>Parado</span>
-    }
+
+    <div class="lanterna-acao">
+      @if (!runControl.algoRodando()) {
+        <button
+          type="button"
+          class="btn btn-lg btn-hero"
+          [disabled]="runControl.iniciando()"
+          (click)="runControl.executar()"
+        >
+          {{ runControl.iniciando() ? 'Ligando…' : 'Ligar robô' }}
+        </button>
+      } @else {
+        <button
+          type="button"
+          class="btn btn-lg btn-primary"
+          [disabled]="runControl.parando()"
+          (click)="runControl.parar()"
+        >
+          {{ runControl.parando() ? 'Parando…' : 'Parar robô' }}
+        </button>
+      }
+    </div>
   </div>
 
-  <div class="grid-2">
-    <div class="stat-tile">
-      <span class="value">{{ formatarData(runControl.ultimaPublicacao()) }}</span>
-      <span class="label">Última publicação</span>
+  <dl class="lanterna-tempos">
+    <div>
+      <dt>Última publicação</dt>
+      <dd>{{ formatarData(runControl.ultimaPublicacao()) }}</dd>
     </div>
-    <div class="stat-tile">
-      <span class="value">{{ formatarData(runControl.proximaPublicacao()) }}</span>
-      <span class="label">Próxima publicação prevista</span>
+    <div>
+      <dt>Próxima publicação prevista</dt>
+      <dd>{{ formatarData(runControl.proximaPublicacao()) }}</dd>
     </div>
-  </div>
+  </dl>
 
-  <div class="card-section">
-    <div class="field">
-      <label>Publicar em quais grupos</label>
+  <div class="lanterna-grupos">
+    <div class="field" role="group" aria-labelledby="lanterna-alvo">
+      <span class="field-rotulo" id="lanterna-alvo">Publicar em quais grupos</span>
       <div class="segmented">
         <button
           type="button"
           class="segmented-option"
           [class.segmented-option-active]="runControl.alvo() === 'todos'"
+          [attr.aria-pressed]="runControl.alvo() === 'todos'"
           [disabled]="runControl.algoRodando()"
           (click)="escolherAlvo('todos')"
         >
@@ -44,18 +83,22 @@
           type="button"
           class="segmented-option"
           [class.segmented-option-active]="runControl.alvo() === 'selecionados'"
+          [attr.aria-pressed]="runControl.alvo() === 'selecionados'"
           [disabled]="runControl.algoRodando()"
           (click)="escolherAlvo('selecionados')"
         >
           Escolher grupos
         </button>
       </div>
+      @if (runControl.algoRodando()) {
+        <span class="hint">Para mudar os grupos, pare o robô primeiro.</span>
+      }
     </div>
 
     @if (runControl.grupos().length === 0) {
-      <p class="hint-text">Nenhum grupo cadastrado ainda — cadastre na aba "Grupos".</p>
+      <p class="hint-text">Nenhum grupo cadastrado ainda. Cadastre em "Grupos", no menu.</p>
     } @else if (runControl.alvo() === 'selecionados') {
-      <div style="display: flex; flex-direction: column; gap: 9px">
+      <div class="lanterna-lista">
         @for (g of runControl.grupos(); track g.id) {
           <label class="checkbox-row">
             <input
@@ -64,43 +107,18 @@
               [checked]="runControl.selecionados().has(g.id)"
               (change)="toggleSelecionado(g.id, $any($event.target).checked)"
             />
-            <span>{{ g.nome }} <span class="hint-text">→ {{ g.groupName }}</span></span>
+            <span>{{ g.nome }} <span class="hint-text">({{ g.groupName }})</span></span>
           </label>
         }
       </div>
     }
-  </div>
 
-  <div class="form-actions">
-    @if (!runControl.algoRodando()) {
-      <button
-        type="button"
-        class="btn btn-lg btn-hero"
-        [disabled]="runControl.iniciando()"
-        (click)="runControl.executar()"
-      >
-        {{ runControl.iniciando() ? 'Ligando…' : 'Ligar robô' }}
-      </button>
-      @if (!runControl.podeLigar()) {
-        <span class="hint-text">Ainda faltam passos de configuração — o robô avisa o que falta ao ligar.</span>
-      }
-    } @else {
-      <button
-        type="button"
-        class="btn btn-lg btn-danger"
-        [disabled]="runControl.parando()"
-        (click)="runControl.parar()"
-      >
-        {{ runControl.parando() ? 'Parando…' : 'Parar robô' }}
-      </button>
+    @if (!runControl.algoRodando() && !runControl.podeLigar()) {
+      <p class="hint-text">Ainda faltam passos de configuração. Ao ligar, o robô avisa o que falta.</p>
+    }
+
+    @if (runControl.erro()) {
+      <p class="error-text" role="alert">{{ runControl.erro() }}</p>
     }
   </div>
-
-  @if (runControl.erro()) {
-    <p class="error-text">{{ runControl.erro() }}</p>
-  }
-
-  @if (runControl.processoExterno()) {
-    <p class="hint-text">O robô também está rodando fora do painel — clique em "Parar" para encerrá-lo.</p>
-  }
-</div>
+</section>

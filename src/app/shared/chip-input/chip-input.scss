@@ -19,14 +19,15 @@
   color: var(--text);
   padding: 4px 6px 4px 10px;
   border-radius: var(--radius-xs);
-  font-size: 12.5px;
+  font-size: 13px;
 }
 
 .chip-remove {
   background: none;
   border: none;
-  color: var(--text-muted);
-  font-size: 15px;
+  border-radius: 6px;
+  color: var(--text-soft);
+  font-size: 18px;
   line-height: 1;
   cursor: pointer;
   padding: 0 3px;
@@ -37,7 +38,7 @@
 
 .chip-empty {
   color: var(--text-muted);
-  font-size: 12.5px;
+  font-size: 13px;
 }
 
 .chip-add {
@@ -49,7 +50,7 @@
   padding: 9px 11px;
   border-radius: var(--radius-xs);
   border: 1px solid var(--border-strong);
-  font-size: 13.5px;
+  font-size: 15px;
   background: var(--surface);
   color: var(--text);
   min-width: 0;
@@ -58,10 +59,10 @@
     box-shadow 0.14s ease;
 }
 .chip-add input::placeholder {
-  color: #b3b0a8;
+  color: var(--placeholder);
 }
 .chip-add input:focus {
   outline: none;
   border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(224, 165, 32, 0.18);
+  box-shadow: var(--focus-halo);
 }

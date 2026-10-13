@@ -1,54 +1,65 @@
 <div class="regras-secao">
-  <div class="regras-secao-cabeca">
-    <div>
-      <h3 class="regras-secao-titulo">Datas especiais</h3>
-      <p class="regras-secao-texto">
-        Perto de datas comemorativas, o robô passa na frente os produtos que combinam com a ocasião.
-      </p>
-    </div>
-    <div class="toggle-row">
-      <span class="toggle-label">{{ ativo() ? 'Ligado' : 'Desligado' }}</span>
-      <button
-        type="button"
-        class="toggle-switch"
-        role="switch"
-        aria-label="Priorizar produtos de datas especiais"
-        [attr.aria-checked]="ativo()"
-        [class.toggle-switch-on]="ativo()"
-        [disabled]="salvando()"
-        (click)="alternarAtivo()"
-      >
-        <span class="toggle-switch-thumb"></span>
-      </button>
-    </div>
-  </div>
+  <h2 class="regras-secao-titulo">Datas especiais</h2>
 
   @if (erro() && !rascunho()) {
-    <div class="info-box info-box-erro">{{ erro() }}</div>
+    <div class="info-box info-box-erro" role="alert">{{ erro() }}</div>
   }
 
-  @if (ativo()) {
-    <div class="datas-hoje">
-      <span class="datas-hoje-rotulo">
-        <span class="badge-dot"></span>
-        Valendo hoje
-      </span>
-      @for (a of ativasHoje().slice(0, 10); track a.nome) {
-        <span class="grupo-tag" [class.datas-tag-sua]="a.sua">{{ a.nome }}</span>
-      } @empty {
-        <span class="datas-hoje-vazio">Nenhuma data especial agora — sai a ordem normal de ofertas.</span>
-      }
-      @if (ativasHoje().length > 10) {
-        <span class="grupo-tag grupo-tag-mais">+{{ ativasHoje().length - 10 }}</span>
+  <!-- Uma grade só, como o resto da página: o card que liga/desliga, as suas datas, as que já vêm
+       prontas e o card de adicionar. As prontas aparecem por proximidade (style.order = dias que faltam). -->
+  <div class="grupos-grade">
+    <div class="grupo-card regra-card grupo-card-fixo datas-controle" [class.regra-card-off]="!ativo()">
+      <div class="grupo-card-topo">
+        <span class="regra-icone regra-icone-data">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+        </span>
+        <div class="grupo-card-nomes">
+          <span class="grupo-card-nome">Prioridade por data</span>
+          <span class="regra-card-sub">Produtos da ocasião passam na frente</span>
+        </div>
+      </div>
+      <div class="regra-card-valor datas-controle-valor">
+        <strong>{{ ativo() ? 'Ligada' : 'Desligada' }}</strong>
+        <button
+          type="button"
+          class="toggle-switch"
+          role="switch"
+          aria-label="Priorizar produtos de datas especiais"
+          [attr.aria-checked]="ativo()"
+          [class.toggle-switch-on]="ativo()"
+          [disabled]="salvando()"
+          (click)="alternarAtivo()"
+        >
+          <span class="toggle-switch-thumb"></span>
+        </button>
+      </div>
+      @if (ativo()) {
+        <div class="grupo-card-corpo">
+          @for (a of ativasHoje().slice(0, 6); track a.nome) {
+            <span class="grupo-tag" [class.datas-tag-sua]="a.sua">{{ a.nome }}</span>
+          } @empty {
+            <span class="regra-card-texto">Nenhuma data especial agora. Sai a ordem normal de ofertas.</span>
+          }
+          @if (ativasHoje().length > 6) {
+            <span class="grupo-tag grupo-tag-mais">+{{ ativasHoje().length - 6 }}</span>
+          }
+        </div>
+        <div class="grupo-card-rodape">
+          <span>{{ ativasHoje().length ? 'Valendo hoje' : 'Nada valendo hoje' }}</span>
+        </div>
+      } @else {
+        <p class="regra-card-texto">
+          O robô ignora as datas comemorativas e segue só pelo desconto e pelas vendas de cada produto.
+        </p>
       }
     </div>
 
-    <div class="grupos-grade">
+    @if (ativo()) {
       @for (c of cards(); track c.indice) {
         <button type="button" class="grupo-card regra-card" (click)="abrir(c.ev, c.indice)">
           <div class="grupo-card-topo">
             <span class="regra-icone regra-icone-data">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
             </span>
             <div class="grupo-card-nomes">
               <span class="grupo-card-nome">{{ c.ev.nome }}</span>
@@ -69,65 +80,79 @@
             } @else {
               <span>Começa em {{ c.faltam }} {{ c.faltam === 1 ? 'dia' : 'dias' }}</span>
             }
-            <span>Prioridade {{ c.nivel.toLowerCase() }}</span>
+            <span>Sua data · prioridade {{ c.nivel.toLowerCase() }}</span>
           </div>
         </button>
       }
 
-      <button type="button" class="grupo-card grupo-card-novo" (click)="criar()">
+      <!-- As datas que já vêm prontas: antes ficavam numa lista escondida; agora são cards como os
+           outros. Só as próximas aparecem de início — o botão abaixo mostra o ano todo. -->
+      @for (g of calendario(); track g.nome) {
+        @for (dt of g.datas; track dt.nome) {
+          @if (mostrarCalendario() || dt.faltam <= 45) {
+            <div class="grupo-card regra-card grupo-card-fixo" [style.order]="dt.faltam + 1">
+              <div class="grupo-card-topo">
+                <span class="regra-icone" [class.regra-icone-data]="dt.ativa">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+                </span>
+                <div class="grupo-card-nomes">
+                  <span class="grupo-card-nome">{{ dt.nome }}</span>
+                  <span class="regra-card-sub">{{ dt.periodo }}</span>
+                </div>
+              </div>
+              <div class="grupo-card-corpo">
+                @for (p of dt.palavras.slice(0, 5); track p) {
+                  <span class="grupo-tag">{{ p }}</span>
+                }
+                @if (dt.palavras.length > 5) {
+                  <span class="grupo-tag grupo-tag-mais">+{{ dt.palavras.length - 5 }}</span>
+                }
+              </div>
+              <div class="grupo-card-rodape">
+                @if (dt.ativa) {
+                  <span class="datas-ativa">Valendo agora</span>
+                } @else {
+                  <span>Começa em {{ dt.faltam }} {{ dt.faltam === 1 ? 'dia' : 'dias' }}</span>
+                }
+                <span>Já vem pronta</span>
+              </div>
+            </div>
+          }
+        }
+      }
+
+      <button type="button" class="grupo-card grupo-card-novo datas-novo" (click)="criar()">
         <span class="grupo-novo-mais">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
         </span>
         <span class="grupo-novo-titulo">{{ cards().length ? 'Adicionar data' : 'Adicionar uma data sua' }}</span>
         <span class="grupo-novo-texto">
-          As datas mais comuns já vêm prontas. Cadastre só ocasiões do seu público (aniversário da loja, evento local…).
+          Para ocasiões do seu público: aniversário da loja, evento local…
         </span>
       </button>
-    </div>
-
-    @if (calendario().length) {
-      <button type="button" class="datas-calendario-botao" (click)="mostrarCalendario.set(!mostrarCalendario())">
-        <svg [class.datas-seta-aberta]="mostrarCalendario()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
-        {{ mostrarCalendario() ? 'Esconder' : 'Ver' }} as {{ prontas().length }} datas que já vêm prontas
-      </button>
-
-      @if (mostrarCalendario()) {
-        <div class="datas-calendario">
-          @for (g of calendario(); track g.nome) {
-            <div class="datas-calendario-grupo">
-              <h4>{{ g.nome }}</h4>
-              <ul>
-                @for (d of g.datas; track d.nome) {
-                  <li [class.datas-item-ativa]="d.ativa" [title]="d.palavras.join(', ')">
-                    <span class="datas-item-nome">{{ d.nome }}</span>
-                    <span class="datas-item-periodo">{{ d.periodo }}</span>
-                    @if (d.ativa) {
-                      <span class="datas-ativa">agora</span>
-                    } @else {
-                      <span class="datas-item-falta">em {{ d.faltam }}d</span>
-                    }
-                  </li>
-                }
-              </ul>
-            </div>
-          }
-        </div>
-      }
     }
-  } @else {
-    <div class="info-box">
-      Desligado: o robô ignora as datas comemorativas e segue só pelo desconto e pelas vendas de cada produto.
-    </div>
+  </div>
+
+  @if (ativo() && prontas().length) {
+    <button
+      type="button"
+      class="datas-calendario-botao"
+      [attr.aria-expanded]="mostrarCalendario()"
+      (click)="mostrarCalendario.set(!mostrarCalendario())"
+    >
+      <svg [class.datas-seta-aberta]="mostrarCalendario()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+      {{ mostrarCalendario() ? 'Mostrar só as datas dos próximos 45 dias' : 'Mostrar as ' + prontas().length + ' datas do ano todo' }}
+    </button>
   }
 </div>
 
 @if (rascunho(); as r) {
   <div class="modal-fundo" (click)="fechar()">
-    <div class="modal-caixa modal-grupo" (click)="$event.stopPropagation()">
+    <div class="modal-caixa modal-grupo" role="dialog" aria-modal="true" aria-label="Data especial" (click)="$event.stopPropagation()">
       <div class="card-header">
         <div class="grupo-modal-titulo">
           <span class="regra-icone regra-icone-data">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
           </span>
           <div>
             <h2>{{ r.indice === null ? 'Nova data especial' : r.nome || 'Data especial' }}</h2>
@@ -135,19 +160,19 @@
           </div>
         </div>
         <button type="button" class="btn-fechar" (click)="fechar()" aria-label="Fechar" title="Fechar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6 18 18M18 6 6 18" /></svg>
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6 18 18M18 6 6 18" /></svg>
         </button>
       </div>
 
       <div class="field">
-        <label>Nome da data</label>
-        <input type="text" maxlength="80" [ngModel]="r.nome" (ngModelChange)="atualizar('nome', $event)" placeholder="Ex.: Aniversário da loja" />
+        <label for="datas-especiais-1">Nome da data</label>
+        <input id="datas-especiais-1" type="text" maxlength="80" [ngModel]="r.nome" (ngModelChange)="atualizar('nome', $event)" placeholder="Ex.: Aniversário da loja" />
       </div>
 
       <div class="grid-2">
         <div class="field">
-          <label>Começa em</label>
-          <div class="datas-dia-mes">
+          <span class="field-rotulo" id="datas-especiais-2">Começa em</span>
+          <div role="group" aria-labelledby="datas-especiais-2" class="datas-dia-mes">
             <select [ngModel]="r.inicioDia" (ngModelChange)="atualizar('inicioDia', $event)" aria-label="Dia de início">
               @for (d of diasInicio(); track d) { <option [ngValue]="d">{{ d }}</option> }
             </select>
@@ -157,8 +182,8 @@
           </div>
         </div>
         <div class="field">
-          <label>Termina em</label>
-          <div class="datas-dia-mes">
+          <span class="field-rotulo" id="datas-especiais-3">Termina em</span>
+          <div role="group" aria-labelledby="datas-especiais-3" class="datas-dia-mes">
             <select [ngModel]="r.fimDia" (ngModelChange)="atualizar('fimDia', $event)" aria-label="Dia do fim">
               @for (d of diasFim(); track d) { <option [ngValue]="d">{{ d }}</option> }
             </select>
@@ -184,14 +209,14 @@
           <span>Prioridade</span>
           <strong>{{ nivel(r.peso) }}</strong>
         </div>
-        <input type="range" min="1" max="30" step="1" [ngModel]="r.peso" (ngModelChange)="atualizar('peso', $event)" />
+        <input type="range" min="1" max="30" step="1" aria-label="Prioridade" [attr.aria-valuetext]="nivel(r.peso)" [ngModel]="r.peso" (ngModelChange)="atualizar('peso', $event)" />
         <small>Quanto mais forte, mais o robô insiste nesses produtos. As datas prontas ficam entre média e forte.</small>
       </div>
 
       <div class="field">
-        <label>Produtos que combinam com a data</label>
+        <span class="field-rotulo" id="datas-especiais-4">Produtos que combinam com a data</span>
         <span class="hint">Palavras do título ou da categoria. Ex.: presente, perfume, kit.</span>
-        <app-chip-input
+        <app-chip-input role="group" aria-labelledby="datas-especiais-4"
           [items]="r.palavras"
           (itemsChange)="atualizar('palavras', $event)"
           [separarPorVirgula]="true"
@@ -200,7 +225,7 @@
       </div>
 
       @if (erro(); as e) {
-        <div class="info-box info-box-erro">{{ e }}</div>
+        <div class="info-box info-box-erro" role="alert">{{ e }}</div>
       }
 
       <div class="modal-rodape grupo-modal-rodape">
