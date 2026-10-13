@@ -78,7 +78,20 @@
                   </div>
 
                   <div class="field">
-                    <label>Grupos em que este WhatsApp está</label>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+                      <label>Grupos em que este WhatsApp está</label>
+                      <button
+                        type="button"
+                        class="btn btn-ghost btn-sm"
+                        [disabled]="atualizandoGrupos()"
+                        (click)="atualizarGrupos()"
+                      >
+                        {{ atualizandoGrupos() ? 'Atualizando…' : 'Atualizar grupos' }}
+                      </button>
+                    </div>
+                    @if (erroGrupos(); as e) {
+                      <span class="hint error-text">{{ e }}</span>
+                    }
                     @if (doWhatsapp().grupos.length) {
                       <div class="regra-chips">
                         @for (w of doWhatsapp().grupos; track w.nome) {
@@ -96,8 +109,8 @@
                       </div>
                     } @else {
                       <span class="hint">
-                        A lista aparece depois da primeira leitura: salve, ligue o robô e volte aqui em alguns minutos.
-                        Enquanto isso, digite o nome do grupo no campo acima.
+                        Clique em "Atualizar grupos" para ler a lista do WhatsApp — ou digite o nome do grupo no campo
+                        acima.
                       </span>
                     }
                   </div>

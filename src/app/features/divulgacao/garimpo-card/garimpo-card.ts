@@ -2,9 +2,13 @@ import { Component, computed, effect, inject, signal, untracked } from '@angular
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { ConfigService, FonteProdutos } from '../../../core/services/config.service';
+import { JobsService } from '../../../core/services/jobs.service';
 import { ChipInput } from '../../../shared/chip-input/chip-input';
 
 const MAX_GRUPOS = 50;
+/** Quanto esperar o robô conectar o WhatsApp e anotar a lista de grupos. */
+const PRAZO_LISTA_MS = 180000;
+const PASSO_ESPERA_MS = 500;
 /** Quantos nomes aparecem no resumo "Clona de" antes do "e mais N". */
 const MAX_NOMES_RESUMO = 2;
 
@@ -32,6 +36,7 @@ const mesmoNome = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
 export class GarimpoCard {
   protected configService = inject(ConfigService);
   private http = inject(HttpClient);
+  private jobs = inject(JobsService);
 
   protected readonly maxGrupos = MAX_GRUPOS;
 
@@ -62,6 +67,8 @@ export class GarimpoCard {
 
   /** Grupos em que o WhatsApp está de verdade, anotados pelo robô na última leitura. */
   protected readonly doWhatsapp = signal<GruposDoWhatsapp>({ em: null, grupos: [], naoEncontrados: [] });
+  protected readonly atualizandoGrupos = signal(false);
+  protected readonly erroGrupos = signal<string | null>(null);
 
   protected fonteDe(id: string): FonteProdutos {
     return this.rFontes()[id] ?? 'garimpo';
@@ -145,6 +152,42 @@ export class GarimpoCard {
     } catch (_) {
       // sem a lista, a tela segue funcionando só com os nomes digitados
     }
+  }
+
+  /**
+   * Botão "Atualizar grupos": com o robô desligado, sobe um processo só para conectar o WhatsApp
+   * e anotar a lista. Com o robô ligado o WhatsApp já está aberto nele — aí só relê o que ele anotou.
+   */
+  async atualizarGrupos(): Promise<void> {
+    if (this.atualizandoGrupos()) return;
+    this.erroGrupos.set(null);
+    this.atualizandoGrupos.set(true);
+    try {
+      if (!this.jobs.rodando()) {
+        const r = await this.jobs.iniciar('listar-grupos-zap');
+        if (!r.ok) {
+          this.erroGrupos.set(r.erro ?? 'Não consegui ler os grupos agora.');
+          return;
+        }
+        await this.esperarJob();
+      }
+      const antes = this.doWhatsapp().em;
+      await this.carregarGruposDoWhatsapp();
+      if (!this.jobs.rodando() && this.doWhatsapp().em === antes) {
+        this.erroGrupos.set('O WhatsApp não respondeu. Confira se ele está conectado na aba Conexões.');
+      }
+    } finally {
+      this.atualizandoGrupos.set(false);
+    }
+  }
+
+  /** Espera o processo subir e encerrar (conectar o WhatsApp pode levar um ou dois minutos). */
+  private async esperarJob(): Promise<void> {
+    const dormir = () => new Promise((r) => setTimeout(r, PASSO_ESPERA_MS));
+    const subiuAte = Date.now() + 5000;
+    while (!this.jobs.rodando() && Date.now() < subiuAte) await dormir();
+    const limite = Date.now() + PRAZO_LISTA_MS;
+    while (this.jobs.rodando() && this.jobs.tipo() === 'listar-grupos-zap' && Date.now() < limite) await dormir();
   }
 
   protected readonly alterado = computed(() => {

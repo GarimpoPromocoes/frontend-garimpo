@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ConfigService, GrupoTematico } from '../../../core/services/config.service';
 import { ConfirmacaoService } from '../../../core/services/confirmacao.service';
@@ -60,12 +60,6 @@ export class GroupsCard {
   protected readonly maxPalavras = MAX_PALAVRAS_CARD;
   protected readonly maxAssunto = MAX_ASSUNTO;
   protected readonly maxExclusoes = MAX_EXCLUSOES;
-
-  /** Outro grupo já é o de sobras? Mostra no aviso da janela. */
-  protected readonly coringaAtual = computed(() => {
-    const r = this.rascunho();
-    return this.grupos().find((g) => g.coringa && g.id !== r?.id) ?? null;
-  });
 
   constructor() {
     effect(() => {
@@ -129,7 +123,7 @@ export class GroupsCard {
       return;
     }
     if (!g.coringa && !g.geral && g.palavras.length === 0) {
-      this.erro.set('Adicione pelo menos uma palavra no assunto — ou marque "Recebe tudo" ou "Sobras".');
+      this.erro.set('Adicione pelo menos uma palavra no assunto — ou marque "Recebe tudo".');
       return;
     }
 

@@ -18,6 +18,7 @@ export type JobTipo =
   | 'grupos'
   | 'ganhos'
   | 'verificar-conexoes'
+  | 'listar-grupos-zap'
   | 'buscar-produto'
   | 'preparar-busca'
   | 'publicar-busca';

@@ -133,22 +133,7 @@
             <small>Qualquer promoção pode cair aqui, sem filtro de assunto.</small>
           </span>
         </label>
-        <label class="grupo-modo" [class.grupo-modo-ativo]="r.coringa">
-          <input type="checkbox" [ngModel]="r.coringa" (ngModelChange)="atualizar('coringa', $event)" />
-          <span>
-            <strong>Sobras</strong>
-            <small>
-              Recebe o que não combinou com nenhum grupo.
-              @if (r.coringa && coringaAtual(); as c) {
-                Substitui “{{ c.nome }}”.
-              }
-            </small>
-          </span>
-        </label>
-      </div>
-
-      @if (!r.geral) {
-        <div class="grid-2">
+        @if (!r.geral) {
           <label class="grupo-modo" [class.grupo-modo-ativo]="r.temaEstrito">
             <input type="checkbox" [ngModel]="r.temaEstrito ?? false" (ngModelChange)="atualizar('temaEstrito', $event)" />
             <span>
@@ -156,18 +141,8 @@
               <small>Só entra o que casa de verdade com o assunto. Corta o vazamento de tema (Halloween, Natal, moda solta) e barra "de brinquedo"/miniatura.</small>
             </span>
           </label>
-          <div class="field">
-            <label>Público do grupo</label>
-            <select [ngModel]="r.publico ?? 'misto'" (ngModelChange)="atualizar('publico', $event)">
-              <option value="misto">Misto (sem trava)</option>
-              <option value="masculino">Masculino</option>
-              <option value="feminino">Feminino</option>
-              <option value="infantil">Infantil</option>
-            </select>
-            <span class="hint">Produto do outro público nunca é postado aqui — nem que a palavra do assunto apareça.</span>
-          </div>
-        </div>
-      }
+        }
+      </div>
 
       @if (!r.geral) {
         <div class="field">

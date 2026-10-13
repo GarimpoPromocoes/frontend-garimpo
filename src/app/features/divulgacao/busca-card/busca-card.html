@@ -165,51 +165,6 @@
     }
   }
 
-  @if (busca.recentes().length) {
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <h2>Buscas recentes</h2>
-          <p class="card-subtitle">Clique para voltar à lista de ofertas e à postagem montada, sem buscar outra vez.</p>
-        </div>
-      </div>
-      <ul class="busca-recentes">
-        @for (r of busca.recentes(); track r.id) {
-          <li>
-            <button
-              type="button"
-              class="busca-recente"
-              [class.busca-recente-ativa]="busca.atual()?.id === r.id"
-              [disabled]="busca.trabalhando() && busca.atual()?.id !== r.id"
-              (click)="busca.abrir(r.id)"
-            >
-              <span class="busca-recente-termo">{{ r.termo }}</span>
-              <span class="busca-recente-meta">
-                {{ quando(r.criadoEm) }} ·
-                @switch (r.status) {
-                  @case ('pronta') {
-                    {{ r.qtdOfertas }} oferta(s)@if (r.menorPreco != null) { a partir de {{ preco(r.menorPreco) }}}
-                    @if (r.lojaEscolhida) {
-                      · escolhida: {{ nomeLoja(r.lojaEscolhida) }} {{ preco(r.precoEscolhida) }}
-                    }
-                    @if (r.publicacaoStatus === 'concluida') {
-                      · postada
-                    }
-                  }
-                  @case ('falhou') {
-                    não deu certo
-                  }
-                  @default {
-                    buscando…
-                  }
-                }
-              </span>
-            </button>
-          </li>
-        }
-      </ul>
-    </div>
-  }
 </div>
 
 <!-- Janela da postagem: abre ao escolher uma oferta. Prévia como no WhatsApp, editor da foto e postar. -->
