@@ -313,9 +313,16 @@
   flex-direction: column;
   gap: 18px;
 }
-/* No Painel não existe o botão flutuante, então não precisa da folga embaixo. */
+/* No Painel não existe o botão flutuante, então não precisa da folga embaixo.
+   E a página não rola: tudo cabe na tela, quem rola é a lista de ações. */
 .content-painel {
   padding-bottom: 20px;
+  overflow: hidden;
+}
+@media (max-width: 1000px) {
+  .content-painel {
+    overflow-y: auto;
+  }
 }
 
 /* O que falta para ligar: uma lista de pendências, cada uma com o seu atalho. */

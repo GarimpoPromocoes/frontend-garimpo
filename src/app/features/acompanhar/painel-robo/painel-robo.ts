@@ -1,4 +1,4 @@
-import { Component, DestroyRef, computed, inject, output, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, HostListener, computed, inject, output, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import {
   AcaoPainel,
@@ -11,7 +11,7 @@ import { RunControlService } from '../../../core/services/run-control.service';
 import { StatusService } from '../../../core/services/status.service';
 import { VerificacaoService } from '../../../core/services/verificacao.service';
 
-type Icone = 'busca' | 'sacola' | 'doc' | 'envio' | 'check' | 'alerta' | 'relogio';
+type Icone = 'busca' | 'sacola' | 'doc' | 'envio' | 'check' | 'alerta' | 'relogio' | 'play' | 'pausa' | 'parar' | 'grafico' | 'grupos';
 type Tom = 'ok' | 'andamento' | 'espera' | 'erro' | 'neutro' | 'achado';
 
 interface EtapaVista {
@@ -36,7 +36,7 @@ interface AcaoVista {
 
 const NOME_LOJA: Record<string, string> = { mercadolivre: 'Mercado Livre', amazon: 'Amazon', shopee: 'Shopee' };
 const ORDEM: EtapaPainelId[] = ['buscando', 'origem', 'preparando', 'postando', 'concluido'];
-const MAX_ACOES_COMPACTO = 7;
+const MAX_ACOES_COMPACTO = 20;
 
 const BASE: Record<EtapaPainelId, { titulo: string; sub: string; icone: Icone }> = {
   buscando: { titulo: 'Buscando produto', sub: 'Procurando promoções', icone: 'busca' },
@@ -61,11 +61,12 @@ function duracao(ms: number): string {
 }
 
 /**
- * O Painel para quem não quer ler log: estado do robô, a pipeline do produto
- * da vez (Buscando → Origem → Preparando → Postando → Concluído), de onde vem e
- * pra onde vai, as últimas ações em frases curtas e os números do dia. Tudo sai
- * do estado estruturado que o robô manda (evento "painel"); o log cru continua
- * no "Ver logs detalhados".
+ * O Painel para quem não quer ler log, cabendo numa tela só: estado do robô e
+ * controles numa linha, a pipeline do produto da vez (Buscando → Origem →
+ * Preparando → Postando → Concluído, com a loja na Origem e os canais no
+ * Postando) e as últimas ações em frases curtas. Os números do dia ficam num
+ * modal. Tudo sai do estado estruturado que o robô manda (evento "painel"); o
+ * log cru continua no "Ver logs detalhados".
  */
 @Component({
   selector: 'app-painel-robo',
@@ -85,10 +86,27 @@ export class PainelRobo {
   /** Relógio de 1s pras contagens (tempo ativo, próxima ação). */
   protected readonly agora = signal(Date.now());
   protected readonly escolhendoGrupos = signal(false);
+  protected readonly statsAbertas = signal(false);
+
+  private host = inject(ElementRef<HTMLElement>);
 
   constructor() {
     const t = setInterval(() => this.agora.set(Date.now()), 1000);
     inject(DestroyRef).onDestroy(() => clearInterval(t));
+  }
+
+  /** Clique fora do "Escolher grupos" fecha a caixinha. */
+  @HostListener('document:click', ['$event'])
+  protected fecharGruposFora(ev: MouseEvent): void {
+    if (!this.escolhendoGrupos()) return;
+    const ancora = (this.host.nativeElement as HTMLElement).querySelector('.pv-grupos-ancora');
+    if (ancora && !ancora.contains(ev.target as Node)) this.escolhendoGrupos.set(false);
+  }
+
+  @HostListener('document:keydown.escape')
+  protected fecharComEsc(): void {
+    this.escolhendoGrupos.set(false);
+    this.statsAbertas.set(false);
   }
 
   private readonly painel = computed(() => this.jobs.painel());
@@ -216,7 +234,7 @@ export class PainelRobo {
     });
   });
 
-  // ---- Cartões de contexto ----
+  // ---- Grupos e canais de destino ----
 
   private readonly gruposAlvo = computed(() => {
     const todos = this.runControl.grupos();
@@ -228,28 +246,14 @@ export class PainelRobo {
     return todos.filter((g) => ids.has(g.id));
   });
 
-  protected readonly modo = computed(() => {
-    const fonteDaVez = this.aoVivo() ? this.painel()?.grupo?.fonte : null;
-    const fontes = new Set(this.gruposAlvo().map((g) => g.fonte ?? 'garimpo'));
-    const fonte = fonteDaVez ?? (fontes.size === 1 ? [...fontes][0] : fontes.size ? 'misto' : 'garimpo');
-    if (fonte === 'clonagem') {
-      return { titulo: 'Clonando da concorrência', sub: 'Pegando produtos dos grupos que você escolheu' };
-    }
-    if (fonte === 'misto') return { titulo: 'Garimpo + clonagem', sub: 'Cada grupo usa a origem que você escolheu' };
-    return { titulo: 'Garimpo nas lojas', sub: 'Buscando ofertas direto nas lojas conectadas' };
-  });
-
   protected readonly grupoDaVez = computed(() => (this.aoVivo() ? this.painel()?.grupo?.nome ?? null : null));
 
-  protected readonly loja = computed(() => {
-    const prod = this.aoVivo() ? this.painel()?.produto : null;
-    if (!prod) return null;
-    return {
-      id: prod.loja ?? 'mercadolivre',
-      nome: NOME_LOJA[prod.loja ?? ''] ?? 'Loja',
-      origem: prod.grupoOrigem ? `Grupo: ${prod.grupoOrigem}` : prod.veioDe ? `Veio ${prod.veioDe}` : 'Direto da loja',
-      produto: prod.nome,
-    };
+  protected readonly produtoDaVez = computed(() => (this.aoVivo() ? this.painel()?.produto?.nome ?? null : null));
+
+  protected readonly rotuloAlvo = computed(() => {
+    const total = this.runControl.grupos().length;
+    const n = this.gruposAlvo().length;
+    return n === total ? 'todos' : `${n} de ${total}`;
   });
 
   protected readonly destino = computed(() => {
@@ -260,6 +264,19 @@ export class PainelRobo {
       telegram: alvo.filter((g) => !!g.grupoTelegram).length,
       telegramConectado: this.verificacao.telegramConectado(),
     };
+  });
+
+  protected readonly tituloWhatsapp = computed(() => {
+    const d = this.destino();
+    if (!d.whatsappConectado) return 'WhatsApp não conectado';
+    return `WhatsApp: ${d.whatsapp} ${d.whatsapp === 1 ? 'grupo ativo' : 'grupos ativos'}`;
+  });
+
+  protected readonly tituloTelegram = computed(() => {
+    const d = this.destino();
+    if (!d.telegramConectado) return 'Telegram não conectado';
+    if (!d.telegram) return 'Telegram: nenhum canal ligado';
+    return `Telegram: ${d.telegram} ${d.telegram === 1 ? 'canal ativo' : 'canais ativos'}`;
   });
 
   // ---- Últimas ações ----
@@ -338,6 +355,11 @@ export class PainelRobo {
   escolherAlvo(alvo: AlvoGrupos): void {
     this.runControl.escolherAlvo(alvo);
     if (alvo === 'selecionados') this.escolhendoGrupos.set(true);
+  }
+
+  abrirProdutos(): void {
+    this.statsAbertas.set(false);
+    this.verProdutos.emit();
   }
 
   toggleSelecionado(id: string, marcado: boolean): void {

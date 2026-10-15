@@ -7,69 +7,107 @@
     @case ('check') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg> }
     @case ('alerta') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 2.5 20h19Z"/><path d="M12 10v4.5M12 17.4v.1"/></svg> }
     @case ('relogio') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> }
+    @case ('play') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M8.5 5.6v12.8a1 1 0 0 0 1.52.85l10.2-6.4a1 1 0 0 0 0-1.7l-10.2-6.4a1 1 0 0 0-1.52.85Z"/></svg> }
+    @case ('pausa') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="5.5" width="4" height="13" rx="1.2"/><rect x="13.5" y="5.5" width="4" height="13" rx="1.2"/></svg> }
+    @case ('parar') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="6.5" width="11" height="11" rx="2"/></svg> }
+    @case ('grafico') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M7 16v-5M12 16V6M17 16v-8"/></svg> }
+    @case ('grupos') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 19c.6-3 2.8-4.6 5.5-4.6s4.9 1.6 5.5 4.6"/><path d="M15.5 5.6a3.2 3.2 0 0 1 0 5.8M17.2 14.6c1.8.5 3 1.9 3.3 4.4"/></svg> }
   }
 </ng-template>
 
-<!-- 1. Cabeçalho: a lanterna (apagada = desligado, acesa = trabalhando) com os números do momento. -->
-<section
-  class="lanterna pv-topo"
-  [class.lanterna-acesa]="runControl.algoRodando()"
-  [class.lanterna-pausada]="runControl.pausado()"
-  aria-labelledby="pv-titulo"
->
-  <div class="lanterna-topo">
-    <span class="lanterna-luz" aria-hidden="true"></span>
-    <div class="lanterna-estado">
-      <!-- role=status: o leitor de tela avisa quando o robô liga, pausa ou para. -->
-      <p class="pv-nome" role="status">
-        <span id="pv-titulo">Robô de promoções</span>
-        <span class="pv-pill" [attr.data-estado]="estado()"><span class="badge-dot"></span>{{ rotuloEstado() }}</span>
-      </p>
-      <p>{{ frase() }}</p>
-    </div>
-    <div class="lanterna-acao">
-      @if (!runControl.algoRodando()) {
-        <button type="button" class="btn btn-lg btn-hero" [disabled]="runControl.iniciando()" (click)="runControl.executar()">
-          {{ runControl.iniciando() ? 'Ligando…' : 'Ligar robô' }}
-        </button>
-      } @else {
-        @if (runControl.postandoAgora()) {
-          <button type="button" class="btn btn-lg btn-pausa" [disabled]="runControl.pausando() || runControl.parando()" (click)="runControl.alternarPausa()">
-            @if (runControl.pausando()) {
-              {{ runControl.pausado() ? 'Retomando…' : 'Pausando…' }}
-            } @else {
-              {{ runControl.pausado() ? 'Retomar' : 'Pausar' }}
-            }
-          </button>
-        }
-        <button type="button" class="btn btn-lg btn-primary" [disabled]="runControl.parando()" (click)="runControl.parar()">
-          {{ runControl.parando() ? 'Parando…' : 'Parar robô' }}
-        </button>
-      }
-    </div>
+<!-- 1. Cabeçalho: estado do robô, números do momento e os controles, numa linha só. -->
+<section class="card pv-topo" [attr.data-estado]="estado()" aria-labelledby="pv-titulo">
+  <div class="pv-estado">
+    <!-- role=status: o leitor de tela avisa quando o robô liga, pausa ou para. -->
+    <p class="pv-nome" role="status">
+      <span class="pv-luz" aria-hidden="true"></span>
+      <span id="pv-titulo">Robô de promoções</span>
+      <span class="pv-pill">{{ rotuloEstado() }}</span>
+    </p>
+    <p class="pv-frase">{{ frase() }}</p>
   </div>
 
   <dl class="pv-kpis">
-    <div class="pv-kpi">
-      <dt>Tempo ativo</dt>
-      <dd>{{ tempoAtivo() }}</dd>
-    </div>
-    <div class="pv-kpi">
-      <dt>Postados hoje</dt>
-      <dd>{{ postadosHoje() ?? '—' }}</dd>
-    </div>
-    <div class="pv-kpi">
-      <dt>{{ proxima().rotulo }}</dt>
-      <dd>{{ proxima().valor }}</dd>
-    </div>
+    <div><dt>Tempo ativo</dt><dd>{{ tempoAtivo() }}</dd></div>
+    <div><dt>Postados hoje</dt><dd>{{ postadosHoje() ?? '—' }}</dd></div>
+    <div><dt>{{ proxima().rotulo }}</dt><dd>{{ proxima().valor }}</dd></div>
   </dl>
+
+  <div class="pv-controles">
+    <button type="button" class="pv-icone-btn" title="Estatísticas de hoje" aria-label="Estatísticas de hoje" (click)="statsAbertas.set(true)">
+      <ng-container *ngTemplateOutlet="icone; context: { $implicit: 'grafico' }" />
+    </button>
+
+    <div class="pv-grupos-ancora">
+      <button
+        type="button"
+        class="pv-icone-btn"
+        [title]="'Grupos: ' + rotuloAlvo()"
+        [attr.aria-label]="'Escolher grupos (' + rotuloAlvo() + ')'"
+        [attr.aria-expanded]="escolhendoGrupos()"
+        (click)="escolhendoGrupos.set(!escolhendoGrupos())"
+      >
+        <ng-container *ngTemplateOutlet="icone; context: { $implicit: 'grupos' }" />
+      </button>
+      @if (escolhendoGrupos()) {
+        <div class="pv-grupos" role="group" aria-labelledby="pv-alvo">
+          <span class="field-rotulo" id="pv-alvo">Publicar em quais grupos</span>
+          <div class="segmented">
+            <button type="button" class="segmented-option" [class.segmented-option-active]="runControl.alvo() === 'todos'" [attr.aria-pressed]="runControl.alvo() === 'todos'" [disabled]="runControl.algoRodando()" (click)="escolherAlvo('todos')">Todos</button>
+            <button type="button" class="segmented-option" [class.segmented-option-active]="runControl.alvo() === 'selecionados'" [attr.aria-pressed]="runControl.alvo() === 'selecionados'" [disabled]="runControl.algoRodando()" (click)="escolherAlvo('selecionados')">Escolher</button>
+          </div>
+          @if (runControl.algoRodando()) {
+            <span class="hint">Para mudar os grupos, pare o robô primeiro.</span>
+          }
+          @if (runControl.grupos().length === 0) {
+            <p class="hint-text">Nenhum grupo cadastrado ainda. Cadastre em "Grupos", no menu.</p>
+          } @else if (runControl.alvo() === 'selecionados') {
+            <div class="lanterna-lista">
+              @for (g of runControl.grupos(); track g.id) {
+                <label class="checkbox-row">
+                  <input type="checkbox" [disabled]="runControl.algoRodando()" [checked]="runControl.selecionados().has(g.id)" (change)="toggleSelecionado(g.id, $any($event.target).checked)" />
+                  <span>{{ g.nome }}</span>
+                </label>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <span class="pv-divisor" aria-hidden="true"></span>
+
+    @if (!runControl.algoRodando()) {
+      <button type="button" class="btn btn-hero pv-ligar" [disabled]="runControl.iniciando()" (click)="runControl.executar()">
+        <ng-container *ngTemplateOutlet="icone; context: { $implicit: 'play' }" />
+        {{ runControl.iniciando() ? 'Ligando…' : 'Ligar' }}
+      </button>
+    } @else {
+      @if (runControl.postandoAgora()) {
+        <button
+          type="button"
+          class="pv-icone-btn"
+          [disabled]="runControl.pausando() || runControl.parando()"
+          [title]="runControl.pausado() ? 'Retomar' : 'Pausar'"
+          [attr.aria-label]="runControl.pausado() ? 'Retomar robô' : 'Pausar robô'"
+          (click)="runControl.alternarPausa()"
+        >
+          <ng-container *ngTemplateOutlet="icone; context: { $implicit: runControl.pausado() ? 'play' : 'pausa' }" />
+        </button>
+      }
+      <button type="button" class="btn btn-ghost pv-parar" [disabled]="runControl.parando()" (click)="runControl.parar()">
+        <ng-container *ngTemplateOutlet="icone; context: { $implicit: 'parar' }" />
+        {{ runControl.parando() ? 'Parando…' : 'Parar' }}
+      </button>
+    }
+  </div>
 
   @if (runControl.erro()) {
     <p class="pv-erro" role="alert">{{ runControl.erro() }}</p>
   }
 </section>
 
-<!-- 2. A pipeline do produto da vez. -->
+<!-- 2. A pipeline do produto da vez — a loja aparece na Origem e os canais no Postando. -->
 <section class="pv-pipeline" aria-label="Etapas do produto da vez">
   <ol class="pv-etapas">
     @for (e of etapas(); track e.id) {
@@ -79,12 +117,16 @@
         [class.pv-etapa-atual]="e.atual"
         [attr.aria-current]="e.atual ? 'step' : null"
       >
-        <span class="pv-etapa-num" aria-hidden="true">{{ e.numero }}</span>
         <span class="pv-etapa-icone"><ng-container *ngTemplateOutlet="icone; context: { $implicit: e.icone }" /></span>
         <strong class="pv-etapa-titulo">{{ e.titulo }}</strong>
-        <span class="pv-etapa-sub">{{ e.sub }}</span>
+        <span class="pv-etapa-sub" [title]="e.sub">{{ e.sub }}</span>
         <span class="pv-etapa-selo">
-          @if (e.loja) {
+          @if (e.id === 'postando') {
+            <span class="pv-canais">
+              <img src="lojas/whatsapp.svg" [class.pv-canal-off]="!destino().whatsappConectado" [title]="tituloWhatsapp()" [attr.alt]="tituloWhatsapp()" />
+              <img src="lojas/telegram.png" [class.pv-canal-off]="!destino().telegramConectado || !destino().telegram" [title]="tituloTelegram()" [attr.alt]="tituloTelegram()" />
+            </span>
+          } @else if (e.loja) {
             <img class="pv-etapa-logo" [src]="logoDaLoja(e.loja)" alt="" />
           } @else {
             <span class="pv-marca" aria-hidden="true"></span>
@@ -94,187 +136,97 @@
       </li>
     }
   </ol>
-  @if (!aoVivo()) {
-    <p class="pv-pipeline-nota">
-      {{ runControl.postandoAgora() ? 'Preparando a primeira busca…' : 'As etapas acendem aqui assim que o robô estiver postando.' }}
-    </p>
-  }
+  <p class="pv-pipeline-nota">
+    @if (aoVivo() && produtoDaVez(); as prod) {
+      <span class="pv-produto" [title]="prod">{{ prod }}</span>
+      @if (grupoDaVez()) { <span class="pv-produto-grupo">&nbsp;· para <strong>{{ grupoDaVez() }}</strong></span> }
+    } @else {
+      {{ runControl.postandoAgora() ? 'Procurando o próximo produto…' : 'As etapas acendem aqui assim que o robô estiver postando.' }}
+    }
+  </p>
 </section>
 
-<!-- 3. Contexto: de onde vem e pra onde vai. -->
-<div class="pv-contexto">
-  <section class="card pv-ctx">
-    <span class="pv-ctx-icone" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="7.5" ry="3"/><path d="M4.5 6v6c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3V6"/><path d="M4.5 12v6c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-6"/></svg>
-    </span>
-    <div class="pv-ctx-corpo">
-      <h2>Modo atual</h2>
-      <span class="pv-chip">{{ modo().titulo }}</span>
-      <p class="pv-ctx-sub">{{ modo().sub }}</p>
-      @if (grupoDaVez()) {
-        <p class="pv-ctx-sub">Grupo da vez: <strong>{{ grupoDaVez() }}</strong></p>
-      }
+<!-- 3. O que ele fez por último. Ocupa o resto da tela e rola por dentro. -->
+<section class="card pv-acoes" aria-labelledby="pv-acoes-titulo">
+  <div class="card-header">
+    <h2 id="pv-acoes-titulo">Últimas ações</h2>
+    <button type="button" class="btn btn-ghost btn-sm" (click)="verLogs.emit()">Ver logs detalhados</button>
+  </div>
+  @if (jobs.desafioMl()) {
+    <div class="espera-faixa">
+      <span class="espera-faixa-logo"><img src="lojas/mercadolivre.svg" alt="" /></span>
+      <div class="espera-faixa-texto">
+        <strong>Mercado Livre em espera</strong>
+        <span>Ele pediu uma verificação de segurança. As outras lojas seguem postando.</span>
+      </div>
+      <button type="button" class="btn btn-ghost btn-sm" (click)="jobs.desafioPopupAberto.set(true)">Resolver</button>
     </div>
-  </section>
+  }
+  <ul class="pv-lista" role="log" aria-label="Últimas ações do robô">
+    @for (a of acoes(); track $index) {
+      <li class="pv-acao" [attr.data-tom]="a.tom">
+        <span class="pv-acao-hora">{{ a.hora }}</span>
+        <span class="pv-acao-icone"><ng-container *ngTemplateOutlet="icone; context: { $implicit: a.icone }" /></span>
+        <span class="pv-acao-texto">{{ a.texto }}</span>
+        <span class="pv-selo" [attr.data-tom]="a.tom">{{ a.selo }}</span>
+      </li>
+    } @empty {
+      <li class="empty-state">
+        <span class="empty-state-title">Nada por aqui ainda</span>
+        <span class="empty-state-text">Ligue o robô para acompanhar cada produto, do achado até a postagem.</span>
+      </li>
+    }
+  </ul>
+</section>
 
-  <section class="card pv-ctx">
-    <span class="pv-ctx-icone" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9 5 4.5h14L20.5 9"/><path d="M3.5 9h17v9.5a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5Z"/><path d="M9.5 20v-5.5h5V20"/></svg>
-    </span>
-    <div class="pv-ctx-corpo">
-      <h2>Loja atual</h2>
-      @if (loja(); as l) {
-        <div class="pv-loja">
-          <span class="pv-loja-logo"><img [src]="logoDaLoja(l.id)" alt="" /></span>
-          <div class="pv-loja-texto">
-            <strong>{{ l.nome }}</strong>
-            <span>{{ l.origem }}</span>
-          </div>
-        </div>
-        @if (l.produto) {
-          <p class="pv-ctx-sub pv-ctx-produto" [title]="l.produto">{{ l.produto }}</p>
-        }
-      } @else {
-        <p class="pv-ctx-sub">{{ runControl.postandoAgora() ? 'Procurando o próximo produto…' : 'Aparece aqui quando o robô achar um produto.' }}</p>
-      }
-    </div>
-  </section>
-
-  <section class="card pv-ctx pv-destino">
-    <span class="pv-ctx-icone" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M8 8l4-4 4 4"/><path d="M4 14v5a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"/></svg>
-    </span>
-    <div class="pv-ctx-corpo">
-      <div class="pv-ctx-cabeca">
-        <h2>Destino</h2>
-        <button type="button" class="btn btn-ghost btn-sm" [attr.aria-expanded]="escolhendoGrupos()" (click)="escolhendoGrupos.set(!escolhendoGrupos())">
-          {{ escolhendoGrupos() ? 'Fechar' : 'Escolher grupos' }}
+<!-- Estatísticas de hoje: abrem pelo ícone de gráfico no cabeçalho. -->
+@if (statsAbertas()) {
+  <div class="modal-fundo" (click)="statsAbertas.set(false)">
+    <div class="modal-caixa pv-stats" role="dialog" aria-modal="true" aria-labelledby="pv-stats-titulo" (click)="$event.stopPropagation()">
+      <div class="card-header">
+        <h2 id="pv-stats-titulo">Estatísticas de hoje</h2>
+        <button type="button" class="btn-fechar" (click)="statsAbertas.set(false)" aria-label="Fechar" title="Fechar">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6 18 18M18 6 6 18" /></svg>
         </button>
       </div>
-      <div class="pv-canais">
-        <div class="pv-canal" [class.pv-canal-off]="!destino().whatsappConectado">
-          <img src="lojas/whatsapp.svg" alt="" />
-          <div>
-            <strong>WhatsApp</strong>
-            <span>{{ destino().whatsappConectado ? destino().whatsapp + (destino().whatsapp === 1 ? ' grupo ativo' : ' grupos ativos') : 'Não conectado' }}</span>
-          </div>
+      <div class="pv-tiles">
+        <div class="pv-tile">
+          <span class="pv-tile-icone" data-cor="ok"><ng-container *ngTemplateOutlet="icone; context: { $implicit: 'envio' }" /></span>
+          <span class="pv-tile-rotulo">Produtos postados</span>
+          <span class="pv-tile-valor">{{ stats().postados ?? '—' }}</span>
+          @if (stats().postadosOntem !== null) {
+            <span class="pv-tile-extra">ontem: {{ stats().postadosOntem }}</span>
+          }
         </div>
-        <div class="pv-canal" [class.pv-canal-off]="!destino().telegramConectado || !destino().telegram">
-          <img src="lojas/telegram.png" alt="" />
-          <div>
-            <strong>Telegram</strong>
-            <span>
-              @if (!destino().telegramConectado) { Não conectado }
-              @else if (!destino().telegram) { Nenhum canal ligado }
-              @else { {{ destino().telegram }} {{ destino().telegram === 1 ? 'canal ativo' : 'canais ativos' }} }
-            </span>
-          </div>
+        <div class="pv-tile">
+          <span class="pv-tile-icone" data-cor="info"><ng-container *ngTemplateOutlet="icone; context: { $implicit: 'relogio' }" /></span>
+          <span class="pv-tile-rotulo">Tempo médio por produto</span>
+          <span class="pv-tile-valor">{{ stats().tempoMedio }}</span>
+          <span class="pv-tile-extra">buscar + postar</span>
+        </div>
+        <div class="pv-tile">
+          <span class="pv-tile-icone" data-cor="ouro"><ng-container *ngTemplateOutlet="icone; context: { $implicit: 'sacola' }" /></span>
+          <span class="pv-tile-rotulo">Produtos encontrados</span>
+          <span class="pv-tile-valor">{{ stats().encontrados ?? '—' }}</span>
+          @if (stats().encontradosOntem !== null) {
+            <span class="pv-tile-extra">ontem: {{ stats().encontradosOntem }}</span>
+          }
+        </div>
+        <div class="pv-tile">
+          <span class="pv-tile-icone" data-cor="ok"><ng-container *ngTemplateOutlet="icone; context: { $implicit: 'check' }" /></span>
+          <span class="pv-tile-rotulo">Taxa de sucesso</span>
+          <span class="pv-tile-valor">{{ stats().taxa }}</span>
+          <span class="pv-tile-extra">{{ stats().taxaDetalhe }}</span>
         </div>
       </div>
-    </div>
-
-    @if (escolhendoGrupos()) {
-      <div class="pv-grupos" role="group" aria-labelledby="pv-alvo">
-        <span class="field-rotulo" id="pv-alvo">Publicar em quais grupos</span>
-        <div class="segmented">
-          <button type="button" class="segmented-option" [class.segmented-option-active]="runControl.alvo() === 'todos'" [attr.aria-pressed]="runControl.alvo() === 'todos'" [disabled]="runControl.algoRodando()" (click)="escolherAlvo('todos')">Todos os grupos</button>
-          <button type="button" class="segmented-option" [class.segmented-option-active]="runControl.alvo() === 'selecionados'" [attr.aria-pressed]="runControl.alvo() === 'selecionados'" [disabled]="runControl.algoRodando()" (click)="escolherAlvo('selecionados')">Escolher grupos</button>
+      <dl class="pv-totais">
+        <div><dt>Publicadas no total</dt><dd>{{ statusService.status()?.produtosPublicados ?? '—' }}</dd></div>
+        <div>
+          <dt>Na fila</dt>
+          <dd>{{ statusService.status()?.produtosCatalogo ?? '—' }} <button type="button" class="btn-link" (click)="abrirProdutos()">Ver produtos</button></dd>
         </div>
-        @if (runControl.algoRodando()) {
-          <span class="hint">Para mudar os grupos, pare o robô primeiro.</span>
-        }
-        @if (runControl.grupos().length === 0) {
-          <p class="hint-text">Nenhum grupo cadastrado ainda. Cadastre em "Grupos", no menu.</p>
-        } @else if (runControl.alvo() === 'selecionados') {
-          <div class="lanterna-lista">
-            @for (g of runControl.grupos(); track g.id) {
-              <label class="checkbox-row">
-                <input type="checkbox" [disabled]="runControl.algoRodando()" [checked]="runControl.selecionados().has(g.id)" (change)="toggleSelecionado(g.id, $any($event.target).checked)" />
-                <span>{{ g.nome }} <span class="hint-text">({{ g.groupName }})</span></span>
-              </label>
-            }
-          </div>
-        }
-      </div>
-    }
-  </section>
-</div>
-
-<!-- 4 e 5. O que ele fez por último e os números de hoje. -->
-<div class="pv-baixo">
-  <section class="card pv-acoes" aria-labelledby="pv-acoes-titulo">
-    <div class="card-header">
-      <h2 id="pv-acoes-titulo">Últimas ações</h2>
-      <button type="button" class="btn btn-ghost btn-sm" (click)="verLogs.emit()">Ver logs detalhados</button>
+        <div><dt>Cupons disponíveis</dt><dd>{{ statusService.status()?.cuponsAtivos ?? '—' }}</dd></div>
+      </dl>
     </div>
-    @if (jobs.desafioMl()) {
-      <div class="espera-faixa">
-        <span class="espera-faixa-logo"><img src="lojas/mercadolivre.svg" alt="" /></span>
-        <div class="espera-faixa-texto">
-          <strong>Mercado Livre em espera</strong>
-          <span>Ele pediu uma verificação de segurança. As outras lojas seguem postando.</span>
-        </div>
-        <button type="button" class="btn btn-ghost btn-sm" (click)="jobs.desafioPopupAberto.set(true)">Resolver</button>
-      </div>
-    }
-    <ul class="pv-lista" role="log" aria-label="Últimas ações do robô">
-      @for (a of acoes(); track $index) {
-        <li class="pv-acao" [attr.data-tom]="a.tom">
-          <span class="pv-acao-hora">{{ a.hora }}</span>
-          <span class="pv-acao-icone"><ng-container *ngTemplateOutlet="icone; context: { $implicit: a.icone }" /></span>
-          <span class="pv-acao-texto">{{ a.texto }}</span>
-          <span class="pv-selo" [attr.data-tom]="a.tom">{{ a.selo }}</span>
-        </li>
-      } @empty {
-        <li class="empty-state">
-          <span class="empty-state-title">Nada por aqui ainda</span>
-          <span class="empty-state-text">Ligue o robô para acompanhar cada produto, do achado até a postagem.</span>
-        </li>
-      }
-    </ul>
-  </section>
-
-  <section class="card pv-stats" aria-labelledby="pv-stats-titulo">
-    <div class="card-header">
-      <h2 id="pv-stats-titulo">Estatísticas de hoje</h2>
-    </div>
-    <div class="pv-tiles">
-      <div class="pv-tile">
-        <span class="pv-tile-icone" data-cor="ok"><ng-container *ngTemplateOutlet="icone; context: { $implicit: 'envio' }" /></span>
-        <span class="pv-tile-rotulo">Produtos postados</span>
-        <span class="pv-tile-valor">{{ stats().postados ?? '—' }}</span>
-        @if (stats().postadosOntem !== null) {
-          <span class="pv-tile-extra">ontem: {{ stats().postadosOntem }}</span>
-        }
-      </div>
-      <div class="pv-tile">
-        <span class="pv-tile-icone" data-cor="info"><ng-container *ngTemplateOutlet="icone; context: { $implicit: 'relogio' }" /></span>
-        <span class="pv-tile-rotulo">Tempo médio por produto</span>
-        <span class="pv-tile-valor">{{ stats().tempoMedio }}</span>
-        <span class="pv-tile-extra">buscar + postar</span>
-      </div>
-      <div class="pv-tile">
-        <span class="pv-tile-icone" data-cor="ouro"><ng-container *ngTemplateOutlet="icone; context: { $implicit: 'sacola' }" /></span>
-        <span class="pv-tile-rotulo">Produtos encontrados</span>
-        <span class="pv-tile-valor">{{ stats().encontrados ?? '—' }}</span>
-        @if (stats().encontradosOntem !== null) {
-          <span class="pv-tile-extra">ontem: {{ stats().encontradosOntem }}</span>
-        }
-      </div>
-      <div class="pv-tile">
-        <span class="pv-tile-icone" data-cor="ok"><ng-container *ngTemplateOutlet="icone; context: { $implicit: 'check' }" /></span>
-        <span class="pv-tile-rotulo">Taxa de sucesso</span>
-        <span class="pv-tile-valor">{{ stats().taxa }}</span>
-        <span class="pv-tile-extra">{{ stats().taxaDetalhe }}</span>
-      </div>
-    </div>
-    <dl class="pv-totais">
-      <div><dt>Publicadas no total</dt><dd>{{ statusService.status()?.produtosPublicados ?? '—' }}</dd></div>
-      <div>
-        <dt>Na fila</dt>
-        <dd>{{ statusService.status()?.produtosCatalogo ?? '—' }} <button type="button" class="btn-link" (click)="verProdutos.emit()">Ver produtos</button></dd>
-      </div>
-      <div><dt>Cupons disponíveis</dt><dd>{{ statusService.status()?.cuponsAtivos ?? '—' }}</dd></div>
-    </dl>
-  </section>
-</div>
+  </div>
+}
