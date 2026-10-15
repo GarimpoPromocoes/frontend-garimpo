@@ -17,8 +17,7 @@ import { LojasCard } from './features/conexoes/lojas-card/lojas-card';
 import { RegrasPostagem } from './features/divulgacao/regras-postagem/regras-postagem';
 import { GroupsCard } from './features/divulgacao/groups-card/groups-card';
 import { GarimpoCard } from './features/divulgacao/garimpo-card/garimpo-card';
-import { RunCard } from './features/acompanhar/run-card/run-card';
-import { StatsCard } from './features/acompanhar/stats-card/stats-card';
+import { PainelRobo } from './features/acompanhar/painel-robo/painel-robo';
 import { ConsoleCard } from './features/acompanhar/console-card/console-card';
 import { ProdutosCard } from './features/divulgacao/produtos-card/produtos-card';
 import { BuscaCard } from './features/divulgacao/busca-card/busca-card';
@@ -145,8 +144,7 @@ const CHAVE_ABA = 'promobot:aba';
     RegrasPostagem,
     GroupsCard,
     GarimpoCard,
-    RunCard,
-    StatsCard,
+    PainelRobo,
     ConsoleCard,
     ProdutosCard,
     BuscaCard,

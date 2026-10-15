@@ -149,6 +149,55 @@ export interface EstadoLogin {
   fim: FimLogin | null;
 }
 
+/** Etapas da pipeline do Painel, na ordem (estado vindo do robô por @PAINEL, montado no jobRunner). */
+export type EtapaPainelId = 'buscando' | 'origem' | 'preparando' | 'postando' | 'concluido';
+export type EstadoEtapa = 'pendente' | 'andamento' | 'espera' | 'ok' | 'erro';
+
+export interface EtapaPainel {
+  estado: EstadoEtapa;
+  em: string | null;
+  /** Até quando espera (estado 'espera'): próxima busca ou horário da postagem. */
+  ate?: string | null;
+  motivo?: string | null;
+}
+
+/** Um evento do robô, guardado para as "Últimas ações". */
+export interface AcaoPainel {
+  tipo: 'rodada' | 'produto' | 'semProduto' | 'aguardando' | 'postando' | 'enviado' | 'concluido' | 'falhou';
+  em: string;
+  rodada?: number;
+  grupo?: { nome: string; destino: string; fonte: string; telegram: string | null } | string | null;
+  loja?: string | null;
+  produto?: string | null;
+  veioDe?: string | null;
+  grupoOrigem?: string | null;
+  motivo?: string | null;
+  ate?: string | null;
+  canal?: 'whatsapp' | 'telegram';
+  destino?: string | null;
+  etapa?: string;
+  duracaoMs?: number | null;
+}
+
+export interface EstadoPainel {
+  rodada: number | null;
+  grupo: { nome: string; destino: string; fonte: string; telegram: string | null } | null;
+  atual: EtapaPainelId | null;
+  etapas: Record<EtapaPainelId, EtapaPainel>;
+  produto: {
+    tipo: 'produto' | 'cupom';
+    loja: string | null;
+    nome: string | null;
+    veioDe: string | null;
+    grupoOrigem: string | null;
+    cupom: boolean;
+  } | null;
+  canais: string[];
+  acoes: AcaoPainel[];
+  hoje: { dia: string; concluidos: number; falhas: number; somaMs: number; medidos: number };
+  atualizadoEm: string | null;
+}
+
 const MAX_LINHAS = 500;
 const INTERVALO_LOTE_MS = 150;
 
@@ -189,6 +238,9 @@ export class JobsService {
   /** Resultado mais recente da verificação ao vivo das conexões. */
   readonly verificacao = signal<VerificacaoConexoes | null>(null);
 
+  /** Pipeline e números do dia do robô de postagem (evento SSE "painel"). */
+  readonly painel = signal<EstadoPainel | null>(null);
+
   private eventSource: EventSource | null = null;
   /** Resultado de login que o usuário já fechou — não reabrir. */
   private fimJaFechado: string | null = null;
@@ -217,6 +269,12 @@ export class JobsService {
       try {
         const { linha } = JSON.parse(ev.data);
         this.enfileirarLinha(linha as string);
+      } catch (_) {}
+    });
+
+    this.eventSource.addEventListener('painel', (ev: MessageEvent) => {
+      try {
+        this.painel.set(JSON.parse(ev.data) as EstadoPainel);
       } catch (_) {}
     });
 
@@ -311,6 +369,7 @@ export class JobsService {
     this.desafioPopupAberto.set(false);
     this.login.set(null);
     this.verificacao.set(null);
+    this.painel.set(null);
   }
 
   /** Último quadro da tela do desafio do ML (null = nenhum quadro novo desde `seq`). */

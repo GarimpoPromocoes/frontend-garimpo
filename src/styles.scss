@@ -3803,69 +3803,672 @@ app-status-conexoes {
   display: none;
 }
 
-/* ---- Painel: controle e números em cima, atividade embaixo ----
-   A atividade estica até o fim da janela; se a janela for baixa demais, a
-   área de conteúdo rola por dentro em vez de espremer os blocos. */
-.painel-grade {
-  flex: 1;
-  min-height: 600px;
-  display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(340px, 1fr);
-  grid-template-rows: auto minmax(0, 1fr);
+/* ---- Painel: a visão para quem não lê log ----
+   Em cima a lanterna (estado + números do momento), depois a pipeline do
+   produto da vez, o contexto (modo, loja, destino) e, embaixo, as últimas
+   ações ao lado dos números do dia. Mesmos tokens do resto do app: o amarelo
+   só acende no que está acontecendo agora. */
+app-painel-robo {
+  display: flex;
+  flex-direction: column;
   gap: 18px;
+  min-width: 0;
 }
-.painel-robo,
-.painel-numeros,
-.painel-atividade {
+
+.lanterna-estado .pv-nome {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin: 0;
+  max-width: none;
+  font-size: clamp(28px, 3.4vw, 40px);
+  font-weight: 800;
+  font-stretch: 68%;
+  line-height: 1;
+  color: inherit;
+}
+.pv-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  font-stretch: 100%;
+  line-height: 1.2;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+.lanterna-acesa .pv-pill {
+  background: var(--on-gold);
+  color: #fff;
+}
+.pv-pill .badge-dot {
+  background: #9a8672;
+}
+.pv-pill[data-estado='online'] .badge-dot {
+  background: #3ddc84;
+  animation: pulse-dot 1.6s ease-in-out infinite;
+}
+.pv-pill[data-estado='pausado'] .badge-dot,
+.pv-pill[data-estado='religando'] .badge-dot {
+  background: var(--gold);
+}
+
+.pv-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0 32px 26px 110px;
+}
+.pv-kpi {
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.08);
+}
+.lanterna-acesa .pv-kpi {
+  background: rgba(42, 30, 22, 0.08);
+}
+.pv-kpi dt {
+  font-size: 13px;
+  color: #cfc4b9;
+}
+.lanterna-acesa .pv-kpi dt {
+  color: var(--on-gold);
+}
+.pv-kpi dd {
+  margin: 4px 0 0;
+  font-size: 26px;
+  font-weight: 800;
+  font-stretch: 70%;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+}
+.pv-erro {
+  margin: 0 6px 6px;
+  padding: 12px 20px;
+  border-radius: 0 0 15px 15px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Pipeline: cinco cartões com seta entre eles; a etapa da vez ganha a borda amarela. */
+.pv-pipeline {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pv-etapas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 30px;
+}
+.pv-etapa {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  padding: 20px 14px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  min-width: 0;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.pv-etapa + .pv-etapa::before {
+  content: '';
+  position: absolute;
+  left: -22px;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  border-top: 2px solid var(--border-strong);
+  border-right: 2px solid var(--border-strong);
+  transform: translateY(-50%) rotate(45deg);
+}
+.pv-etapa-num {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--surface-3);
+  color: var(--text-muted);
+}
+.pv-etapa-icone {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  color: var(--text-soft);
+  margin-bottom: 4px;
+}
+.pv-etapa-icone svg {
+  width: 24px;
+  height: 24px;
+}
+.pv-etapa-titulo {
+  font-size: 16px;
+  font-weight: 700;
+  font-stretch: var(--estreita);
+  color: var(--text);
+}
+.pv-etapa-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.35;
+  min-height: 2.7em;
+  overflow-wrap: anywhere;
+}
+.pv-etapa-selo {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 2px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.pv-etapa-logo {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: var(--logo-placa);
+  padding: 3px;
+}
+.pv-marca {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--border-strong);
+  flex-shrink: 0;
+}
+
+.pv-etapa[data-estado='ok'] .pv-etapa-icone {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+.pv-etapa[data-estado='ok'] .pv-etapa-selo {
+  color: var(--ok);
+}
+.pv-etapa[data-estado='ok'] .pv-marca {
+  border: none;
+  background: var(--ok)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 12.5 4 4L18 8'/%3E%3C/svg%3E")
+    center / 12px no-repeat;
+}
+.pv-etapa[data-estado='andamento'] .pv-etapa-icone {
+  background: var(--gold);
+  color: var(--on-gold);
+}
+.pv-etapa[data-estado='andamento'] .pv-etapa-selo {
+  color: var(--gold-ink);
+}
+.pv-etapa[data-estado='andamento'] .pv-marca {
+  border-color: var(--gold-deep);
+  border-right-color: transparent;
+  animation: pv-gira 0.9s linear infinite;
+}
+.pv-etapa[data-estado='espera'] .pv-etapa-icone {
+  background: var(--gold-soft);
+  color: var(--gold-ink);
+}
+.pv-etapa[data-estado='espera'] .pv-etapa-selo {
+  color: var(--gold-ink);
+}
+.pv-etapa[data-estado='espera'] .pv-marca {
+  border-color: var(--gold-deep);
+  border-style: dashed;
+}
+.pv-etapa[data-estado='erro'] .pv-etapa-icone {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.pv-etapa[data-estado='erro'] .pv-etapa-selo {
+  color: var(--danger);
+}
+.pv-etapa[data-estado='erro'] .pv-marca {
+  border-color: var(--danger);
+  background: var(--danger);
+}
+.pv-etapa-atual {
+  border: 2px solid var(--gold);
+  background: var(--gold-soft);
+  box-shadow: 0 10px 24px rgba(221, 163, 0, 0.18);
+}
+.pv-etapa-atual .pv-etapa-num {
+  background: var(--gold);
+  color: var(--on-gold);
+}
+.pv-pipeline-nota {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-muted);
+  text-align: center;
+}
+@keyframes pv-gira {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Contexto: modo, loja e destino. */
+.pv-contexto {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.3fr);
+  gap: 18px;
+  align-items: stretch;
+}
+.pv-ctx {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 14px;
+  padding: 20px;
+}
+.pv-ctx h2 {
+  font-size: 17px;
+}
+.pv-ctx-icone {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text-soft);
+}
+.pv-ctx-icone svg {
+  width: 22px;
+  height: 22px;
+}
+.pv-ctx-corpo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.pv-ctx-cabeca {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+}
+.pv-ctx-sub {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+.pv-ctx-produto {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-soft);
+}
+.pv-chip {
+  display: inline-flex;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--gold-soft);
+  border: 1px solid var(--gold-border);
+  color: var(--gold-ink);
+  font-size: 15px;
+  font-weight: 700;
+}
+.pv-loja {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.pv-loja-logo {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--logo-placa);
+}
+.pv-loja-logo img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+.pv-loja-texto {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  min-height: 0;
 }
-.painel-robo .lanterna {
-  flex: 1;
+.pv-loja-texto strong {
+  font-size: 16px;
+}
+.pv-loja-texto span {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.pv-canais {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
+}
+.pv-canal {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.pv-canal img {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  object-fit: contain;
+  border-radius: 50%;
+}
+.pv-canal div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.pv-canal strong {
+  font-size: 15px;
+}
+.pv-canal span {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.pv-canal-off img {
+  filter: grayscale(1);
+  opacity: 0.55;
+}
+.pv-grupos {
+  flex-basis: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+/* Últimas ações e números de hoje. */
+.pv-baixo {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+.pv-acoes,
+.pv-stats {
+  gap: 14px;
+  padding: 20px 22px;
+}
+.pv-acoes .card-header,
+.pv-stats .card-header {
+  align-items: center;
+}
+.pv-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
 }
-.painel-robo .lanterna-grupos {
-  flex: 1;
-}
-/* Os três números empilhados, na altura do controle do robô. */
-.painel-numeros .stat-strip {
-  flex: 1;
-  grid-template-columns: minmax(0, 1fr);
-}
-.painel-numeros .stat-cell {
-  justify-content: center;
-  padding: 14px 20px;
-  border-left: none;
+.pv-acao {
+  display: grid;
+  grid-template-columns: 44px 22px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
   border-top: 1px solid var(--border);
+  font-size: 14px;
 }
-.painel-numeros .stat-cell:first-child {
+.pv-acao:first-child {
   border-top: none;
 }
-.painel-atividade {
-  grid-column: 1 / -1;
+.pv-acao-hora {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
 }
-.painel-atividade > .card {
-  flex: 1;
-  min-height: 0;
+.pv-acao-icone {
+  display: grid;
+  place-items: center;
+  color: var(--text-soft);
 }
-.painel-atividade .activity-feed {
-  flex: 1;
-  min-height: 0;
-  max-height: none;
+.pv-acao-icone svg {
+  width: 18px;
+  height: 18px;
 }
-@media (max-width: 1100px) {
-  .painel-grade {
-    flex: none;
-    min-height: 0;
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: none;
+.pv-acao[data-tom='ok'] .pv-acao-icone {
+  color: var(--ok);
+}
+.pv-acao[data-tom='erro'] .pv-acao-icone {
+  color: var(--danger);
+}
+.pv-acao[data-tom='achado'] .pv-acao-icone,
+.pv-acao[data-tom='andamento'] .pv-acao-icone {
+  color: var(--gold-ink);
+}
+.pv-acao-texto {
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+.pv-selo {
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.pv-selo[data-tom='ok'] {
+  background: var(--ok-soft);
+  border-color: var(--ok-border);
+  color: var(--ok);
+}
+.pv-selo[data-tom='andamento'],
+.pv-selo[data-tom='achado'] {
+  background: var(--gold-soft);
+  border-color: var(--gold-border);
+  color: var(--gold-ink);
+}
+.pv-selo[data-tom='erro'] {
+  background: var(--danger-soft);
+  border-color: var(--danger-border);
+  color: var(--danger);
+}
+.pv-tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.pv-tile {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  grid-template-rows: auto auto auto;
+  column-gap: 12px;
+  row-gap: 2px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.pv-tile-icone {
+  grid-row: 1 / span 3;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text-soft);
+}
+.pv-tile-icone svg {
+  width: 22px;
+  height: 22px;
+}
+.pv-tile-icone[data-cor='ok'] {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+.pv-tile-icone[data-cor='ouro'] {
+  background: var(--gold-soft);
+  color: var(--gold-ink);
+}
+.pv-tile-rotulo {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.pv-tile-valor {
+  font-size: 30px;
+  font-weight: 800;
+  font-stretch: 70%;
+  line-height: 1.05;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.pv-tile-extra {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.pv-totais {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.pv-totais div {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.pv-totais dt {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.pv-totais dd {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.pv-totais .btn-link {
+  font-size: 13px;
+  margin-left: 4px;
+}
+
+@media (max-width: 1200px) {
+  .pv-contexto {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
-  .painel-atividade .activity-feed {
-    flex: none;
-    max-height: 320px;
+  .pv-destino {
+    grid-column: 1 / -1;
+  }
+  .pv-baixo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+/* Telas estreitas: a pipeline vira uma lista vertical, cada etapa numa linha. */
+@media (max-width: 1000px) {
+  .pv-etapas {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+  .pv-etapa {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    align-items: center;
+    text-align: left;
+    column-gap: 12px;
+    row-gap: 0;
+    padding: 12px 14px;
+  }
+  .pv-etapa + .pv-etapa::before {
+    display: none;
+  }
+  .pv-etapa-num {
+    display: none;
+  }
+  .pv-etapa-icone {
+    grid-row: 1 / span 2;
+    width: 44px;
+    height: 44px;
+    margin: 0;
+  }
+  .pv-etapa-sub {
+    grid-column: 2;
+    min-height: 0;
+  }
+  .pv-etapa-selo {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    margin: 0;
+  }
+}
+@media (max-width: 720px) {
+  .pv-kpis {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    padding: 0 20px 22px;
+  }
+  .pv-kpi:last-child {
+    grid-column: 1 / -1;
+  }
+  .pv-contexto,
+  .pv-tiles {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pv-destino {
+    grid-column: auto;
+  }
+  .pv-acao {
+    grid-template-columns: 40px 20px minmax(0, 1fr);
+  }
+  .pv-acao .pv-selo {
+    grid-column: 3;
+    justify-self: start;
+  }
+}
+@media (max-width: 460px) {
+  .pv-canais {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pv-etapa {
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+  .pv-etapa-selo {
+    grid-column: 2;
+    grid-row: auto;
+    margin-top: 4px;
   }
 }
 

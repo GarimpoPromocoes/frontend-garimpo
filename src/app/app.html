@@ -203,13 +203,9 @@
             </div>
           }
 
-          <!-- Controle e números lado a lado em cima, atividade embaixo ocupando o resto da altura:
-               cabe tudo na tela, sem rolar. -->
-          <div class="painel-grade">
-            <app-run-card class="painel-robo" />
-            <app-stats-card class="painel-numeros" (verProdutos)="produtosModalAberto.set(true)" />
-            <app-console-card class="painel-atividade" [compacto]="true" (verTudo)="atividadeModalAberta.set(true)" />
-          </div>
+          <!-- Visão para leigos: estado, pipeline do produto da vez, contexto, últimas ações e números
+               do dia. O log detalhado continua no modal de atividade ("Ver logs detalhados"). -->
+          <app-painel-robo (verProdutos)="produtosModalAberto.set(true)" (verLogs)="atividadeModalAberta.set(true)" />
         }
 
         @case ('grupos') {

@@ -24,6 +24,8 @@ export interface StatusResponse {
   produtosPublicados: number;
   produtosCatalogo: number;
   cuponsAtivos: number;
+  /** Números do dia (fuso de São Paulo); "encontrados" = o que entrou no catálogo. */
+  hoje?: { postados: number; postadosOntem: number; encontrados: number; encontradosOntem: number } | null;
   processoExterno: { rodando: boolean };
   job: { rodando: boolean; tipo: string | null; iniciadoEm: string | null; codigoSaida?: number | null };
   agendamento: {
