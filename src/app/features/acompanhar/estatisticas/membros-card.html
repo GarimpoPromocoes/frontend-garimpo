@@ -1,0 +1,154 @@
+<div class="stat-strip stat-strip-4">
+  <div class="stat-cell">
+    <span class="stat-cell-label">Membros agora</span>
+    <span class="stat-cell-value">{{ inteiro(resumo().membros) }}</span>
+  </div>
+  <div class="stat-cell">
+    <span class="stat-cell-label">Entraram ({{ dias() }} dias)</span>
+    <span class="stat-cell-value">{{ inteiro(resumo().entradas) }}</span>
+  </div>
+  <div class="stat-cell">
+    <span class="stat-cell-label">Saíram ({{ dias() }} dias)</span>
+    <span class="stat-cell-value">{{ inteiro(resumo().saidas) }}</span>
+  </div>
+  <div class="stat-cell">
+    <span class="stat-cell-label">Saldo</span>
+    <span class="stat-cell-value">{{ sinal(resumo().entradas - resumo().saidas) }}</span>
+  </div>
+</div>
+
+@if (est.erroMembros()) {
+  <p class="error-text" role="alert">{{ est.erroMembros() }}</p>
+}
+
+@if (!est.grupos().length) {
+  <div class="card">
+    <div class="info-box">
+      Ainda não li os membros dos grupos. Com o robô ligado, ele confere quem está em cada grupo do WhatsApp
+      (principais e espelhos) a cada 30 minutos. A primeira leitura de cada grupo vira a base; as entradas e
+      saídas começam a contar a partir da segunda.
+    </div>
+  </div>
+} @else {
+  @if (resumo().cresceu || resumo().encolheu) {
+    <div class="est-destaques">
+      @if (resumo().cresceu; as c) {
+        <div class="est-destaque">
+          <span class="est-destaque-rotulo">Grupo que mais cresceu</span>
+          <strong>{{ c.nome }}</strong>
+          <span class="hint-text">{{ sinal(saldo(c)) }} ({{ inteiro(c.entradas) }} entraram, {{ inteiro(c.saidas) }} saíram)</span>
+        </div>
+      }
+      @if (resumo().encolheu; as e) {
+        <div class="est-destaque">
+          <span class="est-destaque-rotulo">Grupo que mais perdeu gente</span>
+          <strong>{{ e.nome }}</strong>
+          <span class="hint-text">{{ sinal(saldo(e)) }} ({{ inteiro(e.entradas) }} entraram, {{ inteiro(e.saidas) }} saíram)</span>
+        </div>
+      }
+    </div>
+  }
+
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h2>Entradas e saídas por dia</h2>
+        <p class="card-subtitle">Para cima, quem entrou; para baixo, quem saiu.</p>
+      </div>
+      <div class="est-controles">
+        <div class="ganhos-legenda">
+          <span><span class="ganhos-swatch est-cor-entrada"></span>Entraram</span>
+          <span><span class="ganhos-swatch est-cor-saida"></span>Saíram</span>
+        </div>
+        <select aria-label="Grupo do gráfico" (change)="filtrar($event)">
+          <option value="">Todos os grupos</option>
+          @for (gr of est.grupos(); track gr.chatId) {
+            <option [value]="gr.chatId" [selected]="grupoFiltro() === gr.chatId">{{ gr.nome }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="ganhos-grafico" (mouseleave)="barraAtiva.set(null)">
+      <svg [attr.viewBox]="'0 0 ' + g.largura + ' ' + g.altura" role="group"
+        aria-label="Entradas e saídas de membros por dia. Os números por grupo estão na tabela abaixo.">
+        @for (l of grafico().grade; track l.y) {
+          <line class="ganhos-grade" [class.est-zero]="l.rotulo === '0'" [attr.x1]="g.esq" [attr.x2]="g.largura - g.dir"
+            [attr.y1]="l.y" [attr.y2]="l.y" />
+          <text class="ganhos-eixo" [attr.x]="g.esq - 8" [attr.y]="l.y + 4" text-anchor="end">{{ l.rotulo }}</text>
+        }
+        @for (b of grafico().barras; track b.dia) {
+          <g class="ganhos-coluna" [class.ativa]="barraAtiva() === b" tabindex="0" role="img"
+            [attr.aria-label]="nomeDia(b.dia) + ': ' + b.entradas + ' entraram, ' + b.saidas + ' saíram'"
+            (mouseenter)="barraAtiva.set(b)" (focus)="barraAtiva.set(b)" (blur)="barraAtiva.set(null)">
+            <rect class="ganhos-alvo" [attr.x]="b.x - (grafico().passo - b.largura) / 2" [attr.y]="g.topo"
+              [attr.width]="grafico().passo" [attr.height]="g.altura - g.topo - g.base" />
+            @if (b.dEntrada) {
+              <path class="est-entrada" [attr.d]="b.dEntrada" />
+            }
+            @if (b.dSaida) {
+              <path class="est-saida" [attr.d]="b.dSaida" />
+            }
+            @if (b.rotulo) {
+              <text class="ganhos-eixo" [attr.x]="b.x + b.largura / 2" [attr.y]="g.altura - 8" text-anchor="middle">{{ b.rotulo }}</text>
+            }
+          </g>
+        }
+      </svg>
+
+      @if (barraAtiva(); as b) {
+        <div class="ganhos-tooltip" [class.ganhos-tooltip-fim]="tooltipEsquerda(b) > 72"
+          [class.ganhos-tooltip-inicio]="tooltipEsquerda(b) < 28" [style.left.%]="tooltipEsquerda(b)">
+          <strong>{{ nomeDia(b.dia) }}</strong>
+          <span class="ganhos-tooltip-linha"><span class="ganhos-swatch est-cor-entrada"></span>Entraram <b>{{ b.entradas }}</b></span>
+          <span class="ganhos-tooltip-linha"><span class="ganhos-swatch est-cor-saida"></span>Saíram <b>{{ b.saidas }}</b></span>
+          <span class="ganhos-tooltip-linha ganhos-tooltip-total">Saldo <b>{{ sinal(b.entradas - b.saidas) }}</b></span>
+        </div>
+      }
+    </div>
+    @if (grafico().vazio) {
+      <p class="hint-text">Ninguém entrou nem saiu {{ grupoFiltro() ? 'deste grupo' : 'dos grupos' }} no período.</p>
+    }
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h2>Por grupo</h2>
+        <p class="card-subtitle">Últimos {{ dias() }} dias. Membros = quantos estavam na última leitura.</p>
+      </div>
+      <div class="segmented">
+        <button type="button" class="segmented-option" [class.segmented-option-active]="ordem() === 'entradas'"
+          [attr.aria-pressed]="ordem() === 'entradas'" (click)="ordem.set('entradas')">Mais entradas</button>
+        <button type="button" class="segmented-option" [class.segmented-option-active]="ordem() === 'saidas'"
+          [attr.aria-pressed]="ordem() === 'saidas'" (click)="ordem.set('saidas')">Mais saídas</button>
+      </div>
+    </div>
+    <div class="tabela-rolagem">
+      <table class="tabela est-tabela-grupos">
+        <thead>
+          <tr>
+            <th scope="col">Grupo</th>
+            <th scope="col" class="col-num">Membros</th>
+            <th scope="col" class="col-num">Entraram</th>
+            <th scope="col" class="col-num">Saíram</th>
+            <th scope="col" class="col-num">Saldo</th>
+            <th scope="col">Lido em</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (gr of gruposOrdenados(); track gr.chatId) {
+            <tr>
+              <td>{{ gr.nome }}</td>
+              <td class="col-num">{{ inteiro(gr.total) }}</td>
+              <td class="col-num">{{ inteiro(gr.entradas) }}</td>
+              <td class="col-num">{{ inteiro(gr.saidas) }}</td>
+              <td class="col-num">{{ sinal(saldo(gr)) }}</td>
+              <td class="hint-text">{{ quando(gr.lidoEm) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}

@@ -1,0 +1,103 @@
+<div class="stat-strip stat-strip-4">
+  <div class="stat-cell">
+    <span class="stat-cell-label">Vendas ({{ dias() }} dias)</span>
+    <span class="stat-cell-value">{{ resumo().total }}</span>
+  </div>
+  <div class="stat-cell">
+    <span class="stat-cell-label">Achei o grupo</span>
+    <span class="stat-cell-value">{{ resumo().comGrupo }}</span>
+  </div>
+  <div class="stat-cell">
+    <span class="stat-cell-label">De um grupo só</span>
+    <span class="stat-cell-value">{{ resumo().soUmGrupo }}</span>
+  </div>
+  <div class="stat-cell">
+    <span class="stat-cell-label">Comissão</span>
+    <span class="stat-cell-value">{{ moeda(resumo().comissao) }}</span>
+  </div>
+</div>
+
+@if (est.erroVendas()) {
+  <p class="error-text" role="alert">{{ est.erroVendas() }}</p>
+}
+
+@if (!est.vendas().length) {
+  <div class="card">
+    <div class="info-box">
+      Nenhuma venda lida nos últimos {{ dias() }} dias. O robô lê as vendas junto com os ganhos (quando liga e quando
+      você clica em "Atualizar agora" na aba Ganhos): a Shopee pela API e o Mercado Livre e a Amazon pelo relatório
+      do painel de afiliado.
+    </div>
+  </div>
+} @else {
+  <div class="est-vendas-grade">
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2>Grupos que mais venderam</h2>
+          <p class="card-subtitle">
+            Vendas em que o grupo postou o produto nos 30 dias antes. Quando mais de um grupo postou, a venda conta
+            para todos — "só dele" são as que vieram com certeza daquele grupo.
+          </p>
+        </div>
+      </div>
+      @if (!est.ranking().length) {
+        <p class="hint-text">Nenhuma venda bateu com um produto postado nos grupos.</p>
+      } @else {
+        <ul class="est-ranking">
+          @for (r of est.ranking(); track r.grupoId) {
+            <li>
+              <span class="est-ranking-nome">{{ r.grupoNome }}</span>
+              <span class="est-ranking-barra" aria-hidden="true">
+                <span class="est-cor-entrada" [style.width.%]="(r.vendas / maxRanking()) * 100"></span>
+              </span>
+              <span class="est-ranking-num">{{ r.vendas }} <span class="hint-text">({{ r.unicas }} só dele)</span></span>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2>De onde saiu cada venda</h2>
+          <p class="card-subtitle">Lido por último: {{ lidoPorLoja() }}</p>
+        </div>
+      </div>
+      <ul class="est-vendas">
+        @for (v of est.vendas(); track v.id) {
+          <li [class.est-venda-cancelada]="cancelada(v)">
+            <div class="est-venda-topo">
+              <strong class="est-venda-titulo">{{ v.titulo || 'Produto sem nome no relatório' }}</strong>
+              <span class="est-venda-valor">{{ moeda(v.comissao) }}</span>
+            </div>
+            <span class="hint-text">
+              {{ loja(v.loja) }} · {{ data(v.vendidoEm || v.lidoEm) }}
+              @if (v.valor != null) { · venda de {{ moeda(v.valor) }} }
+              @if (v.status) { · {{ v.status }} }
+            </span>
+            @if (v.origens.length) {
+              <span class="est-venda-rotulo">
+                {{ v.origens[0].como === 'subid' ? 'Saiu do grupo (confirmado pelo link):' : v.origens.length === 1 ? 'Saiu do grupo:' : 'Pode ter saído de:' }}
+              </span>
+              <ul class="est-origens">
+                @for (o of v.origens; track o.grupoId) {
+                  <li [attr.title]="extras(o)">
+                    <strong>{{ o.grupoNome }}</strong>
+                    <span class="hint-text">
+                      @if (o.enviadoEm) { postado {{ quando(o.enviadoEm) }} } @else { postagem fora do histórico }
+                      {{ o.como === 'titulo' ? ' · pelo nome' : '' }}
+                    </span>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <span class="hint-text">Não achei esse produto nos grupos nos 30 dias antes da venda.</span>
+            }
+          </li>
+        }
+      </ul>
+    </div>
+  </div>
+}

@@ -22,7 +22,7 @@ import { ConsoleCard } from './features/acompanhar/console-card/console-card';
 import { ProdutosCard } from './features/divulgacao/produtos-card/produtos-card';
 import { BuscaCard } from './features/divulgacao/busca-card/busca-card';
 import { OwnerCard } from './features/admin/owner-card/owner-card';
-import { GanhosCard } from './features/acompanhar/ganhos-card/ganhos-card';
+import { Estatisticas } from './features/acompanhar/estatisticas/estatisticas';
 import { LojaDialog } from './features/conexoes/loja-dialog/loja-dialog';
 import { WhatsappDialog } from './features/conexoes/whatsapp-dialog/whatsapp-dialog';
 import { TelegramDialog } from './features/conexoes/telegram-dialog/telegram-dialog';
@@ -34,7 +34,7 @@ import { Sino } from './shared/sino/sino';
 export type AbaId =
   | 'painel'
   | 'atividade'
-  | 'ganhos'
+  | 'estatisticas'
   | 'grupos'
   | 'garimpo'
   | 'regras'
@@ -63,10 +63,10 @@ const ABAS: Aba[] = [
     secao: 'Acompanhar',
   },
   {
-    id: 'ganhos',
-    label: 'Ganhos',
-    titulo: 'Ganhos',
-    descricao: 'Quanto as promoções renderam em comissão em cada loja, mês a mês.',
+    id: 'estatisticas',
+    label: 'Estatísticas',
+    titulo: 'Estatísticas',
+    descricao: 'Quanto as promoções renderam, quem entra e sai dos grupos e de qual grupo saiu cada venda.',
     secao: 'Acompanhar',
   },
 
@@ -149,7 +149,7 @@ const CHAVE_ABA = 'promobot:aba';
     ProdutosCard,
     BuscaCard,
     OwnerCard,
-    GanhosCard,
+    Estatisticas,
     LojaDialog,
     WhatsappDialog,
     TelegramDialog,
@@ -271,6 +271,8 @@ export class App implements OnInit, OnDestroy {
       if ((salva as string) === 'atividade') salva = 'painel';
       // Produtos também: agora é um modal aberto pelo painel.
       if ((salva as string) === 'produtos') salva = 'painel';
+      // Ganhos virou parte de Estatísticas.
+      if ((salva as string) === 'ganhos') salva = 'estatisticas';
       if (salva && ABAS.some((a) => a.id === salva)) this.aba.set(salva);
     } catch (_) {
     }
@@ -285,7 +287,7 @@ export class App implements OnInit, OnDestroy {
     const carregar = () => {
       void import('./features/divulgacao/groups-card/groups-card');
       void import('./features/divulgacao/garimpo-card/garimpo-card');
-      void import('./features/acompanhar/ganhos-card/ganhos-card');
+      void import('./features/acompanhar/estatisticas/estatisticas');
       void import('./features/divulgacao/produtos-card/produtos-card');
       void import('./features/divulgacao/busca-card/busca-card');
       void import('./features/conexoes/whatsapp-card/whatsapp-card');
