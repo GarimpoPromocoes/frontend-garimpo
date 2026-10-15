@@ -102,7 +102,7 @@
         @if (runControl.rodandoContinuo()) {
           <span class="badge badge-running">
             <span class="badge-dot"></span>
-            {{ runControl.postandoAgora() ? 'Postando agora' : 'Robô ligado' }}
+            {{ runControl.pausado() ? 'Robô pausado' : runControl.postandoAgora() ? 'Postando agora' : 'Robô ligado' }}
           </span>
         } @else if (runControl.lendoGanhos()) {
           <span class="badge badge-running"><span class="badge-dot"></span>Lendo ganhos</span>
@@ -138,6 +138,23 @@
           <span>{{ runControl.iniciando() ? 'Ligando…' : 'Ligar robô' }}</span>
         </button>
       } @else {
+        @if (runControl.postandoAgora()) {
+          <button
+            type="button"
+            class="bot-fab bot-fab-pausa"
+            [disabled]="runControl.pausando() || runControl.parando()"
+            (click)="runControl.alternarPausa()"
+          >
+            @if (runControl.pausando()) {
+              <span class="bot-fab-spinner"></span>
+            } @else if (runControl.pausado()) {
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8.5 5.6v12.8a1 1 0 0 0 1.52.85l10.2-6.4a1 1 0 0 0 0-1.7l-10.2-6.4a1 1 0 0 0-1.52.85Z" /></svg>
+            } @else {
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6.5" y="5.5" width="4" height="13" rx="1.2" /><rect x="13.5" y="5.5" width="4" height="13" rx="1.2" /></svg>
+            }
+            <span>{{ runControl.pausado() ? 'Retomar robô' : 'Pausar robô' }}</span>
+          </button>
+        }
         <button
           type="button"
           class="bot-fab bot-fab-parar"

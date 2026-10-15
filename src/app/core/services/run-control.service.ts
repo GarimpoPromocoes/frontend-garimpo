@@ -34,11 +34,17 @@ export class RunControlService {
   readonly erro = signal<string | null>(null);
   readonly iniciando = signal(false);
   readonly parando = signal(false);
+  readonly pausando = signal(false);
 
   readonly grupos = computed(() => this.configService.config()?.grupos ?? []);
 
   readonly rodandoContinuo = computed(
     () => !!this.statusService.status()?.agendamento?.manual?.ativo
+  );
+
+  /** Ligado, mas parado no meio: sem postar, com navegador e WhatsApp abertos. */
+  readonly pausado = computed(
+    () => this.postandoAgora() && !!this.statusService.status()?.agendamento?.manual?.pausado
   );
 
   readonly lendoGanhos = computed(() => this.jobsService.rodando() && this.jobsService.tipo() === 'ganhos');
@@ -151,6 +157,18 @@ export class RunControlService {
     this.iniciando.set(false);
     if (!r.ok) this.erro.set(r.erro ?? null);
     await this.statusService.atualizar();
+  }
+
+  async alternarPausa(): Promise<void> {
+    this.erro.set(null);
+    this.pausando.set(true);
+    try {
+      const r = await this.jobsService.pausar(!this.pausado());
+      if (!r.ok) this.erro.set(r.erro ?? null);
+      await this.statusService.atualizar();
+    } finally {
+      this.pausando.set(false);
+    }
   }
 
   async parar(): Promise<void> {

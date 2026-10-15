@@ -229,6 +229,8 @@
   right: 28px;
   bottom: 28px;
   z-index: 100;
+  display: flex;
+  gap: 10px;
   transition:
     opacity 0.15s ease,
     visibility 0.15s ease,
@@ -283,6 +285,13 @@
 }
 .bot-fab-parar:hover:not(:disabled) {
   background: var(--espresso-soft);
+}
+.bot-fab-pausa {
+  background: var(--surface);
+  color: var(--text);
+}
+.bot-fab-pausa:hover:not(:disabled) {
+  background: var(--surface-3);
 }
 .bot-fab-spinner {
   width: 18px;

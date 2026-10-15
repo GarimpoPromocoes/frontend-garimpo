@@ -29,6 +29,8 @@ export interface StatusResponse {
   agendamento: {
     manual: {
       ativo: boolean;
+      /** Ligado mas pausado: navegador e WhatsApp abertos, sem postar. */
+      pausado?: boolean;
       alvo: string;
       ids: string[];
       ultimaRodadaEm: string | null;

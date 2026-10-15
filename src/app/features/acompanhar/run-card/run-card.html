@@ -1,12 +1,19 @@
 <!-- A lanterna: o bloco que diz se o robô está ligado e onde se liga ou para. Apagada (escura) com
      o robô parado, acesa (amarela) com ele trabalhando. -->
-<section class="lanterna" [class.lanterna-acesa]="runControl.algoRodando()" aria-labelledby="lanterna-titulo">
+<section
+  class="lanterna"
+  [class.lanterna-acesa]="runControl.algoRodando()"
+  [class.lanterna-pausada]="runControl.pausado()"
+  aria-labelledby="lanterna-titulo"
+>
   <div class="lanterna-topo">
     <span class="lanterna-luz" aria-hidden="true"></span>
 
     <div class="lanterna-estado">
       <h2 id="lanterna-titulo">
-        @if (runControl.postandoAgora()) {
+        @if (runControl.pausado()) {
+          Robô pausado
+        } @else if (runControl.postandoAgora()) {
           Postando agora
         } @else if (runControl.rodandoContinuo()) {
           Robô ligado
@@ -19,7 +26,9 @@
         }
       </h2>
       <p>
-        @if (runControl.rodandoContinuo()) {
+        @if (runControl.pausado()) {
+          Navegador e WhatsApp continuam abertos, mas nada é postado. Retome quando quiser, sem esperar ligar tudo de novo.
+        } @else if (runControl.rodandoContinuo()) {
           Ele procura ofertas e publica nos grupos sozinho, até você mandar parar.
         } @else if (runControl.processoExterno()) {
           O robô está rodando fora do painel. Pare por aqui para encerrá-lo.
@@ -42,6 +51,20 @@
           {{ runControl.iniciando() ? 'Ligando…' : 'Ligar robô' }}
         </button>
       } @else {
+        @if (runControl.postandoAgora()) {
+          <button
+            type="button"
+            class="btn btn-lg btn-pausa"
+            [disabled]="runControl.pausando() || runControl.parando()"
+            (click)="runControl.alternarPausa()"
+          >
+            @if (runControl.pausando()) {
+              {{ runControl.pausado() ? 'Retomando…' : 'Pausando…' }}
+            } @else {
+              {{ runControl.pausado() ? 'Retomar' : 'Pausar' }}
+            }
+          </button>
+        }
         <button
           type="button"
           class="btn btn-lg btn-primary"

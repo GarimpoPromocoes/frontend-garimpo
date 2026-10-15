@@ -3689,6 +3689,23 @@ app-status-conexoes {
 }
 .lanterna-acao {
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+/* Pausar/Retomar, sobre o amarelo: contorno escuro, para o Parar continuar sendo o botão cheio. */
+.lanterna-acao .btn-pausa {
+  background: transparent;
+  border: 2px solid var(--on-gold);
+  color: var(--on-gold);
+}
+.lanterna-acao .btn-pausa:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.08);
+}
+/* Pausado: a luz fica acesa mas para de pulsar. */
+.lanterna-pausada .lanterna-luz {
+  background: transparent;
+  animation: none;
 }
 .lanterna-acao .btn {
   min-width: 168px;
