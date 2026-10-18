@@ -64,6 +64,15 @@ export interface AlertaConexao {
   grupo: string;
 }
 
+/** Horário de funcionamento: fora da janela o robô não posta, só garimpa (relógio de São Paulo). */
+export interface HorarioFuncionamento {
+  ativo: boolean;
+  /** 'HH:MM' — hora de ligar. */
+  inicio: string;
+  /** 'HH:MM' — hora de desligar. Antes do início = a janela passa da meia-noite. */
+  fim: string;
+}
+
 export type FonteGarimpo = 'mercadolivre' | 'grupos';
 
 export interface Garimpo {
@@ -92,6 +101,9 @@ export interface DashboardConfig {
   cupons: Cupons;
   divulgacao: Divulgacao;
   alertaConexao?: AlertaConexao;
+  horario?: HorarioFuncionamento;
+  /** Modelo do texto da postagem, com {variaveis}. Vazio = o texto padrão do robô. */
+  copy?: { modelo: string };
   garimpo?: Garimpo;
 }
 

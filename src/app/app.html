@@ -171,7 +171,8 @@
       }
     </div>
 
-    <main class="content" id="conteudo" tabindex="-1" [class.content-painel]="aba() === 'painel'">
+    <main class="content" id="conteudo" tabindex="-1" [class.content-painel]="aba() === 'painel'"
+      [class.content-tela-cheia]="aba() === 'estatisticas'">
       @if (configService.erro()) {
         <div class="alert-banner" role="alert">{{ configService.erro() }}</div>
       }

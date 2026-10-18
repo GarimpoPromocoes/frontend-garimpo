@@ -1,0 +1,154 @@
+/* Regras de postagem: o que é só desta tela. O resto (cards, janela, campos) vem de src/styles.scss. */
+
+/* Status do horário de funcionamento no card. */
+.regra-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  margin: 0;
+  padding: 5px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--ok-border);
+  background: var(--ok-soft);
+  color: var(--ok);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.regra-status-ponto {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: currentColor;
+}
+.regra-status-fora {
+  border-color: var(--warn-border);
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+/* Liga às / Desliga às, lado a lado. */
+.regra-horas {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.regra-horas input[type='time'] {
+  width: 100%;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 520px) {
+  .regra-horas {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---- Texto da postagem ---- */
+
+/* Começo da prévia no card: as primeiras linhas, apagadas no fim. */
+.copy-mini {
+  position: relative;
+  max-height: 5.4em;
+  overflow: hidden;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--text-soft);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  flex: 1;
+}
+.copy-mini::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 1.6em;
+  background: linear-gradient(transparent, var(--surface));
+}
+
+.copy-editor {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+@media (max-width: 760px) {
+  .copy-editor {
+    grid-template-columns: 1fr;
+  }
+}
+.copy-variaveis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.copy-campo {
+  width: 100%;
+  min-height: 190px;
+  resize: vertical;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.copy-acoes {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.copy-previa-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Balão de mensagem, como chega no grupo. */
+.copy-balao {
+  max-width: 340px;
+  padding: 6px;
+  border-radius: var(--radius) var(--radius) var(--radius) var(--radius-xs);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+.copy-balao-foto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  max-height: 150px;
+  width: 100%;
+  border-radius: var(--radius-sm);
+  background: var(--surface-3);
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.copy-balao-texto {
+  padding: 8px 6px 4px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.copy-balao-texto ::ng-deep code,
+.copy-mini ::ng-deep code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.92em;
+  padding: 0 3px;
+  border-radius: var(--radius-xs);
+  background: var(--surface-3);
+}
+.copy-balao-texto ::ng-deep strong {
+  font-weight: 700;
+}
+
+/* A janela do texto tem editor e prévia lado a lado: um pouco mais larga que as outras. */
+.modal-grupo.modal-copy {
+  width: min(860px, 100%);
+}

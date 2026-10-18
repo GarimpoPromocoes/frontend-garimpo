@@ -209,8 +209,9 @@ export class PainelRobo {
             nenhumLiberado: 'Nada liberado agora',
             cedeu: 'Passando a vez pro próximo grupo',
             repetido: 'Só assunto repetido neste grupo',
+            foraDoHorario: 'Fora do horário — garimpando',
           }[e.motivo ?? ''] ?? 'Esperando novidade';
-          if (e.ate) v.selo = `Nova busca às ${hhmm(e.ate)}`;
+          if (e.ate) v.selo = e.motivo === 'foraDoHorario' ? `Posta de novo às ${hhmm(e.ate)}` : `Nova busca às ${hhmm(e.ate)}`;
         } else if (e.estado === 'ok') v.sub = 'Promoção escolhida';
         else if (e.estado === 'erro') v.sub = 'Falhou — tenta de novo sozinho';
       }
@@ -312,6 +313,9 @@ export class PainelRobo {
           cedeu: grupoNome ? `"${grupoNome}" sem produto agora — vez do próximo grupo` : 'Vez do próximo grupo',
           repetido: grupoNome ? `"${grupoNome}" só tem assunto repetido agora` : 'Só assunto repetido agora',
         }[a.motivo ?? ''] ?? 'Nada para postar agora';
+        if (a.motivo === 'foraDoHorario') {
+          return [linha('relogio', `Fora do horário — garimpando${a.ate ? `, posta de novo às ${hhmm(a.ate)}` : ''}`, 'Fora do horário', 'espera')];
+        }
         return [linha('relogio', a.ate ? `${txt} — nova busca às ${hhmm(a.ate)}` : txt, 'Aguardando', 'espera')];
       }
       case 'aguardando':

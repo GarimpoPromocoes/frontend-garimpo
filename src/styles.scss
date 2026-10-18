@@ -1,51 +1,48 @@
 :root {
-  /* Terra: o marrom do macacão da garimpeira — tinta e blocos escuros. */
-  --espresso: #2a1e16;
-  --espresso-soft: #44332a;
-  /* Capacete: o amarelo da lanterna. Só para o que está ligado, selecionado
-     ou é a ação principal da tela — nunca como enfeite. */
-  --gold: #f5b800;
-  --gold-deep: #dda300;
-  --gold-ink: #6b4700;
-  --gold-soft: #fff5cf;
-  --gold-border: #e3cc85;
+  /* Cores da main (antes da refatoracao): fundo creme, cafe e dourado. */
+  --espresso: #2a1d12;
+  --espresso-soft: #3d2c1c;
+  --gold: #e0a520;
+  --gold-deep: #c78c11;
+  --gold-ink: #8a5e05;
+  --gold-soft: #fdf4e1;
+  --gold-border: #eedcae;
 
-  /* Pedra-sabão: fundo cinza-esverdeado, frio o bastante para o amarelo acender. */
-  --bg: #eceee9;
+  --bg: #faf8f4;
   --surface: #ffffff;
-  --surface-2: #f4f5f1;
-  --surface-3: #e3e6de;
+  --surface-2: #f6f3ed;
+  --surface-3: #efebe2;
 
-  --border: #d6d9cf;
-  --border-strong: #b4b8ac;
+  --border: #e9e4da;
+  --border-strong: #d9d2c5;
   /* Contorno de campo e de controle: 3:1 contra o branco, para a caixa ser
      visível mesmo sem depender da cor do texto. */
-  --border-control: #82867b;
+  --border-control: #8f8474;
 
   --ink: var(--espresso);
-  --text: #1f1611;
-  --text-soft: #453b33;
-  --text-muted: #5d544b;
-  --placeholder: #6b6258;
+  --text: #241a11;
+  --text-soft: #51453a;
+  --text-muted: #726758;
+  --placeholder: #7d7264;
 
   --ml-yellow: #ffe600;
   --ml-yellow-text: #2d2100;
-  --wpp-green: #157a41;
-  --wpp-green-dark: #0f6334;
+  --wpp-green: #1faa59;
+  --wpp-green-dark: #178c48;
 
-  --ok: #14613f;
-  --ok-soft: #e3f1e9;
-  --ok-border: #b3d5c1;
-  --warn: #6b4700;
-  --warn-soft: #fff5cf;
-  --warn-border: #e3cc85;
-  --danger: #a8261f;
-  --danger-soft: #fbe9e6;
-  --danger-border: #e8bdb7;
+  --ok: #1f7a4d;
+  --ok-soft: #ecf5ef;
+  --ok-border: #cfe4d6;
+  --warn: #8a5a11;
+  --warn-soft: #fdf4e5;
+  --warn-border: #eedcba;
+  --danger: #a83232;
+  --danger-soft: #fbeeec;
+  --danger-border: #eed2cd;
 
-  /* Foco de teclado: anel escuro (visível no claro e no amarelo). Nos campos,
-     o contorno escurece e ganha um halo amarelo. */
-  --focus: #1f1611;
+  /* Foco de teclado: anel escuro (visível no claro e no dourado). Nos campos,
+     o contorno escurece e ganha um halo dourado. */
+  --focus: #241a11;
   --focus-halo: 0 0 0 3px var(--gold);
 
   /* O raio acompanha a hierarquia: bloco principal > cartão > controle. */
@@ -53,31 +50,31 @@
   --radius: 14px;
   --radius-sm: 10px;
   --radius-xs: 8px;
-  --shadow-sm: 0 1px 0 rgba(42, 30, 22, 0.06);
-  --shadow: 0 12px 28px rgba(42, 30, 22, 0.14);
+  --shadow-sm: 0 1px 1px rgba(26, 26, 24, 0.03);
+  --shadow: 0 4px 16px rgba(26, 26, 24, 0.07);
 
   /* Archivo tem eixo de largura: títulos e números usam a versão estreita,
      como etiqueta de preço; o texto corrido fica na largura normal. */
   --estreita: 80%;
 
-  /* Papéis que não mudam com o tema: texto sobre o amarelo é sempre escuro, e
+  /* Papéis que não mudam com o tema: texto sobre o dourado é sempre escuro, e
      preenchimento vermelho (botão, contador) é sempre o vermelho fechado. */
-  --on-gold: #2a1e16;
-  --danger-solido: #a8261f;
-  /* Texto sobre o bloco "terra" (botão principal, opção marcada). */
+  --on-gold: #2a1d12;
+  --danger-solido: #a83232;
+  /* Texto sobre o bloco café (botão principal, opção marcada). */
   --on-espresso: #ffffff;
   /* A lanterna apagada e o painel da marca no login. */
-  --lanterna-bg: #2a1e16;
+  --lanterna-bg: #2a1d12;
   --lanterna-borda: transparent;
   --lanterna-luz: #6f5f52;
-  --toggle-trilho: #2a1e16;
-  --toggle-bola: #f5b800;
+  --toggle-trilho: #2a1d12;
+  --toggle-bola: #e0a520;
   /* Plaquinha atrás das logos das lojas (elas são desenhadas para fundo claro). */
   --logo-placa: var(--surface-2);
   --logo-caixa: transparent;
   --logo-caixa-folga: 0;
   /* Véu atrás das janelas e o contorno delas (no escuro a sombra não basta). */
-  --veu: rgba(31, 22, 17, 0.6);
+  --veu: rgba(36, 26, 17, 0.55);
   --janela-anel: 0 0 0 0 transparent;
   --so-no-claro: inline;
   --so-no-escuro: none;
@@ -85,59 +82,59 @@
 }
 
 /* ---- Tema escuro ----
-   O mesmo desenho do claro, virado do avesso: a pedra-sabão vira pedra à
-   noite (cinza-esverdeado bem fechado, sem cor), os cartões sobem um tom, e o
-   marrom fica só onde ele já mora no claro — no bloco do robô e na marca.
-   Assim o amarelo do capacete continua sendo a única cor cheia. Vale quando a
-   pessoa escolhe (data-theme no <html>) ou, sem escolha, quando o sistema pede. */
+   O mesmo desenho do claro com a luz apagada: o creme vira café escuro, os
+   cartões sobem um tom e o dourado continua sendo a única cor cheia. Vale
+   quando a pessoa escolhe (data-theme no <html>) ou, sem escolha, quando o
+   sistema pede. */
 @mixin tema-escuro {
-  --espresso: #f3f1ea;
-  --espresso-soft: #dad7cb;
-  --on-espresso: #1a1612;
-  --gold: #f5b800;
-  --gold-deep: #ffcc33;
-  --gold-ink: #f2c14e;
-  --gold-soft: #382d0f;
-  --gold-border: #6e5a1c;
+  /* Café escuro com o mesmo dourado do claro: a mesma família, só com a luz apagada. */
+  --espresso: #f2e9dc;
+  --espresso-soft: #d9ccb9;
+  --on-espresso: #1c150e;
+  --gold: #e0a520;
+  --gold-deep: #f0b93a;
+  --gold-ink: #f0c25a;
+  --gold-soft: #3a2c12;
+  --gold-border: #6b5320;
 
-  --bg: #131512;
-  --surface: #1d201b;
-  --surface-2: #262924;
-  --surface-3: #31352e;
+  --bg: #17120d;
+  --surface: #211a13;
+  --surface-2: #2a2219;
+  --surface-3: #352b20;
 
-  --border: #343830;
-  --border-strong: #4c5146;
-  --border-control: #8a8f81;
+  --border: #3a2f24;
+  --border-strong: #54463a;
+  --border-control: #8c7e6d;
 
-  --text: #f3f1ea;
-  --text-soft: #d6d4ca;
-  --text-muted: #a9a89c;
-  --placeholder: #9d9c90;
+  --text: #f5efe6;
+  --text-soft: #d9cfc2;
+  --text-muted: #ab9f90;
+  --placeholder: #9c907f;
 
-  --ok: #7fd6a8;
-  --ok-soft: #173123;
-  --ok-border: #2f5a43;
-  --warn: #f2c14e;
-  --warn-soft: #382d0f;
-  --warn-border: #6e5a1c;
-  --danger: #ff9d93;
-  --danger-soft: #3b1b17;
-  --danger-border: #7a352d;
+  --ok: #7fcf9f;
+  --ok-soft: #16291e;
+  --ok-border: #2d5039;
+  --warn: #f0c25a;
+  --warn-soft: #3a2c12;
+  --warn-border: #6b5320;
+  --danger: #ff9a8f;
+  --danger-soft: #3a1b16;
+  --danger-border: #74342b;
 
-  --focus: #f5b800;
-  --focus-halo: 0 0 0 3px rgba(245, 184, 0, 0.45);
+  --focus: #e0a520;
+  --focus-halo: 0 0 0 3px rgba(224, 165, 32, 0.45);
   --shadow-sm: 0 1px 0 rgba(0, 0, 0, 0.4);
   --shadow: 0 14px 32px rgba(0, 0, 0, 0.55);
   --veu: rgba(0, 0, 0, 0.68);
   --janela-anel: 0 0 0 1px var(--border-strong);
 
-  --lanterna-bg: #38281c;
-  --lanterna-borda: #58432f;
+  --lanterna-bg: #2e2217;
+  --lanterna-borda: #4a3a2a;
   --lanterna-luz: #9a8672;
-  --toggle-trilho: #f5b800;
-  --toggle-bola: #2a1e16;
-  --logo-placa: #f4f1ec;
-  --logo-caixa: #f4f1ec;
+  --toggle-trilho: #e0a520;
+  --toggle-bola: #2a1d12;
+  --logo-placa: #f6f3ed;
+  --logo-caixa: #f6f3ed;
   --logo-caixa-folga: 8px 14px;
   --so-no-claro: none;
   --so-no-escuro: inline;
@@ -150,6 +147,7 @@
   --mov-saida: #d8723f;
   color-scheme: dark;
 }
+
 :root[data-theme='dark'] {
   @include tema-escuro;
 }
@@ -1357,7 +1355,7 @@ body:has(.modal-fundo) .bot-control-fixo {
   display: flex;
   flex-wrap: wrap;
   gap: 6px 16px;
-  font-size: 13px;
+  font-size: 12.5px;
   color: var(--text-soft);
 }
 .ganhos-legenda > span {
@@ -1375,13 +1373,12 @@ body:has(.modal-fundo) .bot-control-fixo {
   overflow: visible;
 }
 .ganhos-grade {
-  stroke: var(--border-strong);
+  stroke: var(--border);
   stroke-width: 1;
 }
 .ganhos-eixo {
-  fill: var(--text);
-  font-size: 13px;
-  font-weight: 500;
+  fill: var(--text-muted);
+  font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
 .ganhos-alvo {
@@ -1395,9 +1392,8 @@ body:has(.modal-fundo) .bot-control-fixo {
   fill: var(--surface-2);
 }
 .ganhos-coluna:focus-visible .ganhos-alvo {
-  fill: var(--surface-2);
-  stroke: var(--focus);
-  stroke-width: 2;
+  stroke: var(--gold);
+  stroke-width: 1.5;
 }
 
 .ganhos-tooltip {
@@ -1415,7 +1411,7 @@ body:has(.modal-fundo) .bot-control-fixo {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow);
-  font-size: 13px;
+  font-size: 12.5px;
   color: var(--text-soft);
 }
 .ganhos-tooltip strong {
@@ -3729,7 +3725,7 @@ app-status-conexoes {
   cursor: progress;
 }
 .lanterna-acesa .lanterna-acao .btn:disabled {
-  background: #44332a;
+  background: #3d2c1c;
 }
 .lanterna-tempos {
   display: flex;
@@ -4442,48 +4438,61 @@ app-painel-robo {
   }
 }
 
-/* ---- Ganhos: lojas ao lado do gráfico ---- */
-/* Os dois cartões ficam na altura que sobra da janela; a tabela mês a mês
-   rola por dentro do cartão da evolução. */
+/* ---- Ganhos: tudo na altura da janela (como na main: lojas, resumo, evolução) ---- */
+/* O gráfico estica no que sobra da tela; embaixo dele, só o mês escolhido. */
 app-ganhos-card {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 14px;
 }
-.ganhos-grade {
+.ganhos-cartao-lojas {
+  flex: none;
+  gap: 8px;
+  padding: 14px 20px;
+}
+.ganhos-lojas-topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 24px;
+}
+.ganhos-lojas-topo h2 {
+  margin: 0;
+}
+.ganhos-lojas-topo .ganhos-lojas {
   flex: 1;
-  min-height: 460px;
-  display: grid;
-  grid-template-columns: 300px minmax(0, 1fr);
-  gap: 18px;
 }
-/* O cartão não corta nada (a dica do mês pode passar da borda); quem rola é só a tabela. */
-.ganhos-grade > .card {
+.ganhos-loja-valor {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.ganhos-cartao-lojas .ganhos-lojas {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 6px 28px;
+}
+.ganhos-cartao-lojas .ganhos-lojas li,
+.ganhos-cartao-lojas .ganhos-lojas li:first-child {
+  border-top: none;
+  padding: 0;
+}
+.ganhos-cartao-evolucao {
+  flex: 1;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
-.ganhos-grade .ganhos-grafico {
-  flex-shrink: 0;
-}
-.ganhos-grade .tabela-rolagem {
+.ganhos-cartao-evolucao .ganhos-grafico {
   flex: 1;
-  min-height: 120px;
-  overflow-y: auto;
+  min-height: 140px;
 }
-@media (max-width: 1100px) {
-  app-ganhos-card {
-    flex: none;
-  }
-  .ganhos-grade {
-    flex: none;
-    min-height: 0;
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .ganhos-grade .tabela-rolagem {
-    flex: none;
-    overflow: visible;
-  }
+.ganhos-cartao-evolucao .ganhos-grafico svg {
+  height: 100%;
+}
+.ganhos-cartao-evolucao .tabela-rolagem {
+  flex: none;
 }
 
 /* Regras: cards mais estreitos para as cinco regras caberem numa linha só. */
@@ -4643,7 +4652,7 @@ app-ganhos-card {
   color: #fff;
 }
 .lanterna-acesa .lanterna-acao .btn-primary:hover:not(:disabled) {
-  background: #44332a;
+  background: #3d2c1c;
 }
 
 /* ---- Estatisticas: ganhos, membros dos grupos e vendas por grupo ---- */
@@ -4651,8 +4660,46 @@ app-estatisticas {
   flex: 1;
   min-height: 0;
 }
-app-estatisticas.est-altura-livre {
-  flex: none;
+app-estatisticas {
+  gap: 14px;
+}
+app-membros-card,
+app-vendas-card {
+  flex: 1;
+  min-height: 0;
+  gap: 14px;
+}
+/* Cartoes que dividem a altura: a lista longa fica dentro dele, sem barra aparente. */
+.est-rola {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.est-rola::-webkit-scrollbar {
+  display: none;
+}
+.est-membros-grade {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: 14px;
+}
+.est-membros-grade > .card,
+.est-vendas-grade > .card {
+  min-height: 0;
+}
+.est-cartao-grafico .ganhos-grafico {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+}
+@media (max-width: 1100px) {
+  .est-membros-grade {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 .est-controles select {
   min-height: 36px;
@@ -4714,10 +4761,11 @@ app-estatisticas.est-altura-livre {
 }
 
 .est-vendas-grade {
+  flex: 1;
+  min-height: 0;
   display: grid;
   grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
-  gap: 18px;
-  align-items: start;
+  gap: 14px;
 }
 @media (max-width: 1100px) {
   .est-vendas-grade {
@@ -4833,4 +4881,18 @@ app-estatisticas.est-altura-livre {
 }
 .est-barra .segmented-option {
   flex: 1 1 auto;
+}
+
+/* Ganhos: escolha do mes do resumo */
+.ganhos-mes {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+.ganhos-coluna {
+  cursor: pointer;
+}
+.est-cartao-grafico .ganhos-grafico svg {
+  height: 100%;
 }

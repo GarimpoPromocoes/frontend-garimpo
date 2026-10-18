@@ -36,15 +36,16 @@
         <div>
           <h2>Grupos que mais venderam</h2>
           <p class="card-subtitle">
-            Vendas em que o grupo postou o produto nos 30 dias antes. Quando mais de um grupo postou, a venda conta
-            para todos — "só dele" são as que vieram com certeza daquele grupo.
+            Vendas em que o grupo postou o produto nos 30 dias antes ou, sem postagem registrada, cujo assunto bate
+            com o grupo. Quando mais de um grupo é possível, a venda conta para todos; "só dele" são as que vieram com
+            certeza daquele grupo.
           </p>
         </div>
       </div>
       @if (!est.ranking().length) {
         <p class="hint-text">Nenhuma venda bateu com um produto postado nos grupos.</p>
       } @else {
-        <ul class="est-ranking">
+        <ul class="est-ranking est-rola">
           @for (r of est.ranking(); track r.grupoId) {
             <li>
               <span class="est-ranking-nome">{{ r.grupoNome }}</span>
@@ -65,7 +66,7 @@
           <p class="card-subtitle">Lido por último: {{ lidoPorLoja() }}</p>
         </div>
       </div>
-      <ul class="est-vendas">
+      <ul class="est-vendas est-rola">
         @for (v of est.vendas(); track v.id) {
           <li [class.est-venda-cancelada]="cancelada(v)">
             <div class="est-venda-topo">
@@ -79,14 +80,15 @@
             </span>
             @if (v.origens.length) {
               <span class="est-venda-rotulo">
-                {{ v.origens[0].como === 'subid' ? 'Saiu do grupo (confirmado pelo link):' : v.origens.length === 1 ? 'Saiu do grupo:' : 'Pode ter saído de:' }}
+                {{ v.origens[0].como === 'subid' ? 'Saiu do grupo (confirmado pelo link):' : v.origens[0].como === 'tema' ? 'Provável, pelo tema do grupo:' : v.origens.length === 1 ? 'Saiu do grupo:' : 'Pode ter saído de:' }}
               </span>
               <ul class="est-origens">
                 @for (o of v.origens; track o.grupoId) {
                   <li [attr.title]="extras(o)">
                     <strong>{{ o.grupoNome }}</strong>
                     <span class="hint-text">
-                      @if (o.enviadoEm) { postado {{ quando(o.enviadoEm) }} } @else { postagem fora do histórico }
+                      @if (o.como === 'tema') { o produto não está no histórico de postagens; o assunto bate com este grupo }
+                      @else if (o.enviadoEm) { postado {{ quando(o.enviadoEm) }} } @else { postagem fora do histórico }
                       {{ o.como === 'titulo' ? ' · pelo nome' : '' }}
                     </span>
                   </li>

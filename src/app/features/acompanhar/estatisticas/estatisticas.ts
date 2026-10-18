@@ -25,8 +25,8 @@ function visaoSalva(): Visao {
   selector: 'app-estatisticas',
   standalone: true,
   imports: [GanhosCard, MembrosCard, VendasCard],
-  // Ganhos ocupa a altura da janela (a tabela rola por dentro); as outras visões crescem com o conteúdo.
-  host: { class: 'ganhos-pagina', '[class.est-altura-livre]': "visao() !== 'ganhos'" },
+  // As três visões ocupam a altura da janela, sem a página rolar.
+  host: { class: 'ganhos-pagina' },
   template: `
     <div class="est-barra">
       <div class="segmented" role="group" aria-label="O que ver">

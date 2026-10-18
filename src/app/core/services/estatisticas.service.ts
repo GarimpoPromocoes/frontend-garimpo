@@ -29,7 +29,8 @@ export interface OrigemVenda {
    * 'subid' = o link da venda trazia o grupo (certeza); 'id' = o mesmo anúncio foi postado no grupo;
    * 'titulo' = produto com o mesmo nome.
    */
-  como: 'subid' | 'id' | 'titulo';
+  /** 'tema': nenhuma postagem bateu; palpite pelo assunto do grupo. */
+  como: 'subid' | 'id' | 'titulo' | 'tema';
   espelhos: string[];
   telegram: string | null;
 }

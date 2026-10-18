@@ -1,10 +1,12 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ConfigService } from '../../../core/services/config.service';
 import { StatusService } from '../../../core/services/status.service';
 import { DatasEspeciais } from '../datas-especiais/datas-especiais';
+import { HORARIO_PADRAO, dentroDoHorario, duracaoJanela, horaValida, passaDaMeiaNoite } from './horario';
+import { COPY_MAX, COPY_PADRAO, EXEMPLO_COM_CUPOM, EXEMPLO_SEM_CUPOM, VARIAVEIS_COPY, aplicarModelo, formatarWhatsApp } from './copy';
 
-type Janela = 'frequencia' | 'repeticao' | 'cupons' | 'divulgacao' | 'alerta';
+type Janela = 'frequencia' | 'repeticao' | 'cupons' | 'divulgacao' | 'alerta' | 'horario' | 'copy';
 
 interface Ritmo {
   id: string;
@@ -98,6 +100,7 @@ function ehNumero(texto: string): boolean {
   standalone: true,
   imports: [FormsModule, DatasEspeciais],
   templateUrl: './regras-postagem.html',
+  styleUrl: './regras-postagem.scss',
 })
 export class RegrasPostagem {
   protected configService = inject(ConfigService);
@@ -162,6 +165,33 @@ export class RegrasPostagem {
     return { ativo: a?.ativo ?? false, grupo: a?.grupo ?? '' };
   });
 
+  /** Relógio do status do horário: avança sozinho para o card virar na hora de ligar/desligar. */
+  private readonly agora = signal(new Date());
+
+  constructor() {
+    const t = setInterval(() => this.agora.set(new Date()), 30000);
+    inject(DestroyRef).onDestroy(() => clearInterval(t));
+  }
+
+  protected readonly horario = computed(() => {
+    const h = this.cfg()?.horario ?? HORARIO_PADRAO;
+    const dentro = dentroDoHorario(h, this.agora());
+    const roboLigado = !!this.statusService.status()?.agendamento?.manual?.ativo;
+    let situacao: string;
+    if (!h.ativo) situacao = 'Posta a qualquer hora do dia';
+    else if (dentro) situacao = `No horário — posta até as ${h.fim}`;
+    else if (roboLigado) situacao = `Fora do horário — garimpando, posta de novo às ${h.inicio}`;
+    else situacao = `Fora do horário — posta de novo às ${h.inicio}`;
+    return { ...h, dentro, situacao, duracao: duracaoJanela(h.inicio, h.fim), virada: passaDaMeiaNoite(h.inicio, h.fim) };
+  });
+
+  protected readonly copy = computed(() => {
+    const modelo = this.cfg()?.copy?.modelo ?? '';
+    const personalizado = !!modelo.trim() && modelo !== COPY_PADRAO;
+    const previa = aplicarModelo(personalizado ? modelo : COPY_PADRAO, EXEMPLO_SEM_CUPOM);
+    return { personalizado, previa: formatarWhatsApp(previa) };
+  });
+
   // ---- janela de edição -------------------------------------------------------
 
   protected readonly janela = signal<Janela | null>(null);
@@ -187,6 +217,21 @@ export class RegrasPostagem {
   protected readonly rDivMax = signal(1);
   protected readonly rAlertaAtivo = signal(false);
   protected readonly rAlertaGrupo = signal('');
+  protected readonly rHorAtivo = signal(false);
+  protected readonly rHorInicio = signal(HORARIO_PADRAO.inicio);
+  protected readonly rHorFim = signal(HORARIO_PADRAO.fim);
+  protected readonly rHorDuracao = computed(() => duracaoJanela(this.rHorInicio(), this.rHorFim()));
+  protected readonly rHorVirada = computed(() => passaDaMeiaNoite(this.rHorInicio(), this.rHorFim()));
+  protected readonly variaveisCopy = VARIAVEIS_COPY;
+  protected readonly copyMax = COPY_MAX;
+  protected readonly rCopy = signal(COPY_PADRAO);
+  /** A prévia mostra o produto de exemplo com ou sem cupom. */
+  protected readonly rCopyComCupom = signal(true);
+  protected readonly rCopyPadrao = computed(() => this.rCopy() === COPY_PADRAO);
+  protected readonly rCopySemLink = computed(() => !!this.rCopy().trim() && !this.rCopy().includes('{link}'));
+  protected readonly rCopyPrevia = computed(() =>
+    formatarWhatsApp(aplicarModelo(this.rCopy().trim() ? this.rCopy() : COPY_PADRAO, this.rCopyComCupom() ? EXEMPLO_COM_CUPOM : EXEMPLO_SEM_CUPOM)),
+  );
 
   /** Previa de como a mensagem sai no grupo (mesma regra do backend). */
   protected readonly rDivPreview = computed(() => {
@@ -237,6 +282,13 @@ export class RegrasPostagem {
     const al = this.alerta();
     this.rAlertaAtivo.set(al.ativo);
     this.rAlertaGrupo.set(al.grupo);
+    const h = this.horario();
+    this.rHorAtivo.set(h.ativo);
+    this.rHorInicio.set(h.inicio);
+    this.rHorFim.set(h.fim);
+    const modelo = this.cfg()?.copy?.modelo ?? '';
+    this.rCopy.set(modelo.trim() ? modelo : COPY_PADRAO);
+    this.rCopyComCupom.set(true);
     this.janela.set(j);
   }
 
@@ -267,6 +319,24 @@ export class RegrasPostagem {
   /** O campo já mostra o prefixo do jeito que vai sair: maiúsculo, sem espaço, acento ou símbolo. */
   mudarPrefixo(v: string): void {
     this.rCupomPrefixo.set(limparPrefixo(v));
+  }
+
+  /** Coloca a variável onde está o cursor do campo (ou no fim). */
+  inserirVariavel(nome: string, campo: HTMLTextAreaElement): void {
+    const atual = this.rCopy();
+    const ini = campo.selectionStart ?? atual.length;
+    const fim = campo.selectionEnd ?? atual.length;
+    const trecho = `{${nome}}`;
+    this.rCopy.set(atual.slice(0, ini) + trecho + atual.slice(fim));
+    const pos = ini + trecho.length;
+    setTimeout(() => {
+      campo.focus();
+      campo.setSelectionRange(pos, pos);
+    });
+  }
+
+  voltarCopyPadrao(): void {
+    this.rCopy.set(COPY_PADRAO);
   }
 
   escolherRitmo(r: Ritmo): void {
@@ -313,6 +383,30 @@ export class RegrasPostagem {
         return;
       }
       partial = { divulgacao: { ativo: this.rDivAtivo(), texto, link, maxPorDia: max } };
+    } else if (j === 'horario') {
+      const inicio = (this.rHorInicio() || '').trim();
+      const fim = (this.rHorFim() || '').trim();
+      if (!horaValida(inicio) || !horaValida(fim)) {
+        this.erro.set('Informe a hora de ligar e a de desligar (ex.: 07:00 e 21:00).');
+        return;
+      }
+      if (this.rHorAtivo() && inicio === fim) {
+        this.erro.set('A hora de ligar e a de desligar não podem ser iguais.');
+        return;
+      }
+      partial = { horario: { ativo: this.rHorAtivo(), inicio, fim } };
+    } else if (j === 'copy') {
+      const modelo = this.rCopy();
+      if (modelo.length > COPY_MAX) {
+        this.erro.set(`O texto pode ter no máximo ${COPY_MAX} caracteres.`);
+        return;
+      }
+      if (modelo.trim() && !modelo.includes('{link}')) {
+        this.erro.set('Coloque {link} no texto — sem ele a pessoa não chega na oferta.');
+        return;
+      }
+      // Igual ao padrão (ou vazio) grava vazio: a conta segue o texto padrão do robô.
+      partial = { copy: { modelo: modelo === COPY_PADRAO || !modelo.trim() ? '' : modelo } };
     } else if (j === 'alerta') {
       partial = { alertaConexao: { ativo: this.rAlertaAtivo(), grupo: (this.rAlertaGrupo() || '').trim() } };
     } else {

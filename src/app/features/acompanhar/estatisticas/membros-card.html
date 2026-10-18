@@ -49,7 +49,8 @@
     </div>
   }
 
-  <div class="card">
+  <div class="est-membros-grade">
+  <div class="card est-cartao-grafico">
     <div class="card-header">
       <div>
         <h2>Entradas e saídas por dia</h2>
@@ -124,7 +125,7 @@
           [attr.aria-pressed]="ordem() === 'saidas'" (click)="ordem.set('saidas')">Mais saídas</button>
       </div>
     </div>
-    <div class="tabela-rolagem">
+    <div class="tabela-rolagem est-rola">
       <table class="tabela est-tabela-grupos">
         <thead>
           <tr>
@@ -150,5 +151,6 @@
         </tbody>
       </table>
     </div>
+  </div>
   </div>
 }

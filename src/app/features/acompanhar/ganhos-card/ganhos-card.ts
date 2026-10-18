@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { GanhosService, GanhoMes, Loja } from '../../../core/services/ganhos.service';
 
 const LOJAS: { id: Loja; nome: string; cor: string }[] = [
@@ -11,6 +11,10 @@ const NOME_MES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set',
 const MESES_NO_GRAFICO = 12;
 
 const G = { largura: 720, altura: 220, esq: 56, dir: 8, topo: 22, base: 26 };
+// O grafico ocupa a caixa que a tela der, desenhado no tamanho real dela (1 unidade = 1 px): o
+// texto e as barras ficam do tamanho de sempre, so o espaco muda.
+const MIN_LARGURA = 520;
+const MIN_ALTURA = 140;
 
 interface Segmento {
   loja: Loja;
@@ -73,11 +77,24 @@ function tetoRedondo(max: number): number {
 export class GanhosCard implements OnInit, OnDestroy {
   protected ganhos = inject(GanhosService);
   protected readonly lojas = LOJAS;
-  protected readonly g = G;
+  private readonly tamanho = signal<{ w: number; h: number } | null>(null);
+  private readonly geometria = computed(() => {
+    const t = this.tamanho();
+    return t
+      ? { ...G, largura: Math.max(MIN_LARGURA, Math.round(t.w)), altura: Math.max(MIN_ALTURA, Math.round(t.h)) }
+      : G;
+  });
+  protected get g() {
+    return this.geometria();
+  }
+  private readonly caixaGrafico = viewChild<ElementRef<HTMLElement>>('caixaGrafico');
+  private observador: ResizeObserver | null = null;
   protected readonly pedindo = signal(false);
   protected readonly aviso = signal<string | null>(null);
   protected readonly erroAcao = signal<string | null>(null);
   protected readonly colunaAtiva = signal<Coluna | null>(null);
+  // Mes do resumo de cima (o atual, ou o que a pessoa escolheu na lista ou clicando na barra).
+  protected readonly mesEscolhido = signal(mesAtual());
   private timer: ReturnType<typeof setInterval> | null = null;
 
   private porChave = computed(() => {
@@ -90,8 +107,15 @@ export class GanhosCard implements OnInit, OnDestroy {
     return this.porChave().get(`${mes}|${loja}`);
   }
 
+  // Meses com ganho lido, do mais novo pro mais velho (o atual sempre entra).
+  protected readonly mesesDisponiveis = computed(() =>
+    [...new Set([mesAtual(), ...this.ganhos.meses().map((g) => g.mes)])].sort().reverse()
+  );
+
+  protected readonly ehMesAtual = computed(() => this.mesEscolhido() === mesAtual());
+
   protected readonly resumo = computed(() => {
-    const mes = mesAtual();
+    const mes = this.mesEscolhido();
     const doMes = LOJAS.map((l) => this.valorDe(mes, l.id));
     return {
       total: somar(doMes.map(totalDe)),
@@ -105,7 +129,7 @@ export class GanhosCard implements OnInit, OnDestroy {
   protected readonly temDados = computed(() => this.ganhos.meses().length > 0);
 
   protected readonly estadoLojas = computed(() => {
-    const mes = mesAtual();
+    const mes = this.mesEscolhido();
     return LOJAS.map((l) => {
       const r = this.ganhos.leituras().find((x) => x.loja === l.id);
       return {
@@ -115,11 +139,13 @@ export class GanhosCard implements OnInit, OnDestroy {
         lidoEm: r?.lidoEm ?? null,
         aguardando: !!(r?.pedidoEm && (!r.lidoEm || r.pedidoEm > r.lidoEm)),
         cliques: this.valorDe(mes, l.id)?.cliques ?? null,
+        gerado: totalDe(this.valorDe(mes, l.id)),
       };
     });
   });
 
   protected readonly grafico = computed(() => {
+    const G = this.geometria();
     const meses = mesesAte(mesAtual(), MESES_NO_GRAFICO);
     const totais = meses.map((mes) => somar(LOJAS.map((l) => totalDe(this.valorDe(mes, l.id)))));
     const teto = tetoRedondo(Math.max(0, ...totais.map((t) => t ?? 0)));
@@ -162,16 +188,22 @@ export class GanhosCard implements OnInit, OnDestroy {
     return { colunas, linhasGrade, passo };
   });
 
-  protected readonly linhasTabela = computed(() =>
-    [...new Set(this.ganhos.meses().map((g) => g.mes))]
-      .sort()
-      .reverse()
-      .flatMap((mes) =>
-        LOJAS.map((l) => ({ mes, loja: l, g: this.valorDe(mes, l.id) }))
-          .filter((x) => x.g)
-          .map((x) => ({ ...x, total: totalDe(x.g) }))
-      )
-  );
+  constructor() {
+    effect(() => {
+      const el = this.caixaGrafico()?.nativeElement;
+      this.observador?.disconnect();
+      this.observador = null;
+      if (!el) return;
+      const medir = (width: number, height: number) => {
+        if (width > 0 && height > 0) this.tamanho.set({ w: width, h: height });
+      };
+      const caixa = el.getBoundingClientRect();
+      medir(caixa.width, caixa.height);
+      if (typeof ResizeObserver === 'undefined') return;
+      this.observador = new ResizeObserver(([e]) => medir(e.contentRect.width, e.contentRect.height));
+      this.observador.observe(el);
+    });
+  }
 
   ngOnInit(): void {
     void this.ganhos.carregar();
@@ -181,6 +213,7 @@ export class GanhosCard implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.observador?.disconnect();
     if (this.timer) clearInterval(this.timer);
   }
 
@@ -231,7 +264,15 @@ export class GanhosCard implements OnInit, OnDestroy {
       : d.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
   }
 
+  protected escolherMes(ev: Event): void {
+    this.mesEscolhido.set((ev.target as HTMLSelectElement).value);
+  }
+
+  protected rotuloResumo(): string {
+    return this.ehMesAtual() ? 'este mês' : `em ${this.nomeMes(this.mesEscolhido())}`;
+  }
+
   protected tooltipEsquerda(c: Coluna): number {
-    return ((c.x + c.largura / 2) / G.largura) * 100;
+    return ((c.x + c.largura / 2) / this.g.largura) * 100;
   }
 }

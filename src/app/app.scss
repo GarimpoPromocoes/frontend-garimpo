@@ -324,6 +324,15 @@
     overflow-y: auto;
   }
 }
+/* Estatisticas tambem cabe na tela: a pagina nao rola, cada cartao divide a altura. */
+.content-tela-cheia {
+  overflow: hidden;
+}
+@media (max-width: 1000px) {
+  .content-tela-cheia {
+    overflow-y: auto;
+  }
+}
 
 /* O que falta para ligar: uma lista de pendências, cada uma com o seu atalho. */
 .setup-card {

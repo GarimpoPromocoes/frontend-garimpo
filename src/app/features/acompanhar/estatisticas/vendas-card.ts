@@ -23,7 +23,7 @@ export class VendasCard {
     return {
       total: validas.length,
       comGrupo: validas.filter((v) => v.origens.length).length,
-      soUmGrupo: validas.filter((v) => v.origens.length === 1).length,
+      soUmGrupo: validas.filter((v) => v.origens.length === 1 && v.origens[0].como !== 'tema').length,
       comissao: comissoes.length ? comissoes.reduce((s, c) => s + c, 0) : null,
     };
   });
@@ -31,7 +31,7 @@ export class VendasCard {
   protected readonly maxRanking = computed(() => Math.max(1, ...this.est.ranking().map((r) => r.vendas)));
 
   protected cancelada(v: Venda): boolean {
-    return /cancel|devolv|estorn/i.test(v.status || '');
+    return /cancel|recus|devolv|estorn/i.test(v.status || '');
   }
 
   protected loja(l: Loja): string {
