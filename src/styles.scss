@@ -4728,6 +4728,108 @@ app-ganhos-card {
 .segmented-abas .segmented-option-active {
   color: var(--on-espresso);
 }
+.segmented-abas-periodo .segmented-option {
+  padding: 8px 20px;
+}
+.segmented-abas-sm .segmented-option {
+  min-height: 34px;
+  padding: 6px 18px;
+  font-size: 14px;
+}
+
+/* ---- Membros dos grupos: cartoes com descricao e grafico com estado vazio ---- */
+.est-kpi {
+  align-items: flex-start;
+}
+.est-kpi-rotulo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text);
+}
+.est-kpi-rotulo b {
+  font-weight: 600;
+}
+.est-kpi .ganhos-info svg {
+  width: 18px;
+  height: 18px;
+}
+.est-kpi .ganhos-kpi-valor {
+  font-size: 38px;
+}
+.est-kpi-desc {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+.est-kpi-icone-entrada {
+  background: color-mix(in srgb, var(--mov-entrada) 12%, var(--surface));
+  color: var(--mov-entrada);
+}
+.est-kpi-icone-saida {
+  background: color-mix(in srgb, var(--mov-saida) 12%, var(--surface));
+  color: var(--mov-saida);
+}
+.est-cor-entrada.ganhos-ponto {
+  --loja-cor: var(--mov-entrada);
+}
+.est-cor-saida.ganhos-ponto {
+  --loja-cor: var(--mov-saida);
+}
+.est-cartao-grafico .ganhos-legenda {
+  gap: 6px 20px;
+  font-size: 13px;
+}
+.est-cartao-grafico .ganhos-legenda > span {
+  gap: 8px;
+}
+.est-cartao-grafico .ganhos-ponto {
+  width: 12px;
+  height: 12px;
+}
+.est-cartao-grafico .ganhos-grade {
+  stroke-dasharray: 3 4;
+}
+.est-cartao-grafico .ganhos-grafico {
+  position: relative;
+}
+.est-vazio {
+  position: absolute;
+  inset: 0 0 28px 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+.est-vazio strong {
+  margin-top: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+.est-vazio span:last-child {
+  max-width: 320px;
+  line-height: 1.5;
+}
+.est-vazio-icone {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--surface-3);
+  color: var(--text-muted);
+}
+.est-vazio-icone svg {
+  width: 26px;
+  height: 26px;
+}
 
 /* Regras: cards mais estreitos para as cinco regras caberem numa linha só. */
 .regras-secao .grupos-grade {
@@ -4917,7 +5019,7 @@ app-vendas-card {
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
   gap: 14px;
 }
 .est-membros-grade > .card,
@@ -5103,11 +5205,32 @@ app-vendas-card {
 .est-origens li .hint-text {
   font-size: 12px;
 }
-.est-tabela-grupos th:first-child {
-  width: 34%;
+/* Numeros em colunas estreitas de largura fixa; o nome do grupo fica com o resto e quebra linha. */
+.est-tabela-grupos th,
+.est-tabela-grupos td {
+  padding-left: 6px;
+  padding-right: 6px;
+}
+.est-tabela-grupos th:nth-child(2) {
+  width: 72px;
+}
+.est-tabela-grupos th:nth-child(3) {
+  width: 76px;
+}
+.est-tabela-grupos th:nth-child(4),
+.est-tabela-grupos th:nth-child(5) {
+  width: 60px;
+}
+.est-tabela-grupos th:nth-child(6) {
+  width: 92px;
+}
+.est-tabela-grupos .col-num {
+  text-align: center;
 }
 .est-tabela-grupos td:first-child {
+  white-space: normal;
   overflow-wrap: anywhere;
+  color: var(--text);
 }
 /* No celular as tres visoes quebram em linhas em vez de passar da tela. */
 .est-barra .segmented {

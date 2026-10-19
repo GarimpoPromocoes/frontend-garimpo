@@ -1,19 +1,48 @@
-<div class="stat-strip stat-strip-4">
-  <div class="stat-cell">
-    <span class="stat-cell-label">Membros agora</span>
-    <span class="stat-cell-value">{{ inteiro(resumo().membros) }}</span>
+<div class="ganhos-kpis">
+  <div class="card ganhos-kpi est-kpi">
+    <span class="ganhos-kpi-icone" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 19v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V19"/><circle cx="9" cy="7" r="3.4"/><path d="M22 19v-1.5a4 4 0 0 0-3-3.87"/><path d="M16.5 4.2a3.4 3.4 0 0 1 0 6.6"/></svg>
+    </span>
+    <div class="ganhos-kpi-texto">
+      <span class="ganhos-kpi-rotulo est-kpi-rotulo">
+        <b>Membros agora</b>
+        <span class="ganhos-info" tabindex="0" role="img" [attr.aria-label]="dicaMembros" [attr.title]="dicaMembros">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><path d="M12 7.6v.1"/></svg>
+        </span>
+      </span>
+      <span class="ganhos-kpi-valor">{{ inteiro(resumo().membros) }}</span>
+      <span class="est-kpi-desc">Total de membros nos grupos no momento da última leitura.</span>
+    </div>
   </div>
-  <div class="stat-cell">
-    <span class="stat-cell-label">Entraram ({{ dias() }} dias)</span>
-    <span class="stat-cell-value">{{ inteiro(resumo().entradas) }}</span>
+  <div class="card ganhos-kpi est-kpi">
+    <span class="ganhos-kpi-icone est-kpi-icone-entrada" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V19"/><circle cx="8.5" cy="7" r="3.4"/><path d="M19 8v6M16 11h6"/></svg>
+    </span>
+    <div class="ganhos-kpi-texto">
+      <span class="ganhos-kpi-rotulo est-kpi-rotulo"><b>Entraram</b> ({{ dias() }} dias)</span>
+      <span class="ganhos-kpi-valor">{{ inteiro(resumo().entradas) }}</span>
+      <span class="est-kpi-desc">Novos membros que entraram nos últimos {{ dias() }} dias.</span>
+    </div>
   </div>
-  <div class="stat-cell">
-    <span class="stat-cell-label">Saíram ({{ dias() }} dias)</span>
-    <span class="stat-cell-value">{{ inteiro(resumo().saidas) }}</span>
+  <div class="card ganhos-kpi est-kpi">
+    <span class="ganhos-kpi-icone est-kpi-icone-saida" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V19"/><circle cx="8.5" cy="7" r="3.4"/><path d="M16 11h6"/></svg>
+    </span>
+    <div class="ganhos-kpi-texto">
+      <span class="ganhos-kpi-rotulo est-kpi-rotulo"><b>Saíram</b> ({{ dias() }} dias)</span>
+      <span class="ganhos-kpi-valor">{{ inteiro(resumo().saidas) }}</span>
+      <span class="est-kpi-desc">Membros que saíram nos últimos {{ dias() }} dias.</span>
+    </div>
   </div>
-  <div class="stat-cell">
-    <span class="stat-cell-label">Saldo</span>
-    <span class="stat-cell-value">{{ sinal(resumo().entradas - resumo().saidas) }}</span>
+  <div class="card ganhos-kpi est-kpi">
+    <span class="ganhos-kpi-icone ganhos-kpi-icone-ok" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 18.5v-6M12 18.5v-12M17.5 18.5v-8"/></svg>
+    </span>
+    <div class="ganhos-kpi-texto">
+      <span class="ganhos-kpi-rotulo est-kpi-rotulo"><b>Saldo</b></span>
+      <span class="ganhos-kpi-valor">{{ sinal(resumo().entradas - resumo().saidas) }}</span>
+      <span class="est-kpi-desc">Diferença entre entradas e saídas no período.</span>
+    </div>
   </div>
 </div>
 
@@ -53,20 +82,28 @@
   <div class="card est-cartao-grafico">
     <div class="card-header">
       <div>
-        <h2>Entradas e saídas por dia</h2>
+        <h2 class="ganhos-titulo">
+          Entradas e saídas por dia
+          <span class="ganhos-info" tabindex="0" role="img" [attr.aria-label]="dicaGrafico" [attr.title]="dicaGrafico">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><path d="M12 7.6v.1"/></svg>
+          </span>
+        </h2>
         <p class="card-subtitle">Para cima, quem entrou; para baixo, quem saiu.</p>
       </div>
       <div class="est-controles">
         <div class="ganhos-legenda">
-          <span><span class="ganhos-swatch est-cor-entrada"></span>Entraram</span>
-          <span><span class="ganhos-swatch est-cor-saida"></span>Saíram</span>
+          <span><span class="ganhos-ponto est-cor-entrada"></span>Entraram</span>
+          <span><span class="ganhos-ponto est-cor-saida"></span>Saíram</span>
         </div>
-        <select aria-label="Grupo do gráfico" (change)="filtrar($event)">
-          <option value="">Todos os grupos</option>
-          @for (gr of est.grupos(); track gr.chatId) {
-            <option [value]="gr.chatId" [selected]="grupoFiltro() === gr.chatId">{{ gr.nome }}</option>
-          }
-        </select>
+        <span class="ganhos-select">
+          <select aria-label="Grupo do gráfico" (change)="filtrar($event)">
+            <option value="">Todos os grupos</option>
+            @for (gr of est.grupos(); track gr.chatId) {
+              <option [value]="gr.chatId" [selected]="grupoFiltro() === gr.chatId">{{ gr.nome }}</option>
+            }
+          </select>
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 9.5 5.5 5.5 5.5-5.5"/></svg>
+        </span>
       </div>
     </div>
 
@@ -74,10 +111,13 @@
       <svg [attr.viewBox]="'0 0 ' + g.largura + ' ' + g.altura" role="group"
         aria-label="Entradas e saídas de membros por dia. Os números por grupo estão na tabela abaixo.">
         @for (l of grafico().grade; track l.y) {
-          <line class="ganhos-grade" [class.est-zero]="l.rotulo === '0'" [attr.x1]="g.esq" [attr.x2]="g.largura - g.dir"
-            [attr.y1]="l.y" [attr.y2]="l.y" />
-          <text class="ganhos-eixo" [attr.x]="g.esq - 8" [attr.y]="l.y + 4" text-anchor="end">{{ l.rotulo }}</text>
+          @if (l.y < g.altura - g.base - 1) {
+            <line class="ganhos-grade" [attr.x1]="g.esq" [attr.x2]="g.largura - g.dir" [attr.y1]="l.y" [attr.y2]="l.y" />
+          }
+          <text class="ganhos-eixo" [attr.x]="g.esq - 12" [attr.y]="l.y + 4" text-anchor="end">{{ l.rotulo }}</text>
         }
+        <line class="ganhos-eixo-linha" [attr.x1]="g.esq" [attr.x2]="g.esq" [attr.y1]="g.topo" [attr.y2]="g.altura - g.base" />
+        <line class="ganhos-eixo-linha" [attr.x1]="g.esq" [attr.x2]="g.largura - g.dir" [attr.y1]="g.altura - g.base" [attr.y2]="g.altura - g.base" />
         @for (b of grafico().barras; track b.dia) {
           <g class="ganhos-coluna" [class.ativa]="barraAtiva() === b" tabindex="0" role="img"
             [attr.aria-label]="nomeDia(b.dia) + ': ' + b.entradas + ' entraram, ' + b.saidas + ' saíram'"
@@ -101,24 +141,31 @@
         <div class="ganhos-tooltip" [class.ganhos-tooltip-fim]="tooltipEsquerda(b) > 72"
           [class.ganhos-tooltip-inicio]="tooltipEsquerda(b) < 28" [style.left.%]="tooltipEsquerda(b)">
           <strong>{{ nomeDia(b.dia) }}</strong>
-          <span class="ganhos-tooltip-linha"><span class="ganhos-swatch est-cor-entrada"></span>Entraram <b>{{ b.entradas }}</b></span>
-          <span class="ganhos-tooltip-linha"><span class="ganhos-swatch est-cor-saida"></span>Saíram <b>{{ b.saidas }}</b></span>
+          <span class="ganhos-tooltip-linha"><span class="ganhos-ponto est-cor-entrada"></span>Entraram <b>{{ b.entradas }}</b></span>
+          <span class="ganhos-tooltip-linha"><span class="ganhos-ponto est-cor-saida"></span>Saíram <b>{{ b.saidas }}</b></span>
           <span class="ganhos-tooltip-linha ganhos-tooltip-total">Saldo <b>{{ sinal(b.entradas - b.saidas) }}</b></span>
         </div>
       }
+
+      @if (grafico().vazio) {
+        <div class="est-vazio">
+          <span class="est-vazio-icone" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 18v-5M12 18V8M17 18v-7"/></svg>
+          </span>
+          <strong>Nenhuma movimentação no período</strong>
+          <span>Não houve entradas ou saídas de membros {{ grupoFiltro() ? 'deste grupo' : 'dos seus grupos' }} nos últimos {{ dias() }} dias.</span>
+        </div>
+      }
     </div>
-    @if (grafico().vazio) {
-      <p class="hint-text">Ninguém entrou nem saiu {{ grupoFiltro() ? 'deste grupo' : 'dos grupos' }} no período.</p>
-    }
   </div>
 
-  <div class="card">
+  <div class="card est-cartao-grupos">
     <div class="card-header">
       <div>
         <h2>Por grupo</h2>
         <p class="card-subtitle">Últimos {{ dias() }} dias. Membros = quantos estavam na última leitura.</p>
       </div>
-      <div class="segmented">
+      <div class="segmented segmented-abas segmented-abas-sm" role="group" aria-label="Ordenar por">
         <button type="button" class="segmented-option" [class.segmented-option-active]="ordem() === 'entradas'"
           [attr.aria-pressed]="ordem() === 'entradas'" (click)="ordem.set('entradas')">Mais entradas</button>
         <button type="button" class="segmented-option" [class.segmented-option-active]="ordem() === 'saidas'"

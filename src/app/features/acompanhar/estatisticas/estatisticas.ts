@@ -36,7 +36,7 @@ function visaoSalva(): Visao {
         }
       </div>
       @if (visao() !== 'ganhos') {
-        <div class="segmented" role="group" aria-label="Período">
+        <div class="segmented segmented-abas segmented-abas-periodo" role="group" aria-label="Período">
           @for (p of periodos; track p) {
             <button type="button" class="segmented-option" [class.segmented-option-active]="dias() === p"
               [attr.aria-pressed]="dias() === p" (click)="dias.set(p)">{{ p }} dias</button>

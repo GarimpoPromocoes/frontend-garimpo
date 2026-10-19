@@ -1,7 +1,7 @@
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { EstatisticasService, GrupoMembros } from '../../../core/services/estatisticas.service';
 
-const G = { largura: 720, altura: 240, esq: 44, dir: 8, topo: 14, base: 26 };
+const G = { largura: 720, altura: 280, esq: 44, dir: 8, topo: 14, base: 28 };
 const NOME_MES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 
 interface Barra {
@@ -59,6 +59,9 @@ export class MembrosCard {
   protected readonly grupoFiltro = signal<string>('');
   protected readonly ordem = signal<'entradas' | 'saidas'>('entradas');
   protected readonly barraAtiva = signal<Barra | null>(null);
+  protected readonly dicaMembros = 'Soma dos membros de todos os grupos, cada um na sua última leitura.';
+  protected readonly dicaGrafico =
+    'Com o robô ligado, os membros de cada grupo são conferidos a cada 30 minutos. A primeira leitura de um grupo vira a base; entradas e saídas contam a partir da segunda.';
 
   constructor() {
     effect(() => void this.est.carregarMembros(this.dias()));
@@ -126,7 +129,7 @@ export class MembrosCard {
       };
     });
     const grade = [
-      { y: G.topo, rotulo: `+${teto}` },
+      { y: G.topo, rotulo: `${teto}` },
       { y: meio, rotulo: '0' },
       { y: G.altura - G.base, rotulo: `−${teto}` },
     ];
