@@ -214,6 +214,15 @@
   gap: 10px;
   flex-shrink: 0;
 }
+/* O selo do robo na mesma altura do botao de Status e do sino (38px). */
+.topbar-robo {
+  display: inline-flex;
+}
+.topbar-robo .badge {
+  height: 38px;
+  padding: 0 14px;
+  font-size: 14px;
+}
 
 .menu-toggle {
   display: none;
