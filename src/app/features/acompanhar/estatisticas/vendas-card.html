@@ -1,19 +1,48 @@
-<div class="stat-strip stat-strip-4">
-  <div class="stat-cell">
-    <span class="stat-cell-label">Vendas ({{ dias() }} dias)</span>
-    <span class="stat-cell-value">{{ resumo().total }}</span>
+<div class="ganhos-kpis">
+  <div class="card ganhos-kpi est-kpi">
+    <span class="ganhos-kpi-icone" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 3.5h2.6l2.3 11.2a1.6 1.6 0 0 0 1.6 1.3h8.3a1.6 1.6 0 0 0 1.6-1.2l1.6-6.8H6.1"/><circle cx="9.5" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/></svg>
+    </span>
+    <div class="ganhos-kpi-texto">
+      <span class="ganhos-kpi-rotulo est-kpi-rotulo">
+        <b>Vendas</b> ({{ dias() }} dias)
+        <span class="ganhos-info" tabindex="0" role="img" [attr.aria-label]="dicaVendas" [attr.title]="dicaVendas">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><path d="M12 7.6v.1"/></svg>
+        </span>
+      </span>
+      <span class="ganhos-kpi-valor">{{ resumo().total }}</span>
+      <span class="est-kpi-desc">Total de vendas realizadas nos últimos {{ dias() }} dias.</span>
+    </div>
   </div>
-  <div class="stat-cell">
-    <span class="stat-cell-label">Achei o grupo</span>
-    <span class="stat-cell-value">{{ resumo().comGrupo }}</span>
+  <div class="card ganhos-kpi est-kpi">
+    <span class="ganhos-kpi-icone est-kpi-icone-entrada" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 19v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V19"/><circle cx="9" cy="7" r="3.4"/><path d="M22 19v-1.5a4 4 0 0 0-3-3.87"/><path d="M16.5 4.2a3.4 3.4 0 0 1 0 6.6"/></svg>
+    </span>
+    <div class="ganhos-kpi-texto">
+      <span class="ganhos-kpi-rotulo est-kpi-rotulo"><b>Achei o grupo</b></span>
+      <span class="ganhos-kpi-valor">{{ resumo().comGrupo }}</span>
+      <span class="est-kpi-desc">Vendas em que o grupo foi identificado.</span>
+    </div>
   </div>
-  <div class="stat-cell">
-    <span class="stat-cell-label">De um grupo só</span>
-    <span class="stat-cell-value">{{ resumo().soUmGrupo }}</span>
+  <div class="card ganhos-kpi est-kpi">
+    <span class="ganhos-kpi-icone est-kpi-icone-saida" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7.5" r="3.8"/><path d="M4.5 20v-1a5 5 0 0 1 5-5h5a5 5 0 0 1 5 5v1"/></svg>
+    </span>
+    <div class="ganhos-kpi-texto">
+      <span class="ganhos-kpi-rotulo est-kpi-rotulo"><b>De um grupo só</b></span>
+      <span class="ganhos-kpi-valor">{{ resumo().soUmGrupo }}</span>
+      <span class="est-kpi-desc">Vendas que vieram de apenas um grupo.</span>
+    </div>
   </div>
-  <div class="stat-cell">
-    <span class="stat-cell-label">Comissão</span>
-    <span class="stat-cell-value">{{ moeda(resumo().comissao) }}</span>
+  <div class="card ganhos-kpi est-kpi">
+    <span class="ganhos-kpi-icone ganhos-kpi-icone-ok" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 18.5v-6M12 18.5v-12M17.5 18.5v-8"/></svg>
+    </span>
+    <div class="ganhos-kpi-texto">
+      <span class="ganhos-kpi-rotulo est-kpi-rotulo"><b>Comissão</b></span>
+      <span class="ganhos-kpi-valor">{{ moeda(resumo().comissao) }}</span>
+      <span class="est-kpi-desc">Total de comissão gerada nessas vendas.</span>
+    </div>
   </div>
 </div>
 
@@ -32,27 +61,37 @@
 } @else {
   <div class="est-vendas-grade">
     <div class="card">
-      <div class="card-header">
+      <div class="est-cartao-topo">
+        <span class="ganhos-kpi-icone est-cartao-icone" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 18.5v-6M12 18.5v-12M17.5 18.5v-8"/></svg>
+        </span>
         <div>
-          <h2>Grupos que mais venderam</h2>
-          <p class="card-subtitle">
-            Vendas em que o grupo postou o produto nos 30 dias antes ou, sem postagem registrada, cujo assunto bate
-            com o grupo. Quando mais de um grupo é possível, a venda conta para todos; "só dele" são as que vieram com
-            certeza daquele grupo.
-          </p>
+          <h2 class="ganhos-titulo">
+            Grupos que mais venderam
+            <span class="ganhos-info" tabindex="0" role="img" [attr.aria-label]="dicaRanking" [attr.title]="dicaRanking">
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><path d="M12 7.6v.1"/></svg>
+            </span>
+          </h2>
+          <p class="card-subtitle">Grupos com mais vendas nos últimos {{ dias() }} dias.</p>
         </div>
       </div>
       @if (!est.ranking().length) {
         <p class="hint-text">Nenhuma venda bateu com um produto postado nos grupos.</p>
       } @else {
         <ul class="est-ranking est-rola">
-          @for (r of est.ranking(); track r.grupoId) {
-            <li>
-              <span class="est-ranking-nome">{{ r.grupoNome }}</span>
-              <span class="est-ranking-barra" aria-hidden="true">
-                <span class="est-cor-entrada" [style.width.%]="(r.vendas / maxRanking()) * 100"></span>
+          @for (r of est.ranking(); track r.grupoId; let i = $index) {
+            <li [attr.title]="r.unicas + (r.unicas === 1 ? ' venda veio só dele' : ' vendas vieram só dele')">
+              <span class="est-ranking-icone" [class.est-ranking-icone-topo]="i === 0" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="7.5" r="3.6"/><path d="M2 19.5v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1Z"/><circle cx="16.8" cy="8" r="2.9"/><path d="M17.5 19.5v-1a6.4 6.4 0 0 0-2-4.7h2A4.5 4.5 0 0 1 22 18.3v1.2Z"/></svg>
               </span>
-              <span class="est-ranking-num">{{ r.vendas }} <span class="hint-text">({{ r.unicas }} só dele)</span></span>
+              <span class="est-ranking-nome">{{ r.grupoNome }}</span>
+              <span class="est-ranking-num">
+                <b>{{ r.vendas }} {{ r.vendas === 1 ? 'venda' : 'vendas' }}</b>
+                <span>({{ pctDoTotal(r.vendas) }}% do total)</span>
+              </span>
+              <span class="est-ranking-barra" aria-hidden="true">
+                <span [style.width.%]="pctDoTotal(r.vendas)"></span>
+              </span>
             </li>
           }
         </ul>
@@ -60,7 +99,10 @@
     </div>
 
     <div class="card">
-      <div class="card-header">
+      <div class="est-cartao-topo">
+        <span class="ganhos-kpi-icone est-cartao-icone est-cartao-icone-neutro" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6.5h11M9 12h11M9 17.5h11"/><path d="M4.5 6.5h.1M4.5 12h.1M4.5 17.5h.1"/></svg>
+        </span>
         <div>
           <h2>De onde saiu cada venda</h2>
           <p class="card-subtitle">Lido por último: {{ lidoPorLoja() }}</p>
@@ -68,35 +110,39 @@
       </div>
       <ul class="est-vendas est-rola">
         @for (v of est.vendas(); track v.id) {
-          <li [class.est-venda-cancelada]="cancelada(v)">
-            <div class="est-venda-topo">
+          <li class="est-venda" [class.est-venda-cancelada]="cancelada(v)">
+            <div class="est-venda-corpo">
               <strong class="est-venda-titulo">{{ v.titulo || 'Produto sem nome no relatório' }}</strong>
-              <span class="est-venda-valor">{{ moeda(v.comissao) }}</span>
-            </div>
-            <span class="hint-text">
-              {{ loja(v.loja) }} · {{ data(v.vendidoEm || v.lidoEm) }}
-              @if (v.valor != null) { · venda de {{ moeda(v.valor) }} }
-              @if (v.status) { · {{ v.status }} }
-            </span>
-            @if (v.origens.length) {
-              <span class="est-venda-rotulo">
-                {{ v.origens[0].como === 'subid' ? 'Saiu do grupo (confirmado pelo link):' : v.origens[0].como === 'tema' ? 'Provável, pelo tema do grupo:' : v.origens.length === 1 ? 'Saiu do grupo:' : 'Pode ter saído de:' }}
+              <span class="est-venda-meta">
+                {{ loja(v.loja) }} · {{ data(v.vendidoEm || v.lidoEm) }}
+                @if (v.valor != null) { · venda de {{ moeda(v.valor) }} }
+                @if (v.status) { · {{ v.status }} }
               </span>
-              <ul class="est-origens">
-                @for (o of v.origens; track o.grupoId) {
-                  <li [attr.title]="extras(o)">
-                    <strong>{{ o.grupoNome }}</strong>
-                    <span class="hint-text">
-                      @if (o.como === 'tema') { o produto não está no histórico de postagens; o assunto bate com este grupo }
-                      @else if (o.enviadoEm) { postado {{ quando(o.enviadoEm) }} } @else { postagem fora do histórico }
-                      {{ o.como === 'titulo' ? ' · pelo nome' : '' }}
-                    </span>
-                  </li>
-                }
-              </ul>
-            } @else {
-              <span class="hint-text">Não achei esse produto nos grupos nos 30 dias antes da venda.</span>
-            }
+              @if (v.origens.length) {
+                <ul class="est-origens">
+                  @for (o of v.origens; track o.grupoId; let i = $index) {
+                    <li [attr.title]="extras(o)">
+                      <span class="est-origem-chip" [class.est-origem-tema]="o.como === 'tema'">
+                        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 19v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V19"/><circle cx="9" cy="7" r="3.4"/><path d="M22 19v-1.5a4 4 0 0 0-3-3.87"/><path d="M16.5 4.2a3.4 3.4 0 0 1 0 6.6"/></svg>
+                        <span>{{ rotuloOrigem(v, o, i) }}</span>
+                        <b>{{ o.grupoNome }}</b>
+                      </span>
+                      <span class="est-origem-detalhe">
+                        @if (o.como === 'tema') { o produto não está no histórico de postagens; o assunto bate com este grupo }
+                        @else if (o.enviadoEm) { postado {{ quando(o.enviadoEm) }} } @else { postagem fora do histórico }
+                        {{ o.como === 'titulo' ? ' · pelo nome' : '' }}
+                      </span>
+                    </li>
+                  }
+                </ul>
+              } @else {
+                <span class="est-origem-detalhe">Não achei esse produto nos grupos nos 30 dias antes da venda.</span>
+              }
+            </div>
+            <div class="est-venda-comissao">
+              <span>Comissão</span>
+              <b>{{ moeda(v.comissao) }}</b>
+            </div>
           </li>
         }
       </ul>

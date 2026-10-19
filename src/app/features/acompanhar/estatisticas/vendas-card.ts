@@ -12,6 +12,10 @@ const NOME_LOJA: Record<Loja, string> = { mercadolivre: 'Mercado Livre', amazon:
 export class VendasCard {
   protected est = inject(EstatisticasService);
   readonly dias = input(30);
+  protected readonly dicaVendas =
+    'O robô lê as vendas junto com os ganhos: a Shopee pela API e o Mercado Livre e a Amazon pelo relatório do painel de afiliado. Canceladas e devolvidas não entram.';
+  protected readonly dicaRanking =
+    'Vendas em que o grupo postou o produto nos 30 dias antes ou, sem postagem registrada, cujo assunto bate com o grupo. Quando mais de um grupo é possível, a venda conta para todos.';
 
   constructor() {
     effect(() => void this.est.carregarVendas(this.dias()));
@@ -28,7 +32,18 @@ export class VendasCard {
     };
   });
 
-  protected readonly maxRanking = computed(() => Math.max(1, ...this.est.ranking().map((r) => r.vendas)));
+  /** Parte das vendas do periodo em que o grupo aparece (uma venda pode contar para mais de um grupo). */
+  protected pctDoTotal(vendas: number): number {
+    const total = this.resumo().total;
+    return total ? Math.min(100, Math.round((vendas / total) * 100)) : 0;
+  }
+
+  protected rotuloOrigem(v: Venda, o: OrigemVenda, i: number): string {
+    if (o.como === 'tema') return 'Provável:';
+    if (o.como === 'subid') return 'Confirmado pelo link:';
+    if (v.origens.length === 1) return 'Saiu do grupo:';
+    return i === 0 ? 'Pode ter saído de:' : 'ou de:';
+  }
 
   protected cancelada(v: Venda): boolean {
     return /cancel|recus|devolv|estorn/i.test(v.status || '');

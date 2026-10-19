@@ -5100,110 +5100,218 @@ app-vendas-card {
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
-  gap: 14px;
+  grid-template-columns: minmax(300px, 0.6fr) minmax(0, 1fr);
+  gap: 16px;
 }
 @media (max-width: 1100px) {
   .est-vendas-grade {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+/* Topo dos cartoes de vendas: icone num quadrado ao lado do titulo. */
+.est-cartao-topo {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.est-cartao-icone {
+  width: 44px;
+  height: 44px;
+}
+.est-cartao-icone svg {
+  width: 22px;
+  height: 22px;
+}
+.est-cartao-icone-neutro {
+  background: var(--surface-2);
+  color: var(--text-soft);
+}
+
+/* Ranking: icone do grupo, nome, quantas vendas e a parte do total numa barra. */
 .est-ranking {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 22px;
 }
 .est-ranking li {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 4px 10px;
-  align-items: baseline;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  column-gap: 16px;
+  row-gap: 8px;
+  align-items: center;
+}
+.est-ranking-icone {
+  grid-row: 1 / span 2;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text-soft);
+}
+.est-ranking-icone svg {
+  width: 26px;
+  height: 26px;
+}
+.est-ranking-icone-topo {
+  background: color-mix(in srgb, var(--mov-saida) 12%, var(--surface));
+  color: var(--mov-saida);
 }
 .est-ranking-nome {
-  font-weight: 500;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
   overflow-wrap: anywhere;
 }
 .est-ranking-num {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 14px;
+  color: var(--text-muted);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
+.est-ranking-num b {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
 .est-ranking-barra {
-  grid-column: 1 / -1;
-  grid-row: 2;
-  height: 6px;
-  border-radius: 3px;
-  background: var(--surface-2);
+  grid-column: 2 / -1;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--surface-3);
   overflow: hidden;
 }
 .est-ranking-barra > span {
   display: block;
   height: 100%;
-  border-radius: 3px;
+  border-radius: 4px;
+  background: var(--mov-entrada);
 }
+
+/* Cada venda num cartaozinho: produto e origem a esquerda, comissao separada a direita. */
 .est-vendas {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
+  gap: 14px;
 }
-.est-vendas > li {
+.est-venda {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 12px 0;
-  border-top: 1px solid var(--border);
-}
-.est-vendas > li:first-child {
-  border-top: none;
-  padding-top: 0;
+  align-items: stretch;
+  gap: 18px;
+  padding: 16px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
 }
 .est-venda-cancelada {
   opacity: 0.6;
 }
-.est-venda-topo {
+.est-venda-corpo {
+  flex: 1;
+  min-width: 0;
   display: flex;
-  align-items: baseline;
-  gap: 12px;
+  flex-direction: column;
+  gap: 6px;
 }
 .est-venda-titulo {
-  font-weight: 500;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.35;
   color: var(--text);
   overflow-wrap: anywhere;
 }
-.est-venda-valor {
-  margin-left: auto;
+.est-venda-meta {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+.est-venda-comissao {
+  flex-shrink: 0;
+  min-width: 108px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 20px;
+  border-left: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text-soft);
+}
+.est-venda-comissao b {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-  font-weight: 600;
-}
-.est-venda-rotulo {
-  margin-top: 4px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-soft);
 }
 .est-origens {
   list-style: none;
-  margin: 0;
+  margin: 6px 0 0;
   padding: 0;
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  flex-direction: column;
+  gap: 8px;
 }
 .est-origens li {
   display: flex;
-  flex-direction: column;
-  padding: 6px 10px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface-2);
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 18px;
 }
-.est-origens li .hint-text {
-  font-size: 12px;
+.est-origem-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius-sm);
+  background: var(--gold-soft);
+  font-size: 13px;
+  color: var(--text-soft);
+}
+.est-origem-chip svg {
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
+}
+.est-origem-chip b {
+  font-weight: 600;
+  color: var(--text);
+}
+.est-origem-tema {
+  border-color: color-mix(in srgb, var(--mov-saida) 25%, var(--surface));
+  background: color-mix(in srgb, var(--mov-saida) 8%, var(--surface));
+}
+.est-origem-tema svg {
+  color: var(--mov-saida);
+}
+.est-origem-detalhe {
+  max-width: 340px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+@media (max-width: 720px) {
+  .est-venda {
+    flex-direction: column;
+  }
+  .est-venda-comissao {
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 10px 0 0;
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
 }
 /* Numeros em colunas estreitas de largura fixa; o nome do grupo fica com o resto e quebra linha. */
 .est-tabela-grupos th,
