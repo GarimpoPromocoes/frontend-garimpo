@@ -11,7 +11,9 @@ import { RunControlService } from '../../../core/services/run-control.service';
 import { StatusService } from '../../../core/services/status.service';
 import { VerificacaoService } from '../../../core/services/verificacao.service';
 
-type Icone = 'busca' | 'sacola' | 'doc' | 'envio' | 'check' | 'alerta' | 'relogio' | 'play' | 'pausa' | 'parar' | 'grafico' | 'grupos';
+type Icone =
+  | 'busca' | 'sacola' | 'doc' | 'envio' | 'check' | 'alerta' | 'relogio' | 'play' | 'pausa' | 'parar' | 'grafico'
+  | 'grupos' | 'robo' | 'raio' | 'externo';
 type Tom = 'ok' | 'andamento' | 'espera' | 'erro' | 'neutro' | 'achado';
 
 interface EtapaVista {
@@ -321,10 +323,10 @@ export class PainelRobo {
       case 'aguardando':
         return [linha('relogio', `Postagem agendada para ${hhmm(a.ate)}`, 'Agendado', 'espera')];
       case 'postando':
-        return [linha('envio', 'Postando produto nos grupos…', ultima ? 'Em andamento' : 'Feito', ultima ? 'andamento' : 'neutro')];
+        return [linha('grupos', 'Postando produto nos grupos…', ultima ? 'Em andamento' : 'Feito', ultima ? 'andamento' : 'neutro')];
       case 'enviado': {
         const canal = a.canal === 'telegram' ? 'Telegram' : 'WhatsApp';
-        return [linha('check', `Enviado para ${a.destino ? `"${a.destino}"` : 'o grupo'} (${canal})`, 'Concluído', 'ok')];
+        return [linha('envio', `Enviado para ${a.destino ? `"${a.destino}"` : 'o grupo'} (${canal})`, 'Concluído', 'ok')];
       }
       case 'concluido':
         return [linha('check', a.produto ? `Publicado: ${this.curto(a.produto)}` : 'Produto publicado', 'Sucesso', 'ok')];

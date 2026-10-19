@@ -11,26 +11,31 @@
     @case ('pausa') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="5.5" width="4" height="13" rx="1.2"/><rect x="13.5" y="5.5" width="4" height="13" rx="1.2"/></svg> }
     @case ('parar') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="6.5" width="11" height="11" rx="2"/></svg> }
     @case ('grafico') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M7 16v-5M12 16V6M17 16v-8"/></svg> }
+    @case ('robo') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v2.5"/><circle cx="12" cy="3" r="1"/><rect x="4" y="6" width="16" height="13" rx="4.5"/><path d="M2 11.5v3M22 11.5v3"/><circle cx="9" cy="12" r="1.6" fill="currentColor"/><circle cx="15" cy="12" r="1.6" fill="currentColor"/><path d="M9.5 16h5"/></svg> }
+    @case ('raio') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2.5 4.5 13.5H12l-1 8 8.5-11H12Z"/></svg> }
+    @case ('externo') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M18 14v4.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10"/></svg> }
     @case ('grupos') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 19c.6-3 2.8-4.6 5.5-4.6s4.9 1.6 5.5 4.6"/><path d="M15.5 5.6a3.2 3.2 0 0 1 0 5.8M17.2 14.6c1.8.5 3 1.9 3.3 4.4"/></svg> }
   }
 </ng-template>
 
 <!-- 1. Cabeçalho: estado do robô, números do momento e os controles, numa linha só. -->
 <section class="card pv-topo" [attr.data-estado]="estado()" aria-labelledby="pv-titulo">
+  <span class="pv-robo" aria-hidden="true"><ng-container *ngTemplateOutlet="icone; context: { $implicit: 'robo' }" /></span>
   <div class="pv-estado">
     <!-- role=status: o leitor de tela avisa quando o robô liga, pausa ou para. -->
     <p class="pv-nome" role="status">
-      <span class="pv-luz" aria-hidden="true"></span>
       <span id="pv-titulo">Robô de promoções</span>
-      <span class="pv-pill">{{ rotuloEstado() }}</span>
+      <span class="pv-pill"><span class="pv-luz" aria-hidden="true"></span>{{ rotuloEstado() }}</span>
     </p>
     <p class="pv-frase">{{ frase() }}</p>
   </div>
 
+  <span class="pv-divisor pv-divisor-alto" aria-hidden="true"></span>
+
   <dl class="pv-kpis">
-    <div><dt>Tempo ativo</dt><dd>{{ tempoAtivo() }}</dd></div>
-    <div><dt>Postados hoje</dt><dd>{{ postadosHoje() ?? '—' }}</dd></div>
-    <div><dt>{{ proxima().rotulo }}</dt><dd>{{ proxima().valor }}</dd></div>
+    <div><dt><ng-container *ngTemplateOutlet="icone; context: { $implicit: 'relogio' }" />Tempo ativo</dt><dd>{{ tempoAtivo() }}</dd></div>
+    <div><dt><ng-container *ngTemplateOutlet="icone; context: { $implicit: 'doc' }" />Postados hoje</dt><dd>{{ postadosHoje() ?? '—' }}</dd></div>
+    <div><dt><ng-container *ngTemplateOutlet="icone; context: { $implicit: 'raio' }" />{{ proxima().rotulo }}</dt><dd>{{ proxima().valor }}</dd></div>
   </dl>
 
   <div class="pv-controles">
@@ -75,12 +80,10 @@
       }
     </div>
 
-    <span class="pv-divisor" aria-hidden="true"></span>
-
     @if (!runControl.algoRodando()) {
       <button type="button" class="btn btn-hero pv-ligar" [disabled]="runControl.iniciando()" (click)="runControl.executar()">
         <ng-container *ngTemplateOutlet="icone; context: { $implicit: 'play' }" />
-        {{ runControl.iniciando() ? 'Ligando…' : 'Ligar' }}
+        {{ runControl.iniciando() ? 'Ligando…' : 'Ligar robô' }}
       </button>
     } @else {
       @if (runControl.postandoAgora()) {
@@ -95,9 +98,9 @@
           <ng-container *ngTemplateOutlet="icone; context: { $implicit: runControl.pausado() ? 'play' : 'pausa' }" />
         </button>
       }
-      <button type="button" class="btn btn-ghost pv-parar" [disabled]="runControl.parando()" (click)="runControl.parar()">
+      <button type="button" class="btn btn-hero pv-parar" [disabled]="runControl.parando()" (click)="runControl.parar()">
         <ng-container *ngTemplateOutlet="icone; context: { $implicit: 'parar' }" />
-        {{ runControl.parando() ? 'Parando…' : 'Parar' }}
+        {{ runControl.parando() ? 'Parando…' : 'Parar robô' }}
       </button>
     }
   </div>
@@ -149,8 +152,17 @@
 <!-- 3. O que ele fez por último. Ocupa o resto da tela e rola por dentro. -->
 <section class="card pv-acoes" aria-labelledby="pv-acoes-titulo">
   <div class="card-header">
-    <h2 id="pv-acoes-titulo">Últimas ações</h2>
-    <button type="button" class="btn btn-ghost btn-sm" (click)="verLogs.emit()">Ver logs detalhados</button>
+    <div class="est-cartao-topo">
+      <span class="ganhos-kpi-icone est-cartao-icone" aria-hidden="true"><ng-container *ngTemplateOutlet="icone; context: { $implicit: 'doc' }" /></span>
+      <div>
+        <h2 id="pv-acoes-titulo">Últimas ações</h2>
+        <p class="card-subtitle">Acompanhe em tempo real tudo o que o robô está fazendo.</p>
+      </div>
+    </div>
+    <button type="button" class="btn btn-ghost btn-sm pv-logs" (click)="verLogs.emit()">
+      Ver logs detalhados
+      <ng-container *ngTemplateOutlet="icone; context: { $implicit: 'externo' }" />
+    </button>
   </div>
   @if (jobs.desafioMl()) {
     <div class="espera-faixa">
@@ -164,7 +176,7 @@
   }
   <ul class="pv-lista" role="log" aria-label="Últimas ações do robô">
     @for (a of acoes(); track $index) {
-      <li class="pv-acao" [attr.data-tom]="a.tom">
+      <li class="pv-acao" [attr.data-tom]="a.tom" [attr.data-icone]="a.icone">
         <span class="pv-acao-hora">{{ a.hora }}</span>
         <span class="pv-acao-icone"><ng-container *ngTemplateOutlet="icone; context: { $implicit: a.icone }" /></span>
         <span class="pv-acao-texto">{{ a.texto }}</span>

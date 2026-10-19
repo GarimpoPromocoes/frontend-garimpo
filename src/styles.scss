@@ -3802,7 +3802,27 @@ app-painel-robo {
   flex-wrap: wrap;
   align-items: center;
   gap: 14px 28px;
-  padding: 16px 20px;
+  padding: 20px 22px;
+}
+/* O robo num quadrado dourado, como os icones dos cartoes de Estatisticas. */
+.pv-robo {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  margin-right: -10px;
+  border-radius: var(--radius-sm);
+  background: var(--gold-soft);
+  color: var(--text);
+}
+.pv-robo svg {
+  width: 34px;
+  height: 34px;
+}
+.pv-topo[data-estado='online'] .pv-robo {
+  background: var(--gold);
+  color: var(--on-gold);
 }
 .pv-estado {
   flex: 1 1 240px;
@@ -3813,21 +3833,21 @@ app-painel-robo {
   align-items: center;
   gap: 10px;
   margin: 0;
-  font-size: 19px;
+  font-size: 24px;
   font-weight: 700;
   font-stretch: var(--estreita);
   line-height: 1.2;
   color: var(--text);
 }
 .pv-luz {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   flex-shrink: 0;
   border-radius: 50%;
   background: var(--border-strong);
 }
 .pv-topo[data-estado='online'] .pv-luz {
-  background: #3ddc84;
+  background: var(--ok);
   animation: pulse-dot 1.6s ease-in-out infinite;
 }
 .pv-topo[data-estado='pausado'] .pv-luz,
@@ -3836,9 +3856,12 @@ app-painel-robo {
   background: var(--gold);
 }
 .pv-pill {
-  padding: 2px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 12px;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   font-stretch: 100%;
   background: var(--surface-2);
@@ -3857,8 +3880,8 @@ app-painel-robo {
   color: var(--gold-ink);
 }
 .pv-frase {
-  margin: 4px 0 0 20px;
-  font-size: 13px;
+  margin: 6px 0 0;
+  font-size: 15px;
   color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -3871,16 +3894,27 @@ app-painel-robo {
   margin: 0;
 }
 .pv-kpis div {
+  position: relative;
   min-width: 0;
+  padding-left: 30px;
 }
 .pv-kpis dt {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
   white-space: nowrap;
 }
+/* O icone fica a esquerda do rotulo e do valor. */
+.pv-kpis dt svg {
+  position: absolute;
+  left: 0;
+  top: 1px;
+  width: 20px;
+  height: 20px;
+  color: var(--text-soft);
+}
 .pv-kpis dd {
-  margin: 2px 0 0;
-  font-size: 18px;
+  margin: 4px 0 0;
+  font-size: 22px;
   font-weight: 700;
   font-stretch: var(--estreita);
   line-height: 1.1;
@@ -3899,9 +3933,13 @@ app-painel-robo {
   margin: 0 4px;
   background: var(--border);
 }
+.pv-divisor-alto {
+  height: 56px;
+  margin: 0;
+}
 .pv-icone-btn {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   display: grid;
   place-items: center;
   border-radius: var(--radius-sm);
@@ -3914,8 +3952,8 @@ app-painel-robo {
     color 0.14s ease;
 }
 .pv-icone-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
 }
 .pv-icone-btn:hover:not(:disabled),
 .pv-icone-btn[aria-expanded='true'] {
@@ -3933,7 +3971,10 @@ app-painel-robo {
 }
 .pv-ligar,
 .pv-parar {
-  min-width: 104px;
+  min-width: 150px;
+  min-height: 48px;
+  margin-left: 8px;
+  font-size: 16px;
 }
 
 /* "Escolher grupos": uma caixinha que abre embaixo do ícone. */
@@ -4010,8 +4051,8 @@ app-painel-robo {
   transform: translateY(-50%) rotate(45deg);
 }
 .pv-etapa-icone {
-  width: 40px;
-  height: 40px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -4020,18 +4061,18 @@ app-painel-robo {
   margin-bottom: 2px;
 }
 .pv-etapa-icone svg {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
 }
 .pv-etapa-titulo {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   font-stretch: var(--estreita);
   color: var(--text);
 }
 .pv-etapa-sub {
   max-width: 100%;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
   line-height: 1.35;
   white-space: nowrap;
@@ -4160,11 +4201,24 @@ app-painel-robo {
 .pv-acoes {
   flex: 1;
   min-height: 0;
-  gap: 10px;
-  padding: 16px 20px 8px;
+  gap: 12px;
+  padding: 18px 22px 8px;
 }
 .pv-acoes .card-header {
   align-items: center;
+}
+.pv-acoes .est-cartao-icone {
+  width: 52px;
+  height: 52px;
+  color: var(--gold-deep);
+}
+.pv-logs {
+  min-height: 42px;
+  font-weight: 600;
+}
+.pv-logs svg {
+  width: 17px;
+  height: 17px;
 }
 .pv-lista {
   flex: 1;
@@ -4178,19 +4232,19 @@ app-painel-robo {
 }
 .pv-acao {
   display: grid;
-  grid-template-columns: 44px 22px minmax(0, 1fr) auto;
+  grid-template-columns: 56px 26px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 12px;
-  padding: 9px 0;
+  gap: 14px;
+  padding: 8px 0;
   border-top: 1px solid var(--border);
-  font-size: 14px;
+  font-size: 15px;
 }
 .pv-acao:first-child {
   border-top: none;
 }
 .pv-acao-hora {
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: 14px;
   font-variant-numeric: tabular-nums;
 }
 .pv-acao-icone {
@@ -4210,14 +4264,22 @@ app-painel-robo {
 }
 .pv-acao[data-tom='achado'] .pv-acao-icone,
 .pv-acao[data-tom='andamento'] .pv-acao-icone {
-  color: var(--gold-ink);
+  color: var(--gold-deep);
+}
+/* O envio e os grupos ficam na cor do texto mesmo quando deram certo: o verde fica pro publicado. */
+.pv-acao[data-icone='envio'] .pv-acao-icone,
+.pv-acao[data-icone='grupos'] .pv-acao-icone {
+  color: var(--text);
 }
 .pv-acao-texto {
   color: var(--text);
   overflow-wrap: anywhere;
 }
 .pv-selo {
-  padding: 3px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 11px;
   border-radius: 999px;
   border: 1px solid var(--border);
   background: var(--surface-2);
@@ -4225,6 +4287,18 @@ app-painel-robo {
   font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
+}
+.pv-selo::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.85;
+}
+.pv-selo[data-tom='neutro'],
+.pv-selo[data-tom='espera'] {
+  color: var(--text-muted);
 }
 .pv-selo[data-tom='ok'] {
   background: var(--ok-soft);
