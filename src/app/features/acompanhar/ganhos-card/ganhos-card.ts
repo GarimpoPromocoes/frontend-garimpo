@@ -205,9 +205,10 @@ export class GanhosCard implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     void this.ganhos.carregar();
+    // So enquanto tem leitura em curso: cada loja aparece assim que termina.
     this.timer = setInterval(() => {
       if (this.ganhos.lendoAgora() || this.estadoLojas().some((l) => l.aguardando)) void this.ganhos.carregar();
-    }, 15000);
+    }, 3000);
   }
 
   ngOnDestroy(): void {
@@ -227,10 +228,10 @@ export class GanhosCard implements OnInit, OnDestroy {
     }
     this.aviso.set(
       r.modo === 'robo-ligado'
-        ? 'Pedido feito. O robô lê os painéis em segundo plano, sem parar de postar. Leva alguns minutos.'
+        ? 'Pedido feito. O robô começa a ler em poucos segundos, sem parar de postar. Cada loja aparece aqui assim que terminar.'
         : r.modo === 'na-fila'
           ? 'Pedido registrado. A leitura acontece assim que o robô for ligado.'
-          : 'Lendo os painéis das lojas agora. Leva de 1 a 3 minutos.'
+          : 'Lendo os painéis das lojas agora. Cada loja aparece aqui assim que terminar.'
     );
   }
 
