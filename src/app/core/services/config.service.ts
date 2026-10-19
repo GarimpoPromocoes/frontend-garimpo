@@ -83,8 +83,6 @@ export interface Garimpo {
    * esta só vale para grupo que ainda não escolheu.
    */
   grupos: string[];
-  /** Concorrentes com o pixelado da marca d'água ligado (pedaços do nome; a foto com marca não é descartada). */
-  pixelarMarca?: string[];
 }
 
 export interface DashboardConfig {

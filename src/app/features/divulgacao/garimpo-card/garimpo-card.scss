@@ -71,25 +71,6 @@
   gap: 14px;
 }
 
-.marca-dagua {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
-}
-
-.marca-dagua-lista {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-
-  .toggle-label {
-    min-width: 0;
-    overflow-wrap: anywhere;
-  }
-}
-
 .garimpo-rodape {
   display: flex;
   justify-content: flex-end;

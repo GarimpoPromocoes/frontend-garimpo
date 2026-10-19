@@ -52,14 +52,12 @@ export class GarimpoCard {
       fontes[grupo.id] = grupo.fonte ?? padrao;
       clona[grupo.id] = [...(grupo.gruposClonagem ?? [])];
     }
-    return { fontes, clona, pixelar: [...(cfg?.garimpo?.pixelarMarca ?? [])] };
+    return { fontes, clona };
   });
 
   protected readonly rFontes = signal<Record<string, FonteProdutos>>({});
   /** De quais grupos dos concorrentes cada grupo clona (vazio = todos). */
   protected readonly rClona = signal<Record<string, string[]>>({});
-  /** Concorrentes com o pixelado da marca d'água ligado (em vez de descartar a foto). */
-  protected readonly rPixelar = signal<string[]>([]);
   /** Grupo com a escolha dos concorrentes aberta (um por vez). */
   protected readonly aberto = signal<string | null>(null);
   protected readonly salvando = signal(false);
@@ -109,35 +107,6 @@ export class GarimpoCard {
     if (!lista.length) return 'todos os grupos deste WhatsApp';
     if (lista.length <= MAX_NOMES_RESUMO) return lista.join(' e ');
     return `${lista.slice(0, MAX_NOMES_RESUMO).join(', ')} e mais ${lista.length - MAX_NOMES_RESUMO}`;
-  }
-
-  /** Algum grupo recebe a clonagem: só aí os concorrentes e a marca d'água importam. */
-  protected readonly algumClona = computed(() => Object.values(this.rFontes()).includes('clonagem'));
-
-  /**
-   * Concorrentes que dá para ligar o pixelado: os que algum grupo clona (todos os do WhatsApp, se
-   * algum grupo clona de todos), mais os que já estão ligados — para dar para desligar.
-   */
-  protected readonly concorrentes = computed(() => {
-    const nomes: string[] = [];
-    const juntar = (nome: string) => {
-      if (!nomes.some((n) => mesmoNome(n, nome))) nomes.push(nome);
-    };
-    const clonam = this.gruposDestino().filter((g) => this.fonteDe(g.id) === 'clonagem');
-    for (const g of clonam) this.clonaDe(g.id).forEach(juntar);
-    if (clonam.some((g) => !this.clonaDe(g.id).length)) this.doWhatsapp().grupos.forEach((w) => juntar(w.nome));
-    this.rPixelar().forEach(juntar);
-    return nomes;
-  });
-
-  protected pixela(nome: string): boolean {
-    return this.rPixelar().some((n) => mesmoNome(n, nome));
-  }
-
-  alternarPixelar(nome: string): void {
-    this.erro.set(null);
-    const atuais = this.rPixelar();
-    this.rPixelar.set(this.pixela(nome) ? atuais.filter((n) => !mesmoNome(n, nome)) : [...atuais, nome]);
   }
 
   /** Nomes escolhidos para o grupo que o robô não achou no WhatsApp. */
@@ -192,11 +161,8 @@ export class GarimpoCard {
 
   protected readonly alterado = computed(() => {
     const s = this.salvo();
-    return (
-      s.pixelar.join('\n') !== this.rPixelar().join('\n') ||
-      Object.keys(s.fontes).some(
-        (id) => s.fontes[id] !== this.fonteDe(id) || s.clona[id].join('\n') !== this.clonaDe(id).join('\n')
-      )
+    return Object.keys(s.fontes).some(
+      (id) => s.fontes[id] !== this.fonteDe(id) || s.clona[id].join('\n') !== this.clonaDe(id).join('\n')
     );
   });
 
@@ -207,7 +173,6 @@ export class GarimpoCard {
       untracked(() => {
         this.rFontes.set({ ...s.fontes });
         this.rClona.set(Object.fromEntries(Object.entries(s.clona).map(([id, l]) => [id, [...l]])));
-        this.rPixelar.set([...s.pixelar]);
       });
     });
     void this.carregarGruposDoWhatsapp();
@@ -219,7 +184,6 @@ export class GarimpoCard {
     this.aberto.set(null);
     this.rFontes.set({ ...s.fontes });
     this.rClona.set(Object.fromEntries(Object.entries(s.clona).map(([id, l]) => [id, [...l]])));
-    this.rPixelar.set([...s.pixelar]);
   }
 
   async salvar(): Promise<void> {
@@ -229,7 +193,7 @@ export class GarimpoCard {
     // ('fonte') volta para o garimpo, que é o padrão de um grupo novo cadastrado depois.
     const r = await this.configService.salvar({
       grupos: this.gruposDestino().map((g) => ({ ...g, fonte: this.fonteDe(g.id), gruposClonagem: this.clonaDe(g.id) })),
-      garimpo: { fonte: 'mercadolivre', pixelarMarca: this.rPixelar() },
+      garimpo: { fonte: 'mercadolivre' },
     });
     this.salvando.set(false);
     if (!r.ok) this.erro.set(r.erro ?? 'Erro ao salvar.');
