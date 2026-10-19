@@ -8,13 +8,23 @@
   overflow: hidden;
 }
 
-/* O menu fica na mesma pedra do fundo: o único bloco escuro da tela é o
-   controle do robô. Aqui, o amarelo marca só a página em que a pessoa está. */
+/* No claro o menu é o bloco café de antes da refatoração; no escuro fica na
+   mesma pedra do fundo. Os tokens são trocados aqui dentro, então texto, hover,
+   foco e o botão Sair seguem o menu sem regra própria. O amarelo marca só a
+   página em que a pessoa está. */
 .sidebar {
+  --text: var(--menu-texto);
+  --text-soft: var(--menu-texto-suave);
+  --text-muted: var(--menu-texto-fraco);
+  --surface: var(--menu-controle);
+  --surface-3: var(--menu-hover);
+  --border: var(--menu-borda);
+  --border-control: var(--menu-controle-borda);
+  --focus: var(--menu-foco);
   height: 100%;
   min-height: 0;
-  background: var(--bg);
-  border-right: 1px solid var(--border);
+  background: var(--menu-bg);
+  border-right: 1px solid var(--menu-borda);
   display: flex;
   flex-direction: column;
   padding: 22px 14px 16px;
@@ -33,7 +43,7 @@
   width: 46px;
   height: 46px;
   border-radius: 50%;
-  border: 2px solid var(--espresso);
+  border: 2px solid var(--menu-logo);
   object-fit: cover;
   flex-shrink: 0;
 }

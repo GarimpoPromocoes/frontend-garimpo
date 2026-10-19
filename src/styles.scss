@@ -78,6 +78,18 @@
   --janela-anel: 0 0 0 0 transparent;
   --so-no-claro: inline;
   --so-no-escuro: none;
+  /* Menu lateral: no claro é o bloco café de antes da refatoração; no escuro
+     acompanha o fundo (ver o tema escuro). */
+  --menu-bg: #2a1d12;
+  --menu-borda: #3a2a1b;
+  --menu-texto: #f6efe2;
+  --menu-texto-suave: #b3a48f;
+  --menu-texto-fraco: #9c8c75;
+  --menu-hover: rgba(255, 255, 255, 0.07);
+  --menu-foco: #e0a520;
+  --menu-logo: #e0a520;
+  --menu-controle: rgba(255, 255, 255, 0.04);
+  --menu-controle-borda: #6f5f52;
   color-scheme: light;
 }
 
@@ -138,6 +150,16 @@
   --logo-caixa-folga: 8px 14px;
   --so-no-claro: none;
   --so-no-escuro: inline;
+  --menu-bg: var(--bg);
+  --menu-borda: var(--border);
+  --menu-texto: var(--text);
+  --menu-texto-suave: var(--text-soft);
+  --menu-texto-fraco: var(--text-muted);
+  --menu-hover: var(--surface-3);
+  --menu-foco: var(--focus);
+  --menu-logo: var(--espresso);
+  --menu-controle: var(--surface);
+  --menu-controle-borda: var(--border-control);
 
   --serie-1: #7fb4f2;
   --serie-2: #f59a6b;
