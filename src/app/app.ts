@@ -66,7 +66,7 @@ const ABAS: Aba[] = [
     id: 'estatisticas',
     label: 'Estatísticas',
     titulo: 'Estatísticas',
-    descricao: 'Quanto as promoções renderam, quem entra e sai dos grupos e de qual grupo saiu cada venda.',
+    descricao: 'Acompanhe os ganhos, membros e vendas por grupo das suas promoções.',
     secao: 'Acompanhar',
   },
 

@@ -1323,20 +1323,6 @@ body:has(.modal-fundo) .bot-control-fixo {
 .stat-strip-4 .stat-cell-value {
   font-size: 30px;
 }
-.stat-strip-5 {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-}
-.stat-strip-5 .stat-cell-value {
-  font-size: 30px;
-}
-.ganhos-cliques-badge {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-soft);
-  background: var(--surface-2, rgba(127, 127, 127, 0.12));
-  border-radius: 999px;
-  padding: 1px 9px;
-}
 
 .ganhos-swatch {
   display: inline-block;
@@ -1348,30 +1334,6 @@ body:has(.modal-fundo) .bot-control-fixo {
   margin-right: 6px;
 }
 
-.ganhos-lojas {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-}
-.ganhos-lojas li {
-  display: flex;
-  align-items: baseline;
-  gap: 4px 10px;
-  flex-wrap: wrap;
-  padding: 10px 0;
-  border-top: 1px solid var(--border);
-}
-.ganhos-lojas li:first-child {
-  border-top: none;
-  padding-top: 0;
-}
-.ganhos-loja-nome {
-  font-size: 15px;
-  font-weight: 500;
-  min-width: 110px;
-}
 
 .ganhos-legenda {
   display: flex;
@@ -1462,12 +1424,6 @@ body:has(.modal-fundo) .bot-control-fixo {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .stat-strip-4 .stat-cell {
-    border-top: 1px solid var(--border);
-  }
-  .stat-strip-5 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .stat-strip-5 .stat-cell {
     border-top: 1px solid var(--border);
   }
 }
@@ -4469,37 +4425,220 @@ app-ganhos-card {
   flex-direction: column;
   gap: 14px;
 }
+
+/* Topo do card: titulo com a dica, mes e o botao de ler agora. */
 .ganhos-cartao-lojas {
   flex: none;
-  gap: 8px;
-  padding: 14px 20px;
+  gap: 18px;
+  padding: 20px 22px 22px;
 }
-.ganhos-lojas-topo {
+.ganhos-topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px 24px;
+}
+.ganhos-titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ganhos-info {
+  display: inline-grid;
+  place-items: center;
+  color: var(--text-muted);
+  border-radius: 50%;
+  cursor: help;
+}
+.ganhos-info svg {
+  width: 19px;
+  height: 19px;
+}
+.ganhos-mes {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+.ganhos-select {
+  position: relative;
+  display: inline-flex;
+}
+.ganhos-select select {
+  appearance: none;
+  min-width: 124px;
+  min-height: 44px;
+  padding: 8px 40px 8px 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.ganhos-select select:hover {
+  border-color: var(--border-control);
+}
+.ganhos-select select:focus-visible {
+  outline: none;
+  border-color: var(--focus);
+  box-shadow: var(--focus-halo);
+}
+.ganhos-select svg {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  transform: translateY(-50%);
+  color: var(--text);
+  pointer-events: none;
+}
+.ganhos-atualizar {
+  min-height: 44px;
+  padding: 8px 16px;
+  background: var(--gold-soft);
+  border-color: var(--gold-border);
+  color: var(--text);
+  font-weight: 600;
+}
+.ganhos-atualizar:hover:not(:disabled) {
+  border-color: var(--gold);
+}
+.ganhos-atualizar svg {
+  width: 18px;
+  height: 18px;
+}
+.ganhos-atualizar-lendo svg {
+  animation: girar 1s linear infinite;
+}
+
+/* Um bloco por loja, tingido com a cor dela (a mesma do grafico). */
+.ganhos-plataformas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.ganhos-plataforma {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding: 16px 20px 18px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--loja-cor) 8%, var(--surface));
+}
+.ganhos-plataforma-nome {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+.ganhos-ponto {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--loja-cor);
+  flex-shrink: 0;
+}
+.ganhos-plataforma-valor {
+  font-size: 28px;
+  font-weight: 700;
+  font-stretch: var(--estreita);
+  line-height: 1.1;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.ganhos-plataforma-off {
+  font-size: 22px;
+}
+.ganhos-plataforma-meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px 24px;
+  gap: 4px 12px;
+  font-size: 13px;
+  color: var(--text-muted);
 }
-.ganhos-lojas-topo h2 {
-  margin: 0;
+.ganhos-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
-.ganhos-lojas-topo .ganhos-lojas {
-  flex: 1;
+.ganhos-meta-item svg {
+  width: 17px;
+  height: 17px;
 }
-.ganhos-loja-valor {
+.ganhos-meta-item b {
   font-weight: 600;
-  font-variant-numeric: tabular-nums;
+  color: var(--text-soft);
 }
-.ganhos-cartao-lojas .ganhos-lojas {
+.ganhos-meta-erro {
+  color: var(--danger);
+  font-weight: 500;
+}
+
+/* Numeros do mes: cada um no seu cartao, com o icone num quadrado dourado. */
+.ganhos-kpis {
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+.ganhos-kpi {
   flex-direction: row;
-  flex-wrap: wrap;
-  gap: 6px 28px;
+  align-items: center;
+  gap: 18px;
+  padding: 20px 22px;
 }
-.ganhos-cartao-lojas .ganhos-lojas li,
-.ganhos-cartao-lojas .ganhos-lojas li:first-child {
-  border-top: none;
-  padding: 0;
+.ganhos-kpi-icone {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: var(--radius-sm);
+  background: var(--gold-soft);
+  color: var(--gold-deep);
+  flex-shrink: 0;
 }
+.ganhos-kpi-icone svg {
+  width: 26px;
+  height: 26px;
+}
+.ganhos-kpi-icone-ok {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+.ganhos-kpi-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.ganhos-kpi-rotulo {
+  font-size: 14px;
+  color: var(--text-soft);
+}
+.ganhos-kpi-valor {
+  font-size: 30px;
+  font-weight: 700;
+  font-stretch: var(--estreita);
+  line-height: 1;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 .ganhos-cartao-evolucao {
   flex: 1;
   min-height: 0;
@@ -4515,6 +4654,79 @@ app-ganhos-card {
 }
 .ganhos-cartao-evolucao .tabela-rolagem {
   flex: none;
+}
+/* Grafico de ganhos: grade tracejada, eixo marcado e o mes escolhido numa faixa clara. */
+.ganhos-cartao-evolucao .ganhos-legenda {
+  gap: 6px 24px;
+  font-size: 13px;
+}
+.ganhos-cartao-evolucao .ganhos-legenda > span {
+  gap: 8px;
+}
+.ganhos-cartao-evolucao .ganhos-ponto {
+  width: 12px;
+  height: 12px;
+}
+.ganhos-cartao-evolucao .ganhos-grade {
+  stroke-dasharray: 3 4;
+}
+.ganhos-eixo-linha {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+}
+.ganhos-faixa {
+  fill: transparent;
+}
+.ganhos-faixa.ativa {
+  fill: color-mix(in srgb, var(--serie-1) 7%, transparent);
+}
+.ganhos-tooltip .ganhos-ponto {
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
+}
+@media (max-width: 1100px) {
+  .ganhos-plataformas {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ganhos-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 520px) {
+  .ganhos-kpis {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Abas de Estatisticas: uma barra so, com divisoria entre as opcoes. */
+.segmented-abas {
+  gap: 0;
+  padding: 4px;
+  background: var(--surface-2);
+  border-color: var(--border);
+}
+.segmented-abas .segmented-option {
+  min-height: 40px;
+  padding: 8px 28px;
+  font-size: 15px;
+  color: var(--text);
+  position: relative;
+}
+.segmented-abas .segmented-option + .segmented-option::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  border-left: 1px solid var(--border-strong);
+}
+.segmented-abas .segmented-option-active::before,
+.segmented-abas .segmented-option-active + .segmented-option::before {
+  display: none;
+}
+.segmented-abas .segmented-option-active {
+  color: var(--on-espresso);
 }
 
 /* Regras: cards mais estreitos para as cinco regras caberem numa linha só. */

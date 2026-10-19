@@ -29,7 +29,7 @@ function visaoSalva(): Visao {
   host: { class: 'ganhos-pagina' },
   template: `
     <div class="est-barra">
-      <div class="segmented" role="group" aria-label="O que ver">
+      <div class="segmented segmented-abas" role="group" aria-label="O que ver">
         @for (v of visoes; track v.id) {
           <button type="button" class="segmented-option" [class.segmented-option-active]="visao() === v.id"
             [attr.aria-pressed]="visao() === v.id" (click)="escolher(v.id)">{{ v.label }}</button>

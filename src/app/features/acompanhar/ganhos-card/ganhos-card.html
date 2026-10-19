@@ -1,43 +1,71 @@
 <div class="card ganhos-cartao-lojas">
-  <div class="ganhos-lojas-topo">
-    <h2>Ganhos de afiliado</h2>
-    <ul class="ganhos-lojas">
-      @for (l of estadoLojas(); track l.id) {
-        <li [attr.title]="l.ok === false ? l.erro : l.ok ? 'Lido em ' + quando(l.lidoEm) : ''">
-          <span class="ganhos-swatch" aria-hidden="true" [style.background]="l.cor"></span>
-          <span class="ganhos-loja-nome">{{ l.nome }}</span>
-          @if (l.gerado != null) {
-            <b class="ganhos-loja-valor">{{ moeda(l.gerado) }}</b>
-          }
-          @if (l.cliques != null) {
-            <span class="ganhos-cliques-badge">{{ inteiro(l.cliques) }} cliques</span>
-          }
-          @if (l.aguardando) {
-            <span class="hint-text">Aguardando leitura…</span>
-          } @else if (l.ok === false) {
-            <span class="error-text" role="alert">Sessão expirada, reconecte</span>
-          } @else if (l.ok) {
-            <span class="hint-text">lido {{ quando(l.lidoEm) }}</span>
-          } @else {
-            <span class="hint-text">não conectada</span>
-          }
-        </li>
-      }
-    </ul>
+  <div class="ganhos-topo">
+    <div>
+      <h2 class="ganhos-titulo">
+        Ganhos de afiliado
+        <span class="ganhos-info" tabindex="0" role="img" [attr.aria-label]="dicaGanhos" [attr.title]="dicaGanhos">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><path d="M12 7.6v.1"/></svg>
+        </span>
+      </h2>
+      <p class="card-subtitle">Resumo por plataforma {{ rotuloResumo() }}.</p>
+    </div>
     <div class="est-controles">
       <label class="ganhos-mes">
-        Mês
-        <select aria-label="Mês do resumo" (change)="escolherMes($event)">
-          @for (m of mesesDisponiveis(); track m) {
-            <option [value]="m" [selected]="mesEscolhido() === m">{{ nomeMes(m) }}</option>
-          }
-        </select>
+        <span>Mês</span>
+        <span class="ganhos-select">
+          <select aria-label="Mês do resumo" (change)="escolherMes($event)">
+            @for (m of mesesDisponiveis(); track m) {
+              <option [value]="m" [selected]="mesEscolhido() === m">{{ nomeMes(m) }}</option>
+            }
+          </select>
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 9.5 5.5 5.5 5.5-5.5"/></svg>
+        </span>
       </label>
-      <button type="button" class="btn btn-ghost btn-sm" [disabled]="pedindo() || ganhos.lendoAgora()" (click)="atualizar()">
+      <button type="button" class="btn btn-sm ganhos-atualizar" [class.ganhos-atualizar-lendo]="pedindo() || ganhos.lendoAgora()"
+        [disabled]="pedindo() || ganhos.lendoAgora()" (click)="atualizar()">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 3.5V8h4.5"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 20.5V16h-4.5"/></svg>
         {{ pedindo() || ganhos.lendoAgora() ? 'Lendo…' : 'Atualizar agora' }}
       </button>
     </div>
   </div>
+
+  <ul class="ganhos-plataformas">
+    @for (l of estadoLojas(); track l.id) {
+      <li class="ganhos-plataforma" [style.--loja-cor]="l.cor">
+        <span class="ganhos-plataforma-nome"><span class="ganhos-ponto" aria-hidden="true"></span>{{ l.nome }}</span>
+        @if (l.conectada) {
+          <b class="ganhos-plataforma-valor">{{ moeda(l.gerado) }}</b>
+          <span class="ganhos-plataforma-meta">
+            @if (l.cliques != null) {
+              <span class="ganhos-meta-item">
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m9 9 11 4.2-4.6 1.6L13.8 19.5Z"/><path d="M5 3.5 6 6M3.5 9.5 6 9M11 4.5 10 7"/></svg>
+                <b>{{ inteiro(l.cliques) }}</b> cliques
+              </span>
+              <span class="ganhos-meta-sep" aria-hidden="true">•</span>
+            }
+            @if (l.aguardando) {
+              <span class="ganhos-meta-item">Aguardando leitura…</span>
+            } @else if (l.ok === false) {
+              <span class="ganhos-meta-item ganhos-meta-erro" role="alert">Sessão expirada, reconecte</span>
+            } @else {
+              <span class="ganhos-meta-item">
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+                Última leitura: {{ quando(l.lidoEm) }}
+              </span>
+            }
+          </span>
+        } @else {
+          <b class="ganhos-plataforma-valor ganhos-plataforma-off">Não conectada</b>
+          <span class="ganhos-plataforma-meta">
+            <span class="ganhos-meta-item">
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1.2 1.2"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1.2-1.2"/></svg>
+              Integre sua conta para ver os dados.
+            </span>
+          </span>
+        }
+      </li>
+    }
+  </ul>
 
   @if (aviso()) {
     <p class="ok-text">{{ aviso() }}</p>
@@ -50,26 +78,42 @@
   }
 </div>
 
-<div class="stat-strip stat-strip-5">
-  <div class="stat-cell">
-    <span class="stat-cell-label">Cliques {{ rotuloResumo() }}</span>
-    <span class="stat-cell-value">{{ inteiro(resumo().cliques) }}</span>
+<div class="ganhos-kpis">
+  <div class="card ganhos-kpi">
+    <span class="ganhos-kpi-icone" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m9 9 11 4.2-4.6 1.6L13.8 19.5Z"/><path d="M5 3.5 6 6M3.5 9.5 6 9M11 4.5 10 7"/></svg>
+    </span>
+    <div class="ganhos-kpi-texto">
+      <span class="ganhos-kpi-rotulo">Cliques {{ rotuloResumo() }}</span>
+      <span class="ganhos-kpi-valor">{{ inteiro(resumo().cliques) }}</span>
+    </div>
   </div>
-  <div class="stat-cell">
-    <span class="stat-cell-label">Gerado {{ rotuloResumo() }}</span>
-    <span class="stat-cell-value">{{ moeda(resumo().total) }}</span>
+  <div class="card ganhos-kpi">
+    <span class="ganhos-kpi-icone" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3.5h6l-1.6 3.2h-2.8Z"/><path d="M10.6 6.7C6.5 8.4 4.5 12 4.5 15.2c0 3.2 2.6 5.3 7.5 5.3s7.5-2.1 7.5-5.3c0-3.2-2-6.8-6.1-8.5"/><path d="M13.8 11.3c-.4-.6-1.1-.9-1.8-.9-1 0-1.8.6-1.8 1.4 0 1.9 3.6 1.1 3.6 3 0 .8-.8 1.4-1.8 1.4-.8 0-1.5-.3-1.9-.9M12 9.6v.8M12 16.2v.8"/></svg>
+    </span>
+    <div class="ganhos-kpi-texto">
+      <span class="ganhos-kpi-rotulo">Gerado {{ rotuloResumo() }}</span>
+      <span class="ganhos-kpi-valor">{{ moeda(resumo().total) }}</span>
+    </div>
   </div>
-  <div class="stat-cell">
-    <span class="stat-cell-label">Pendente</span>
-    <span class="stat-cell-value">{{ moeda(resumo().pendente) }}</span>
+  <div class="card ganhos-kpi">
+    <span class="ganhos-kpi-icone" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+    </span>
+    <div class="ganhos-kpi-texto">
+      <span class="ganhos-kpi-rotulo">Pendente</span>
+      <span class="ganhos-kpi-valor">{{ moeda(resumo().pendente) }}</span>
+    </div>
   </div>
-  <div class="stat-cell">
-    <span class="stat-cell-label">Aprovado, a receber</span>
-    <span class="stat-cell-value">{{ moeda(resumo().confirmado) }}</span>
-  </div>
-  <div class="stat-cell">
-    <span class="stat-cell-label">Pago</span>
-    <span class="stat-cell-value">{{ moeda(resumo().pago) }}</span>
+  <div class="card ganhos-kpi">
+    <span class="ganhos-kpi-icone ganhos-kpi-icone-ok" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="m8.4 12.2 2.4 2.4 4.8-5"/></svg>
+    </span>
+    <div class="ganhos-kpi-texto">
+      <span class="ganhos-kpi-rotulo">Aprovado / a receber</span>
+      <span class="ganhos-kpi-valor">{{ moeda(resumo().confirmado) }}</span>
+    </div>
   </div>
 </div>
 
@@ -81,7 +125,7 @@
     </div>
     <div class="ganhos-legenda">
       @for (l of lojas; track l.id) {
-        <span><span class="ganhos-swatch" [style.background]="l.cor"></span>{{ l.nome }}</span>
+        <span><span class="ganhos-ponto" [style.--loja-cor]="l.cor"></span>{{ l.nome }}</span>
       }
     </div>
   </div>
@@ -94,26 +138,31 @@
   } @else {
     <div class="ganhos-grafico" #caixaGrafico (mouseleave)="colunaAtiva.set(null)">
       <svg [attr.viewBox]="'0 0 ' + g.largura + ' ' + g.altura" preserveAspectRatio="none" role="group"
-        aria-label="Ganhos por mês, empilhados por loja. Os valores estão na tabela abaixo.">
-        @for (l of grafico().linhasGrade; track l.y) {
-          <line class="ganhos-grade" [attr.x1]="g.esq" [attr.x2]="g.largura - g.dir" [attr.y1]="l.y" [attr.y2]="l.y" />
-          <text class="ganhos-eixo" [attr.x]="g.esq - 8" [attr.y]="l.y + 4" text-anchor="end">{{ l.rotulo }}</text>
-        }
+        aria-label="Ganhos por mês, uma barra por loja. Passe o mouse ou o foco num mês para ver os valores.">
         @for (c of grafico().colunas; track c.mes) {
-          <g class="ganhos-coluna" [class.ativa]="colunaAtiva() === c || mesEscolhido() === c.mes" tabindex="0" role="img"
+          <rect class="ganhos-faixa" [class.ativa]="mesEscolhido() === c.mes"
+            [attr.x]="c.centro - grafico().passo / 2 + 4" [attr.y]="g.topo - 12"
+            [attr.width]="grafico().passo - 8" [attr.height]="g.altura - g.topo - g.base + 12" rx="4" />
+        }
+        @for (l of grafico().linhasGrade; track l.y) {
+          @if (l.y < g.altura - g.base - 1) {
+            <line class="ganhos-grade" [attr.x1]="g.esq" [attr.x2]="g.largura - g.dir" [attr.y1]="l.y" [attr.y2]="l.y" />
+          }
+          <text class="ganhos-eixo" [attr.x]="g.esq - 12" [attr.y]="l.y + 4" text-anchor="end">{{ l.rotulo }}</text>
+        }
+        <line class="ganhos-eixo-linha" [attr.x1]="g.esq" [attr.x2]="g.esq" [attr.y1]="g.topo" [attr.y2]="g.altura - g.base" />
+        <line class="ganhos-eixo-linha" [attr.x1]="g.esq" [attr.x2]="g.largura - g.dir" [attr.y1]="g.altura - g.base" [attr.y2]="g.altura - g.base" />
+        @for (c of grafico().colunas; track c.mes) {
+          <g class="ganhos-coluna" [class.ativa]="colunaAtiva() === c" tabindex="0" role="img"
             [attr.aria-label]="nomeMes(c.mes) + ': ' + moeda(c.total)"
             (mouseenter)="colunaAtiva.set(c)" (focus)="colunaAtiva.set(c)" (blur)="colunaAtiva.set(null)"
             (click)="mesEscolhido.set(c.mes)" (keydown.enter)="mesEscolhido.set(c.mes)">
-            <rect class="ganhos-alvo" [attr.x]="c.x - (grafico().passo - c.largura) / 2" [attr.y]="g.topo"
+            <rect class="ganhos-alvo" [attr.x]="c.centro - grafico().passo / 2" [attr.y]="g.topo"
               [attr.width]="grafico().passo" [attr.height]="g.altura - g.topo - g.base" />
-            @for (s of c.segmentos; track s.loja) {
-              @if (s.d) {
-                <path [attr.d]="s.d" [attr.fill]="s.cor" />
-              } @else {
-                <rect [attr.x]="c.x" [attr.y]="s.y" [attr.width]="c.largura" [attr.height]="s.altura" [attr.fill]="s.cor" />
-              }
+            @for (b of c.barras; track b.loja) {
+              <path [attr.d]="b.d" [attr.fill]="b.cor" />
             }
-            <text class="ganhos-eixo" [attr.x]="c.x + c.largura / 2" [attr.y]="g.altura - 8" text-anchor="middle">
+            <text class="ganhos-eixo" [attr.x]="c.centro" [attr.y]="g.altura - 6" text-anchor="middle">
               {{ c.rotulo }}
             </text>
           </g>
@@ -131,7 +180,7 @@
           <strong>{{ nomeMes(c.mes) }}</strong>
           @for (p of c.porLoja; track p.nome) {
             <span class="ganhos-tooltip-linha">
-              <span class="ganhos-swatch" [style.background]="p.cor"></span>
+              <span class="ganhos-ponto" [style.--loja-cor]="p.cor"></span>
               {{ p.nome }}
               <b>{{ moeda(p.valor) }}</b>
             </span>

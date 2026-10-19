@@ -10,27 +10,26 @@ const LOJAS: { id: Loja; nome: string; cor: string }[] = [
 const NOME_MES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 const MESES_NO_GRAFICO = 12;
 
-const G = { largura: 720, altura: 220, esq: 56, dir: 8, topo: 22, base: 26 };
+const G = { largura: 720, altura: 220, esq: 64, dir: 8, topo: 22, base: 28 };
 // O grafico ocupa a caixa que a tela der, desenhado no tamanho real dela (1 unidade = 1 px): o
 // texto e as barras ficam do tamanho de sempre, so o espaco muda.
 const MIN_LARGURA = 520;
 const MIN_ALTURA = 140;
 
-interface Segmento {
+// Cada mes tem uma barra por loja, lado a lado. Loja sem ganho no mes fica com um traco no
+// chao, para a sequencia de cores continuar legivel.
+interface Barra {
   loja: Loja;
   cor: string;
-  y: number;
-  altura: number;
-  d: string | null;
+  d: string;
 }
 
 interface Coluna {
   mes: string;
   rotulo: string;
-  x: number;
-  largura: number;
+  centro: number;
   total: number | null;
-  segmentos: Segmento[];
+  barras: Barra[];
   porLoja: { nome: string; cor: string; valor: number | null }[];
 }
 
@@ -77,6 +76,8 @@ function tetoRedondo(max: number): number {
 export class GanhosCard implements OnInit, OnDestroy {
   protected ganhos = inject(GanhosService);
   protected readonly lojas = LOJAS;
+  protected readonly dicaGanhos =
+    'Valores lidos dos painéis de afiliado de cada loja. O robô lê de tempos em tempos; "Atualizar agora" pede uma leitura na hora.';
   private readonly tamanho = signal<{ w: number; h: number } | null>(null);
   private readonly geometria = computed(() => {
     const t = this.tamanho();
@@ -138,6 +139,8 @@ export class GanhosCard implements OnInit, OnDestroy {
         erro: r?.erro ?? null,
         lidoEm: r?.lidoEm ?? null,
         aguardando: !!(r?.pedidoEm && (!r.lidoEm || r.pedidoEm > r.lidoEm)),
+        // Sem nenhuma leitura e sem ganho no mes: a loja ainda nao foi integrada.
+        conectada: !!r || this.valorDe(mes, l.id) != null,
         cliques: this.valorDe(mes, l.id)?.cliques ?? null,
         gerado: totalDe(this.valorDe(mes, l.id)),
       };
@@ -153,35 +156,30 @@ export class GanhosCard implements OnInit, OnDestroy {
     const areaL = G.largura - G.esq - G.dir;
     const areaA = G.altura - G.topo - G.base;
     const passo = areaL / meses.length;
-    const larguraBarra = Math.min(36, passo * 0.62);
-    const yDe = (v: number) => G.topo + areaA - (v / teto) * areaA;
+    const vao = 3;
+    const larguraBarra = Math.max(4, Math.min(14, (passo * 0.5 - vao * (LOJAS.length - 1)) / LOJAS.length));
+    const grupo = larguraBarra * LOJAS.length + vao * (LOJAS.length - 1);
+    const chao = G.topo + areaA;
+    const yDe = (v: number) => chao - (v / teto) * areaA;
 
     const colunas: Coluna[] = meses.map((mes, i) => {
-      const x = G.esq + passo * i + (passo - larguraBarra) / 2;
-      let acumulado = 0;
-      const segmentos: Segmento[] = [];
+      const centro = G.esq + passo * i + passo / 2;
       const porLoja = LOJAS.map((l) => ({ nome: l.nome, cor: l.cor, valor: totalDe(this.valorDe(mes, l.id)) }));
-      LOJAS.forEach((l, k) => {
+      const barras: Barra[] = LOJAS.map((l, k) => {
+        const x = centro - grupo / 2 + k * (larguraBarra + vao);
         const v = porLoja[k].valor;
-        if (!v || v <= 0) return;
-        const yBase = yDe(acumulado);
-        acumulado += v;
-        const yTopo = yDe(acumulado);
-        const altura = Math.max(1, yBase - yTopo - (segmentos.length ? 2 : 0));
-        segmentos.push({ loja: l.id, cor: l.cor, y: yBase - (segmentos.length ? 2 : 0) - altura, altura, d: null });
-      });
-      const topo = segmentos[segmentos.length - 1];
-      if (topo) {
-        const r = Math.min(4, topo.altura / 2, larguraBarra / 2);
-        const { y, altura } = topo;
+        const altura = Math.max(2, v && v > 0 ? chao - yDe(v) : 0);
+        const y = chao - altura;
+        const r = Math.min(3, altura / 2, larguraBarra / 2);
         const x2 = x + larguraBarra;
-        topo.d =
-          `M${x},${y + altura} V${y + r} Q${x},${y} ${x + r},${y} ` +
-          `H${x2 - r} Q${x2},${y} ${x2},${y + r} V${y + altura} Z`;
-      }
+        const d =
+          `M${x},${chao} V${y + r} Q${x},${y} ${x + r},${y} ` +
+          `H${x2 - r} Q${x2},${y} ${x2},${y + r} V${chao} Z`;
+        return { loja: l.id, cor: l.cor, d };
+      });
       const [a, m] = mes.split('-').map(Number);
       const rotulo = m === 1 || i === 0 ? `${NOME_MES[m - 1]}/${String(a).slice(2)}` : NOME_MES[m - 1];
-      return { mes, rotulo, x, largura: larguraBarra, total: totais[i], segmentos, porLoja };
+      return { mes, rotulo, centro, total: totais[i], barras, porLoja };
     });
 
     const linhasGrade = [0, 0.5, 1].map((f) => ({ y: yDe(teto * f), rotulo: this.moedaCurta(teto * f) }));
@@ -273,6 +271,6 @@ export class GanhosCard implements OnInit, OnDestroy {
   }
 
   protected tooltipEsquerda(c: Coluna): number {
-    return ((c.x + c.largura / 2) / this.g.largura) * 100;
+    return (c.centro / this.g.largura) * 100;
   }
 }
