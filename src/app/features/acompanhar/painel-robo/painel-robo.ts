@@ -1,7 +1,6 @@
 import { Component, DestroyRef, ElementRef, HostListener, computed, inject, output, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import {
-  AcaoPainel,
   AlvoGrupos,
   EstadoEtapa,
   EtapaPainelId,
@@ -29,17 +28,8 @@ interface EtapaVista {
   loja: string | null;
 }
 
-interface AcaoVista {
-  hora: string;
-  icone: Icone;
-  texto: string;
-  selo: string;
-  tom: Tom;
-}
-
 const NOME_LOJA: Record<string, string> = { mercadolivre: 'Mercado Livre', amazon: 'Amazon', shopee: 'Shopee' };
 const ORDEM: EtapaPainelId[] = ['buscando', 'origem', 'preparando', 'postando', 'concluido'];
-const MAX_ACOES_COMPACTO = 20;
 
 const BASE: Record<EtapaPainelId, { titulo: string; sub: string; icone: Icone }> = {
   buscando: { titulo: 'Buscando produto', sub: 'Procurando promoções', icone: 'busca' },
@@ -67,9 +57,9 @@ function duracao(ms: number): string {
  * O Painel para quem não quer ler log, cabendo numa tela só: estado do robô e
  * controles numa linha, a pipeline do produto da vez (Buscando → Origem →
  * Preparando → Postando → Concluído, com a loja na Origem e os canais no
- * Postando) e as últimas ações em frases curtas. Os números do dia ficam num
+ * Postando) e os grupos da fila. Os números do dia ficam num
  * modal. Tudo sai do estado estruturado que o robô manda (evento "painel"); o
- * log cru continua no "Ver logs detalhados".
+ * log cru fica no botão "Logs" do topo.
  */
 @Component({
   selector: 'app-painel-robo',
@@ -79,7 +69,6 @@ function duracao(ms: number): string {
 })
 export class PainelRobo {
   verProdutos = output<void>();
-  verLogs = output<void>();
 
   protected runControl = inject(RunControlService);
   protected jobs = inject(JobsService);
@@ -282,63 +271,6 @@ export class PainelRobo {
     if (!d.telegram) return 'Telegram: nenhum canal ligado';
     return `Telegram: ${d.telegram} ${d.telegram === 1 ? 'canal ativo' : 'canais ativos'}`;
   });
-
-  // ---- Últimas ações ----
-
-  protected readonly acoes = computed<AcaoVista[]>(() => {
-    const lista = this.painel()?.acoes ?? [];
-    const out: AcaoVista[] = [];
-    lista.forEach((a, i) => {
-      const ultima = i === lista.length - 1 && this.runControl.postandoAgora();
-      out.push(...this.traduzir(a, ultima));
-    });
-    return out.reverse().slice(0, MAX_ACOES_COMPACTO);
-  });
-
-  private traduzir(a: AcaoPainel, ultima: boolean): AcaoVista[] {
-    const hora = hhmm(a.em);
-    const linha = (icone: Icone, texto: string, selo: string, tom: Tom): AcaoVista => ({ hora, icone, texto, selo, tom });
-    const grupoNome = typeof a.grupo === 'string' ? a.grupo : a.grupo?.nome;
-    switch (a.tipo) {
-      case 'rodada':
-        return [linha('busca', grupoNome ? `Buscando produto para "${grupoNome}"` : 'Buscando produto…', ultima ? 'Em andamento' : 'Feito', ultima ? 'andamento' : 'neutro')];
-      case 'produto': {
-        const loja = NOME_LOJA[a.loja ?? ''] ?? 'loja';
-        return [
-          linha('sacola', `${a.produto ? 'Produto encontrado: ' + this.curto(a.produto) : 'Produto encontrado'} (${loja})`, 'Encontrado', 'achado'),
-          linha('doc', 'Link e mensagem prontos', 'Concluído', 'ok'),
-        ];
-      }
-      case 'semProduto': {
-        const txt = {
-          catalogoVazio: 'Ainda sem produtos — garimpando as primeiras ofertas',
-          nenhumLiberado: 'Nenhum produto liberado agora',
-          cedeu: grupoNome ? `"${grupoNome}" sem produto agora — vez do próximo grupo` : 'Vez do próximo grupo',
-          repetido: grupoNome ? `"${grupoNome}" só tem assunto repetido agora` : 'Só assunto repetido agora',
-        }[a.motivo ?? ''] ?? 'Nada para postar agora';
-        if (a.motivo === 'foraDoHorario') {
-          return [linha('relogio', `Fora do horário — garimpando${a.ate ? `, posta de novo às ${hhmm(a.ate)}` : ''}`, 'Fora do horário', 'espera')];
-        }
-        return [linha('relogio', a.ate ? `${txt} — nova busca às ${hhmm(a.ate)}` : txt, 'Aguardando', 'espera')];
-      }
-      case 'aguardando':
-        return [linha('relogio', `Postagem agendada para ${hhmm(a.ate)}`, 'Agendado', 'espera')];
-      case 'postando':
-        return [linha('grupos', 'Postando produto nos grupos…', ultima ? 'Em andamento' : 'Feito', ultima ? 'andamento' : 'neutro')];
-      case 'enviado': {
-        const canal = a.canal === 'telegram' ? 'Telegram' : 'WhatsApp';
-        return [linha('envio', `Enviado para ${a.destino ? `"${a.destino}"` : 'o grupo'} (${canal})`, 'Concluído', 'ok')];
-      }
-      case 'concluido':
-        return [linha('check', a.produto ? `Publicado: ${this.curto(a.produto)}` : 'Produto publicado', 'Sucesso', 'ok')];
-      case 'falhou': {
-        const onde = a.etapa === 'telegram' ? 'Não saiu no Telegram' : a.etapa === 'postando' ? 'A postagem não saiu' : 'A busca falhou';
-        return [linha('alerta', a.motivo ? `${onde}: ${this.curto(a.motivo)}` : onde, 'Erro', 'erro')];
-      }
-      default:
-        return [];
-    }
-  }
 
   // ---- Estatísticas de hoje ----
 

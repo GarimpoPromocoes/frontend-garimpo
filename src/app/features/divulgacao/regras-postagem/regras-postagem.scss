@@ -152,3 +152,27 @@
 .modal-grupo.modal-copy {
   width: min(860px, 100%);
 }
+
+/* Mensagens de divulgação (até 3): cada uma com o seu rótulo e o "Remover". */
+.div-mensagem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+.div-mensagem-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 32px;
+}
+.div-mensagem-adicionar {
+  align-self: flex-start;
+  margin-top: 8px;
+}
+.div-previas {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

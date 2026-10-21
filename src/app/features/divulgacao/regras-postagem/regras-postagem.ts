@@ -6,6 +6,9 @@ import { DatasEspeciais } from '../datas-especiais/datas-especiais';
 import { HORARIO_PADRAO, dentroDoHorario, duracaoJanela, horaValida, passaDaMeiaNoite } from './horario';
 import { COPY_MAX, COPY_PADRAO, EXEMPLO_COM_CUPOM, EXEMPLO_SEM_CUPOM, VARIAVEIS_COPY, aplicarModelo, formatarWhatsApp } from './copy';
 
+/** Quantas mensagens de divulgação diferentes dá pra cadastrar (o robô alterna entre elas). */
+const MAX_DIVULGACOES = 3;
+
 type Janela = 'frequencia' | 'repeticao' | 'cupons' | 'divulgacao' | 'alerta' | 'horario' | 'copy';
 
 interface Ritmo {
@@ -155,6 +158,7 @@ export class RegrasPostagem {
     return {
       ativo: d?.ativo ?? false,
       texto: d?.texto ?? '',
+      textos: d?.textos?.length ? d.textos : d?.texto ? [d.texto] : [],
       link: d?.link ?? '',
       maxPorDia: d?.maxPorDia ?? 1,
     };
@@ -212,7 +216,9 @@ export class RegrasPostagem {
   protected readonly rProdutoCupom = computed(() => Number(this.rCorte2()) - Number(this.rCorte1()));
   protected readonly rProdutoSem = computed(() => 100 - Number(this.rCorte2()));
   protected readonly rDivAtivo = signal(false);
-  protected readonly rDivTexto = signal('');
+  /** Até MAX_DIVULGACOES mensagens; o robô alterna entre elas. */
+  protected readonly rDivTextos = signal<string[]>(['']);
+  protected readonly maxDivulgacoes = MAX_DIVULGACOES;
   protected readonly rDivLink = signal('');
   protected readonly rDivMax = signal(1);
   protected readonly rAlertaAtivo = signal(false);
@@ -233,16 +239,33 @@ export class RegrasPostagem {
     formatarWhatsApp(aplicarModelo(this.rCopy().trim() ? this.rCopy() : COPY_PADRAO, this.rCopyComCupom() ? EXEMPLO_COM_CUPOM : EXEMPLO_SEM_CUPOM)),
   );
 
-  /** Previa de como a mensagem sai no grupo (mesma regra do backend). */
-  protected readonly rDivPreview = computed(() => {
-    const t = (this.rDivTexto() || '').trim();
+  /** Previa de como cada mensagem sai no grupo (mesma regra do backend). */
+  protected readonly rDivPreviews = computed(() => {
     const l = (this.rDivLink() || '').trim();
-    if (!t && !l) return '';
-    if (!l) return t;
-    if (t.includes('{link}')) return t.split('{link}').join(l);
-    if (t.includes('[LINK DOS GRUPOS]')) return t.split('[LINK DOS GRUPOS]').join(l);
-    return t ? `${t}\n\n🔗 ${l}` : l;
+    // Mensagem em branco não é salva; só o link sozinho quando nenhuma foi escrita.
+    const escritos = this.rDivTextos().map((t) => (t || '').trim()).filter(Boolean);
+    return (escritos.length ? escritos : [''])
+      .map((t) => {
+        if (!t && !l) return '';
+        if (!l) return t;
+        if (t.includes('{link}')) return t.split('{link}').join(l);
+        if (t.includes('[LINK DOS GRUPOS]')) return t.split('[LINK DOS GRUPOS]').join(l);
+        return t ? `${t}\n\n🔗 ${l}` : l;
+      })
+      .filter(Boolean);
   });
+
+  protected mudarDivTexto(i: number, texto: string): void {
+    this.rDivTextos.update((lista) => lista.map((t, k) => (k === i ? texto : t)));
+  }
+
+  protected adicionarDivTexto(): void {
+    this.rDivTextos.update((lista) => (lista.length < MAX_DIVULGACOES ? [...lista, ''] : lista));
+  }
+
+  protected removerDivTexto(i: number): void {
+    this.rDivTextos.update((lista) => (lista.length > 1 ? lista.filter((_, k) => k !== i) : lista));
+  }
 
   protected readonly rPorDia = computed(() => postsPorDia(Number(this.rMin()), Number(this.rMax())));
   protected readonly rGarimpoMax = computed(() => garimpoMaxPorDia(Number(this.rMin()), Number(this.rMax())));
@@ -276,7 +299,7 @@ export class RegrasPostagem {
     this.rCorte2.set(Math.min(100, soCupom + (c?.percentualProduto ?? 15)));
     const d = this.divulgacao();
     this.rDivAtivo.set(d.ativo);
-    this.rDivTexto.set(d.texto);
+    this.rDivTextos.set(d.textos.length ? [...d.textos] : ['']);
     this.rDivLink.set(d.link);
     this.rDivMax.set(d.maxPorDia === 2 ? 2 : 1);
     const al = this.alerta();
@@ -375,14 +398,15 @@ export class RegrasPostagem {
       }
       partial = { postagem: { cooldownHoras: cooldown, repostarAposDias: repostar } };
     } else if (j === 'divulgacao') {
-      const texto = (this.rDivTexto() || '').trim();
+      // Mensagem em branco não conta: some da lista ao salvar.
+      const textos = this.rDivTextos().map((t) => (t || '').trim()).filter(Boolean).slice(0, MAX_DIVULGACOES);
       const link = (this.rDivLink() || '').trim();
       const max = Number(this.rDivMax()) === 2 ? 2 : 1;
-      if (this.rDivAtivo() && !texto && !link) {
+      if (this.rDivAtivo() && !textos.length && !link) {
         this.erro.set('Escreva a mensagem ou informe o link antes de ativar a divulgação.');
         return;
       }
-      partial = { divulgacao: { ativo: this.rDivAtivo(), texto, link, maxPorDia: max } };
+      partial = { divulgacao: { ativo: this.rDivAtivo(), texto: textos[0] ?? '', textos, link, maxPorDia: max } };
     } else if (j === 'horario') {
       const inicio = (this.rHorInicio() || '').trim();
       const fim = (this.rHorFim() || '').trim();

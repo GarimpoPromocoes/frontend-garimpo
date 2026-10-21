@@ -2542,6 +2542,59 @@ body:has(.modal-fundo) .bot-control-fixo {
   animation: pulse-dot 1.6s ease-in-out infinite;
 }
 
+/* ---- Botões do topo que abrem janelas (Oferta personalizada, Logs) ---- */
+.topbar-botao {
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-soft);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s,
+    color 0.15s;
+}
+.topbar-botao svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.topbar-botao:hover,
+.topbar-botao-aberto {
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+  color: var(--text);
+}
+.topbar-botao:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+/* Tela estreita: só o ícone, redondo como o sino. */
+@media (max-width: 1100px) {
+  .topbar-botao {
+    width: 38px;
+    padding: 0;
+    justify-content: center;
+  }
+  .topbar-botao-texto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
 /* ---- Sino de avisos (topo, canto direito) ---- */
 app-sino {
   position: relative;
@@ -3570,6 +3623,21 @@ app-status-conexoes {
   max-height: min(70vh, 620px);
 }
 
+/* Oferta personalizada dentro do modal do topo: a busca preenche a janela inteira. */
+.modal-busca {
+  padding: 20px 22px;
+  position: relative;
+}
+.modal-busca app-busca-card > .busca-pagina > .card:first-child {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  box-shadow: none;
+}
+.modal-busca .card-header {
+  padding-right: 44px;
+}
+
 /* Produtos garimpados dentro do modal do painel: o card perde a moldura, o modal já é a caixa. */
 .modal-produtos {
   padding: 20px 22px;
@@ -3784,8 +3852,7 @@ app-status-conexoes {
 
 /* ---- Painel: a visão para quem não lê log ----
    Cabe numa tela só: uma linha com estado + números + controles, a pipeline
-   do produto da vez (loja na Origem, canais no Postando) e as últimas ações
-   ocupando o que sobra, rolando por dentro. Os números do dia ficam no modal
+   do produto da vez (loja na Origem, canais no Postando). Os números do dia ficam no modal
    do ícone de gráfico. O amarelo só acende no que está acontecendo agora. */
 app-painel-robo {
   flex: 1;
@@ -4197,84 +4264,6 @@ app-painel-robo {
   }
 }
 
-/* Últimas ações: pega a altura que sobra e rola por dentro. */
-.pv-acoes {
-  flex: 1;
-  min-height: 0;
-  gap: 12px;
-  padding: 18px 22px 8px;
-}
-.pv-acoes .card-header {
-  align-items: center;
-}
-.pv-acoes .est-cartao-icone {
-  width: 52px;
-  height: 52px;
-  color: var(--gold-deep);
-}
-.pv-logs {
-  min-height: 42px;
-  font-weight: 600;
-}
-.pv-logs svg {
-  width: 17px;
-  height: 17px;
-}
-.pv-lista {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-}
-.pv-acao {
-  display: grid;
-  grid-template-columns: 56px 26px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 14px;
-  padding: 8px 0;
-  border-top: 1px solid var(--border);
-  font-size: 15px;
-}
-.pv-acao:first-child {
-  border-top: none;
-}
-.pv-acao-hora {
-  color: var(--text-muted);
-  font-size: 14px;
-  font-variant-numeric: tabular-nums;
-}
-.pv-acao-icone {
-  display: grid;
-  place-items: center;
-  color: var(--text-soft);
-}
-.pv-acao-icone svg {
-  width: 18px;
-  height: 18px;
-}
-.pv-acao[data-tom='ok'] .pv-acao-icone {
-  color: var(--ok);
-}
-.pv-acao[data-tom='erro'] .pv-acao-icone {
-  color: var(--danger);
-}
-.pv-acao[data-tom='achado'] .pv-acao-icone,
-.pv-acao[data-tom='andamento'] .pv-acao-icone {
-  color: var(--gold-deep);
-}
-/* O envio e os grupos ficam na cor do texto mesmo quando deram certo: o verde fica pro publicado. */
-.pv-acao[data-icone='envio'] .pv-acao-icone,
-.pv-acao[data-icone='grupos'] .pv-acao-icone {
-  color: var(--text);
-}
-.pv-acao-texto {
-  color: var(--text);
-  overflow-wrap: anywhere;
-}
 .pv-selo {
   display: inline-flex;
   align-items: center;
@@ -4610,12 +4599,6 @@ a.gf-item-titulo:hover {
   app-painel-robo {
     flex: none;
   }
-  .pv-acoes {
-    flex: none;
-  }
-  .pv-lista {
-    overflow: visible;
-  }
   .pv-etapas {
     grid-template-columns: minmax(0, 1fr);
     gap: 6px;
@@ -4669,13 +4652,6 @@ a.gf-item-titulo:hover {
   }
   .pv-tiles {
     grid-template-columns: minmax(0, 1fr);
-  }
-  .pv-acao {
-    grid-template-columns: 40px 20px minmax(0, 1fr);
-  }
-  .pv-acao .pv-selo {
-    grid-column: 3;
-    justify-self: start;
   }
 }
 @media (max-width: 460px) {

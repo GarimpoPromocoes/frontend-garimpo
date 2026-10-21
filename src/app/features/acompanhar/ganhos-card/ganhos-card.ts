@@ -77,7 +77,7 @@ export class GanhosCard implements OnInit, OnDestroy {
   protected ganhos = inject(GanhosService);
   protected readonly lojas = LOJAS;
   protected readonly dicaGanhos =
-    'Valores lidos dos painéis de afiliado de cada loja. O robô lê de tempos em tempos; "Atualizar agora" pede uma leitura na hora.';
+    'Valores lidos dos painéis de afiliado de cada loja. O robô lê de tempos em tempos; "Atualizar agora", no alto da tela, pede uma leitura na hora.';
   private readonly tamanho = signal<{ w: number; h: number } | null>(null);
   private readonly geometria = computed(() => {
     const t = this.tamanho();
@@ -90,13 +90,9 @@ export class GanhosCard implements OnInit, OnDestroy {
   }
   private readonly caixaGrafico = viewChild<ElementRef<HTMLElement>>('caixaGrafico');
   private observador: ResizeObserver | null = null;
-  protected readonly pedindo = signal(false);
-  protected readonly aviso = signal<string | null>(null);
-  protected readonly erroAcao = signal<string | null>(null);
   protected readonly colunaAtiva = signal<Coluna | null>(null);
   // Mes do resumo de cima (o atual, ou o que a pessoa escolheu na lista ou clicando na barra).
   protected readonly mesEscolhido = signal(mesAtual());
-  private timer: ReturnType<typeof setInterval> | null = null;
 
   private porChave = computed(() => {
     const m = new Map<string, GanhoMes>();
@@ -204,36 +200,12 @@ export class GanhosCard implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // O "Atualizar agora" e o acompanhamento da leitura ficam na barra de Estatísticas.
     void this.ganhos.carregar();
-    // So enquanto tem leitura em curso: cada loja aparece assim que termina.
-    this.timer = setInterval(() => {
-      if (this.ganhos.lendoAgora() || this.estadoLojas().some((l) => l.aguardando)) void this.ganhos.carregar();
-    }, 3000);
   }
 
   ngOnDestroy(): void {
     this.observador?.disconnect();
-    if (this.timer) clearInterval(this.timer);
-  }
-
-  protected async atualizar(): Promise<void> {
-    this.pedindo.set(true);
-    this.aviso.set(null);
-    this.erroAcao.set(null);
-    const r = await this.ganhos.atualizar();
-    this.pedindo.set(false);
-    if (!r.ok) {
-      this.erroAcao.set(r.erro ?? null);
-      return;
-    }
-    // Leitura direta: o botão em "Lendo…" e cada loja aparecendo já contam o que está acontecendo.
-    this.aviso.set(
-      r.modo === 'robo-ligado'
-        ? 'Pedido feito. O robô começa a ler em poucos segundos, sem parar de postar. Cada loja aparece aqui assim que terminar.'
-        : r.modo === 'na-fila'
-          ? 'Pedido registrado. A leitura acontece assim que o robô for ligado.'
-          : null
-    );
   }
 
   protected inteiro(v: number | null | undefined): string {

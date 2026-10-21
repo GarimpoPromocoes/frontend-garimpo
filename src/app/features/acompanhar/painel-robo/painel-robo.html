@@ -152,48 +152,6 @@
 <!-- 3. Os grupos marcados para postar: clicar abre a lista de cada um, com o status de cada produto. -->
 <app-grupos-fila [grupoDaVez]="grupoDaVez()" />
 
-<!-- 4. O que ele fez por último. Ocupa o resto da tela e rola por dentro. -->
-<section class="card pv-acoes" aria-labelledby="pv-acoes-titulo">
-  <div class="card-header">
-    <div class="est-cartao-topo">
-      <span class="ganhos-kpi-icone est-cartao-icone" aria-hidden="true"><ng-container *ngTemplateOutlet="icone; context: { $implicit: 'doc' }" /></span>
-      <div>
-        <h2 id="pv-acoes-titulo">Últimas ações</h2>
-        <p class="card-subtitle">Acompanhe em tempo real tudo o que o robô está fazendo.</p>
-      </div>
-    </div>
-    <button type="button" class="btn btn-ghost btn-sm pv-logs" (click)="verLogs.emit()">
-      Ver logs detalhados
-      <ng-container *ngTemplateOutlet="icone; context: { $implicit: 'externo' }" />
-    </button>
-  </div>
-  @if (jobs.desafioMl()) {
-    <div class="espera-faixa">
-      <span class="espera-faixa-logo"><img src="lojas/mercadolivre.svg" alt="" /></span>
-      <div class="espera-faixa-texto">
-        <strong>Mercado Livre em espera</strong>
-        <span>Ele pediu uma verificação de segurança. As outras lojas seguem postando.</span>
-      </div>
-      <button type="button" class="btn btn-ghost btn-sm" (click)="jobs.desafioPopupAberto.set(true)">Resolver</button>
-    </div>
-  }
-  <ul class="pv-lista" role="log" aria-label="Últimas ações do robô">
-    @for (a of acoes(); track $index) {
-      <li class="pv-acao" [attr.data-tom]="a.tom" [attr.data-icone]="a.icone">
-        <span class="pv-acao-hora">{{ a.hora }}</span>
-        <span class="pv-acao-icone"><ng-container *ngTemplateOutlet="icone; context: { $implicit: a.icone }" /></span>
-        <span class="pv-acao-texto">{{ a.texto }}</span>
-        <span class="pv-selo" [attr.data-tom]="a.tom">{{ a.selo }}</span>
-      </li>
-    } @empty {
-      <li class="empty-state">
-        <span class="empty-state-title">Nada por aqui ainda</span>
-        <span class="empty-state-text">Ligue o robô para acompanhar cada produto, do achado até a postagem.</span>
-      </li>
-    }
-  </ul>
-</section>
-
 <!-- Estatísticas de hoje: abrem pelo ícone de gráfico no cabeçalho. -->
 @if (statsAbertas()) {
   <div class="modal-fundo" (click)="statsAbertas.set(false)">
