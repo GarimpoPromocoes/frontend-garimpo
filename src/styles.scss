@@ -4623,6 +4623,57 @@ a.gf-item-titulo:hover {
   margin-left: 4px;
 }
 
+/* Tela de computador: o Painel ocupa a altura inteira. Os números, o fluxo e os grupos dividem o
+   espaço (os grupos ficam com a maior parte) e cada cartão cresce junto, em vez de sobrar um vazio
+   embaixo. Com muitos grupos, a lista rola por dentro. Em tela baixa ou estreita a página rola
+   normalmente. */
+@media (min-width: 1001px) and (min-height: 640px) {
+  .content-painel app-painel-robo {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-rows: minmax(min-content, 0.75fr) minmax(min-content, 1fr) minmax(160px, 1.35fr);
+  }
+  .content-painel .pn-kpis {
+    min-height: 0;
+  }
+  .content-painel .pn-kpi {
+    min-height: 0;
+    height: 100%;
+  }
+  .content-painel .pv-pipeline {
+    min-height: 0;
+  }
+  .content-painel .pv-etapas {
+    flex: 1;
+    min-height: 0;
+  }
+  .content-painel .pv-etapa {
+    justify-content: center;
+  }
+  .content-painel .gf {
+    min-height: 0;
+  }
+  .content-painel .gf-cartoes {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    grid-auto-rows: minmax(140px, 1fr);
+    padding: 2px;
+    margin: -2px;
+  }
+  .content-painel .gf-cartao {
+    justify-content: space-between;
+  }
+  .content-painel .gf > .hint-text {
+    flex: 1;
+    display: grid;
+    place-items: center;
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius);
+  }
+}
+
 /* Telas estreitas: os cartões passam pra duas colunas, depois pra uma. */
 @media (max-width: 1280px) {
   .pn-kpis {
@@ -5682,4 +5733,561 @@ app-postagens-card {
 }
 .ganhos-grafico .ganhos-grade.est-zero {
   stroke: var(--border-strong);
+}
+
+/* ---- Regras de postagem ----
+   Cartões com cabeçalho (ícone, título e explicação) e as regras lado a lado, separadas por uma
+   linha fina. Cada regra é um botão: clicar abre a janela dela. */
+app-regras-postagem,
+app-datas-especiais {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+.rg-card {
+  gap: 16px;
+  padding: 22px 24px;
+}
+.rg-cabeca {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.rg-cabeca-icone {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--gold-soft);
+  color: var(--gold-deep);
+}
+.rg-cabeca-icone svg {
+  width: 26px;
+  height: 26px;
+}
+.rg-cabeca-texto {
+  flex: 1;
+  min-width: 200px;
+}
+.rg-cabeca-texto h2 {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 800;
+  font-stretch: var(--estreita);
+}
+.rg-cabeca-texto p {
+  margin: 2px 0 0;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+.rg-cabeca-acoes {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.rg-cabeca-acoes .btn svg {
+  width: 16px;
+  height: 16px;
+}
+.rg-alternar {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-soft);
+}
+
+.rg-itens {
+  display: grid;
+  border-top: 1px solid var(--border);
+}
+.rg-itens-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.rg-itens-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.rg-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+  padding: 18px 20px 16px;
+  text-align: left;
+  font: inherit;
+  color: var(--text);
+  background: transparent;
+  border: 0;
+  border-left: 1px solid var(--border);
+  border-radius: 0;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+.rg-item:first-child {
+  border-left: 0;
+}
+.rg-item:hover {
+  background: var(--surface-2);
+}
+.rg-item:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+.rg-item-rotulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-soft);
+}
+.rg-item-rotulo svg {
+  width: 20px;
+  height: 20px;
+  color: var(--gold-deep);
+  flex-shrink: 0;
+}
+.rg-item-valor {
+  font-size: 28px;
+  font-weight: 800;
+  font-stretch: var(--estreita);
+  line-height: 1.15;
+  color: var(--text);
+}
+.rg-item-valor small {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-soft);
+}
+.rg-item-off .rg-item-valor {
+  color: var(--text-muted);
+}
+.rg-item-sub {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+.rg-barra {
+  width: 100%;
+  max-width: 220px;
+}
+.rg-copy-mini {
+  display: block;
+  width: 100%;
+  max-height: 64px;
+}
+/* "Editar" aparece no canto da regra ao passar o mouse (no toque, fica sempre à vista). */
+.rg-item-editar {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-soft);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.rg-item-editar svg {
+  width: 14px;
+  height: 14px;
+}
+.rg-item:hover .rg-item-editar,
+.rg-item:focus-visible .rg-item-editar {
+  opacity: 1;
+}
+@media (hover: none) {
+  .rg-item-editar {
+    opacity: 1;
+  }
+}
+.rg-selo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--ok-border);
+  background: var(--ok-soft);
+  color: var(--ok);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.rg-selo i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.rg-selo-fora {
+  border-color: var(--border);
+  background: var(--surface-2);
+  color: var(--text-soft);
+}
+
+/* Datas especiais: uma linha por data. */
+.rg-vazio {
+  margin: 0;
+  padding: 18px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.rg-hoje {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 14px;
+}
+.rg-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--border);
+}
+.rg-linha {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto 92px;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 4px;
+  border-bottom: 1px solid var(--border);
+}
+.rg-linha-icone {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--surface-2);
+  color: var(--text-soft);
+}
+.rg-linha-icone svg {
+  width: 21px;
+  height: 21px;
+}
+.rg-linha-icone-ativa,
+.rg-linha-icone-sua {
+  background: var(--gold-soft);
+  color: var(--gold-deep);
+}
+.rg-linha-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.rg-linha-texto strong {
+  font-size: 15px;
+}
+.rg-linha-texto > span:not(.rg-linha-tags) {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.rg-linha-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+.rg-linha-quando {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text-soft);
+  white-space: nowrap;
+}
+.rg-linha-quando small {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.rg-linha-acao {
+  justify-self: end;
+}
+.rg-linha-acao svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Janela de cada regra: cabeçalho e rodapé separados por uma linha, como um formulário. */
+.modal-grupo > .card-header {
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-grupo > .grupo-modal-rodape {
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 1100px) {
+  .rg-itens-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .rg-itens-4 .rg-item:nth-child(3) {
+    border-left: 0;
+  }
+  .rg-itens-4 .rg-item:nth-child(n + 3) {
+    border-top: 1px solid var(--border);
+  }
+}
+@media (max-width: 760px) {
+  .rg-itens-3,
+  .rg-itens-4 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .rg-item {
+    border-left: 0;
+  }
+  .rg-item + .rg-item {
+    border-top: 1px solid var(--border);
+  }
+  .rg-linha {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+  .rg-linha-quando {
+    grid-column: 2;
+    align-items: flex-start;
+  }
+  .rg-linha-acao {
+    grid-column: 2;
+    justify-self: start;
+  }
+  .rg-linha-acao:empty {
+    display: none;
+  }
+}
+
+/* ---- Lojas de afiliado ----
+   Uma frase com a situação geral, um cartão por loja (com o logo dela) em três estados —
+   funcionando, precisa entrar de novo, não conectada — e as que vêm em breve, discretas. */
+app-lojas-card {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-width: 0;
+}
+.lj-resumo {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+}
+.lj-resumo-icone {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+.lj-resumo-icone svg {
+  width: 22px;
+  height: 22px;
+}
+.lj-resumo[data-tom='atencao'] .lj-resumo-icone {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+.lj-resumo-texto {
+  flex: 1;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+}
+.lj-resumo-texto strong {
+  font-size: 16px;
+}
+.lj-resumo-texto span {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+.lj-secao {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.lj-secao-titulo {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 800;
+  font-stretch: var(--estreita);
+}
+.lj-secao-titulo-leve {
+  font-size: 16px;
+  font-weight: 700;
+  font-stretch: normal;
+  color: var(--text-soft);
+}
+.lj-grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+.lj-cartao {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.lj-cartao[data-estado='atencao'] {
+  border: 2px solid var(--gold-border);
+  padding: 19px;
+}
+.lj-cartao[data-estado='off'] {
+  border-style: dashed;
+  border-color: var(--border-strong);
+}
+.lj-topo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+/* Todos os logos na mesma caixa: as marcas têm proporções bem diferentes. */
+.lj-logo {
+  flex-shrink: 0;
+  width: 96px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  padding: 8px;
+  box-sizing: border-box;
+  border-radius: var(--radius-sm);
+  background: var(--logo-placa);
+}
+.lj-logo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.lj-cartao[data-estado='off'] .lj-logo img {
+  filter: grayscale(1);
+  opacity: 0.65;
+}
+.lj-nome {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+}
+.lj-nome strong {
+  font-size: 17px;
+}
+.lj-selo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-soft);
+}
+.lj-selo i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.lj-selo[data-estado='ok'] {
+  border-color: var(--ok-border);
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+.lj-selo[data-estado='atencao'] {
+  border-color: var(--warn-border);
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+.lj-texto {
+  margin: 0;
+  flex: 1;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-soft);
+}
+.lj-acao {
+  width: 100%;
+  min-height: 42px;
+}
+.lj-breve {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.lj-breve-item {
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px 0 10px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--surface-3);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-soft);
+  cursor: pointer;
+}
+.lj-breve-item img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  border-radius: 6px;
+  filter: grayscale(1);
+  opacity: 0.75;
+}
+.lj-breve-item:hover img {
+  filter: none;
+  opacity: 1;
+}
+.lj-breve-item:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.lj-duvida {
+  padding: 16px 20px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  font-size: 14px;
+  color: var(--text-soft);
+}
+.lj-duvida summary {
+  font-weight: 700;
+  color: var(--text);
+  cursor: pointer;
+}
+.lj-duvida p {
+  margin: 10px 0 0;
+  line-height: 1.5;
 }

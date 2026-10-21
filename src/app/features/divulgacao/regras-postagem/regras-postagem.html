@@ -1,218 +1,147 @@
-<p class="grupos-intro">
-  Como e quando o robô publica nos grupos. Clique num card para ajustar — salvar na janela já grava.
-</p>
+<!-- Visão geral: dois cartões com as regras lado a lado. Clicar numa regra abre a janela dela
+     (salvar na janela já grava, como antes). -->
+<section class="card rg-card" aria-labelledby="rg-principais-titulo">
+  <div class="rg-cabeca">
+    <span class="rg-cabeca-icone" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>
+    </span>
+    <div class="rg-cabeca-texto">
+      <h2 id="rg-principais-titulo">Configurações principais</h2>
+      <p>Quando e com que ritmo o robô publica. Clique numa regra para ajustar.</p>
+    </div>
+  </div>
 
-<div class="regras-secao">
-  <div class="grupos-grade">
-    <!-- Frequência -->
-    <button type="button" class="grupo-card regra-card" (click)="abrir('frequencia')">
-      <div class="grupo-card-topo">
-        <span class="regra-icone">
-          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-        </span>
-        <div class="grupo-card-nomes">
-          <span class="grupo-card-nome">Frequência</span>
-          <span class="regra-card-sub">Tempo entre uma postagem e outra</span>
-        </div>
-      </div>
-      <div class="regra-card-valor">
-        <strong>{{ frequencia().min }}–{{ frequencia().max }}</strong>
-        <span>min</span>
-      </div>
-      <p class="regra-card-texto">
-        Cerca de <strong>{{ frequencia().porDia }} postagens por dia</strong> em cada grupo.
-        @if (frequencia().garimpoMax) { Garimpo de até {{ frequencia().garimpoMax }} produtos/dia por grupo. }
-      </p>
-      <div class="grupo-card-rodape">
-        <span>Ritmo {{ frequencia().ritmo.toLowerCase() }}</span>
-        <span>Ajustar</span>
-      </div>
+  <div class="rg-itens rg-itens-4">
+    <button type="button" class="rg-item" (click)="abrir('frequencia')">
+      <span class="rg-item-rotulo">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        Frequência
+      </span>
+      <span class="rg-item-valor">{{ frequencia().min }}–{{ frequencia().max }} <small>min</small></span>
+      <span class="rg-item-sub">Cerca de {{ frequencia().porDia }} postagens por dia em cada grupo</span>
+      <span class="rg-item-editar" aria-hidden="true"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16Z"/><path d="m13.5 6.5 4 4"/></svg>Editar</span>
     </button>
 
-    <!-- Horário de funcionamento -->
-    <button type="button" class="grupo-card regra-card" [class.regra-card-off]="!horario().ativo" (click)="abrir('horario')">
-      <div class="grupo-card-topo">
-        <span class="regra-icone">
-          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2M12 19v2M4.2 7l1.7 1M18.1 16l1.7 1M3 12h2M19 12h2M4.2 17l1.7-1M18.1 8l1.7-1"/><circle cx="12" cy="12" r="4"/></svg>
-        </span>
-        <div class="grupo-card-nomes">
-          <span class="grupo-card-nome">Horário de funcionamento</span>
-          <span class="regra-card-sub">Quando o robô posta nos grupos</span>
-        </div>
-      </div>
+    <button type="button" class="rg-item" (click)="abrir('horario')">
+      <span class="rg-item-rotulo">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2M12 19v2M4.2 7l1.7 1M18.1 16l1.7 1M3 12h2M19 12h2M4.2 17l1.7-1M18.1 8l1.7-1"/><circle cx="12" cy="12" r="4"/></svg>
+        Horário de funcionamento
+      </span>
       @if (horario().ativo) {
-        <div class="regra-card-valor">
-          <strong>{{ horario().inicio }}–{{ horario().fim }}</strong>
-        </div>
-        <p class="regra-status" [class.regra-status-fora]="!horario().dentro" role="status">
-          <i class="regra-status-ponto" aria-hidden="true"></i>{{ horario().situacao }}
-        </p>
+        <span class="rg-item-valor">{{ horario().inicio }}–{{ horario().fim }}</span>
+        <span class="rg-selo" [class.rg-selo-fora]="!horario().dentro" role="status"><i aria-hidden="true"></i>{{ horario().situacao }}</span>
       } @else {
-        <div class="regra-card-valor"><strong>24 horas</strong></div>
-        <p class="regra-card-texto">Posta a qualquer hora do dia. Ligue para definir a hora de ligar e de desligar.</p>
+        <span class="rg-item-valor">24 horas</span>
+        <span class="rg-selo"><i aria-hidden="true"></i>Sempre ativo</span>
       }
-      <div class="grupo-card-rodape">
-        <span>Horário de Brasília</span>
-        <span>Ajustar</span>
-      </div>
+      <span class="rg-item-editar" aria-hidden="true"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16Z"/><path d="m13.5 6.5 4 4"/></svg>Editar</span>
     </button>
 
-    <!-- Repetição -->
-    <button type="button" class="grupo-card regra-card" (click)="abrir('repeticao')">
-      <div class="grupo-card-topo">
-        <span class="regra-icone">
-          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2.5 20.5 6 17 9.5"/><path d="M3.5 11V9.5A3.5 3.5 0 0 1 7 6h13.5"/><path d="M7 21.5 3.5 18 7 14.5"/><path d="M20.5 13v1.5A3.5 3.5 0 0 1 17 18H3.5"/></svg>
-        </span>
-        <div class="grupo-card-nomes">
-          <span class="grupo-card-nome">Repetição de produtos</span>
-          <span class="regra-card-sub">Quando uma oferta pode voltar</span>
-        </div>
-      </div>
-      <div class="regra-card-valor">
-        <strong>{{ textoHoras(repeticao().cooldownHoras) }}</strong>
-        <span>de espera</span>
-      </div>
-      <p class="regra-card-texto">
+    <button type="button" class="rg-item" (click)="abrir('repeticao')">
+      <span class="rg-item-rotulo">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2.5 20.5 6 17 9.5"/><path d="M3.5 11V9.5A3.5 3.5 0 0 1 7 6h13.5"/><path d="M7 21.5 3.5 18 7 14.5"/><path d="M20.5 13v1.5A3.5 3.5 0 0 1 17 18H3.5"/></svg>
+        Repetição de produtos
+      </span>
+      <span class="rg-item-valor">{{ textoHoras(repeticao().cooldownHoras) }}</span>
+      <span class="rg-item-sub">
         @if (repeticao().repostarAposDias > 0) {
-          Depois de <strong>{{ repeticao().repostarAposDias }} dias</strong> volta mesmo sem baixar o preço.
+          De espera. Após {{ repeticao().repostarAposDias }} dias volta mesmo sem baixar o preço
         } @else {
-          Só volta se <strong>o preço baixar</strong> ou o desconto subir.
+          De espera. Depois só volta se o preço baixar
         }
-      </p>
-      <div class="grupo-card-rodape">
-        <span>Vale para cada grupo</span>
-        <span>Ajustar</span>
-      </div>
+      </span>
+      <span class="rg-item-editar" aria-hidden="true"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16Z"/><path d="m13.5 6.5 4 4"/></svg>Editar</span>
     </button>
 
-    <!-- Cupons -->
-    <button type="button" class="grupo-card regra-card" [class.regra-card-off]="!cupons().ativo" (click)="abrir('cupons')">
-      <div class="grupo-card-topo">
-        <span class="regra-icone">
-          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5V7a1.5 1.5 0 0 1 1.5-1.5h15A1.5 1.5 0 0 1 21 7v2.5a2.5 2.5 0 0 0 0 5V17a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17v-2.5a2.5 2.5 0 0 0 0-5Z"/><path d="M14 5.5v13" stroke-dasharray="2 2.6"/></svg>
-        </span>
-        <div class="grupo-card-nomes">
-          <span class="grupo-card-nome">Cupons de desconto</span>
-          <span class="regra-card-sub">Códigos das lojas junto com as ofertas</span>
-        </div>
-      </div>
+    <button type="button" class="rg-item" [class.rg-item-off]="!cupons().ativo" (click)="abrir('cupons')">
+      <span class="rg-item-rotulo">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5V7a1.5 1.5 0 0 1 1.5-1.5h15A1.5 1.5 0 0 1 21 7v2.5a2.5 2.5 0 0 0 0 5V17a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17v-2.5a2.5 2.5 0 0 0 0-5Z"/><path d="M14 5.5v13" stroke-dasharray="2 2.6"/></svg>
+        Cupons de desconto
+      </span>
       @if (cupons().ativo) {
-        <div class="regra-card-valor">
-          <strong>{{ cupons().soCupom + cupons().produtoCupom }}%</strong>
-          <span>das mensagens com cupom</span>
-        </div>
-        <div class="regra-barra" aria-hidden="true">
+        <span class="rg-item-valor">{{ cupons().soCupom + cupons().produtoCupom }}%</span>
+        <span class="regra-barra rg-barra" aria-hidden="true">
           <span class="regra-barra-lista" [style.width.%]="cupons().soCupom"></span>
           <span class="regra-barra-produto" [style.width.%]="cupons().produtoCupom"></span>
           <span class="regra-barra-ofertas" [style.width.%]="cupons().produto"></span>
-        </div>
-        <p class="regra-card-texto">
-          {{ cupons().soCupom }}% só cupom · {{ cupons().produtoCupom }}% produto com cupom ·
-          {{ cupons().produto }}% produto sem cupom. Códigos como <strong>{{ cupons().exemplo }}</strong>.
-        </p>
+        </span>
+        <span class="rg-item-sub">das mensagens com cupom</span>
       } @else {
-        <div class="regra-card-valor">
-          <strong>Desligado</strong>
-        </div>
-        <p class="regra-card-texto">Só saem ofertas comuns.</p>
+        <span class="rg-item-valor">Desligado</span>
+        <span class="rg-item-sub">Só saem ofertas comuns</span>
       }
-      <div class="grupo-card-rodape">
-        <span>
-          @if (cuponsDisponiveis() !== null) {
-            {{ cuponsDisponiveis() }} {{ cuponsDisponiveis() === 1 ? 'cupom disponível' : 'cupons disponíveis' }}
-          } @else {
-            Cupons buscados sozinhos
-          }
-        </span>
-        <span>Ajustar</span>
-      </div>
-    </button>
-
-    <!-- Texto da postagem -->
-    <button type="button" class="grupo-card regra-card" (click)="abrir('copy')">
-      <div class="grupo-card-topo">
-        <span class="regra-icone">
-          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9a1.5 1.5 0 0 1-1.5 1.5H9l-4 4v-4.5"/><path d="M8 8.5h8M8 12h5"/></svg>
-        </span>
-        <div class="grupo-card-nomes">
-          <span class="grupo-card-nome">Texto da postagem</span>
-          <span class="regra-card-sub">Como a mensagem do produto sai no grupo</span>
-        </div>
-      </div>
-      <div class="regra-card-valor">
-        <strong>{{ copy().personalizado ? 'Seu modelo' : 'Padrão' }}</strong>
-      </div>
-      <div class="copy-mini" aria-hidden="true" [innerHTML]="copy().previa"></div>
-      <div class="grupo-card-rodape">
-        <span>{{ copy().personalizado ? 'Texto personalizado' : 'Texto padrão do robô' }}</span>
-        <span>Ajustar</span>
-      </div>
-    </button>
-
-    <button type="button" class="grupo-card regra-card" [class.regra-card-off]="!divulgacao().ativo" (click)="abrir('divulgacao')">
-      <div class="grupo-card-topo">
-        <span class="regra-icone">
-          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-6-6 18-3.5-7.5L3 11Z"/></svg>
-        </span>
-        <div class="grupo-card-nomes">
-          <span class="grupo-card-nome">Mensagem de divulgação</span>
-          <span class="regra-card-sub">Uma chamada com o seu Linktree, de vez em quando</span>
-        </div>
-      </div>
-      @if (divulgacao().ativo) {
-        <div class="regra-card-valor">
-          <strong>{{ divulgacao().maxPorDia }}x</strong>
-          <span>por dia, no máximo</span>
-        </div>
-        <p class="regra-card-texto">
-          @if (divulgacao().textos.length > 1) {
-            {{ divulgacao().textos.length }} mensagens alternando, esporadicamente, em cada grupo com o link dos seus outros grupos.
-          } @else {
-            Aparece esporadicamente em cada grupo com o link dos seus outros grupos.
-          }
-        </p>
-      } @else {
-        <div class="regra-card-valor"><strong>Desligada</strong></div>
-        <p class="regra-card-texto">Nenhuma mensagem de divulgação é enviada.</p>
-      }
-      <div class="grupo-card-rodape">
-        <span>Vale para cada grupo</span>
-        <span>Ajustar</span>
-      </div>
-    </button>
-
-    <button type="button" class="grupo-card regra-card" [class.regra-card-off]="!alerta().ativo" (click)="abrir('alerta')">
-      <div class="grupo-card-topo">
-        <span class="regra-icone">
-          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
-        </span>
-        <div class="grupo-card-nomes">
-          <span class="grupo-card-nome">Aviso de queda</span>
-          <span class="regra-card-sub">Um recado no WhatsApp quando uma conexão cai</span>
-        </div>
-      </div>
-      @if (alerta().ativo) {
-        <div class="regra-card-valor"><strong>Ligado</strong></div>
-        <p class="regra-card-texto">
-          @if (alerta().grupo && ehNumero(alerta().grupo)) {
-            O aviso vai para o número <strong>{{ alerta().grupo }}</strong>.
-          } @else if (alerta().grupo) {
-            O aviso sai no grupo <strong>{{ alerta().grupo }}</strong>.
-          } @else {
-            O aviso sai na conversa do próprio número conectado.
-          }
-        </p>
-      } @else {
-        <div class="regra-card-valor"><strong>Desligado</strong></div>
-        <p class="regra-card-texto">As quedas só aparecem no sino do painel.</p>
-      }
-      <div class="grupo-card-rodape">
-        <span>Enquanto o robô está rodando</span>
-        <span>Ajustar</span>
-      </div>
+      <span class="rg-item-editar" aria-hidden="true"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16Z"/><path d="m13.5 6.5 4 4"/></svg>Editar</span>
     </button>
   </div>
-</div>
+</section>
+
+<section class="card rg-card" aria-labelledby="rg-mensagens-titulo">
+  <div class="rg-cabeca">
+    <span class="rg-cabeca-icone" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9a1.5 1.5 0 0 1-1.5 1.5H9l-4 4v-4.5"/><path d="M8 8.5h8M8 12h5"/></svg>
+    </span>
+    <div class="rg-cabeca-texto">
+      <h2 id="rg-mensagens-titulo">Mensagens</h2>
+      <p>O texto das ofertas e os recados que o robô manda além delas.</p>
+    </div>
+  </div>
+
+  <div class="rg-itens rg-itens-3">
+    <button type="button" class="rg-item" (click)="abrir('copy')">
+      <span class="rg-item-rotulo">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg>
+        Texto da postagem
+      </span>
+      <span class="rg-item-valor">{{ copy().personalizado ? 'Seu modelo' : 'Padrão' }}</span>
+      <span class="copy-mini rg-copy-mini" aria-hidden="true" [innerHTML]="copy().previa"></span>
+      <span class="rg-item-editar" aria-hidden="true"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16Z"/><path d="m13.5 6.5 4 4"/></svg>Editar</span>
+    </button>
+
+    <button type="button" class="rg-item" [class.rg-item-off]="!divulgacao().ativo" (click)="abrir('divulgacao')">
+      <span class="rg-item-rotulo">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-6-6 18-3.5-7.5L3 11Z"/></svg>
+        Mensagem de divulgação
+      </span>
+      @if (divulgacao().ativo) {
+        <span class="rg-item-valor">{{ divulgacao().maxPorDia }}x <small>por dia</small></span>
+        <span class="rg-item-sub">
+          @if (divulgacao().textos.length > 1) {
+            {{ divulgacao().textos.length }} mensagens alternando, com o link dos seus grupos
+          } @else {
+            De vez em quando, com o link dos seus grupos
+          }
+        </span>
+      } @else {
+        <span class="rg-item-valor">Desligada</span>
+        <span class="rg-item-sub">Nenhuma mensagem de divulgação é enviada</span>
+      }
+      <span class="rg-item-editar" aria-hidden="true"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16Z"/><path d="m13.5 6.5 4 4"/></svg>Editar</span>
+    </button>
+
+    <button type="button" class="rg-item" [class.rg-item-off]="!alerta().ativo" (click)="abrir('alerta')">
+      <span class="rg-item-rotulo">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+        Aviso de queda
+      </span>
+      @if (alerta().ativo) {
+        <span class="rg-item-valor">Ligado</span>
+        <span class="rg-item-sub">
+          @if (alerta().grupo && ehNumero(alerta().grupo)) {
+            Vai para o número {{ alerta().grupo }}
+          } @else if (alerta().grupo) {
+            Sai no grupo {{ alerta().grupo }}
+          } @else {
+            Sai na conversa do próprio número conectado
+          }
+        </span>
+      } @else {
+        <span class="rg-item-valor">Desligado</span>
+        <span class="rg-item-sub">As quedas só aparecem no sino do painel</span>
+      }
+      <span class="rg-item-editar" aria-hidden="true"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16Z"/><path d="m13.5 6.5 4 4"/></svg>Editar</span>
+    </button>
+  </div>
+</section>
 
 <app-datas-especiais />
 
@@ -714,7 +643,7 @@
         <span class="grupo-modal-espaco"></span>
         <button type="button" class="btn btn-ghost" [disabled]="salvando()" (click)="fechar()">Cancelar</button>
         <button type="button" class="btn btn-primary" [disabled]="salvando()" (click)="salvar()">
-          {{ salvando() ? 'Salvando…' : 'Salvar' }}
+          {{ salvando() ? 'Salvando…' : 'Salvar alterações' }}
         </button>
       </div>
     </div>

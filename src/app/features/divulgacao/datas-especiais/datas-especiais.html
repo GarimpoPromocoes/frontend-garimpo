@@ -1,30 +1,21 @@
-<div class="regras-secao">
-  <h2 class="regras-secao-titulo">Datas especiais</h2>
-
-  @if (erro() && !rascunho()) {
-    <div class="info-box info-box-erro" role="alert">{{ erro() }}</div>
-  }
-
-  <!-- Uma grade só, como o resto da página: o card que liga/desliga, as suas datas, as que já vêm
-       prontas e o card de adicionar. As prontas aparecem por proximidade (style.order = dias que faltam). -->
-  <div class="grupos-grade">
-    <div class="grupo-card regra-card grupo-card-fixo datas-controle" [class.regra-card-off]="!ativo()">
-      <div class="grupo-card-topo">
-        <span class="regra-icone regra-icone-data">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
-        </span>
-        <div class="grupo-card-nomes">
-          <span class="grupo-card-nome">Prioridade por data</span>
-          <span class="regra-card-sub">Produtos da ocasião passam na frente</span>
-        </div>
-      </div>
-      <div class="regra-card-valor datas-controle-valor">
-        <strong>{{ ativo() ? 'Ligada' : 'Desligada' }}</strong>
+<!-- Datas especiais numa lista só: as suas e as que já vêm prontas, das mais próximas para as mais
+     distantes (style.order = dias que faltam). As prontas mostram só os próximos 45 dias de início. -->
+<section class="card rg-card" aria-labelledby="rg-datas-titulo">
+  <div class="rg-cabeca">
+    <span class="rg-cabeca-icone" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+    </span>
+    <div class="rg-cabeca-texto">
+      <h2 id="rg-datas-titulo">Datas especiais</h2>
+      <p>Na época de cada data, os produtos da ocasião passam na frente na fila.</p>
+    </div>
+    <div class="rg-cabeca-acoes">
+      <span class="rg-alternar">
         <button
           type="button"
           class="toggle-switch"
           role="switch"
-          aria-label="Priorizar produtos de datas especiais"
+          aria-labelledby="rg-datas-ligar"
           [attr.aria-checked]="ativo()"
           [class.toggle-switch-on]="ativo()"
           [disabled]="salvando()"
@@ -32,119 +23,118 @@
         >
           <span class="toggle-switch-thumb"></span>
         </button>
-      </div>
+        <span id="rg-datas-ligar">{{ ativo() ? 'Prioridade ligada' : 'Prioridade desligada' }}</span>
+      </span>
       @if (ativo()) {
-        <div class="grupo-card-corpo">
-          @for (a of ativasHoje().slice(0, 6); track a.nome) {
-            <span class="grupo-tag" [class.datas-tag-sua]="a.sua">{{ a.nome }}</span>
-          } @empty {
-            <span class="regra-card-texto">Nenhuma data especial agora. Sai a ordem normal de ofertas.</span>
-          }
-          @if (ativasHoje().length > 6) {
-            <span class="grupo-tag grupo-tag-mais">+{{ ativasHoje().length - 6 }}</span>
-          }
-        </div>
-        <div class="grupo-card-rodape">
-          <span>{{ ativasHoje().length ? 'Valendo hoje' : 'Nada valendo hoje' }}</span>
-        </div>
-      } @else {
-        <p class="regra-card-texto">
-          O robô ignora as datas comemorativas e segue só pelo desconto e pelas vendas de cada produto.
-        </p>
-      }
-    </div>
-
-    @if (ativo()) {
-      @for (c of cards(); track c.indice) {
-        <button type="button" class="grupo-card regra-card" (click)="abrir(c.ev, c.indice)">
-          <div class="grupo-card-topo">
-            <span class="regra-icone regra-icone-data">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
-            </span>
-            <div class="grupo-card-nomes">
-              <span class="grupo-card-nome">{{ c.ev.nome }}</span>
-              <span class="regra-card-sub">{{ c.periodo }}</span>
-            </div>
-          </div>
-          <div class="grupo-card-corpo">
-            @for (p of c.ev.palavras.slice(0, 5); track p) {
-              <span class="grupo-tag">{{ p }}</span>
-            }
-            @if (c.ev.palavras.length > 5) {
-              <span class="grupo-tag grupo-tag-mais">+{{ c.ev.palavras.length - 5 }}</span>
-            }
-          </div>
-          <div class="grupo-card-rodape">
-            @if (c.faltam === 0) {
-              <span class="datas-ativa">Valendo agora</span>
-            } @else {
-              <span>Começa em {{ c.faltam }} {{ c.faltam === 1 ? 'dia' : 'dias' }}</span>
-            }
-            <span>Sua data · prioridade {{ c.nivel.toLowerCase() }}</span>
-          </div>
+        <button type="button" class="btn btn-primary btn-sm" (click)="criar()">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
+          Nova data especial
         </button>
       }
+    </div>
+  </div>
 
-      <!-- As datas que já vêm prontas: antes ficavam numa lista escondida; agora são cards como os
-           outros. Só as próximas aparecem de início — o botão abaixo mostra o ano todo. -->
+  @if (erro() && !rascunho()) {
+    <div class="info-box info-box-erro" role="alert">{{ erro() }}</div>
+  }
+
+  @if (!ativo()) {
+    <p class="rg-vazio">
+      O robô ignora as datas comemorativas e segue só pelo desconto e pelas vendas de cada produto.
+    </p>
+  } @else {
+    @if (ativasHoje().length) {
+      <p class="rg-hoje">
+        <strong>Valendo hoje:</strong>
+        @for (a of ativasHoje().slice(0, 6); track a.nome) {
+          <span class="grupo-tag" [class.datas-tag-sua]="a.sua">{{ a.nome }}</span>
+        }
+        @if (ativasHoje().length > 6) {
+          <span class="grupo-tag grupo-tag-mais">+{{ ativasHoje().length - 6 }}</span>
+        }
+      </p>
+    }
+
+    <ul class="rg-lista">
+      @for (c of cards(); track c.indice) {
+        <li class="rg-linha" [style.order]="c.faltam">
+          <span class="rg-linha-icone rg-linha-icone-sua" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 14.6 9l5.9.6-4.4 4 1.3 5.9L12 16.5l-5.4 3 1.3-5.9-4.4-4L9.4 9Z"/></svg>
+          </span>
+          <span class="rg-linha-texto">
+            <strong>{{ c.ev.nome }}</strong>
+            <span>Sua data · prioridade {{ c.nivel.toLowerCase() }}</span>
+            <span class="rg-linha-tags">
+              @for (p of c.ev.palavras.slice(0, 4); track p) {
+                <span class="grupo-tag">{{ p }}</span>
+              }
+              @if (c.ev.palavras.length > 4) {
+                <span class="grupo-tag grupo-tag-mais">+{{ c.ev.palavras.length - 4 }}</span>
+              }
+            </span>
+          </span>
+          <span class="rg-linha-quando">
+            <span>{{ c.periodo }}</span>
+            @if (c.faltam === 0) {
+              <span class="rg-selo"><i aria-hidden="true"></i>Valendo agora</span>
+            } @else {
+              <small>Começa em {{ c.faltam }} {{ c.faltam === 1 ? 'dia' : 'dias' }}</small>
+            }
+          </span>
+          <button type="button" class="btn btn-ghost btn-sm rg-linha-acao" (click)="abrir(c.ev, c.indice)" [attr.aria-label]="'Editar ' + c.ev.nome">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16Z"/><path d="m13.5 6.5 4 4"/></svg>
+            Editar
+          </button>
+        </li>
+      }
+
       @for (g of calendario(); track g.nome) {
         @for (dt of g.datas; track dt.nome) {
           @if (mostrarCalendario() || dt.faltam <= 45) {
-            <div class="grupo-card regra-card grupo-card-fixo" [style.order]="dt.faltam + 1">
-              <div class="grupo-card-topo">
-                <span class="regra-icone" [class.regra-icone-data]="dt.ativa">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+            <li class="rg-linha" [style.order]="dt.faltam">
+              <span class="rg-linha-icone" [class.rg-linha-icone-ativa]="dt.ativa" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+              </span>
+              <span class="rg-linha-texto">
+                <strong>{{ dt.nome }}</strong>
+                <span>{{ g.nome }} · já vem pronta</span>
+                <span class="rg-linha-tags">
+                  @for (p of dt.palavras.slice(0, 4); track p) {
+                    <span class="grupo-tag">{{ p }}</span>
+                  }
+                  @if (dt.palavras.length > 4) {
+                    <span class="grupo-tag grupo-tag-mais">+{{ dt.palavras.length - 4 }}</span>
+                  }
                 </span>
-                <div class="grupo-card-nomes">
-                  <span class="grupo-card-nome">{{ dt.nome }}</span>
-                  <span class="regra-card-sub">{{ dt.periodo }}</span>
-                </div>
-              </div>
-              <div class="grupo-card-corpo">
-                @for (p of dt.palavras.slice(0, 5); track p) {
-                  <span class="grupo-tag">{{ p }}</span>
-                }
-                @if (dt.palavras.length > 5) {
-                  <span class="grupo-tag grupo-tag-mais">+{{ dt.palavras.length - 5 }}</span>
-                }
-              </div>
-              <div class="grupo-card-rodape">
+              </span>
+              <span class="rg-linha-quando">
+                <span>{{ dt.periodo }}</span>
                 @if (dt.ativa) {
-                  <span class="datas-ativa">Valendo agora</span>
+                  <span class="rg-selo"><i aria-hidden="true"></i>Valendo agora</span>
                 } @else {
-                  <span>Começa em {{ dt.faltam }} {{ dt.faltam === 1 ? 'dia' : 'dias' }}</span>
+                  <small>{{ dt.faltam === 0 ? 'Começa hoje' : 'Começa em ' + dt.faltam + (dt.faltam === 1 ? ' dia' : ' dias') }}</small>
                 }
-                <span>Já vem pronta</span>
-              </div>
-            </div>
+              </span>
+              <span class="rg-linha-acao" aria-hidden="true"></span>
+            </li>
           }
         }
       }
+    </ul>
 
-      <button type="button" class="grupo-card grupo-card-novo datas-novo" (click)="criar()">
-        <span class="grupo-novo-mais">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
-        </span>
-        <span class="grupo-novo-titulo">{{ cards().length ? 'Adicionar data' : 'Adicionar uma data sua' }}</span>
-        <span class="grupo-novo-texto">
-          Para ocasiões do seu público: aniversário da loja, evento local…
-        </span>
+    @if (prontas().length) {
+      <button
+        type="button"
+        class="datas-calendario-botao"
+        [attr.aria-expanded]="mostrarCalendario()"
+        (click)="mostrarCalendario.set(!mostrarCalendario())"
+      >
+        <svg [class.datas-seta-aberta]="mostrarCalendario()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        {{ mostrarCalendario() ? 'Mostrar só as datas dos próximos 45 dias' : 'Mostrar as ' + prontas().length + ' datas do ano todo' }}
       </button>
     }
-  </div>
-
-  @if (ativo() && prontas().length) {
-    <button
-      type="button"
-      class="datas-calendario-botao"
-      [attr.aria-expanded]="mostrarCalendario()"
-      (click)="mostrarCalendario.set(!mostrarCalendario())"
-    >
-      <svg [class.datas-seta-aberta]="mostrarCalendario()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
-      {{ mostrarCalendario() ? 'Mostrar só as datas dos próximos 45 dias' : 'Mostrar as ' + prontas().length + ' datas do ano todo' }}
-    </button>
   }
-</div>
+</section>
 
 @if (rascunho(); as r) {
   <div class="modal-fundo" (click)="fechar()">
