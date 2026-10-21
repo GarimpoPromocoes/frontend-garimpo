@@ -1,0 +1,91 @@
+<div class="ganhos-kpis">
+  <div class="card ganhos-kpi est-kpi">
+    <span class="ganhos-kpi-icone" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.3 3.2 2.9 10.4c-.7.3-.7 1.3.1 1.5l5 1.4 1.4 5c.2.8 1.2.8 1.5.1L21.3 3.2Z"/><path d="M21.3 3.2 8.9 13.3"/></svg>
+    </span>
+    <div class="ganhos-kpi-texto">
+      <span class="ganhos-kpi-rotulo est-kpi-rotulo"><b>Postagens</b></span>
+      <span class="ganhos-kpi-valor">{{ inteiro(resumo().total) }}</span>
+      <span class="est-kpi-desc">Ofertas enviadas nos grupos nos últimos {{ dias() }} dias.</span>
+    </div>
+  </div>
+  <div class="card ganhos-kpi est-kpi">
+    <span class="ganhos-kpi-icone est-kpi-icone-entrada" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg>
+    </span>
+    <div class="ganhos-kpi-texto">
+      <span class="ganhos-kpi-rotulo est-kpi-rotulo"><b>Média por dia</b></span>
+      <span class="ganhos-kpi-valor">{{ decimal(resumo().media) }}</span>
+      <span class="est-kpi-desc">Postagens por dia, contando os dias sem postagem.</span>
+    </div>
+  </div>
+  <div class="card ganhos-kpi est-kpi">
+    <span class="ganhos-kpi-icone ganhos-kpi-icone-ok" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 18.5v-6M12 18.5v-12M17.5 18.5v-8"/></svg>
+    </span>
+    <div class="ganhos-kpi-texto">
+      <span class="ganhos-kpi-rotulo est-kpi-rotulo"><b>Melhor dia</b></span>
+      <span class="ganhos-kpi-valor">{{ resumo().melhor ? inteiro(resumo().melhor!.n) : '—' }}</span>
+      <span class="est-kpi-desc">{{ resumo().melhor ? nomeDoDia(resumo().melhor!.dia) : 'Nenhuma postagem no período.' }}</span>
+    </div>
+  </div>
+  <div class="card ganhos-kpi est-kpi">
+    <span class="ganhos-kpi-icone est-kpi-icone-saida" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.4"/><path d="M2.8 19.5c.5-3.4 3-5.3 6.2-5.3s5.7 1.9 6.2 5.3Z"/><path d="M15.6 4.8a3.4 3.4 0 0 1 0 6.4M17.6 14.4c2 .6 3.3 2.3 3.6 5.1h-3"/></svg>
+    </span>
+    <div class="ganhos-kpi-texto">
+      <span class="ganhos-kpi-rotulo est-kpi-rotulo"><b>Grupos que postaram</b></span>
+      <span class="ganhos-kpi-valor">{{ inteiro(resumo().grupos) }}</span>
+      <span class="est-kpi-desc">Grupos com pelo menos uma postagem no período.</span>
+    </div>
+  </div>
+</div>
+
+@if (est.erroPostagens()) {
+  <p class="error-text" role="alert">{{ est.erroPostagens() }}</p>
+}
+
+<div class="est-membros-grade">
+  <div class="card est-cartao-grafico est-postagens">
+    <div>
+      <h2>Postagens dos últimos {{ dias() }} dias</h2>
+      <p class="card-subtitle">Quantidade de ofertas enviadas por dia.</p>
+    </div>
+    <app-grafico-barras [barras]="barras()" [descricao]="'Postagens por dia nos últimos ' + dias() + ' dias'" />
+  </div>
+
+  <div class="card est-cartao-grupos">
+    <div>
+      <h2>Por grupo</h2>
+      <p class="card-subtitle">Postagens de cada grupo nos últimos {{ dias() }} dias.</p>
+    </div>
+    @if (!est.postagensPorGrupo().length) {
+      <p class="hint-text">Nenhuma postagem no período.</p>
+    } @else {
+      <div class="tabela-rolagem est-rola">
+        <table class="tabela est-tabela-grupos est-tabela-postagens">
+          <thead>
+            <tr>
+              <th scope="col">Grupo</th>
+              <th scope="col" class="col-num">Posts</th>
+              <th scope="col" class="col-num">%</th>
+              <th scope="col" class="col-num">Produtos</th>
+              <th scope="col">Última</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (g of est.postagensPorGrupo(); track g.grupoId) {
+              <tr>
+                <td>{{ g.grupoNome }}</td>
+                <td class="col-num">{{ inteiro(g.postagens) }}</td>
+                <td class="col-num">{{ pct(g.postagens) }}%</td>
+                <td class="col-num">{{ inteiro(g.produtos) }}</td>
+                <td class="hint-text">{{ quando(g.ultimaEm) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>

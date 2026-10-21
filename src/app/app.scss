@@ -232,9 +232,8 @@
   height: 20px;
 }
 
-/* Ligar, pausar e parar: botões redondos de vidro (um "liquid glass" suave) no canto de baixo,
-   em todas as telas. O de ligar é dourado e quase opaco; os outros são vidro claro. O nome da
-   ação fica no title e no aria-label. */
+/* Ligar, pausar e parar: botões redondos e sólidos (com uma transparência leve) no canto de
+   baixo, em todas as telas. O de ligar é dourado. O nome da ação fica no title e no aria-label. */
 .bot-control-fixo {
   position: fixed;
   right: 28px;
@@ -258,43 +257,22 @@
 }
 
 .bot-fab {
-  position: relative;
   width: 64px;
   height: 64px;
   padding: 0;
   display: grid;
   place-items: center;
-  border: 1px solid var(--vidro-borda);
+  border: 1px solid var(--border);
   border-radius: 50%;
   color: var(--text);
-  background: linear-gradient(160deg, var(--vidro-topo), var(--vidro-base));
-  -webkit-backdrop-filter: blur(16px) saturate(170%);
-  backdrop-filter: blur(16px) saturate(170%);
-  box-shadow:
-    var(--vidro-sombra),
-    inset 0 1px 1px var(--vidro-brilho),
-    inset 0 -3px 8px rgba(42, 29, 18, 0.06);
+  /* Sólido, com uma transparência leve. */
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  box-shadow: 0 6px 18px rgba(42, 29, 18, 0.16);
   cursor: pointer;
-  overflow: hidden;
   transition:
     transform 0.16s ease,
-    box-shadow 0.16s ease,
-    filter 0.16s ease;
-}
-/* O brilho de cima, que dá o ar de vidro. */
-.bot-fab::before {
-  content: '';
-  position: absolute;
-  inset: 1px 8px auto;
-  height: 46%;
-  border-radius: 50% 50% 45% 45% / 60% 60% 40% 40%;
-  background: linear-gradient(180deg, var(--vidro-reflexo), rgba(255, 255, 255, 0));
-  opacity: 0.7;
-  pointer-events: none;
-}
-.bot-fab svg,
-.bot-fab-spinner {
-  position: relative;
+    background-color 0.16s ease,
+    box-shadow 0.16s ease;
 }
 .bot-fab svg {
   width: 24px;
@@ -302,7 +280,8 @@
 }
 .bot-fab:hover:not(:disabled) {
   transform: translateY(-1px);
-  filter: brightness(1.03);
+  background: var(--surface);
+  box-shadow: 0 8px 22px rgba(42, 29, 18, 0.2);
 }
 .bot-fab:active:not(:disabled) {
   transform: scale(0.96);
@@ -314,17 +293,16 @@
 .bot-fab:disabled {
   cursor: progress;
 }
-/* Ligar (e retomar): dourado, minimamente transparente. */
+/* Ligar (e retomar): dourado, quase opaco. */
 .bot-fab-ligar {
   color: #2a1d12;
-  --vidro-reflexo: rgba(255, 250, 230, 0.6);
-  border-color: rgba(255, 236, 190, 0.75);
-  background: linear-gradient(160deg, rgba(246, 203, 96, 0.94), rgba(224, 165, 32, 0.88));
-  box-shadow:
-    0 10px 26px rgba(199, 140, 17, 0.3),
-    0 2px 6px rgba(42, 29, 18, 0.1),
-    inset 0 1px 1px rgba(255, 248, 225, 0.9),
-    inset 0 -3px 8px rgba(138, 94, 5, 0.18);
+  border-color: transparent;
+  background: color-mix(in srgb, var(--gold) 90%, transparent);
+  box-shadow: 0 6px 18px rgba(199, 140, 17, 0.28);
+}
+.bot-fab-ligar:hover:not(:disabled) {
+  background: var(--gold-deep);
+  box-shadow: 0 8px 22px rgba(199, 140, 17, 0.34);
 }
 .bot-fab-ligar svg {
   margin-left: 3px;
@@ -340,16 +318,6 @@
   border: 2.5px solid currentColor;
   border-top-color: transparent;
   animation: girar 0.9s linear infinite;
-}
-@media (prefers-reduced-transparency: reduce) {
-  .bot-fab {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-    background: var(--surface);
-  }
-  .bot-fab-ligar {
-    background: var(--gold);
-  }
 }
 
 /* Ocupa a largura toda; em monitor muito largo o respiro lateral cresce igual

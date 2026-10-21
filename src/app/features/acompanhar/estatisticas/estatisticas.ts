@@ -2,10 +2,12 @@ import { Component, signal } from '@angular/core';
 import { GanhosCard } from '../ganhos-card/ganhos-card';
 import { MembrosCard } from './membros-card';
 import { VendasCard } from './vendas-card';
+import { PostagensCard } from './postagens-card';
 
-type Visao = 'ganhos' | 'membros' | 'vendas';
+type Visao = 'postagens' | 'ganhos' | 'membros' | 'vendas';
 
 const VISOES: { id: Visao; label: string }[] = [
+  { id: 'postagens', label: 'Postagens' },
   { id: 'ganhos', label: 'Ganhos' },
   { id: 'membros', label: 'Membros dos grupos' },
   { id: 'vendas', label: 'Vendas por grupo' },
@@ -24,7 +26,7 @@ function visaoSalva(): Visao {
 @Component({
   selector: 'app-estatisticas',
   standalone: true,
-  imports: [GanhosCard, MembrosCard, VendasCard],
+  imports: [GanhosCard, MembrosCard, VendasCard, PostagensCard],
   // As três visões ocupam a altura da janela, sem a página rolar.
   host: { class: 'ganhos-pagina' },
   template: `
@@ -45,6 +47,7 @@ function visaoSalva(): Visao {
       }
     </div>
     @switch (visao()) {
+      @case ('postagens') { <app-postagens-card class="ganhos-pagina" [dias]="dias()" /> }
       @case ('ganhos') { <app-ganhos-card /> }
       @case ('membros') { <app-membros-card class="ganhos-pagina" [dias]="dias()" /> }
       @case ('vendas') { <app-vendas-card class="ganhos-pagina" [dias]="dias()" /> }

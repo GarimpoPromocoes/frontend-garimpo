@@ -43,16 +43,7 @@ const BASE: Record<EtapaPainelId, { titulo: string; sub: string; icone: Icone }>
   concluido: { titulo: 'Concluído', sub: 'Produto publicado', icone: 'check' },
 };
 
-interface Barra {
-  dia: string;
-  rotulo: string;
-  n: number;
-  altura: number;
-  marca: boolean;
-}
-
 const NOME_LOJA: Record<string, string> = { mercadolivre: 'Mercado Livre', amazon: 'Amazon', shopee: 'Shopee' };
-const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 const MAX_ACOES = 20;
 const NUMEROS_A_CADA_MS = 60000;
 
@@ -61,20 +52,9 @@ function hhmm(iso: string | null | undefined): string {
   return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 }
 
-/** Teto do eixo: um número redondo acima do maior valor, dividido em 4 faixas. */
-function tetoDoEixo(max: number): number {
-  if (max <= 4) return 4;
-  const passo = Math.pow(10, Math.floor(Math.log10(max / 4)));
-  for (const m of [1, 2, 2.5, 5, 10]) {
-    const faixa = m * passo;
-    if (faixa * 4 >= max) return faixa * 4;
-  }
-  return Math.ceil(max / 4) * 4;
-}
-
 /**
- * O Painel: os números do dia em quatro cartões, as postagens dos últimos 30 dias, as últimas
- * ações e os grupos marcados para postar. O tempo ativo e a próxima postagem ficam no cabeçalho
+ * O Painel: os números do dia em quatro cartões, a pipeline do produto da vez, as últimas ações
+ * e os grupos marcados para postar. O gráfico das postagens por dia fica em Estatísticas. O tempo ativo e a próxima postagem ficam no cabeçalho
  * (topo-kpis); ligar, pausar e parar, no botão flutuante.
  */
 @Component({
@@ -101,7 +81,7 @@ export class PainelRobo {
     void this.painelService.carregar();
     const t = setInterval(() => document.visibilityState === 'visible' && void this.painelService.carregar(), NUMEROS_A_CADA_MS);
     inject(DestroyRef).onDestroy(() => clearInterval(t));
-    // Postou: o gráfico e os grupos atualizam na hora, sem esperar a próxima leitura.
+    // Postou: os cartões e os grupos atualizam na hora, sem esperar a próxima leitura.
     let concluidos: number | null = null;
     effect(() => {
       const n = this.jobs.painel()?.hoje?.concluidos ?? null;
@@ -253,28 +233,6 @@ export class PainelRobo {
   protected numero(n: number | null): string {
     return n == null ? '—' : n.toLocaleString('pt-BR');
   }
-
-  // ---- Postagens dos últimos 30 dias ----
-
-  protected readonly grafico = computed(() => {
-    const dias = this.numeros()?.postagensPorDia ?? [];
-    const max = Math.max(0, ...dias.map((d) => d.n));
-    const teto = tetoDoEixo(max);
-    const barras: Barra[] = dias.map((d, i) => {
-      const [, mes, dia] = d.dia.split('-').map(Number);
-      return {
-        dia: d.dia,
-        rotulo: `${dia}/${MESES[mes - 1]}`,
-        n: d.n,
-        altura: teto ? (d.n / teto) * 100 : 0,
-        // Um rótulo a cada 3 dias, como no eixo de calendário.
-        marca: i % 3 === 0,
-      };
-    });
-    const linhas = [0, 1, 2, 3, 4].map((k) => (teto / 4) * k).reverse();
-    const total = dias.reduce((a, d) => a + d.n, 0);
-    return { barras, linhas, total, vazio: !dias.length };
-  });
 
   // ---- Últimas ações ----
 

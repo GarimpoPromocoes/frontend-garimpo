@@ -116,7 +116,6 @@
           }
           <text class="ganhos-eixo" [attr.x]="g.esq - 12" [attr.y]="l.y + 4" text-anchor="end">{{ l.rotulo }}</text>
         }
-        <line class="ganhos-eixo-linha" [attr.x1]="g.esq" [attr.x2]="g.esq" [attr.y1]="g.topo" [attr.y2]="g.altura - g.base" />
         <line class="ganhos-eixo-linha" [attr.x1]="g.esq" [attr.x2]="g.largura - g.dir" [attr.y1]="g.altura - g.base" [attr.y2]="g.altura - g.base" />
         @for (b of grafico().barras; track b.dia) {
           <g class="ganhos-coluna" [class.ativa]="barraAtiva() === b" tabindex="0" role="img"

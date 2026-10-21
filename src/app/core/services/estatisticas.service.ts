@@ -59,6 +59,21 @@ export interface RankingVendas {
   unicas: number;
 }
 
+export interface PostagensDoDia {
+  /** 'YYYY-MM-DD', no fuso de São Paulo. */
+  dia: string;
+  n: number;
+}
+
+export interface PostagensDoGrupo {
+  grupoId: string;
+  grupoNome: string;
+  postagens: number;
+  /** Produtos diferentes (o mesmo produto pode sair mais de uma vez). */
+  produtos: number;
+  ultimaEm: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class EstatisticasService {
   private http = inject(HttpClient);
@@ -73,6 +88,25 @@ export class EstatisticasService {
   readonly leiturasVendas = signal<{ loja: Loja; lidoEm: string }[]>([]);
   readonly carregandoVendas = signal(false);
   readonly erroVendas = signal<string | null>(null);
+
+  readonly postagensPorDia = signal<PostagensDoDia[]>([]);
+  readonly postagensPorGrupo = signal<PostagensDoGrupo[]>([]);
+  readonly carregandoPostagens = signal(false);
+  readonly erroPostagens = signal<string | null>(null);
+
+  async carregarPostagens(dias: number): Promise<void> {
+    this.carregandoPostagens.set(true);
+    this.erroPostagens.set(null);
+    try {
+      const r: any = await firstValueFrom(this.http.get('/api/estatisticas/postagens', { params: { dias } }));
+      this.postagensPorDia.set(r.porDia ?? []);
+      this.postagensPorGrupo.set(r.porGrupo ?? []);
+    } catch (e: any) {
+      this.erroPostagens.set(e?.error?.erro || 'Não consegui carregar as postagens.');
+    } finally {
+      this.carregandoPostagens.set(false);
+    }
+  }
 
   async carregarMembros(dias: number): Promise<void> {
     this.carregandoMembros.set(true);

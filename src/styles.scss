@@ -40,18 +40,12 @@
   --danger-soft: #fbeeec;
   --danger-border: #eed2cd;
 
-  /* Painel: o azul so do icone de membros, a barra do grafico e o vidro dos botoes flutuantes. */
+  /* Painel: o azul so do icone de membros e a barra do grafico. */
   --azul: #2f6fd6;
   --azul-soft: #e8f0fc;
   --vermelho-icone: #c9543b;
   --barra: #f2cd78;
   --barra-forte: #e0a520;
-  --vidro-topo: rgba(255, 255, 255, 0.74);
-  --vidro-base: rgba(255, 255, 255, 0.42);
-  --vidro-borda: rgba(255, 255, 255, 0.7);
-  --vidro-brilho: rgba(255, 255, 255, 0.9);
-  --vidro-sombra: 0 10px 26px rgba(42, 29, 18, 0.16), 0 2px 6px rgba(42, 29, 18, 0.08);
-  --vidro-reflexo: rgba(255, 255, 255, 0.55);
 
   /* Foco de teclado: anel escuro (visível no claro e no dourado). Nos campos,
      o contorno escurece e ganha um halo dourado. */
@@ -151,12 +145,6 @@
   --vermelho-icone: #ff9a8f;
   --barra: #b8862a;
   --barra-forte: #f0b93a;
-  --vidro-topo: rgba(255, 255, 255, 0.14);
-  --vidro-base: rgba(255, 255, 255, 0.05);
-  --vidro-borda: rgba(255, 255, 255, 0.2);
-  --vidro-brilho: rgba(255, 255, 255, 0.28);
-  --vidro-sombra: 0 10px 26px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3);
-  --vidro-reflexo: rgba(255, 255, 255, 0.12);
 
   --focus: #e0a520;
   --focus-halo: 0 0 0 3px rgba(224, 165, 32, 0.45);
@@ -3930,7 +3918,7 @@ app-painel-robo {
 
 .pn-meio {
   display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 18px;
   height: 392px;
 }
@@ -3944,11 +3932,15 @@ app-painel-robo {
   font-weight: 800;
 }
 
-/* Gráfico de barras dos 30 dias: eixo y à esquerda, grade fraca, barras douradas finas. */
-.pn-grafico {
-  gap: 14px;
+/* Gráfico de barras por dia (shared/grafico-barras): eixo y à esquerda, grade fraca, barras
+   douradas finas. É o padrão dos gráficos de Estatísticas. */
+app-grafico-barras {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
-.pn-plot {
+.gb-plot {
   flex: 1;
   min-height: 0;
   display: grid;
@@ -3956,7 +3948,7 @@ app-painel-robo {
   gap: 12px;
   padding: 10px 0 24px;
 }
-.pn-eixo-y {
+.gb-eixo-y {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -3968,11 +3960,11 @@ app-painel-robo {
   /* Cada número fica no meio da sua linha da grade. */
   margin: -8px 0;
 }
-.pn-area {
+.gb-area {
   position: relative;
   min-height: 0;
 }
-.pn-grade {
+.gb-grade {
   position: absolute;
   inset: 0;
   display: flex;
@@ -3980,21 +3972,21 @@ app-painel-robo {
   justify-content: space-between;
   pointer-events: none;
 }
-.pn-grade span {
+.gb-grade span {
   height: 1px;
   background: var(--border);
 }
-.pn-grade span:last-child {
+.gb-grade span:last-child {
   background: var(--border-strong);
 }
-.pn-barras {
+.gb-barras {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: flex-end;
   gap: 2px;
 }
-.pn-coluna {
+.gb-coluna {
   position: relative;
   flex: 1;
   height: 100%;
@@ -4003,22 +3995,22 @@ app-painel-robo {
   justify-content: center;
   outline: none;
 }
-.pn-barra {
+.gb-barra {
   position: relative;
   width: 64%;
   border-radius: 4px 4px 0 0;
   background: var(--barra);
   transition: background 0.12s;
 }
-.pn-coluna:hover .pn-barra,
-.pn-coluna:focus-visible .pn-barra {
+.gb-coluna:hover .gb-barra,
+.gb-coluna:focus-visible .gb-barra {
   background: var(--barra-forte);
 }
-.pn-coluna:focus-visible {
+.gb-coluna:focus-visible {
   box-shadow: inset 0 0 0 2px var(--focus);
   border-radius: 4px;
 }
-.pn-rotulo-x {
+.gb-rotulo-x {
   position: absolute;
   top: 100%;
   left: 50%;
@@ -4028,7 +4020,7 @@ app-painel-robo {
   color: var(--text-muted);
   white-space: nowrap;
 }
-.pn-dica {
+.gb-dica {
   position: absolute;
   bottom: calc(100% + 6px);
   left: 50%;
@@ -4046,17 +4038,17 @@ app-painel-robo {
   pointer-events: none;
   transition: opacity 0.1s;
 }
-.pn-coluna:hover .pn-dica,
-.pn-coluna:focus-visible .pn-dica {
+.gb-coluna:hover .gb-dica,
+.gb-coluna:focus-visible .gb-dica {
   opacity: 1;
   visibility: visible;
 }
 /* Nas pontas, a dica não sai do cartão. */
-.pn-coluna:nth-child(-n + 2) .pn-dica {
+.gb-coluna:nth-child(-n + 2) .gb-dica {
   left: 0;
   transform: none;
 }
-.pn-coluna:nth-last-child(-n + 2) .pn-dica {
+.gb-coluna:nth-last-child(-n + 2) .gb-dica {
   left: auto;
   right: 0;
   transform: none;
@@ -4308,6 +4300,7 @@ app-painel-robo {
     margin-top: 4px;
   }
 }
+
 
 /* Lista das últimas ações (Painel): rola por dentro do cartão. */
 .pv-lista {
@@ -4775,11 +4768,7 @@ a.gf-item-titulo:hover {
 }
 @media (max-width: 1000px) {
   .pn-meio {
-    grid-template-columns: minmax(0, 1fr);
     height: auto;
-  }
-  .pn-grafico {
-    height: 340px;
   }
   .pn-acoes {
     max-height: 460px;
@@ -4796,9 +4785,6 @@ a.gf-item-titulo:hover {
   .pn-kpi-icone {
     width: 54px;
     height: 54px;
-  }
-  .pn-rotulo-x {
-    font-size: 11px;
   }
   .pv-tiles {
     grid-template-columns: minmax(0, 1fr);
@@ -5397,7 +5383,8 @@ app-estatisticas {
   gap: 14px;
 }
 app-membros-card,
-app-vendas-card {
+app-vendas-card,
+app-postagens-card {
   flex: 1;
   min-height: 0;
   gap: 14px;
@@ -5757,4 +5744,82 @@ app-vendas-card {
 }
 .est-cartao-grafico .ganhos-grafico svg {
   height: 100%;
+}
+
+/* ---- Padrão dos gráficos (Estatísticas) ----
+   O mesmo desenho do gráfico de postagens: título grande, grade contínua e fraca, só a linha de
+   base marcada, números do eixo em 12px e a dica escura com o valor. */
+.est-cartao-grafico h2,
+.ganhos-cartao-evolucao h2,
+.est-cartao-grupos h2,
+.est-vendas-grade h2 {
+  font-size: 21px;
+  font-weight: 800;
+}
+.est-postagens {
+  gap: 14px;
+}
+.ganhos-grafico .ganhos-grade,
+.est-cartao-grafico .ganhos-grade,
+.ganhos-cartao-evolucao .ganhos-grade {
+  stroke: var(--border);
+  stroke-dasharray: none;
+}
+.ganhos-grafico .ganhos-eixo-linha {
+  stroke: var(--border-strong);
+}
+.ganhos-grafico .ganhos-eixo {
+  font-size: 12px;
+  fill: var(--text-muted);
+}
+/* Passar o mouse escurece as barras da coluna, como no gráfico de postagens (sem faixa por trás). */
+.ganhos-grafico .ganhos-coluna.ativa .ganhos-alvo {
+  fill: transparent;
+}
+.ganhos-grafico .ganhos-coluna path {
+  transition: filter 0.12s;
+}
+.ganhos-grafico .ganhos-coluna.ativa path,
+.ganhos-grafico .ganhos-coluna:focus-visible path {
+  filter: brightness(0.86) saturate(1.1);
+}
+.ganhos-grafico .ganhos-coluna:focus-visible .ganhos-alvo {
+  stroke: var(--focus);
+  stroke-width: 2;
+}
+.ganhos-grafico .ganhos-tooltip {
+  min-width: 150px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: var(--radius-xs);
+  background: var(--espresso);
+  color: var(--on-espresso);
+  font-size: 12px;
+  box-shadow: var(--shadow);
+}
+.ganhos-grafico .ganhos-tooltip strong,
+.ganhos-grafico .ganhos-tooltip-linha b {
+  color: var(--on-espresso);
+}
+.ganhos-grafico .ganhos-tooltip-total {
+  border-top-color: color-mix(in srgb, var(--on-espresso) 25%, transparent);
+}
+.est-postagens app-grafico-barras {
+  min-height: 220px;
+}
+/* Por grupo (Postagens): cinco colunas, a data com hora inteira. */
+.est-tabela-postagens th:nth-child(2) {
+  width: 64px;
+}
+.est-tabela-postagens th:nth-child(3) {
+  width: 56px;
+}
+.est-tabela-postagens th:nth-child(4) {
+  width: 80px;
+}
+.est-tabela-postagens th:nth-child(5) {
+  width: 104px;
+}
+.ganhos-grafico .ganhos-grade.est-zero {
+  stroke: var(--border-strong);
 }

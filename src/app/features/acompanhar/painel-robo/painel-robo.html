@@ -94,44 +94,8 @@
   </ol>
 </section>
 
-<!-- 3. Postagens dos últimos 30 dias e as últimas ações, lado a lado. -->
+<!-- 3. O que o robô fez por último. -->
 <div class="pn-meio">
-  <section class="card pn-grafico" aria-labelledby="pn-grafico-titulo">
-    <div>
-      <h2 id="pn-grafico-titulo">Postagens dos últimos 30 dias</h2>
-      <p class="card-subtitle">Quantidade de ofertas enviadas por dia.</p>
-    </div>
-    @if (grafico(); as g) {
-      <div class="pn-plot" role="img" [attr.aria-label]="'Postagens por dia nos últimos 30 dias: ' + g.total + ' no total.'">
-        <div class="pn-eixo-y" aria-hidden="true">
-          @for (v of g.linhas; track $index) { <span>{{ v }}</span> }
-        </div>
-        <div class="pn-area">
-          <div class="pn-grade" aria-hidden="true">
-            @for (v of g.linhas; track $index) { <span></span> }
-          </div>
-          <div class="pn-barras">
-            @for (b of g.barras; track b.dia) {
-              <div class="pn-coluna" tabindex="0" [attr.aria-label]="b.rotulo + ': ' + b.n + (b.n === 1 ? ' postagem' : ' postagens')">
-                <span class="pn-barra" [style.height.%]="b.altura">
-                  <span class="pn-dica" aria-hidden="true"><strong>{{ b.n }}</strong> {{ b.n === 1 ? 'postagem' : 'postagens' }} · {{ b.rotulo }}</span>
-                </span>
-                <span class="pn-rotulo-x" aria-hidden="true">{{ b.marca ? b.rotulo : '' }}</span>
-              </div>
-            }
-          </div>
-        </div>
-      </div>
-      <!-- Os mesmos números em tabela, pra leitor de tela. -->
-      <table class="sr-only">
-        <caption>Postagens por dia</caption>
-        <tbody>
-          @for (b of g.barras; track b.dia) { <tr><th scope="row">{{ b.rotulo }}</th><td>{{ b.n }}</td></tr> }
-        </tbody>
-      </table>
-    }
-  </section>
-
   <section class="card pn-acoes" aria-labelledby="pn-acoes-titulo">
     <div class="card-header">
       <h2 id="pn-acoes-titulo">Últimas ações</h2>
