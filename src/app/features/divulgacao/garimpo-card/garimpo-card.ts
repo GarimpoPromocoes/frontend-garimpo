@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { ConfigService, FonteProdutos } from '../../../core/services/config.service';
 import { JobsService } from '../../../core/services/jobs.service';
-import { ChipInput } from '../../../shared/chip-input/chip-input';
 
 const MAX_GRUPOS = 50;
 /** Quanto esperar o robô conectar o WhatsApp e anotar a lista de grupos. */
@@ -11,6 +10,8 @@ const PRAZO_LISTA_MS = 180000;
 const PASSO_ESPERA_MS = 500;
 /** Quantos nomes aparecem no resumo "Clona de" antes do "e mais N". */
 const MAX_NOMES_RESUMO = 2;
+/** Quantos concorrentes aparecem como etiqueta na linha do grupo antes do "+N". */
+const MAX_CHIPS = 3;
 
 interface GruposDoWhatsapp {
   em: string | null;
@@ -29,7 +30,6 @@ const mesmoNome = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
 @Component({
   selector: 'app-garimpo-card',
   standalone: true,
-  imports: [ChipInput],
   templateUrl: './garimpo-card.html',
   styleUrl: './garimpo-card.scss',
 })
@@ -39,6 +39,14 @@ export class GarimpoCard {
   private jobs = inject(JobsService);
 
   protected readonly maxGrupos = MAX_GRUPOS;
+  protected readonly maxChips = MAX_CHIPS;
+  /** Filtro da lista de grupos e da lista da janela. */
+  protected readonly busca = signal('');
+  protected readonly buscaJanela = signal('');
+  /** Na janela: "Todos os grupos" (lista vazia) ou "Só os que eu escolher". */
+  protected readonly modoTodos = signal(true);
+  /** Como a lista do grupo estava ao abrir a janela — o "Cancelar" volta pra ela. */
+  private antesDaJanela: string[] = [];
 
   /** Os grupos onde o robô posta (aba Grupos). */
   protected readonly gruposDestino = computed(() => this.configService.config()?.grupos ?? []);
@@ -80,8 +88,115 @@ export class GarimpoCard {
     this.erro.set(null);
     this.rFontes.set({ ...this.rFontes(), [id]: fonte });
     // Acabou de virar clonagem e ainda clona de todos: já abre a escolha dos grupos.
-    if (fonte === 'clonagem' && !this.clonaDe(id).length) this.aberto.set(id);
+    if (fonte === 'clonagem' && !this.clonaDe(id).length) this.abrirEscolha(id, true);
   }
+
+  protected inicial(nome: string): string {
+    return (nome || '?').trim().charAt(0).toUpperCase() || '?';
+  }
+
+  protected readonly contagem = computed(() => {
+    const grupos = this.gruposDestino();
+    const clonagem = grupos.filter((g) => this.fonteDe(g.id) === 'clonagem').length;
+    return {
+      garimpo: grupos.length - clonagem,
+      clonagem,
+      lidos: this.doWhatsapp().grupos.filter((w) => w.lendo).length,
+    };
+  });
+
+  protected readonly gruposVisiveis = computed(() => {
+    const termo = this.busca().trim().toLowerCase();
+    const grupos = this.gruposDestino();
+    if (!termo) return grupos;
+    return grupos.filter((g) => `${g.nome} ${g.groupName}`.toLowerCase().includes(termo));
+  });
+
+  /** O nome escolhido não está entre os grupos que o robô achou no WhatsApp. */
+  protected naoEncontrado(nome: string): boolean {
+    return this.doWhatsapp().naoEncontrados.some((n) => mesmoNome(n, nome));
+  }
+
+  // ---- janela "Escolher concorrentes" ----
+
+  protected readonly grupoAberto = computed(() => {
+    const id = this.aberto();
+    return id ? this.gruposDestino().find((g) => g.id === id) ?? null : null;
+  });
+
+  /** `escolher`: abre já em "Só os que eu escolher" (o grupo acabou de virar clonagem). */
+  abrirEscolha(id: string, escolher = false): void {
+    this.antesDaJanela = [...this.clonaDe(id)];
+    this.modoTodos.set(!this.antesDaJanela.length && !escolher);
+    this.buscaJanela.set('');
+    this.aberto.set(id);
+  }
+
+  cancelarEscolha(): void {
+    const id = this.aberto();
+    if (id) this.definirClonagem(id, this.antesDaJanela);
+    this.aberto.set(null);
+  }
+
+  concluirEscolha(): void {
+    const id = this.aberto();
+    if (id && this.modoTodos()) this.definirClonagem(id, []);
+    this.aberto.set(null);
+  }
+
+  escolherTodos(id: string): void {
+    this.modoTodos.set(true);
+    this.definirClonagem(id, []);
+  }
+
+  /** O que foi digitado na busca e não está na lista: dá pra adicionar pelo nome. */
+  protected podeAdicionarDigitado(id: string): boolean {
+    const nome = this.buscaJanela().trim();
+    if (!nome || this.clonaDe(id).length >= MAX_GRUPOS) return false;
+    return !this.doWhatsapp().grupos.some((w) => mesmoNome(w.nome, nome)) && !this.naLista(id, nome);
+  }
+
+  adicionarDigitado(id: string): void {
+    if (!this.podeAdicionarDigitado(id)) return;
+    this.definirClonagem(id, [...this.clonaDe(id), this.buscaJanela().trim()]);
+    this.buscaJanela.set('');
+  }
+
+  /** Lista da janela: os grupos do WhatsApp mais os nomes digitados, marcados primeiro. */
+  protected readonly opcoesJanela = computed(() => {
+    const id = this.aberto();
+    if (!id) return [];
+    const termo = this.buscaJanela().trim().toLowerCase();
+    const doZap = this.doWhatsapp().grupos.map((w) => ({
+      nome: w.nome,
+      marcado: this.naLista(id, w.nome),
+      lendo: w.lendo,
+      faltando: false,
+      detalhe: w.canal ? 'Canal' : 'Grupo',
+    }));
+    const digitados = this.clonaDe(id)
+      .filter((n) => !doZap.some((w) => mesmoNome(w.nome, n)))
+      .map((nome) => ({ nome, marcado: true, lendo: false, faltando: this.naoEncontrado(nome), detalhe: 'Digitado pelo nome' }));
+    return [...digitados, ...doZap]
+      .filter((o) => !termo || o.nome.toLowerCase().includes(termo))
+      .sort((a, b) => Number(b.marcado) - Number(a.marcado));
+  });
+
+  protected horaDaLista(): string {
+    const em = this.doWhatsapp().em;
+    const d = em ? new Date(em) : null;
+    if (!d || Number.isNaN(d.getTime())) return '';
+    const hora = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    return d.toDateString() === new Date().toDateString() ? `hoje, ${hora}` : `${d.toLocaleDateString('pt-BR')}, ${hora}`;
+  }
+
+  /** Quantos grupos têm alguma mudança ainda não salva. */
+  protected readonly alteracoes = computed(() => {
+    const s = this.salvo();
+    return Object.keys(s.fontes).filter(
+      (id) => s.fontes[id] !== this.fonteDe(id) || s.clona[id].join('|') !== this.clonaDe(id).join('|')
+    ).length;
+  });
 
   definirClonagem(id: string, grupos: string[]): void {
     this.erro.set(null);
