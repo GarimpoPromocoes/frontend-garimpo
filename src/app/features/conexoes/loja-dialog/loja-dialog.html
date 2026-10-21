@@ -11,6 +11,9 @@
               {{ artigoM() }} {{ rotulo() }} pediu mais uma confirmação. Responda aqui.
             } @else if (emLogin()) {
               O robô está entrando na sua conta. Isso leva alguns segundos.
+            } @else if (conectada() && painelPediuLogin()) {
+              Os posts da Amazon seguem saindo, mas o painel de Associados pediu para entrar de novo — sem isso os
+              ganhos não são lidos.
             } @else if (conectada()) {
               Esta loja está conectada e trabalhando para você.
             } @else if (usaNavegador()) {
@@ -287,6 +290,9 @@
         }
 
         <div class="form-actions">
+          @if (painelPediuLogin()) {
+            <button type="button" class="btn btn-primary" [disabled]="enviando()" (click)="entrarDeNovo()">Entrar de novo</button>
+          }
           <button type="button" class="btn btn-danger" [disabled]="enviando()" (click)="desconectar()">
             {{ enviando() ? 'Desconectando…' : 'Desconectar' }}
           </button>

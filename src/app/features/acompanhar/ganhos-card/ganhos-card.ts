@@ -226,12 +226,13 @@ export class GanhosCard implements OnInit, OnDestroy {
       this.erroAcao.set(r.erro ?? null);
       return;
     }
+    // Leitura direta: o botão em "Lendo…" e cada loja aparecendo já contam o que está acontecendo.
     this.aviso.set(
       r.modo === 'robo-ligado'
         ? 'Pedido feito. O robô começa a ler em poucos segundos, sem parar de postar. Cada loja aparece aqui assim que terminar.'
         : r.modo === 'na-fila'
           ? 'Pedido registrado. A leitura acontece assim que o robô for ligado.'
-          : 'Lendo os painéis das lojas agora. Cada loja aparece aqui assim que terminar.'
+          : null
     );
   }
 

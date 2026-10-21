@@ -4587,8 +4587,9 @@ app-ganhos-card {
   width: 18px;
   height: 18px;
 }
+/* As setas do icone apontam no sentido anti-horario: gira pra onde elas apontam. */
 .ganhos-atualizar-lendo svg {
-  animation: girar 1s linear infinite;
+  animation: girar 1s linear infinite reverse;
 }
 
 /* Um bloco por loja, tingido com a cor dela (a mesma do grafico). */

@@ -7,6 +7,7 @@ import { StatusService } from '../../../core/services/status.service';
 import { LojasUiService } from '../../../core/services/lojas-ui.service';
 import { ConfirmacaoService } from '../../../core/services/confirmacao.service';
 import { VerificacaoService } from '../../../core/services/verificacao.service';
+import { GanhosService } from '../../../core/services/ganhos.service';
 
 const ROTULO: Record<Provedor, string> = {
   mercadolivre: 'Mercado Livre',
@@ -92,6 +93,7 @@ export class LojaDialog {
   private lojasUi = inject(LojasUiService);
   private confirmacao = inject(ConfirmacaoService);
   protected verificacao = inject(VerificacaoService);
+  private ganhos = inject(GanhosService);
 
   protected readonly estadoLogin = computed(() => this.jobsService.login());
   protected readonly pedido = computed<PedidoLogin | null>(() => this.estadoLogin()?.pedido ?? null);
@@ -103,6 +105,13 @@ export class LojaDialog {
     () => this.lojasUi.aberta() ?? this.estadoLogin()?.provedor ?? null,
   );
   protected readonly aberto = computed(() => !!this.provedor());
+  /**
+   * Amazon: a tag e a loja seguem valendo (os posts saem), mas o painel de Associados — de onde
+   * vêm os ganhos — pede o login dele de novo de tempos em tempos. Aí o modal oferece entrar de novo.
+   */
+  protected readonly painelPediuLogin = computed(
+    () => this.provedor() === 'amazon' && this.ganhos.leituras().find((l) => l.loja === 'amazon')?.ok === false,
+  );
   protected readonly rotulo = computed(() => {
     const p = this.provedor();
     return p ? ROTULO[p] : '';
@@ -256,6 +265,16 @@ export class LojaDialog {
 
   constructor() {
     inject(DestroyRef).onDestroy(() => this.desligarCamera());
+
+    // Ao abrir a Amazon, confere a última leitura dos ganhos (pra saber se o painel pediu login).
+    effect(() => {
+      if (this.provedor() === 'amazon') untracked(() => void this.ganhos.carregar());
+    });
+    // Entrou de novo na Amazon: já pede a leitura dos ganhos, pra "Sessão expirada" sumir na hora.
+    effect(() => {
+      const f = this.fim();
+      if (f?.ok && this.provedor() === 'amazon') untracked(() => void this.ganhos.atualizar());
+    });
 
     // Desliga com folga: entre um clique e a próxima foto a loja pode ficar um
     // instante sem pedido — sem isso a câmera piscaria a cada clique.
