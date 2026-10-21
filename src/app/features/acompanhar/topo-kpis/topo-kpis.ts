@@ -12,7 +12,7 @@ export function duracao(ms: number): string {
   return `${Math.floor(min / 60)}h ${min % 60}min`;
 }
 
-/** Os números do momento no cabeçalho: tempo ativo, postados hoje e a próxima postagem. */
+/** Os números do momento no cabeçalho: tempo ativo e a próxima postagem. */
 @Component({
   selector: 'app-topo-kpis',
   standalone: true,
@@ -21,10 +21,6 @@ export function duracao(ms: number): string {
       <div class="tk-item">
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 2" /></svg>
         <div><dt>Tempo ativo</dt><dd>{{ tempoAtivo() }}</dd></div>
-      </div>
-      <div class="tk-item">
-        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5.5" y="3.5" width="13" height="17" rx="2" /><path d="M9 8.5h6M9 12h6M9 15.5h4" /></svg>
-        <div><dt>Postados hoje</dt><dd>{{ postadosHoje() ?? '—' }}</dd></div>
       </div>
       <div class="tk-item">
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2.5 4.5 13.5H12l-1 8 8.5-11H12Z" /></svg>
@@ -50,8 +46,6 @@ export class TopoKpis {
     if (!this.runControl.postandoAgora() || !ini) return '—';
     return duracao(this.agora() - new Date(ini).getTime());
   });
-
-  protected readonly postadosHoje = computed(() => this.statusService.status()?.hoje?.postados ?? null);
 
   /** A próxima coisa com hora marcada: a postagem agendada ou a nova busca. */
   protected readonly proxima = computed<{ rotulo: string; valor: string }>(() => {

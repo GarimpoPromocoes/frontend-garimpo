@@ -1,9 +1,6 @@
-<!-- Os grupos marcados para postar: um cartão por grupo. Clicar abre a lista dele. -->
-<section class="card gf" aria-labelledby="gf-titulo">
-  <div>
-    <h2 id="gf-titulo">Grupos</h2>
-    <p class="card-subtitle">Resumo rápido dos seus grupos.</p>
-  </div>
+<!-- Os grupos marcados para postar: um cartão por grupo, com o tamanho da lista dele. -->
+<section class="gf" aria-labelledby="gf-titulo">
+  <h2 class="pn-secao-titulo" id="gf-titulo">Grupos</h2>
   @if (cartoes().length) {
     <ul class="gf-cartoes">
       @for (g of cartoes(); track g.id) {
@@ -12,20 +9,27 @@
             type="button"
             class="gf-cartao"
             [class.gf-cartao-vez]="ehDaVez(g)"
-            [attr.aria-label]="'Ver a lista de ' + g.nome + (ehDaVez(g) ? ' (vez dele agora)' : '')"
-            [title]="fonteTexto(g) + ' — ' + detalheProntos(g)"
+            [attr.aria-label]="'Ver a lista de ' + g.nome"
             (click)="abrir(g)"
           >
-            <span class="gf-ponto" [class.gf-ponto-vez]="ehDaVez(g)" aria-hidden="true"></span>
-            <span class="gf-corpo">
+            <span class="gf-cartao-topo">
               <strong class="gf-nome">{{ g.nome }}</strong>
-              <span class="gf-membros">{{ membros(g) }}</span>
-              <span class="gf-numeros">
-                <span><b>{{ prontos(g) }}</b> prontos</span>
-                <span><b>{{ postadosHoje(g) }}</b> postados</span>
-              </span>
+              @if (ehDaVez(g)) { <span class="pv-selo" data-tom="andamento">Vez dele agora</span> }
             </span>
-            <svg class="gf-chevron" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5.5 6.5 6.5L9 18.5"/></svg>
+            <span class="gf-fonte">{{ fonteTexto(g) }}</span>
+            <span class="gf-numeros">
+              @if (g.fonte === 'clonagem') {
+                <span><b>{{ g.contagens.fila }}</b> na fila</span>
+              }
+              <span><b>{{ g.contagens.pronto + g.contagens.espera }}</b> {{ g.fonte === 'clonagem' ? 'prontos' : 'no estoque' }}</span>
+              <span class="gf-ok"><b>{{ g.contagens.postado }}</b> postados</span>
+              @if (g.fonte === 'clonagem') {
+                <span class="gf-erro"><b>{{ g.contagens.recusado }}</b> recusados</span>
+              }
+            </span>
+            <span class="gf-rodape">
+              {{ g.ultimaPostagemEm ? 'Último post às ' + horaDe(g.ultimaPostagemEm) : 'Nenhum post ainda' }}
+            </span>
           </button>
         </li>
       }

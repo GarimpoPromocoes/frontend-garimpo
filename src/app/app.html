@@ -56,13 +56,6 @@
     </nav>
 
     <div class="sidebar-footer">
-      <!-- Troca de tema: quem trata o clique é core/tema/tema.ts (data-alternar-tema). O texto certo
-           aparece por CSS conforme o tema em uso. -->
-      <button type="button" class="tema-botao" data-alternar-tema>
-        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>
-        <span class="so-no-claro">Usar tema escuro</span>
-        <span class="so-no-escuro">Usar tema claro</span>
-      </button>
       <div class="usuario-pill">
         <span class="usuario-email">{{ auth.usuario()?.email }}</span>
         <button type="button" class="btn btn-ghost btn-sm" (click)="sair()">Sair</button>
@@ -95,7 +88,7 @@
       </div>
 
       <div class="topbar-actions">
-        <!-- Os números do momento (tempo ativo, postados hoje, próxima postagem), a oferta
+        <!-- Os números do momento (tempo ativo e próxima postagem), a oferta
              personalizada e os logs (janelas abertas daqui, de qualquer página) e o sino. -->
         <app-topo-kpis />
         <button type="button" class="topbar-botao" [class.topbar-botao-aberto]="buscaModalAberta()"

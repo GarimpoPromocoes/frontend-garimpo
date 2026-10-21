@@ -69,7 +69,8 @@
 </section>
 
 <!-- 2. A pipeline do produto da vez: a loja aparece na Origem e os canais no Postando. -->
-<section class="pv-pipeline" aria-label="Etapas do produto da vez">
+<section class="pv-pipeline" aria-labelledby="pn-fluxo-titulo">
+  <h2 class="pn-secao-titulo" id="pn-fluxo-titulo">Fluxo</h2>
   <ol class="pv-etapas">
     @for (e of etapas(); track e.id) {
       <li class="pv-etapa" [attr.data-estado]="e.estado" [class.pv-etapa-atual]="e.atual" [attr.aria-current]="e.atual ? 'step' : null">
@@ -95,7 +96,7 @@
 </section>
 
 <!-- 3. Os grupos marcados para postar: clicar abre a lista de cada um. -->
-<app-grupos-fila [grupoDaVez]="grupoDaVez()" [numeros]="numerosDosGrupos()" />
+<app-grupos-fila [grupoDaVez]="grupoDaVez()" />
 
 <!-- Grupos ativos: em quais grupos o robô publica. -->
 @if (escolhendoGrupos()) {

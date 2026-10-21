@@ -50,8 +50,6 @@ function hora(iso: string | null): string {
 export class GruposFila {
   /** Nome do grupo da rodada atual (destaca o cartão dele). */
   grupoDaVez = input<string | null>(null);
-  /** Membros e postagens de hoje de cada grupo (api /painel), por id. */
-  numeros = input<Record<string, { membros: number | null; postadosHoje: number }>>({});
 
   private filas = inject(FilasService);
   private runControl = inject(RunControlService);
@@ -112,28 +110,6 @@ export class GruposFila {
     if (!g.origens.length) return 'Clonagem de todos os grupos';
     const nomes = g.origens.slice(0, 2).join(', ');
     return `Clonagem de ${nomes}${g.origens.length > 2 ? ` e mais ${g.origens.length - 2}` : ''}`;
-  }
-
-  protected membros(g: ResumoFila): string {
-    const n = this.numeros()[g.id]?.membros;
-    return n == null ? 'Membros ainda não lidos' : `${n.toLocaleString('pt-BR')} ${n === 1 ? 'membro' : 'membros'}`;
-  }
-
-  /** Tudo o que ainda vai sair no grupo: na fila, pronto e em espera. */
-  protected prontos(g: ResumoFila): number {
-    return g.contagens.fila + g.contagens.pronto + g.contagens.espera;
-  }
-
-  protected postadosHoje(g: ResumoFila): number {
-    return this.numeros()[g.id]?.postadosHoje ?? 0;
-  }
-
-  protected detalheProntos(g: ResumoFila): string {
-    const c = g.contagens;
-    const partes = g.fonte === 'clonagem' ? [`${c.fila} na fila`, `${c.pronto} com link pronto`] : [`${c.pronto} no estoque`];
-    if (c.espera) partes.push(`${c.espera} em espera`);
-    if (c.recusado) partes.push(`${c.recusado} recusados`);
-    return partes.join(' · ');
   }
 
   protected ehDaVez(g: ResumoFila): boolean {

@@ -83,10 +83,7 @@
   /* Véu atrás das janelas e o contorno delas (no escuro a sombra não basta). */
   --veu: rgba(36, 26, 17, 0.55);
   --janela-anel: 0 0 0 0 transparent;
-  --so-no-claro: inline;
-  --so-no-escuro: none;
-  /* Menu lateral: no claro é o bloco café de antes da refatoração; no escuro
-     acompanha o fundo (ver o tema escuro). */
+  /* Menu lateral: o bloco café. */
   --menu-bg: #2a1d12;
   --menu-borda: #3a2a1b;
   --menu-texto: #f6efe2;
@@ -100,97 +97,6 @@
   color-scheme: light;
 }
 
-/* ---- Tema escuro ----
-   O mesmo desenho do claro com a luz apagada: o creme vira café escuro, os
-   cartões sobem um tom e o dourado continua sendo a única cor cheia. Vale
-   quando a pessoa escolhe (data-theme no <html>) ou, sem escolha, quando o
-   sistema pede. */
-@mixin tema-escuro {
-  /* Café escuro com o mesmo dourado do claro: a mesma família, só com a luz apagada. */
-  --espresso: #f2e9dc;
-  --espresso-soft: #d9ccb9;
-  --on-espresso: #1c150e;
-  --gold: #e0a520;
-  --gold-deep: #f0b93a;
-  --gold-ink: #f0c25a;
-  --gold-soft: #3a2c12;
-  --gold-border: #6b5320;
-
-  --bg: #17120d;
-  --surface: #211a13;
-  --surface-2: #2a2219;
-  --surface-3: #352b20;
-
-  --border: #3a2f24;
-  --border-strong: #54463a;
-  --border-control: #8c7e6d;
-
-  --text: #f5efe6;
-  --text-soft: #d9cfc2;
-  --text-muted: #ab9f90;
-  --placeholder: #9c907f;
-
-  --ok: #7fcf9f;
-  --ok-soft: #16291e;
-  --ok-border: #2d5039;
-  --warn: #f0c25a;
-  --warn-soft: #3a2c12;
-  --warn-border: #6b5320;
-  --danger: #ff9a8f;
-  --danger-soft: #3a1b16;
-  --danger-border: #74342b;
-
-  --azul: #8ab4f5;
-  --azul-soft: #1b2638;
-  --vermelho-icone: #ff9a8f;
-  --barra: #b8862a;
-  --barra-forte: #f0b93a;
-
-  --focus: #e0a520;
-  --focus-halo: 0 0 0 3px rgba(224, 165, 32, 0.45);
-  --shadow-sm: 0 1px 0 rgba(0, 0, 0, 0.4);
-  --shadow: 0 14px 32px rgba(0, 0, 0, 0.55);
-  --veu: rgba(0, 0, 0, 0.68);
-  --janela-anel: 0 0 0 1px var(--border-strong);
-
-  --lanterna-bg: #2e2217;
-  --lanterna-borda: #4a3a2a;
-  --lanterna-luz: #9a8672;
-  --toggle-trilho: #e0a520;
-  --toggle-bola: #2a1d12;
-  --logo-placa: #f6f3ed;
-  --logo-caixa: #f6f3ed;
-  --logo-caixa-folga: 8px 14px;
-  --so-no-claro: none;
-  --so-no-escuro: inline;
-  --menu-bg: var(--bg);
-  --menu-borda: var(--border);
-  --menu-texto: var(--text);
-  --menu-texto-suave: var(--text-soft);
-  --menu-texto-fraco: var(--text-muted);
-  --menu-hover: var(--surface-3);
-  --menu-foco: var(--focus);
-  --menu-logo: var(--espresso);
-  --menu-controle: var(--surface);
-  --menu-controle-borda: var(--border-control);
-
-  --serie-1: #7fb4f2;
-  --serie-2: #f59a6b;
-  --serie-3: #5fd0a4;
-  /* Entradas x saidas dos grupos: azul x laranja, validados contra a superficie escura. */
-  --mov-entrada: #4a8ad6;
-  --mov-saida: #d8723f;
-  color-scheme: dark;
-}
-
-:root[data-theme='dark'] {
-  @include tema-escuro;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    @include tema-escuro;
-  }
-}
 
 * {
   box-sizing: border-box;
@@ -3985,10 +3891,6 @@ app-painel-robo {
   height: 20px;
 }
 
-.gf h2 {
-  font-size: 21px;
-  font-weight: 800;
-}
 
 /* Gráfico de barras por dia (shared/grafico-barras): eixo y à esquerda, grade fraca, barras
    douradas finas. É o padrão dos gráficos de Estatísticas. */
@@ -4370,36 +4272,45 @@ app-grafico-barras {
   color: var(--danger);
 }
 
-/* Grupos: um cartão por grupo marcado para postar; clicar abre a lista dele. */
+/* Grupos postando: um cartão por grupo marcado; clicar abre a lista dele. */
 .gf {
-  padding: 22px;
-  gap: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+/* Título de cada seção do Painel (Fluxo, Grupos): separa os blocos. */
+.pn-secao-titulo {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 800;
+  font-stretch: var(--estreita);
+  color: var(--text);
 }
 .gf-cartoes {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 12px;
 }
 .gf-cartao {
   width: 100%;
   height: 100%;
   display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 18px 18px 18px 26px;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
   text-align: left;
   font: inherit;
   color: var(--text);
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
   cursor: pointer;
-  transition:
-    border-color 0.15s,
-    box-shadow 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 .gf-cartao:hover {
   border-color: var(--border-strong);
@@ -4411,57 +4322,39 @@ app-grafico-barras {
 }
 .gf-cartao-vez {
   border-color: var(--gold-border);
+  background: var(--gold-soft);
 }
-.gf-ponto {
-  align-self: flex-start;
-  flex-shrink: 0;
-  width: 10px;
-  height: 10px;
-  margin-top: 9px;
-  border-radius: 50%;
-  background: var(--border-strong);
-}
-/* Verde = a vez dele agora. */
-.gf-ponto-vez {
-  background: var(--ok);
-  box-shadow: 0 0 0 4px var(--ok-soft);
-}
-.gf-corpo {
-  flex: 1;
-  min-width: 0;
+.gf-cartao-topo {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 .gf-nome {
-  font-size: 18px;
-  font-weight: 800;
-  font-stretch: var(--estreita);
+  font-size: 16px;
   overflow-wrap: anywhere;
 }
-.gf-membros {
-  font-size: 14px;
+.gf-fonte,
+.gf-rodape {
+  font-size: 13px;
   color: var(--text-muted);
 }
 .gf-numeros {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 20px;
-  white-space: nowrap;
-  margin-top: 8px;
-  font-size: 15px;
-  color: var(--text-muted);
+  gap: 4px 12px;
+  font-size: 13px;
+  color: var(--text-soft);
 }
 .gf-numeros b {
   color: var(--text);
-  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
-.gf-chevron {
-  flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-  color: var(--text-muted);
+.gf-ok b {
+  color: var(--ok);
+}
+.gf-erro b {
+  color: var(--danger);
 }
 
 /* Janela com a lista de um grupo. */
@@ -5314,12 +5207,6 @@ app-ganhos-card {
 }
 
 /* ---- Troca de tema (botão no rodapé do menu) ---- */
-.so-no-claro {
-  display: var(--so-no-claro);
-}
-.so-no-escuro {
-  display: var(--so-no-escuro);
-}
 /* Parar o robô, sobre o amarelo: sempre escuro, nos dois temas. */
 .lanterna-acesa .lanterna-acao .btn-primary {
   background: var(--on-gold);
