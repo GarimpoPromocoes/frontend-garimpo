@@ -38,7 +38,6 @@ export type AbaId =
   | 'grupos'
   | 'garimpo'
   | 'regras'
-  | 'busca'
   | 'whatsapp'
   | 'lojas'
   | 'dono';
@@ -70,13 +69,6 @@ const ABAS: Aba[] = [
     secao: 'Acompanhar',
   },
 
-  {
-    id: 'busca',
-    label: 'Oferta personalizada',
-    titulo: 'Oferta personalizada',
-    descricao: 'Veja as melhores ofertas de um produto nas lojas conectadas e escolha qual postar.',
-    secao: 'Divulgação',
-  },
   {
     id: 'grupos',
     label: 'Grupos',
@@ -187,6 +179,8 @@ export class App implements OnInit, OnDestroy {
   protected readonly atividadeModalAberta = signal(false);
   /** Produtos garimpados — abre pelo "Ver produtos" do painel, no lugar de ser uma aba. */
   protected readonly produtosModalAberto = signal(false);
+  /** Oferta personalizada (buscar ofertas de um produto) — abre pelo botão do topo, no lugar de ser uma aba. */
+  protected readonly buscaModalAberta = signal(false);
 
   protected readonly algumModalAberto = computed(() =>
     !!this.lojasUi.aberta() ||
@@ -197,7 +191,8 @@ export class App implements OnInit, OnDestroy {
     !!this.confirmacaoService.pedido() ||
     this.buscaService.postagemAberta() ||
     this.atividadeModalAberta() ||
-    this.produtosModalAberto(),
+    this.produtosModalAberto() ||
+    this.buscaModalAberta(),
   );
 
   protected badgeDe(id: AbaId): string | null {
@@ -273,6 +268,8 @@ export class App implements OnInit, OnDestroy {
       if ((salva as string) === 'produtos') salva = 'painel';
       // Ganhos virou parte de Estatísticas.
       if ((salva as string) === 'ganhos') salva = 'estatisticas';
+      // Oferta personalizada também: agora é um modal aberto pelo topo.
+      if ((salva as string) === 'busca') salva = 'painel';
       if (salva && ABAS.some((a) => a.id === salva)) this.aba.set(salva);
     } catch (_) {
     }

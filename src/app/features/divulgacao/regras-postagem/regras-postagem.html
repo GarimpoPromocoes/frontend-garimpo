@@ -165,7 +165,11 @@
           <span>por dia, no máximo</span>
         </div>
         <p class="regra-card-texto">
-          Aparece esporadicamente em cada grupo com o link dos seus outros grupos.
+          @if (divulgacao().textos.length > 1) {
+            {{ divulgacao().textos.length }} mensagens alternando, esporadicamente, em cada grupo com o link dos seus outros grupos.
+          } @else {
+            Aparece esporadicamente em cada grupo com o link dos seus outros grupos.
+          }
         </p>
       } @else {
         <div class="regra-card-valor"><strong>Desligada</strong></div>
@@ -480,17 +484,34 @@
 
           @if (rDivAtivo()) {
             <div class="field">
-              <label for="regras-postagem-6">Mensagem</label>
+              <span class="field-rotulo">Mensagens</span>
               <span class="hint">
                 Sua chamada e assinatura. Escreva <strong>&#123;link&#125;</strong> onde o link deve aparecer — se não escrever,
-                o link entra automaticamente no fim.
+                o link entra automaticamente no fim. Com mais de uma mensagem, o robô alterna entre elas
+                (até {{ maxDivulgacoes }}).
               </span>
-              <textarea id="regras-postagem-6"
-                rows="6"
-                [ngModel]="rDivTexto()"
-                (ngModelChange)="rDivTexto.set($event)"
-                placeholder="🚨 NÃO PERCA NENHUMA PROMOÇÃO!&#10;Confira nossos outros grupos de ofertas 👇&#10;&#123;link&#125;"
-              ></textarea>
+              @for (t of rDivTextos(); track $index; let i = $index) {
+                <div class="div-mensagem">
+                  <div class="div-mensagem-topo">
+                    <label [for]="'regras-postagem-div-' + i">Mensagem {{ i + 1 }}</label>
+                    @if (rDivTextos().length > 1) {
+                      <button type="button" class="btn btn-ghost btn-sm" (click)="removerDivTexto(i)"
+                        [attr.aria-label]="'Remover a mensagem ' + (i + 1)">Remover</button>
+                    }
+                  </div>
+                  <textarea [id]="'regras-postagem-div-' + i"
+                    rows="5"
+                    [ngModel]="t"
+                    (ngModelChange)="mudarDivTexto(i, $event)"
+                    placeholder="🚨 NÃO PERCA NENHUMA PROMOÇÃO!&#10;Confira nossos outros grupos de ofertas 👇&#10;&#123;link&#125;"
+                  ></textarea>
+                </div>
+              }
+              @if (rDivTextos().length < maxDivulgacoes) {
+                <button type="button" class="btn btn-ghost btn-sm div-mensagem-adicionar" (click)="adicionarDivTexto()">
+                  + Adicionar outra mensagem
+                </button>
+              }
             </div>
 
             <div class="field">
@@ -516,10 +537,14 @@
               <span class="hint">O robô envia de forma esporádica ao longo do dia, sem passar desse limite.</span>
             </div>
 
-            @if (rDivPreview()) {
+            @if (rDivPreviews().length) {
               <div class="field">
-                <span class="field-rotulo" id="regras-postagem-9">Prévia</span>
-                <div role="group" aria-labelledby="regras-postagem-9" class="info-box" style="white-space: pre-wrap">{{ rDivPreview() }}</div>
+                <span class="field-rotulo" id="regras-postagem-9">{{ rDivPreviews().length > 1 ? 'Prévias' : 'Prévia' }}</span>
+                <div role="group" aria-labelledby="regras-postagem-9" class="div-previas">
+                  @for (p of rDivPreviews(); track $index) {
+                    <div class="info-box" style="white-space: pre-wrap">{{ p }}</div>
+                  }
+                </div>
               </div>
             }
           } @else {

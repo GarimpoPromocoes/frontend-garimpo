@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { Loja } from './ganhos.service';
+import { Loja, ModoAtualizacao } from './ganhos.service';
 
 export interface GrupoMembros {
   chatId: string;
@@ -82,6 +82,8 @@ export class EstatisticasService {
   readonly movimentos = signal<MovimentoDia[]>([]);
   readonly carregandoMembros = signal(false);
   readonly erroMembros = signal<string | null>(null);
+  /** "Atualizar agora" pediu os membros e o robô ainda não leu (só lê com o WhatsApp aberto). */
+  readonly aguardandoMembros = signal(false);
 
   readonly vendas = signal<Venda[]>([]);
   readonly ranking = signal<RankingVendas[]>([]);
@@ -115,10 +117,21 @@ export class EstatisticasService {
       const r: any = await firstValueFrom(this.http.get('/api/estatisticas/membros', { params: { dias } }));
       this.grupos.set(r.grupos ?? []);
       this.movimentos.set(r.movimentos ?? []);
+      this.aguardandoMembros.set(!!r.aguardandoLeitura);
     } catch (e: any) {
       this.erroMembros.set(e?.error?.erro || 'Não consegui carregar os membros dos grupos.');
     } finally {
       this.carregandoMembros.set(false);
+    }
+  }
+
+  /** Pede de uma vez a leitura dos ganhos (que traz as vendas junto) e a dos membros dos grupos. */
+  async atualizar(): Promise<{ ok: boolean; modo?: ModoAtualizacao; erro?: string }> {
+    try {
+      const r: any = await firstValueFrom(this.http.post('/api/estatisticas/atualizar', {}));
+      return { ok: true, modo: r.modo };
+    } catch (e: any) {
+      return { ok: false, erro: e?.error?.erro || 'Não consegui pedir a atualização.' };
     }
   }
 

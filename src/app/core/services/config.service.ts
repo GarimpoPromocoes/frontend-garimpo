@@ -50,8 +50,10 @@ export interface Cupons {
 
 export interface Divulgacao {
   ativo: boolean;
-  /** Texto livre do cliente (chamada + "copyright"). Aceita {link} como marcador. */
+  /** Primeira mensagem (compatibilidade: a mesma que textos[0]). */
   texto: string;
+  /** De 1 a 3 mensagens (chamada + "copyright"), aceitam {link}. O robô alterna entre elas. */
+  textos?: string[];
   /** Linktree (ou outro link) com os outros grupos do cliente. */
   link: string;
   /** Teto por dia por grupo: 1 ou 2. */

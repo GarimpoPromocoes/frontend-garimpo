@@ -61,7 +61,7 @@ export class MembrosCard {
   protected readonly barraAtiva = signal<Barra | null>(null);
   protected readonly dicaMembros = 'Soma dos membros de todos os grupos, cada um na sua última leitura.';
   protected readonly dicaGrafico =
-    'Com o robô ligado, os membros de cada grupo são conferidos a cada 30 minutos. A primeira leitura de um grupo vira a base; entradas e saídas contam a partir da segunda.';
+    'Com o robô ligado, os membros de cada grupo são conferidos a cada 30 minutos (ou na hora, pelo "Atualizar agora"). A primeira leitura de um grupo vira a base; entradas e saídas contam a partir da segunda.';
 
   constructor() {
     effect(() => void this.est.carregarMembros(this.dias()));

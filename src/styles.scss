@@ -2555,6 +2555,60 @@ body:has(.modal-fundo) .bot-control-fixo {
   animation: pulse-dot 1.6s ease-in-out infinite;
 }
 
+/* ---- Botões do topo que abrem janelas (Oferta personalizada, Logs) ---- */
+.topbar-botao {
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-soft);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s,
+    color 0.15s;
+}
+.topbar-botao svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.topbar-botao:hover,
+.topbar-botao-aberto {
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+  color: var(--text);
+}
+.topbar-botao:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+/* Tela estreita: só o ícone, redondo como o sino. O cabeçalho também tem os números do momento
+   (topo-kpis), então o texto sai antes do resto apertar. */
+@media (max-width: 1500px) {
+  .topbar-botao {
+    width: 38px;
+    padding: 0;
+    justify-content: center;
+  }
+  .topbar-botao-texto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
 /* ---- Sino de avisos (topo, canto direito) ---- */
 app-sino {
   position: relative;
@@ -3583,6 +3637,21 @@ app-status-conexoes {
   max-height: min(70vh, 620px);
 }
 
+/* Oferta personalizada dentro do modal do topo: a busca preenche a janela inteira. */
+.modal-busca {
+  padding: 20px 22px;
+  position: relative;
+}
+.modal-busca app-busca-card > .busca-pagina > .card:first-child {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  box-shadow: none;
+}
+.modal-busca .card-header {
+  padding-right: 44px;
+}
+
 /* Produtos garimpados dentro do modal do painel: o card perde a moldura, o modal já é a caixa. */
 .modal-produtos {
   padding: 20px 22px;
@@ -3796,9 +3865,9 @@ app-status-conexoes {
 }
 
 /* ---- Painel ----
-   Quatro cartões com os números do dia, o gráfico de 30 dias ao lado das últimas ações e os
-   grupos embaixo. Tempo ativo e próxima postagem ficam no cabeçalho; ligar/parar, no botão
-   flutuante. */
+   Quatro cartões com os números do dia, a pipeline do produto da vez e os grupos embaixo. Tempo
+   ativo e próxima postagem ficam no cabeçalho; o log, no botão "Logs" do topo; ligar/parar, no
+   botão flutuante. */
 app-painel-robo {
   display: flex;
   flex-direction: column;
@@ -3916,17 +3985,6 @@ app-painel-robo {
   height: 20px;
 }
 
-.pn-meio {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 18px;
-  height: 392px;
-}
-.pn-meio > .card {
-  min-height: 0;
-  padding: 22px 22px 18px;
-}
-.pn-meio > .card h2,
 .gf h2 {
   font-size: 21px;
   font-weight: 800;
@@ -4054,37 +4112,6 @@ app-grafico-barras {
   transform: none;
 }
 
-.pn-acoes {
-  gap: 8px;
-}
-.pn-acoes .card-header {
-  align-items: center;
-}
-.pn-ver-todas {
-  gap: 8px;
-  font-weight: 600;
-}
-.pn-ver-todas svg {
-  width: 16px;
-  height: 16px;
-}
-.pn-acoes .pv-acao {
-  grid-template-columns: 50px 24px minmax(0, 1fr) auto;
-  padding: 11px 0;
-}
-/* Nos selos das ações a cor já diz o estado: sem a bolinha. */
-.pn-acoes .pv-selo {
-  padding: 4px 12px;
-  border-color: transparent;
-}
-.pn-acoes .pv-selo::before {
-  display: none;
-}
-.pn-acoes .pv-selo[data-tom='neutro'],
-.pn-acoes .pv-selo[data-tom='espera'] {
-  background: var(--surface-3);
-  color: var(--text-soft);
-}
 
 .pn-alvo {
   width: min(460px, 100%);
@@ -4301,63 +4328,6 @@ app-grafico-barras {
   }
 }
 
-
-/* Lista das últimas ações (Painel): rola por dentro do cartão. */
-.pv-lista {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-}
-.pv-acao {
-  display: grid;
-  grid-template-columns: 56px 26px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 14px;
-  padding: 8px 0;
-  border-top: 1px solid var(--border);
-  font-size: 15px;
-}
-.pv-acao:first-child {
-  border-top: none;
-}
-.pv-acao-hora {
-  color: var(--text-muted);
-  font-size: 14px;
-  font-variant-numeric: tabular-nums;
-}
-.pv-acao-icone {
-  display: grid;
-  place-items: center;
-  color: var(--text-soft);
-}
-.pv-acao-icone svg {
-  width: 18px;
-  height: 18px;
-}
-.pv-acao[data-tom='ok'] .pv-acao-icone {
-  color: var(--ok);
-}
-.pv-acao[data-tom='erro'] .pv-acao-icone {
-  color: var(--danger);
-}
-.pv-acao[data-tom='achado'] .pv-acao-icone,
-.pv-acao[data-tom='andamento'] .pv-acao-icone {
-  color: var(--gold-deep);
-}
-/* O envio e os grupos ficam na cor do texto mesmo quando deram certo: o verde fica pro publicado. */
-.pv-acao[data-icone='envio'] .pv-acao-icone,
-.pv-acao[data-icone='grupos'] .pv-acao-icone {
-  color: var(--text);
-}
-.pv-acao-texto {
-  color: var(--text);
-  overflow-wrap: anywhere;
-}
 .pv-selo {
   display: inline-flex;
   align-items: center;
@@ -4645,7 +4615,7 @@ a.gf-item-titulo:hover {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
-@media (max-width: 1100px) {
+@media (max-width: 1280px) {
   .tk-item {
     padding: 0 14px;
   }
@@ -4760,18 +4730,10 @@ a.gf-item-titulo:hover {
   margin-left: 4px;
 }
 
-/* Telas estreitas: os cartões passam pra duas colunas e o gráfico fica em cima das ações. */
+/* Telas estreitas: os cartões passam pra duas colunas, depois pra uma. */
 @media (max-width: 1280px) {
   .pn-kpis {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-@media (max-width: 1000px) {
-  .pn-meio {
-    height: auto;
-  }
-  .pn-acoes {
-    max-height: 460px;
   }
 }
 @media (max-width: 720px) {
@@ -4788,13 +4750,6 @@ a.gf-item-titulo:hover {
   }
   .pv-tiles {
     grid-template-columns: minmax(0, 1fr);
-  }
-  .pn-acoes .pv-acao {
-    grid-template-columns: 44px 20px minmax(0, 1fr);
-  }
-  .pn-acoes .pv-acao .pv-selo {
-    grid-column: 3;
-    justify-self: start;
   }
 }
 

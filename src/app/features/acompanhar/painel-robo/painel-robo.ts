@@ -1,6 +1,6 @@
 import { Component, DestroyRef, HostListener, computed, effect, inject, output, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { AcaoPainel, AlvoGrupos, EstadoEtapa, EtapaPainelId, JobsService } from '../../../core/services/jobs.service';
+import { AlvoGrupos, EstadoEtapa, EtapaPainelId, JobsService } from '../../../core/services/jobs.service';
 import { VerificacaoService } from '../../../core/services/verificacao.service';
 import { RunControlService } from '../../../core/services/run-control.service';
 import { StatusService } from '../../../core/services/status.service';
@@ -11,17 +11,8 @@ import { duracao } from '../topo-kpis/topo-kpis';
 type Icone =
   | 'busca' | 'sacola' | 'doc' | 'envio' | 'check' | 'alerta' | 'relogio' | 'grupos' | 'externo'
   | 'cubo' | 'etiqueta' | 'pessoas' | 'dinheiro' | 'seta' | 'subiu' | 'desceu' | 'chevron';
-type Tom = 'ok' | 'andamento' | 'espera' | 'erro' | 'neutro' | 'achado';
 /** Abas do app que os cartões do Painel abrem. */
 export type DestinoPainel = 'estatisticas' | 'grupos';
-
-interface AcaoVista {
-  hora: string;
-  icone: Icone;
-  texto: string;
-  selo: string;
-  tom: Tom;
-}
 
 interface EtapaVista {
   id: EtapaPainelId;
@@ -44,7 +35,6 @@ const BASE: Record<EtapaPainelId, { titulo: string; sub: string; icone: Icone }>
 };
 
 const NOME_LOJA: Record<string, string> = { mercadolivre: 'Mercado Livre', amazon: 'Amazon', shopee: 'Shopee' };
-const MAX_ACOES = 20;
 const NUMEROS_A_CADA_MS = 60000;
 
 function hhmm(iso: string | null | undefined): string {
@@ -53,8 +43,8 @@ function hhmm(iso: string | null | undefined): string {
 }
 
 /**
- * O Painel: os números do dia em quatro cartões, a pipeline do produto da vez, as últimas ações
- * e os grupos marcados para postar. O gráfico das postagens por dia fica em Estatísticas. O tempo ativo e a próxima postagem ficam no cabeçalho
+ * O Painel: os números do dia em quatro cartões, a pipeline do produto da vez e os grupos
+ * marcados para postar. O log completo abre pelo botão "Logs" do topo. O gráfico das postagens por dia fica em Estatísticas. O tempo ativo e a próxima postagem ficam no cabeçalho
  * (topo-kpis); ligar, pausar e parar, no botão flutuante.
  */
 @Component({
@@ -65,7 +55,6 @@ function hhmm(iso: string | null | undefined): string {
 })
 export class PainelRobo {
   verProdutos = output<void>();
-  verLogs = output<void>();
   irPara = output<DestinoPainel>();
 
   protected runControl = inject(RunControlService);
@@ -232,63 +221,6 @@ export class PainelRobo {
 
   protected numero(n: number | null): string {
     return n == null ? '—' : n.toLocaleString('pt-BR');
-  }
-
-  // ---- Últimas ações ----
-
-  protected readonly acoes = computed<AcaoVista[]>(() => {
-    const lista = this.painel()?.acoes ?? [];
-    const out: AcaoVista[] = [];
-    lista.forEach((a, i) => {
-      const ultima = i === lista.length - 1 && this.runControl.postandoAgora();
-      out.push(...this.traduzir(a, ultima));
-    });
-    return out.reverse().slice(0, MAX_ACOES);
-  });
-
-  private traduzir(a: AcaoPainel, ultima: boolean): AcaoVista[] {
-    const hora = hhmm(a.em);
-    const linha = (icone: Icone, texto: string, selo: string, tom: Tom): AcaoVista => ({ hora, icone, texto, selo, tom });
-    const grupoNome = typeof a.grupo === 'string' ? a.grupo : a.grupo?.nome;
-    switch (a.tipo) {
-      case 'rodada':
-        return [linha('busca', grupoNome ? `Buscando produto para "${grupoNome}"` : 'Buscando produto…', ultima ? 'Em andamento' : 'Feito', ultima ? 'andamento' : 'neutro')];
-      case 'produto': {
-        const loja = NOME_LOJA[a.loja ?? ''] ?? 'loja';
-        return [
-          linha('cubo', `${a.produto ? 'Produto encontrado: ' + this.curto(a.produto) : 'Produto encontrado'} (${loja})`, 'Encontrado', 'achado'),
-          linha('doc', 'Link e mensagem prontos', 'Concluído', 'ok'),
-        ];
-      }
-      case 'semProduto': {
-        const txt = {
-          catalogoVazio: 'Ainda sem produtos — buscando as primeiras ofertas',
-          nenhumLiberado: 'Nenhum produto liberado agora',
-          cedeu: grupoNome ? `"${grupoNome}" sem produto agora — vez do próximo grupo` : 'Vez do próximo grupo',
-          repetido: grupoNome ? `"${grupoNome}" só tem assunto repetido agora` : 'Só assunto repetido agora',
-        }[a.motivo ?? ''] ?? 'Nada para postar agora';
-        if (a.motivo === 'foraDoHorario') {
-          return [linha('relogio', `Fora do horário${a.ate ? ` — posta de novo às ${hhmm(a.ate)}` : ''}`, 'Fora do horário', 'espera')];
-        }
-        return [linha('relogio', a.ate ? `${txt} — nova busca às ${hhmm(a.ate)}` : txt, 'Aguardando', 'espera')];
-      }
-      case 'aguardando':
-        return [linha('relogio', `Postagem agendada para ${hhmm(a.ate)}`, 'Agendado', 'espera')];
-      case 'postando':
-        return [linha('grupos', 'Postando produto nos grupos…', ultima ? 'Em andamento' : 'Feito', ultima ? 'andamento' : 'neutro')];
-      case 'enviado': {
-        const canal = a.canal === 'telegram' ? ' (Telegram)' : '';
-        return [linha('envio', `Enviado para ${a.destino ? `"${a.destino}"` : 'o grupo'}${canal}`, 'Concluído', 'ok')];
-      }
-      case 'concluido':
-        return [linha('check', a.produto ? `Publicado: ${this.curto(a.produto)}` : 'Produto publicado', 'Sucesso', 'ok')];
-      case 'falhou': {
-        const onde = a.etapa === 'telegram' ? 'Não saiu no Telegram' : a.etapa === 'postando' ? 'A postagem não saiu' : 'A busca falhou';
-        return [linha('alerta', a.motivo ? `${onde}: ${this.curto(a.motivo)}` : onde, 'Erro', 'erro')];
-      }
-      default:
-        return [];
-    }
   }
 
   // ---- Estatísticas de hoje (cartão "Postados hoje") ----

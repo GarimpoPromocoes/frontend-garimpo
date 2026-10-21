@@ -193,7 +193,8 @@
 }
 
 .topbar-title {
-  min-width: 0;
+  /* Sem isto, com os números e os botões no topo, o subtítulo quebrava uma palavra por linha. */
+  min-width: 220px;
   flex: 1;
 }
 .topbar-title h1 {
@@ -473,4 +474,19 @@
 .tema-botao svg {
   width: 18px;
   height: 18px;
+}
+
+/* Celular: os botões e o sino ficam na linha do menu, o título embaixo e os números numa linha só
+   deles, por último. O bloco de ações some como caixa e cada item entra direto no cabeçalho. */
+@media (max-width: 640px) {
+  .topbar-actions {
+    display: contents;
+  }
+  .topbar-botao:first-of-type {
+    margin-left: auto;
+  }
+  app-topo-kpis {
+    order: 4;
+    flex-basis: 100%;
+  }
 }

@@ -94,44 +94,7 @@
   </ol>
 </section>
 
-<!-- 3. O que o robô fez por último. -->
-<div class="pn-meio">
-  <section class="card pn-acoes" aria-labelledby="pn-acoes-titulo">
-    <div class="card-header">
-      <h2 id="pn-acoes-titulo">Últimas ações</h2>
-      <button type="button" class="btn btn-ghost btn-sm pn-ver-todas" (click)="verLogs.emit()">
-        Ver todas <ng-container *ngTemplateOutlet="icone; context: { $implicit: 'seta' }" />
-      </button>
-    </div>
-    @if (jobs.desafioMl()) {
-      <div class="espera-faixa">
-        <span class="espera-faixa-logo"><img src="lojas/mercadolivre.svg" alt="" /></span>
-        <div class="espera-faixa-texto">
-          <strong>Mercado Livre em espera</strong>
-          <span>Ele pediu uma verificação de segurança. As outras lojas seguem postando.</span>
-        </div>
-        <button type="button" class="btn btn-ghost btn-sm" (click)="jobs.desafioPopupAberto.set(true)">Resolver</button>
-      </div>
-    }
-    <ul class="pv-lista" role="log" aria-label="Últimas ações do robô">
-      @for (a of acoes(); track $index) {
-        <li class="pv-acao" [attr.data-tom]="a.tom" [attr.data-icone]="a.icone">
-          <span class="pv-acao-hora">{{ a.hora }}</span>
-          <span class="pv-acao-icone"><ng-container *ngTemplateOutlet="icone; context: { $implicit: a.icone }" /></span>
-          <span class="pv-acao-texto">{{ a.texto }}</span>
-          <span class="pv-selo" [attr.data-tom]="a.tom">{{ a.selo }}</span>
-        </li>
-      } @empty {
-        <li class="empty-state">
-          <span class="empty-state-title">Nada por aqui ainda</span>
-          <span class="empty-state-text">Ligue o robô no botão do canto para acompanhar cada produto, do achado até a postagem.</span>
-        </li>
-      }
-    </ul>
-  </section>
-</div>
-
-<!-- 4. Os grupos marcados para postar: clicar abre a lista de cada um. -->
+<!-- 3. Os grupos marcados para postar: clicar abre a lista de cada um. -->
 <app-grupos-fila [grupoDaVez]="grupoDaVez()" [numeros]="numerosDosGrupos()" />
 
 <!-- Grupos ativos: em quais grupos o robô publica. -->
