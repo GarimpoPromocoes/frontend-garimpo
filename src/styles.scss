@@ -4317,6 +4317,205 @@ app-painel-robo {
   color: var(--danger);
 }
 
+/* Grupos postando: um cartão por grupo marcado; clicar abre a lista dele. */
+.gf {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.gf-titulo {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-soft);
+}
+.gf-cartoes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 12px;
+}
+.gf-cartao {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  text-align: left;
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.gf-cartao:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow);
+}
+.gf-cartao:focus-visible {
+  outline: 2px solid var(--focus);
+  box-shadow: var(--focus-halo);
+}
+.gf-cartao-vez {
+  border-color: var(--gold-border);
+  background: var(--gold-soft);
+}
+.gf-cartao-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.gf-nome {
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+.gf-fonte,
+.gf-rodape {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.gf-numeros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 13px;
+  color: var(--text-soft);
+}
+.gf-numeros b {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.gf-ok b {
+  color: var(--ok);
+}
+.gf-erro b {
+  color: var(--danger);
+}
+
+/* Janela com a lista de um grupo. */
+.gf-janela {
+  width: min(980px, 100%);
+}
+.gf-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.gf-filtro {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-soft);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.gf-filtro-ativo {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--on-espresso);
+}
+.gf-filtro-n {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.8;
+}
+.gf-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.gf-item {
+  display: grid;
+  grid-template-columns: 28px 24px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+}
+.gf-item:first-child {
+  border-top: none;
+}
+.gf-pos {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.gf-logo {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+.gf-item-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.gf-item-titulo {
+  color: var(--text);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+a.gf-item-titulo:hover {
+  text-decoration: underline;
+}
+.gf-item-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+.gf-item[data-status='recusado'] .gf-item-sub {
+  color: var(--danger);
+}
+.gf-preco {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 640px) {
+  .gf-item {
+    grid-template-columns: 24px minmax(0, 1fr) auto;
+    grid-template-areas:
+      'logo texto selo'
+      'logo texto preco';
+  }
+  .gf-pos {
+    display: none;
+  }
+  .gf-logo {
+    grid-area: logo;
+  }
+  .gf-item-texto {
+    grid-area: texto;
+  }
+  .gf-preco {
+    grid-area: preco;
+    justify-self: end;
+  }
+  .gf-item .pv-selo {
+    grid-area: selo;
+    justify-self: end;
+  }
+}
+
 /* Modal das estatísticas de hoje. */
 .pv-stats {
   width: min(620px, 100%);

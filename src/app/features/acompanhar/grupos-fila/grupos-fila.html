@@ -1,0 +1,119 @@
+<!-- Os grupos marcados para postar: um cartão por grupo, com o tamanho da lista dele. -->
+<section class="gf" aria-labelledby="gf-titulo">
+  <h2 class="gf-titulo" id="gf-titulo">Grupos postando</h2>
+  @if (cartoes().length) {
+    <ul class="gf-cartoes">
+      @for (g of cartoes(); track g.id) {
+        <li>
+          <button
+            type="button"
+            class="gf-cartao"
+            [class.gf-cartao-vez]="ehDaVez(g)"
+            [attr.aria-label]="'Ver a lista de ' + g.nome"
+            (click)="abrir(g)"
+          >
+            <span class="gf-cartao-topo">
+              <strong class="gf-nome">{{ g.nome }}</strong>
+              @if (ehDaVez(g)) { <span class="pv-selo" data-tom="andamento">Vez dele agora</span> }
+            </span>
+            <span class="gf-fonte">{{ fonteTexto(g) }}</span>
+            <span class="gf-numeros">
+              @if (g.fonte === 'clonagem') {
+                <span><b>{{ g.contagens.fila }}</b> na fila</span>
+              }
+              <span><b>{{ g.contagens.pronto + g.contagens.espera }}</b> {{ g.fonte === 'clonagem' ? 'prontos' : 'no estoque' }}</span>
+              <span class="gf-ok"><b>{{ g.contagens.postado }}</b> postados</span>
+              @if (g.fonte === 'clonagem') {
+                <span class="gf-erro"><b>{{ g.contagens.recusado }}</b> recusados</span>
+              }
+            </span>
+            <span class="gf-rodape">
+              {{ g.ultimaPostagemEm ? 'Último post às ' + horaDe(g.ultimaPostagemEm) : 'Nenhum post ainda' }}
+            </span>
+          </button>
+        </li>
+      }
+    </ul>
+  } @else if (erroResumo()) {
+    <p class="hint-text">{{ erroResumo() }}</p>
+  } @else {
+    <p class="hint-text">Nenhum grupo marcado para postar.</p>
+  }
+</section>
+
+@if (aberto()) {
+  <div class="modal-fundo" (click)="fechar()">
+    <div class="modal-caixa gf-janela" role="dialog" aria-modal="true" aria-labelledby="gf-janela-titulo" (click)="$event.stopPropagation()">
+      <div class="card-header">
+        <div>
+          <h2 id="gf-janela-titulo">{{ lista()?.grupo?.nome ?? 'Lista do grupo' }}</h2>
+          @if (lista(); as l) {
+            <p class="card-subtitle">
+              {{ fonteTexto(l.grupo) }}
+              @if (l.grupo.fonte === 'clonagem') {
+                · a fila sai do mais antigo pro mais novo
+                @if (l.grupo.filaLidaEm) { · atualizada às {{ horaDe(l.grupo.filaLidaEm) }} }
+              }
+            </p>
+          }
+        </div>
+        <button type="button" class="btn-fechar" (click)="fechar()" aria-label="Fechar" title="Fechar">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6 18 18M18 6 6 18" /></svg>
+        </button>
+      </div>
+
+      <div class="gf-filtros" role="group" aria-label="Filtrar por status">
+        @for (f of filtros; track f.id) {
+          @if (f.id === 'todos' || contagem(f.id) > 0) {
+            <button
+              type="button"
+              class="gf-filtro"
+              [class.gf-filtro-ativo]="filtro() === f.id"
+              [attr.aria-pressed]="filtro() === f.id"
+              (click)="filtro.set(f.id)"
+            >
+              {{ f.rotulo }} <span class="gf-filtro-n">{{ contagem(f.id) }}</span>
+            </button>
+          }
+        }
+      </div>
+
+      @if (carregandoLista()) {
+        <p class="hint-text">Carregando a lista…</p>
+      } @else if (erroLista()) {
+        <p class="hint-text" role="alert">{{ erroLista() }}</p>
+      } @else {
+        <ul class="gf-lista">
+          @for (it of itensVisiveis(); track it.chave) {
+            <li class="gf-item" [attr.data-status]="it.status">
+              <span class="gf-pos">{{ it.posicao ?? '' }}</span>
+              <img class="gf-logo" [src]="logo(it)" [alt]="loja(it)" [title]="loja(it)" />
+              <span class="gf-item-texto">
+                @if (it.link) {
+                  <a class="gf-item-titulo" [href]="it.link" target="_blank" rel="noopener noreferrer">{{ it.titulo }}</a>
+                } @else {
+                  <span class="gf-item-titulo">{{ it.titulo }}</span>
+                }
+                <span class="gf-item-sub">
+                  @if (origemTexto(it)) { {{ origemTexto(it) }} · }{{ detalhe(it) }}
+                </span>
+              </span>
+              <span class="gf-preco">{{ preco(it.precoPor) }}</span>
+              <span class="pv-selo" [attr.data-tom]="status(it).tom">{{ status(it).rotulo }}</span>
+            </li>
+          } @empty {
+            <li class="empty-state">
+              <span class="empty-state-title">Nada aqui</span>
+              <span class="empty-state-text">
+                {{ filtro() === 'todos' ? 'Este grupo ainda não tem produto na lista.' : 'Nenhum produto com este status.' }}
+              </span>
+            </li>
+          }
+        </ul>
+        @if ((lista()?.total ?? 0) > (lista()?.itens?.length ?? 0)) {
+          <p class="hint-text">Mostrando os {{ lista()?.itens?.length }} primeiros de {{ lista()?.total }}.</p>
+        }
+      }
+    </div>
+  </div>
+}

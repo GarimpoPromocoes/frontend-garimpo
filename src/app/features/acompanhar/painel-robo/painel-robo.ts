@@ -10,6 +10,7 @@ import {
 import { RunControlService } from '../../../core/services/run-control.service';
 import { StatusService } from '../../../core/services/status.service';
 import { VerificacaoService } from '../../../core/services/verificacao.service';
+import { GruposFila } from '../grupos-fila/grupos-fila';
 
 type Icone =
   | 'busca' | 'sacola' | 'doc' | 'envio' | 'check' | 'alerta' | 'relogio' | 'play' | 'pausa' | 'parar' | 'grafico'
@@ -73,7 +74,7 @@ function duracao(ms: number): string {
 @Component({
   selector: 'app-painel-robo',
   standalone: true,
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, GruposFila],
   templateUrl: './painel-robo.html',
 })
 export class PainelRobo {
