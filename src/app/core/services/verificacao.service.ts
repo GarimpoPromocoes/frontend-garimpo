@@ -28,8 +28,13 @@ export class VerificacaoService {
   private statusService = inject(StatusService);
   private jobsService = inject(JobsService);
 
-  /** true assim que a checagem (ao vivo ou não) termina — libera a tela. */
+  /**
+   * true assim que o estado guardado (banco + sessões salvas) chegou — libera a tela. A checagem ao
+   * vivo continua por trás; quando ela responde, os status se corrigem sozinhos (ver guardadoVence).
+   */
   readonly pronto = signal(false);
+  /** A checagem ao vivo ainda está rodando (a tela já liberou). */
+  readonly verificandoAoVivo = signal(false);
   /**
    * Só é true quando a checagem ao vivo realmente rodou (não foi pulada por
    * o robô estar ocupado). Os cards podem usar isso pra decidir se mostram
@@ -49,31 +54,29 @@ export class VerificacaoService {
   }
 
   private async rodar(): Promise<void> {
-    this.pronto.set(false);
     this.confirmadoAoVivo.set(false);
 
-    // 1) O que está guardado — banco (conexões) e status (sessões salvas).
+    // 1) O que está guardado — banco (conexões) e status (sessões salvas). É rápido e já basta pra
+    // mostrar o painel: a tela de carregamento sai aqui.
     await Promise.all([this.conexoes.carregar(), this.statusService.atualizar()]);
+    this.pronto.set(true);
 
     // 2) Isso ainda vale de verdade? Só dá pra perguntar se o robô estiver
     // livre — ML/Amazon (mesmo perfil) e WhatsApp só abrem uma sessão de cada
     // vez. Se o robô já está trabalhando, ele mesmo já é a prova de que está
     // conectado (ou já estaria avisando o contrário no log).
-    if (this.jobsService.rodando()) {
-      this.pronto.set(true);
-      return;
-    }
+    if (this.jobsService.rodando()) return;
 
-    const r = await this.jobsService.iniciar('verificar-conexoes');
-    if (!r.ok) {
-      // Servidor ocupado com outro cliente, por exemplo — segue com o que o
-      // banco disse. Não vale travar a tela esperando um slot livre.
-      this.pronto.set(true);
-      return;
+    // Servidor ocupado com outro cliente, por exemplo: segue com o que o banco disse.
+    this.verificandoAoVivo.set(true);
+    try {
+      const r = await this.jobsService.iniciar('verificar-conexoes');
+      if (r.ok) await this.esperarResultado();
+    } finally {
+      this.verificandoAoVivo.set(false);
     }
-
-    await this.esperarResultado();
-    this.pronto.set(true);
+    // O que a checagem confirmou vira o estado guardado: relê pra todo o painel ver.
+    await Promise.all([this.conexoes.carregar(), this.statusService.atualizar()]).catch(() => {});
   }
 
   private async esperarResultado(): Promise<void> {
