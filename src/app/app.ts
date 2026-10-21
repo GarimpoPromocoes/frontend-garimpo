@@ -26,7 +26,7 @@ import { Estatisticas } from './features/acompanhar/estatisticas/estatisticas';
 import { LojaDialog } from './features/conexoes/loja-dialog/loja-dialog';
 import { WhatsappDialog } from './features/conexoes/whatsapp-dialog/whatsapp-dialog';
 import { TelegramDialog } from './features/conexoes/telegram-dialog/telegram-dialog';
-import { StatusConexoes } from './shared/status-conexoes/status-conexoes';
+import { TopoKpis } from './features/acompanhar/topo-kpis/topo-kpis';
 import { DesafioMlDialog } from './features/acompanhar/desafio-ml-dialog/desafio-ml-dialog';
 import { ConfirmacaoDialog } from './shared/confirmacao-dialog/confirmacao-dialog';
 import { Sino } from './shared/sino/sino';
@@ -59,7 +59,7 @@ const ABAS: Aba[] = [
     id: 'painel',
     label: 'Painel',
     titulo: 'Painel',
-    descricao: 'Ligue o robô e acompanhe o que está acontecendo agora.',
+    descricao: 'Visão geral da sua operação de promoções.',
     secao: 'Acompanhar',
   },
   {
@@ -153,7 +153,7 @@ const CHAVE_ABA = 'promobot:aba';
     LojaDialog,
     WhatsappDialog,
     TelegramDialog,
-    StatusConexoes,
+    TopoKpis,
     DesafioMlDialog,
     ConfirmacaoDialog,
     Sino,

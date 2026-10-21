@@ -186,6 +186,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
+  min-height: 80px;
   padding: 14px 28px 12px;
   background: var(--bg);
   border-bottom: 1px solid var(--border);
@@ -196,7 +197,7 @@
   flex: 1;
 }
 .topbar-title h1 {
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 800;
   font-stretch: 75%;
   line-height: 1.1;
@@ -214,16 +215,6 @@
   gap: 10px;
   flex-shrink: 0;
 }
-/* O selo do robo na mesma altura do botao de Status e do sino (38px). */
-.topbar-robo {
-  display: inline-flex;
-}
-.topbar-robo .badge {
-  height: 38px;
-  padding: 0 14px;
-  font-size: 14px;
-}
-
 .menu-toggle {
   display: none;
   align-items: center;
@@ -241,15 +232,16 @@
   height: 20px;
 }
 
-/* Ligar/parar fora do Painel: um botão com o nome da ação escrito — só o
-   triângulo de "play" não diz que é o robô que vai ligar. */
+/* Ligar, pausar e parar: botões redondos de vidro (um "liquid glass" suave) no canto de baixo,
+   em todas as telas. O de ligar é dourado e quase opaco; os outros são vidro claro. O nome da
+   ação fica no title e no aria-label. */
 .bot-control-fixo {
   position: fixed;
   right: 28px;
   bottom: 28px;
   z-index: 100;
   display: flex;
-  gap: 10px;
+  gap: 12px;
   transition:
     opacity 0.15s ease,
     visibility 0.15s ease,
@@ -266,59 +258,98 @@
 }
 
 .bot-fab {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 54px;
-  padding: 0 24px 0 20px;
-  border: 2px solid var(--espresso);
-  border-radius: 999px;
-  font-size: 16px;
-  font-weight: 700;
+  position: relative;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--vidro-borda);
+  border-radius: 50%;
+  color: var(--text);
+  background: linear-gradient(160deg, var(--vidro-topo), var(--vidro-base));
+  -webkit-backdrop-filter: blur(16px) saturate(170%);
+  backdrop-filter: blur(16px) saturate(170%);
+  box-shadow:
+    var(--vidro-sombra),
+    inset 0 1px 1px var(--vidro-brilho),
+    inset 0 -3px 8px rgba(42, 29, 18, 0.06);
   cursor: pointer;
-  box-shadow: var(--shadow);
+  overflow: hidden;
   transition:
-    background 0.14s ease,
-    transform 0.14s ease;
+    transform 0.16s ease,
+    box-shadow 0.16s ease,
+    filter 0.16s ease;
+}
+/* O brilho de cima, que dá o ar de vidro. */
+.bot-fab::before {
+  content: '';
+  position: absolute;
+  inset: 1px 8px auto;
+  height: 46%;
+  border-radius: 50% 50% 45% 45% / 60% 60% 40% 40%;
+  background: linear-gradient(180deg, var(--vidro-reflexo), rgba(255, 255, 255, 0));
+  opacity: 0.7;
+  pointer-events: none;
+}
+.bot-fab svg,
+.bot-fab-spinner {
+  position: relative;
 }
 .bot-fab svg {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
+}
+.bot-fab:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.03);
 }
 .bot-fab:active:not(:disabled) {
-  transform: scale(0.97);
+  transform: scale(0.96);
+}
+.bot-fab:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
 }
 .bot-fab:disabled {
   cursor: progress;
 }
+/* Ligar (e retomar): dourado, minimamente transparente. */
 .bot-fab-ligar {
-  background: var(--gold);
-  color: var(--on-gold);
+  color: #2a1d12;
+  --vidro-reflexo: rgba(255, 250, 230, 0.6);
+  border-color: rgba(255, 236, 190, 0.75);
+  background: linear-gradient(160deg, rgba(246, 203, 96, 0.94), rgba(224, 165, 32, 0.88));
+  box-shadow:
+    0 10px 26px rgba(199, 140, 17, 0.3),
+    0 2px 6px rgba(42, 29, 18, 0.1),
+    inset 0 1px 1px rgba(255, 248, 225, 0.9),
+    inset 0 -3px 8px rgba(138, 94, 5, 0.18);
 }
-.bot-fab-ligar:hover:not(:disabled) {
-  background: var(--gold-deep);
+.bot-fab-ligar svg {
+  margin-left: 3px;
 }
-.bot-fab-parar {
-  background: var(--espresso);
-  color: var(--on-espresso);
-}
-.bot-fab-parar:hover:not(:disabled) {
-  background: var(--espresso-soft);
-}
-.bot-fab-pausa {
-  background: var(--surface);
-  color: var(--text);
-}
-.bot-fab-pausa:hover:not(:disabled) {
-  background: var(--surface-3);
+.bot-fab-parar svg {
+  width: 20px;
+  height: 20px;
 }
 .bot-fab-spinner {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   border: 2.5px solid currentColor;
   border-top-color: transparent;
   animation: girar 0.9s linear infinite;
+}
+@media (prefers-reduced-transparency: reduce) {
+  .bot-fab {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--surface);
+  }
+  .bot-fab-ligar {
+    background: var(--gold);
+  }
 }
 
 /* Ocupa a largura toda; em monitor muito largo o respiro lateral cresce igual
@@ -331,17 +362,6 @@
   display: flex;
   flex-direction: column;
   gap: 18px;
-}
-/* No Painel não existe o botão flutuante, então não precisa da folga embaixo.
-   E a página não rola: tudo cabe na tela, quem rola é a lista de ações. */
-.content-painel {
-  padding-bottom: 20px;
-  overflow: hidden;
-}
-@media (max-width: 1000px) {
-  .content-painel {
-    overflow-y: auto;
-  }
 }
 /* Estatisticas tambem cabe na tela: a pagina nao rola, cada cartao divide a altura. */
 .content-tela-cheia {
@@ -462,9 +482,6 @@
   }
   .content {
     padding: 16px 16px 92px;
-  }
-  .content-painel {
-    padding-bottom: 16px;
   }
 }
 

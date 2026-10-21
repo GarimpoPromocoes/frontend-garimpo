@@ -7,194 +7,181 @@
     @case ('check') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg> }
     @case ('alerta') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 2.5 20h19Z"/><path d="M12 10v4.5M12 17.4v.1"/></svg> }
     @case ('relogio') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> }
-    @case ('play') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M8.5 5.6v12.8a1 1 0 0 0 1.52.85l10.2-6.4a1 1 0 0 0 0-1.7l-10.2-6.4a1 1 0 0 0-1.52.85Z"/></svg> }
-    @case ('pausa') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="5.5" width="4" height="13" rx="1.2"/><rect x="13.5" y="5.5" width="4" height="13" rx="1.2"/></svg> }
-    @case ('parar') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="6.5" width="11" height="11" rx="2"/></svg> }
-    @case ('grafico') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M7 16v-5M12 16V6M17 16v-8"/></svg> }
-    @case ('robo') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v2.5"/><circle cx="12" cy="3" r="1"/><rect x="4" y="6" width="16" height="13" rx="4.5"/><path d="M2 11.5v3M22 11.5v3"/><circle cx="9" cy="12" r="1.6" fill="currentColor"/><circle cx="15" cy="12" r="1.6" fill="currentColor"/><path d="M9.5 16h5"/></svg> }
-    @case ('raio') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2.5 4.5 13.5H12l-1 8 8.5-11H12Z"/></svg> }
-    @case ('externo') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M18 14v4.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10"/></svg> }
     @case ('grupos') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 19c.6-3 2.8-4.6 5.5-4.6s4.9 1.6 5.5 4.6"/><path d="M15.5 5.6a3.2 3.2 0 0 1 0 5.8M17.2 14.6c1.8.5 3 1.9 3.3 4.4"/></svg> }
+    @case ('cubo') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 20.5 7.5v9L12 21.2 3.5 16.5v-9Z"/><path d="M3.8 7.6 12 12.2l8.2-4.6M12 12.2v9"/></svg> }
+    @case ('etiqueta') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12.6V4.8a1.3 1.3 0 0 1 1.3-1.3h7.8l8.2 8.2a1.3 1.3 0 0 1 0 1.8l-7 7a1.3 1.3 0 0 1-1.8 0Z"/><circle cx="8.3" cy="8.3" r="1.5"/></svg> }
+    @case ('pessoas') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.4"/><path d="M2.8 19.5c.5-3.4 3-5.3 6.2-5.3s5.7 1.9 6.2 5.3Z"/><path d="M15.6 4.8a3.4 3.4 0 0 1 0 6.4M17.6 14.4c2 .6 3.3 2.3 3.6 5.1h-3"/></svg> }
+    @case ('dinheiro') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3.5h6l-1.6 3.2h-2.8Z"/><path d="M10.6 6.7C6.4 8.3 4 11.7 4 15c0 3.6 3 5.5 8 5.5s8-1.9 8-5.5c0-3.3-2.4-6.7-6.6-8.3"/><path d="M13.9 11.2c-.4-.7-1.1-1-1.9-1-1.1 0-1.9.6-1.9 1.4 0 2 3.9 1 3.9 3 0 .8-.9 1.5-2 1.5-.9 0-1.7-.4-2-1.1M12 9v1.2M12 16.1v1.2"/></svg> }
+    @case ('externo') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M18 14v4.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10"/></svg> }
+    @case ('seta') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg> }
+    @case ('subiu') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg> }
+    @case ('desceu') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg> }
+    @case ('chevron') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5.5 6.5 6.5L9 18.5"/></svg> }
   }
 </ng-template>
 
-<!-- 1. Cabeçalho: estado do robô, números do momento e os controles, numa linha só. -->
-<section class="card pv-topo" [attr.data-estado]="estado()" aria-labelledby="pv-titulo">
-  <span class="pv-robo" aria-hidden="true"><ng-container *ngTemplateOutlet="icone; context: { $implicit: 'robo' }" /></span>
-  <div class="pv-estado">
-    <!-- role=status: o leitor de tela avisa quando o robô liga, pausa ou para. -->
-    <p class="pv-nome" role="status">
-      <span id="pv-titulo">Robô de promoções</span>
-      <span class="pv-pill"><span class="pv-luz" aria-hidden="true"></span>{{ rotuloEstado() }}</span>
-    </p>
-    <p class="pv-frase">{{ frase() }}</p>
-  </div>
+@if (runControl.erro()) {
+  <p class="alert-banner" role="alert">{{ runControl.erro() }}</p>
+}
 
-  <span class="pv-divisor pv-divisor-alto" aria-hidden="true"></span>
+<!-- 1. Os números do dia. Cada cartão abre o detalhe dele. -->
+<section class="pn-kpis" aria-label="Números de hoje">
+  <button type="button" class="pn-kpi" (click)="escolhendoGrupos.set(true)" [attr.aria-label]="'Grupos ativos: ' + gruposAtivos() + ' — escolher os grupos'">
+    <span class="pn-kpi-icone" data-cor="ouro"><ng-container *ngTemplateOutlet="icone; context: { $implicit: 'cubo' }" /></span>
+    <span class="pn-kpi-texto">
+      <span class="pn-kpi-rotulo">Grupos ativos</span>
+      <strong class="pn-kpi-valor">{{ gruposAtivos() }}</strong>
+    </span>
+    <span class="pn-kpi-chevron"><ng-container *ngTemplateOutlet="icone; context: { $implicit: 'chevron' }" /></span>
+  </button>
 
-  <dl class="pv-kpis">
-    <div><dt><ng-container *ngTemplateOutlet="icone; context: { $implicit: 'relogio' }" />Tempo ativo</dt><dd>{{ tempoAtivo() }}</dd></div>
-    <div><dt><ng-container *ngTemplateOutlet="icone; context: { $implicit: 'doc' }" />Postados hoje</dt><dd>{{ postadosHoje() ?? '—' }}</dd></div>
-    <div><dt><ng-container *ngTemplateOutlet="icone; context: { $implicit: 'raio' }" />{{ proxima().rotulo }}</dt><dd>{{ proxima().valor }}</dd></div>
-  </dl>
+  <button type="button" class="pn-kpi" (click)="statsAbertas.set(true)" aria-label="Postados hoje — ver as estatísticas de hoje">
+    <span class="pn-kpi-icone" data-cor="verde"><ng-container *ngTemplateOutlet="icone; context: { $implicit: 'etiqueta' }" /></span>
+    <span class="pn-kpi-texto">
+      <span class="pn-kpi-rotulo">Postados hoje</span>
+      <strong class="pn-kpi-valor">{{ numero(postadosHoje()) }}</strong>
+    </span>
+    @if (variacao(); as v) {
+      <span class="pn-variacao" [attr.data-subiu]="v.subiu" [title]="'Comparado com ontem (' + (statusService.status()?.hoje?.postadosOntem ?? 0) + ')'">
+        <ng-container *ngTemplateOutlet="icone; context: { $implicit: v.subiu ? 'subiu' : 'desceu' }" />{{ v.texto }}
+      </span>
+    }
+    <span class="pn-kpi-chevron"><ng-container *ngTemplateOutlet="icone; context: { $implicit: 'chevron' }" /></span>
+  </button>
 
-  <div class="pv-controles">
-    <button type="button" class="pv-icone-btn" title="Estatísticas de hoje" aria-label="Estatísticas de hoje" (click)="statsAbertas.set(true)">
-      <ng-container *ngTemplateOutlet="icone; context: { $implicit: 'grafico' }" />
-    </button>
+  <button type="button" class="pn-kpi" (click)="irPara.emit('estatisticas')" aria-label="Membros totais — ver as estatísticas">
+    <span class="pn-kpi-icone" data-cor="azul"><ng-container *ngTemplateOutlet="icone; context: { $implicit: 'pessoas' }" /></span>
+    <span class="pn-kpi-texto">
+      <span class="pn-kpi-rotulo">Membros totais</span>
+      <strong class="pn-kpi-valor">{{ numero(membrosTotais()) }}</strong>
+    </span>
+    <span class="pn-kpi-chevron"><ng-container *ngTemplateOutlet="icone; context: { $implicit: 'chevron' }" /></span>
+  </button>
 
-    <div class="pv-grupos-ancora">
-      <button
-        type="button"
-        class="pv-icone-btn"
-        [title]="'Grupos: ' + rotuloAlvo()"
-        [attr.aria-label]="'Escolher grupos (' + rotuloAlvo() + ')'"
-        [attr.aria-expanded]="escolhendoGrupos()"
-        (click)="escolhendoGrupos.set(!escolhendoGrupos())"
-      >
-        <ng-container *ngTemplateOutlet="icone; context: { $implicit: 'grupos' }" />
-      </button>
-      @if (escolhendoGrupos()) {
-        <div class="pv-grupos" role="group" aria-labelledby="pv-alvo">
-          <span class="field-rotulo" id="pv-alvo">Publicar em quais grupos</span>
-          <div class="segmented">
-            <button type="button" class="segmented-option" [class.segmented-option-active]="runControl.alvo() === 'todos'" [attr.aria-pressed]="runControl.alvo() === 'todos'" [disabled]="runControl.algoRodando()" (click)="escolherAlvo('todos')">Todos</button>
-            <button type="button" class="segmented-option" [class.segmented-option-active]="runControl.alvo() === 'selecionados'" [attr.aria-pressed]="runControl.alvo() === 'selecionados'" [disabled]="runControl.algoRodando()" (click)="escolherAlvo('selecionados')">Escolher</button>
+  <button type="button" class="pn-kpi" (click)="irPara.emit('estatisticas')" aria-label="Receita hoje — ver os ganhos">
+    <span class="pn-kpi-icone" data-cor="vermelho"><ng-container *ngTemplateOutlet="icone; context: { $implicit: 'dinheiro' }" /></span>
+    <span class="pn-kpi-texto">
+      <span class="pn-kpi-rotulo">Receita hoje</span>
+      <strong class="pn-kpi-valor">{{ receitaHoje() }}</strong>
+    </span>
+    <span class="pn-kpi-chevron"><ng-container *ngTemplateOutlet="icone; context: { $implicit: 'chevron' }" /></span>
+  </button>
+</section>
+
+<!-- 2. Postagens dos últimos 30 dias e as últimas ações, lado a lado. -->
+<div class="pn-meio">
+  <section class="card pn-grafico" aria-labelledby="pn-grafico-titulo">
+    <div>
+      <h2 id="pn-grafico-titulo">Postagens dos últimos 30 dias</h2>
+      <p class="card-subtitle">Quantidade de ofertas enviadas por dia.</p>
+    </div>
+    @if (grafico(); as g) {
+      <div class="pn-plot" role="img" [attr.aria-label]="'Postagens por dia nos últimos 30 dias: ' + g.total + ' no total.'">
+        <div class="pn-eixo-y" aria-hidden="true">
+          @for (v of g.linhas; track $index) { <span>{{ v }}</span> }
+        </div>
+        <div class="pn-area">
+          <div class="pn-grade" aria-hidden="true">
+            @for (v of g.linhas; track $index) { <span></span> }
           </div>
-          @if (runControl.algoRodando()) {
-            <span class="hint">Para mudar os grupos, pare o robô primeiro.</span>
-          }
-          @if (runControl.grupos().length === 0) {
-            <p class="hint-text">Nenhum grupo cadastrado ainda. Cadastre em "Grupos", no menu.</p>
-          } @else if (runControl.alvo() === 'selecionados') {
-            <div class="lanterna-lista">
-              @for (g of runControl.grupos(); track g.id) {
-                <label class="checkbox-row">
-                  <input type="checkbox" [disabled]="runControl.algoRodando()" [checked]="runControl.selecionados().has(g.id)" (change)="toggleSelecionado(g.id, $any($event.target).checked)" />
-                  <span>{{ g.nome }}</span>
-                </label>
-              }
-            </div>
+          <div class="pn-barras">
+            @for (b of g.barras; track b.dia) {
+              <div class="pn-coluna" tabindex="0" [attr.aria-label]="b.rotulo + ': ' + b.n + (b.n === 1 ? ' postagem' : ' postagens')">
+                <span class="pn-barra" [style.height.%]="b.altura">
+                  <span class="pn-dica" aria-hidden="true"><strong>{{ b.n }}</strong> {{ b.n === 1 ? 'postagem' : 'postagens' }} · {{ b.rotulo }}</span>
+                </span>
+                <span class="pn-rotulo-x" aria-hidden="true">{{ b.marca ? b.rotulo : '' }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+      <!-- Os mesmos números em tabela, pra leitor de tela. -->
+      <table class="sr-only">
+        <caption>Postagens por dia</caption>
+        <tbody>
+          @for (b of g.barras; track b.dia) { <tr><th scope="row">{{ b.rotulo }}</th><td>{{ b.n }}</td></tr> }
+        </tbody>
+      </table>
+    }
+  </section>
+
+  <section class="card pn-acoes" aria-labelledby="pn-acoes-titulo">
+    <div class="card-header">
+      <h2 id="pn-acoes-titulo">Últimas ações</h2>
+      <button type="button" class="btn btn-ghost btn-sm pn-ver-todas" (click)="verLogs.emit()">
+        Ver todas <ng-container *ngTemplateOutlet="icone; context: { $implicit: 'seta' }" />
+      </button>
+    </div>
+    @if (jobs.desafioMl()) {
+      <div class="espera-faixa">
+        <span class="espera-faixa-logo"><img src="lojas/mercadolivre.svg" alt="" /></span>
+        <div class="espera-faixa-texto">
+          <strong>Mercado Livre em espera</strong>
+          <span>Ele pediu uma verificação de segurança. As outras lojas seguem postando.</span>
+        </div>
+        <button type="button" class="btn btn-ghost btn-sm" (click)="jobs.desafioPopupAberto.set(true)">Resolver</button>
+      </div>
+    }
+    <ul class="pv-lista" role="log" aria-label="Últimas ações do robô">
+      @for (a of acoes(); track $index) {
+        <li class="pv-acao" [attr.data-tom]="a.tom" [attr.data-icone]="a.icone">
+          <span class="pv-acao-hora">{{ a.hora }}</span>
+          <span class="pv-acao-icone"><ng-container *ngTemplateOutlet="icone; context: { $implicit: a.icone }" /></span>
+          <span class="pv-acao-texto">{{ a.texto }}</span>
+          <span class="pv-selo" [attr.data-tom]="a.tom">{{ a.selo }}</span>
+        </li>
+      } @empty {
+        <li class="empty-state">
+          <span class="empty-state-title">Nada por aqui ainda</span>
+          <span class="empty-state-text">Ligue o robô no botão do canto para acompanhar cada produto, do achado até a postagem.</span>
+        </li>
+      }
+    </ul>
+  </section>
+</div>
+
+<!-- 3. Os grupos marcados para postar: clicar abre a lista de cada um. -->
+<app-grupos-fila [grupoDaVez]="grupoDaVez()" [numeros]="numerosDosGrupos()" />
+
+<!-- Grupos ativos: em quais grupos o robô publica. -->
+@if (escolhendoGrupos()) {
+  <div class="modal-fundo" (click)="escolhendoGrupos.set(false)">
+    <div class="modal-caixa pn-alvo" role="dialog" aria-modal="true" aria-labelledby="pn-alvo-titulo" (click)="$event.stopPropagation()">
+      <div class="card-header">
+        <div>
+          <h2 id="pn-alvo-titulo">Publicar em quais grupos</h2>
+          <p class="card-subtitle">{{ gruposAtivos() }} de {{ runControl.grupos().length }} grupo(s) recebem as postagens.</p>
+        </div>
+        <button type="button" class="btn-fechar" (click)="escolhendoGrupos.set(false)" aria-label="Fechar" title="Fechar">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6 18 18M18 6 6 18" /></svg>
+        </button>
+      </div>
+      <div class="segmented">
+        <button type="button" class="segmented-option" [class.segmented-option-active]="runControl.alvo() === 'todos'" [attr.aria-pressed]="runControl.alvo() === 'todos'" [disabled]="runControl.algoRodando()" (click)="escolherAlvo('todos')">Todos</button>
+        <button type="button" class="segmented-option" [class.segmented-option-active]="runControl.alvo() === 'selecionados'" [attr.aria-pressed]="runControl.alvo() === 'selecionados'" [disabled]="runControl.algoRodando()" (click)="escolherAlvo('selecionados')">Escolher</button>
+      </div>
+      @if (runControl.algoRodando()) {
+        <p class="hint-text">Para mudar os grupos, pare o robô primeiro.</p>
+      }
+      @if (runControl.grupos().length === 0) {
+        <p class="hint-text">Nenhum grupo cadastrado ainda.</p>
+        <button type="button" class="btn btn-ghost btn-sm" (click)="escolhendoGrupos.set(false); irPara.emit('grupos')">Cadastrar grupos</button>
+      } @else if (runControl.alvo() === 'selecionados') {
+        <div class="lanterna-lista">
+          @for (g of runControl.grupos(); track g.id) {
+            <label class="checkbox-row">
+              <input type="checkbox" [disabled]="runControl.algoRodando()" [checked]="runControl.selecionados().has(g.id)" (change)="toggleSelecionado(g.id, $any($event.target).checked)" />
+              <span>{{ g.nome }}</span>
+            </label>
           }
         </div>
       }
     </div>
-
-    @if (!runControl.algoRodando()) {
-      <button type="button" class="btn btn-hero pv-ligar" [disabled]="runControl.iniciando()" (click)="runControl.executar()">
-        <ng-container *ngTemplateOutlet="icone; context: { $implicit: 'play' }" />
-        {{ runControl.iniciando() ? 'Ligando…' : 'Ligar robô' }}
-      </button>
-    } @else {
-      @if (runControl.postandoAgora()) {
-        <button
-          type="button"
-          class="pv-icone-btn"
-          [disabled]="runControl.pausando() || runControl.parando()"
-          [title]="runControl.pausado() ? 'Retomar' : 'Pausar'"
-          [attr.aria-label]="runControl.pausado() ? 'Retomar robô' : 'Pausar robô'"
-          (click)="runControl.alternarPausa()"
-        >
-          <ng-container *ngTemplateOutlet="icone; context: { $implicit: runControl.pausado() ? 'play' : 'pausa' }" />
-        </button>
-      }
-      <button type="button" class="btn btn-hero pv-parar" [disabled]="runControl.parando()" (click)="runControl.parar()">
-        <ng-container *ngTemplateOutlet="icone; context: { $implicit: 'parar' }" />
-        {{ runControl.parando() ? 'Parando…' : 'Parar robô' }}
-      </button>
-    }
   </div>
+}
 
-  @if (runControl.erro()) {
-    <p class="pv-erro" role="alert">{{ runControl.erro() }}</p>
-  }
-</section>
-
-<!-- 2. A pipeline do produto da vez — a loja aparece na Origem e os canais no Postando. -->
-<section class="pv-pipeline" aria-label="Etapas do produto da vez">
-  <ol class="pv-etapas">
-    @for (e of etapas(); track e.id) {
-      <li
-        class="pv-etapa"
-        [attr.data-estado]="e.estado"
-        [class.pv-etapa-atual]="e.atual"
-        [attr.aria-current]="e.atual ? 'step' : null"
-      >
-        <span class="pv-etapa-icone"><ng-container *ngTemplateOutlet="icone; context: { $implicit: e.icone }" /></span>
-        <strong class="pv-etapa-titulo">{{ e.titulo }}</strong>
-        <span class="pv-etapa-sub" [title]="e.sub">{{ e.sub }}</span>
-        <span class="pv-etapa-selo">
-          @if (e.id === 'postando') {
-            <span class="pv-canais">
-              <img src="lojas/whatsapp.svg" [class.pv-canal-off]="!destino().whatsappConectado" [title]="tituloWhatsapp()" [attr.alt]="tituloWhatsapp()" />
-              <img src="lojas/telegram.png" [class.pv-canal-off]="!destino().telegramConectado || !destino().telegram" [title]="tituloTelegram()" [attr.alt]="tituloTelegram()" />
-            </span>
-          } @else if (e.loja) {
-            <img class="pv-etapa-logo" [src]="logoDaLoja(e.loja)" alt="" />
-          } @else {
-            <span class="pv-marca" aria-hidden="true"></span>
-          }
-          {{ e.selo }}
-        </span>
-      </li>
-    }
-  </ol>
-  <p class="pv-pipeline-nota">
-    @if (aoVivo() && produtoDaVez(); as prod) {
-      <span class="pv-produto" [title]="prod">{{ prod }}</span>
-      @if (grupoDaVez()) { <span class="pv-produto-grupo">&nbsp;· para <strong>{{ grupoDaVez() }}</strong></span> }
-    } @else {
-      {{ runControl.postandoAgora() ? 'Procurando o próximo produto…' : 'As etapas acendem aqui assim que o robô estiver postando.' }}
-    }
-  </p>
-</section>
-
-<!-- 3. Os grupos marcados para postar: clicar abre a lista de cada um, com o status de cada produto. -->
-<app-grupos-fila [grupoDaVez]="grupoDaVez()" />
-
-<!-- 4. O que ele fez por último. Ocupa o resto da tela e rola por dentro. -->
-<section class="card pv-acoes" aria-labelledby="pv-acoes-titulo">
-  <div class="card-header">
-    <div class="est-cartao-topo">
-      <span class="ganhos-kpi-icone est-cartao-icone" aria-hidden="true"><ng-container *ngTemplateOutlet="icone; context: { $implicit: 'doc' }" /></span>
-      <div>
-        <h2 id="pv-acoes-titulo">Últimas ações</h2>
-        <p class="card-subtitle">Acompanhe em tempo real tudo o que o robô está fazendo.</p>
-      </div>
-    </div>
-    <button type="button" class="btn btn-ghost btn-sm pv-logs" (click)="verLogs.emit()">
-      Ver logs detalhados
-      <ng-container *ngTemplateOutlet="icone; context: { $implicit: 'externo' }" />
-    </button>
-  </div>
-  @if (jobs.desafioMl()) {
-    <div class="espera-faixa">
-      <span class="espera-faixa-logo"><img src="lojas/mercadolivre.svg" alt="" /></span>
-      <div class="espera-faixa-texto">
-        <strong>Mercado Livre em espera</strong>
-        <span>Ele pediu uma verificação de segurança. As outras lojas seguem postando.</span>
-      </div>
-      <button type="button" class="btn btn-ghost btn-sm" (click)="jobs.desafioPopupAberto.set(true)">Resolver</button>
-    </div>
-  }
-  <ul class="pv-lista" role="log" aria-label="Últimas ações do robô">
-    @for (a of acoes(); track $index) {
-      <li class="pv-acao" [attr.data-tom]="a.tom" [attr.data-icone]="a.icone">
-        <span class="pv-acao-hora">{{ a.hora }}</span>
-        <span class="pv-acao-icone"><ng-container *ngTemplateOutlet="icone; context: { $implicit: a.icone }" /></span>
-        <span class="pv-acao-texto">{{ a.texto }}</span>
-        <span class="pv-selo" [attr.data-tom]="a.tom">{{ a.selo }}</span>
-      </li>
-    } @empty {
-      <li class="empty-state">
-        <span class="empty-state-title">Nada por aqui ainda</span>
-        <span class="empty-state-text">Ligue o robô para acompanhar cada produto, do achado até a postagem.</span>
-      </li>
-    }
-  </ul>
-</section>
-
-<!-- Estatísticas de hoje: abrem pelo ícone de gráfico no cabeçalho. -->
+<!-- Estatísticas de hoje: abrem pelo cartão "Postados hoje". -->
 @if (statsAbertas()) {
   <div class="modal-fundo" (click)="statsAbertas.set(false)">
     <div class="modal-caixa pv-stats" role="dialog" aria-modal="true" aria-labelledby="pv-stats-titulo" (click)="$event.stopPropagation()">

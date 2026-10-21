@@ -1,33 +1,18 @@
-import { Component, DestroyRef, ElementRef, HostListener, computed, inject, output, signal } from '@angular/core';
+import { Component, DestroyRef, HostListener, computed, effect, inject, output, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import {
-  AcaoPainel,
-  AlvoGrupos,
-  EstadoEtapa,
-  EtapaPainelId,
-  JobsService,
-} from '../../../core/services/jobs.service';
+import { AcaoPainel, AlvoGrupos, JobsService } from '../../../core/services/jobs.service';
 import { RunControlService } from '../../../core/services/run-control.service';
 import { StatusService } from '../../../core/services/status.service';
-import { VerificacaoService } from '../../../core/services/verificacao.service';
+import { PainelService } from '../../../core/services/painel.service';
 import { GruposFila } from '../grupos-fila/grupos-fila';
+import { duracao } from '../topo-kpis/topo-kpis';
 
 type Icone =
-  | 'busca' | 'sacola' | 'doc' | 'envio' | 'check' | 'alerta' | 'relogio' | 'play' | 'pausa' | 'parar' | 'grafico'
-  | 'grupos' | 'robo' | 'raio' | 'externo';
+  | 'busca' | 'sacola' | 'doc' | 'envio' | 'check' | 'alerta' | 'relogio' | 'grupos' | 'externo'
+  | 'cubo' | 'etiqueta' | 'pessoas' | 'dinheiro' | 'seta' | 'subiu' | 'desceu' | 'chevron';
 type Tom = 'ok' | 'andamento' | 'espera' | 'erro' | 'neutro' | 'achado';
-
-interface EtapaVista {
-  id: EtapaPainelId;
-  numero: number;
-  titulo: string;
-  sub: string;
-  estado: EstadoEtapa;
-  selo: string;
-  atual: boolean;
-  icone: Icone;
-  loja: string | null;
-}
+/** Abas do app que os cartões do Painel abrem. */
+export type DestinoPainel = 'estatisticas' | 'grupos';
 
 interface AcaoVista {
   hora: string;
@@ -37,39 +22,39 @@ interface AcaoVista {
   tom: Tom;
 }
 
-const NOME_LOJA: Record<string, string> = { mercadolivre: 'Mercado Livre', amazon: 'Amazon', shopee: 'Shopee' };
-const ORDEM: EtapaPainelId[] = ['buscando', 'origem', 'preparando', 'postando', 'concluido'];
-const MAX_ACOES_COMPACTO = 20;
+interface Barra {
+  dia: string;
+  rotulo: string;
+  n: number;
+  altura: number;
+  marca: boolean;
+}
 
-const BASE: Record<EtapaPainelId, { titulo: string; sub: string; icone: Icone }> = {
-  buscando: { titulo: 'Buscando produto', sub: 'Procurando promoções', icone: 'busca' },
-  origem: { titulo: 'Origem do produto', sub: 'De qual loja ele vem', icone: 'sacola' },
-  preparando: { titulo: 'Preparando conteúdo', sub: 'Gerando link e mensagem', icone: 'doc' },
-  postando: { titulo: 'Postando', sub: 'Enviando para os grupos', icone: 'envio' },
-  concluido: { titulo: 'Concluído', sub: 'Produto publicado', icone: 'check' },
-};
+const NOME_LOJA: Record<string, string> = { mercadolivre: 'Mercado Livre', amazon: 'Amazon', shopee: 'Shopee' };
+const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+const MAX_ACOES = 20;
+const NUMEROS_A_CADA_MS = 60000;
 
 function hhmm(iso: string | null | undefined): string {
   if (!iso) return '';
   return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 }
 
-/** "2h 34min", "12min", "45s". */
-function duracao(ms: number): string {
-  const s = Math.max(0, Math.round(ms / 1000));
-  if (s < 60) return `${s}s`;
-  const min = Math.floor(s / 60);
-  if (min < 60) return s % 60 && min < 10 ? `${min}min ${s % 60}s` : `${min}min`;
-  return `${Math.floor(min / 60)}h ${min % 60}min`;
+/** Teto do eixo: um número redondo acima do maior valor, dividido em 4 faixas. */
+function tetoDoEixo(max: number): number {
+  if (max <= 4) return 4;
+  const passo = Math.pow(10, Math.floor(Math.log10(max / 4)));
+  for (const m of [1, 2, 2.5, 5, 10]) {
+    const faixa = m * passo;
+    if (faixa * 4 >= max) return faixa * 4;
+  }
+  return Math.ceil(max / 4) * 4;
 }
 
 /**
- * O Painel para quem não quer ler log, cabendo numa tela só: estado do robô e
- * controles numa linha, a pipeline do produto da vez (Buscando → Origem →
- * Preparando → Postando → Concluído, com a loja na Origem e os canais no
- * Postando) e as últimas ações em frases curtas. Os números do dia ficam num
- * modal. Tudo sai do estado estruturado que o robô manda (evento "painel"); o
- * log cru continua no "Ver logs detalhados".
+ * O Painel: os números do dia em quatro cartões, as postagens dos últimos 30 dias, as últimas
+ * ações e os grupos marcados para postar. O tempo ativo e a próxima postagem ficam no cabeçalho
+ * (topo-kpis); ligar, pausar e parar, no botão flutuante.
  */
 @Component({
   selector: 'app-painel-robo',
@@ -80,30 +65,27 @@ function duracao(ms: number): string {
 export class PainelRobo {
   verProdutos = output<void>();
   verLogs = output<void>();
+  irPara = output<DestinoPainel>();
 
   protected runControl = inject(RunControlService);
   protected jobs = inject(JobsService);
   protected statusService = inject(StatusService);
-  private verificacao = inject(VerificacaoService);
+  private painelService = inject(PainelService);
 
-  /** Relógio de 1s pras contagens (tempo ativo, próxima ação). */
-  protected readonly agora = signal(Date.now());
   protected readonly escolhendoGrupos = signal(false);
   protected readonly statsAbertas = signal(false);
 
-  private host = inject(ElementRef<HTMLElement>);
-
   constructor() {
-    const t = setInterval(() => this.agora.set(Date.now()), 1000);
+    void this.painelService.carregar();
+    const t = setInterval(() => document.visibilityState === 'visible' && void this.painelService.carregar(), NUMEROS_A_CADA_MS);
     inject(DestroyRef).onDestroy(() => clearInterval(t));
-  }
-
-  /** Clique fora do "Escolher grupos" fecha a caixinha. */
-  @HostListener('document:click', ['$event'])
-  protected fecharGruposFora(ev: MouseEvent): void {
-    if (!this.escolhendoGrupos()) return;
-    const ancora = (this.host.nativeElement as HTMLElement).querySelector('.pv-grupos-ancora');
-    if (ancora && !ancora.contains(ev.target as Node)) this.escolhendoGrupos.set(false);
+    // Postou: o gráfico e os grupos atualizam na hora, sem esperar a próxima leitura.
+    let concluidos: number | null = null;
+    effect(() => {
+      const n = this.jobs.painel()?.hoje?.concluidos ?? null;
+      if (concluidos !== null && n !== null && n !== concluidos) void this.painelService.carregar();
+      concluidos = n;
+    });
   }
 
   @HostListener('document:keydown.escape')
@@ -113,132 +95,9 @@ export class PainelRobo {
   }
 
   private readonly painel = computed(() => this.jobs.painel());
+  private readonly numeros = computed(() => this.painelService.numeros());
 
-  /** A pipeline só vale com o robô de postagem rodando agora; parado, tudo volta a "pendente". */
-  protected readonly aoVivo = computed(() => this.runControl.postandoAgora() && !!this.painel()?.atual);
-
-  // ---- Cabeçalho ----
-
-  protected readonly estado = computed<'online' | 'pausado' | 'religando' | 'externo' | 'ganhos' | 'desligado'>(() => {
-    if (this.runControl.pausado()) return 'pausado';
-    if (this.runControl.postandoAgora()) return 'online';
-    if (this.runControl.rodandoContinuo()) return 'religando';
-    if (this.runControl.processoExterno()) return 'externo';
-    if (this.runControl.lendoGanhos()) return 'ganhos';
-    return 'desligado';
-  });
-
-  protected readonly rotuloEstado = computed(() => {
-    switch (this.estado()) {
-      case 'online': return 'Online';
-      case 'pausado': return 'Pausado';
-      case 'religando': return 'Ligando';
-      case 'externo': return 'Fora do painel';
-      case 'ganhos': return 'Lendo ganhos';
-      default: return 'Desligado';
-    }
-  });
-
-  protected readonly frase = computed(() => {
-    switch (this.estado()) {
-      case 'online':
-        if (this.jobs.desafioMl()) return 'Funcionando — Mercado Livre em espera, as outras lojas seguem postando';
-        if (this.painel()?.etapas.buscando.estado === 'erro') return 'Funcionando — a última busca falhou, tentando de novo';
-        return 'Funcionando normalmente';
-      case 'pausado': return 'Pausado — WhatsApp e navegador abertos, nada é postado até retomar';
-      case 'religando': return 'Abrindo o navegador e o WhatsApp…';
-      case 'externo': return 'Rodando fora do painel (pelo terminal)';
-      case 'ganhos': return 'Lendo os ganhos nas lojas — dá para ligar a postagem em seguida';
-      default: return 'Ligue para ele procurar ofertas e postar nos grupos sozinho';
-    }
-  });
-
-  protected readonly tempoAtivo = computed(() => {
-    const ini = this.statusService.status()?.job?.iniciadoEm;
-    if (!this.runControl.postandoAgora() || !ini) return '—';
-    return duracao(this.agora() - new Date(ini).getTime());
-  });
-
-  protected readonly postadosHoje = computed(() => this.statusService.status()?.hoje?.postados ?? null);
-
-  /** Próxima coisa com hora marcada: a postagem agendada ou a nova busca. */
-  protected readonly proxima = computed<{ rotulo: string; valor: string }>(() => {
-    const p = this.painel();
-    if (!this.runControl.postandoAgora()) return { rotulo: 'Próxima postagem', valor: '—' };
-    if (this.runControl.pausado()) return { rotulo: 'Próxima ação', valor: 'Pausado' };
-    const conta = (iso: string) => duracao(new Date(iso).getTime() - this.agora());
-    const postar = p?.etapas.postando;
-    if (postar?.estado === 'espera' && postar.ate && new Date(postar.ate).getTime() > this.agora()) {
-      return { rotulo: 'Próxima postagem em', valor: conta(postar.ate) };
-    }
-    const buscar = p?.etapas.buscando;
-    if (p?.atual === 'buscando' && buscar?.estado === 'espera' && buscar.ate && new Date(buscar.ate).getTime() > this.agora()) {
-      return { rotulo: 'Nova busca em', valor: conta(buscar.ate) };
-    }
-    const prevista = this.runControl.proximaPublicacao();
-    if (prevista && new Date(prevista).getTime() > this.agora()) {
-      return { rotulo: 'Próxima postagem em', valor: conta(prevista) };
-    }
-    return { rotulo: 'Próxima ação', valor: 'Agora' };
-  });
-
-  // ---- Pipeline ----
-
-  protected readonly etapas = computed<EtapaVista[]>(() => {
-    const p = this.painel();
-    const vivo = this.aoVivo();
-    const pausado = this.runControl.pausado();
-    return ORDEM.map((id, i) => {
-      const base = BASE[id];
-      const e = vivo && p ? p.etapas[id] : { estado: 'pendente' as EstadoEtapa, ate: null, motivo: null };
-      const atual = vivo && p?.atual === id;
-      const v: EtapaVista = {
-        id,
-        numero: i + 1,
-        titulo: base.titulo,
-        sub: base.sub,
-        estado: e.estado,
-        selo: '',
-        atual,
-        icone: base.icone,
-        loja: null,
-      };
-      v.selo = { pendente: 'Aguardando', andamento: 'Em andamento…', espera: 'Aguardando', ok: 'Concluído', erro: 'Erro' }[e.estado];
-
-      if (id === 'buscando') {
-        if (e.estado === 'espera') {
-          v.sub = {
-            catalogoVazio: 'Garimpando as primeiras ofertas',
-            nenhumLiberado: 'Nada liberado agora',
-            cedeu: 'Passando a vez pro próximo grupo',
-            repetido: 'Só assunto repetido neste grupo',
-            foraDoHorario: 'Fora do horário — garimpando',
-          }[e.motivo ?? ''] ?? 'Esperando novidade';
-          if (e.ate) v.selo = e.motivo === 'foraDoHorario' ? `Posta de novo às ${hhmm(e.ate)}` : `Nova busca às ${hhmm(e.ate)}`;
-        } else if (e.estado === 'ok') v.sub = 'Promoção escolhida';
-        else if (e.estado === 'erro') v.sub = 'Falhou — tenta de novo sozinho';
-      }
-      if (id === 'origem' && e.estado === 'ok' && p?.produto) {
-        v.loja = p.produto.loja;
-        v.sub = p.produto.grupoOrigem ? `Clonado de "${p.produto.grupoOrigem}"` : p.produto.tipo === 'cupom' ? 'Cupom da loja' : 'Garimpado na loja';
-        v.selo = NOME_LOJA[p.produto.loja ?? ''] ?? 'Loja';
-      }
-      if (id === 'preparando' && e.estado === 'ok') v.sub = 'Link e mensagem prontos';
-      if (id === 'postando') {
-        if (e.estado === 'espera') {
-          v.sub = 'Esperando o horário sorteado';
-          v.selo = e.ate ? `Agendado ${hhmm(e.ate)}` : 'Agendado';
-        } else if (e.estado === 'andamento') v.selo = 'Enviando…';
-        else if (e.estado === 'ok') v.sub = this.canaisTexto(p?.canais ?? []);
-        else if (e.estado === 'erro') v.sub = e.motivo ? this.curto(e.motivo) : 'A mensagem não saiu';
-      }
-      if (id === 'concluido' && e.estado === 'ok') v.selo = 'Sucesso';
-      if (atual && pausado) v.selo = 'Pausado';
-      return v;
-    });
-  });
-
-  // ---- Grupos e canais de destino ----
+  // ---- Grupos marcados para postar ----
 
   private readonly gruposAlvo = computed(() => {
     const todos = this.runControl.grupos();
@@ -250,37 +109,65 @@ export class PainelRobo {
     return todos.filter((g) => ids.has(g.id));
   });
 
-  protected readonly grupoDaVez = computed(() => (this.aoVivo() ? this.painel()?.grupo?.nome ?? null : null));
+  protected readonly grupoDaVez = computed(() =>
+    this.runControl.postandoAgora() && this.painel()?.atual ? this.painel()?.grupo?.nome ?? null : null
+  );
 
-  protected readonly produtoDaVez = computed(() => (this.aoVivo() ? this.painel()?.produto?.nome ?? null : null));
-
-  protected readonly rotuloAlvo = computed(() => {
-    const total = this.runControl.grupos().length;
-    const n = this.gruposAlvo().length;
-    return n === total ? 'todos' : `${n} de ${total}`;
+  protected readonly numerosDosGrupos = computed(() => {
+    const m: Record<string, { membros: number | null; postadosHoje: number }> = {};
+    for (const g of this.numeros()?.grupos ?? []) m[g.id] = { membros: g.membros, postadosHoje: g.postadosHoje };
+    return m;
   });
 
-  protected readonly destino = computed(() => {
-    const alvo = this.gruposAlvo();
-    return {
-      whatsapp: alvo.length,
-      whatsappConectado: this.verificacao.whatsappConectado(),
-      telegram: alvo.filter((g) => !!g.grupoTelegram).length,
-      telegramConectado: this.verificacao.telegramConectado(),
-    };
+  // ---- Os quatro cartões ----
+
+  protected readonly gruposAtivos = computed(() => this.gruposAlvo().length);
+
+  protected readonly postadosHoje = computed(() => this.statusService.status()?.hoje?.postados ?? null);
+
+  /** Variação contra ontem: só com ontem > 0 (de zero não dá porcentagem). */
+  protected readonly variacao = computed<{ texto: string; subiu: boolean } | null>(() => {
+    const h = this.statusService.status()?.hoje;
+    if (!h || !h.postadosOntem) return null;
+    const pct = Math.round(((h.postados - h.postadosOntem) / h.postadosOntem) * 100);
+    return { texto: `${Math.abs(pct)}%`, subiu: pct >= 0 };
   });
 
-  protected readonly tituloWhatsapp = computed(() => {
-    const d = this.destino();
-    if (!d.whatsappConectado) return 'WhatsApp não conectado';
-    return `WhatsApp: ${d.whatsapp} ${d.whatsapp === 1 ? 'grupo ativo' : 'grupos ativos'}`;
+  protected readonly membrosTotais = computed<number | null>(() => {
+    const m = this.numerosDosGrupos();
+    const lidos = this.gruposAlvo().map((g) => m[g.id]?.membros).filter((n): n is number => n != null);
+    return lidos.length ? lidos.reduce((a, b) => a + b, 0) : null;
   });
 
-  protected readonly tituloTelegram = computed(() => {
-    const d = this.destino();
-    if (!d.telegramConectado) return 'Telegram não conectado';
-    if (!d.telegram) return 'Telegram: nenhum canal ligado';
-    return `Telegram: ${d.telegram} ${d.telegram === 1 ? 'canal ativo' : 'canais ativos'}`;
+  protected readonly receitaHoje = computed(() => {
+    const v = this.numeros()?.receitaHoje;
+    return v == null ? '—' : v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  });
+
+  protected numero(n: number | null): string {
+    return n == null ? '—' : n.toLocaleString('pt-BR');
+  }
+
+  // ---- Postagens dos últimos 30 dias ----
+
+  protected readonly grafico = computed(() => {
+    const dias = this.numeros()?.postagensPorDia ?? [];
+    const max = Math.max(0, ...dias.map((d) => d.n));
+    const teto = tetoDoEixo(max);
+    const barras: Barra[] = dias.map((d, i) => {
+      const [, mes, dia] = d.dia.split('-').map(Number);
+      return {
+        dia: d.dia,
+        rotulo: `${dia}/${MESES[mes - 1]}`,
+        n: d.n,
+        altura: teto ? (d.n / teto) * 100 : 0,
+        // Um rótulo a cada 3 dias, como no eixo de calendário.
+        marca: i % 3 === 0,
+      };
+    });
+    const linhas = [0, 1, 2, 3, 4].map((k) => (teto / 4) * k).reverse();
+    const total = dias.reduce((a, d) => a + d.n, 0);
+    return { barras, linhas, total, vazio: !dias.length };
   });
 
   // ---- Últimas ações ----
@@ -292,7 +179,7 @@ export class PainelRobo {
       const ultima = i === lista.length - 1 && this.runControl.postandoAgora();
       out.push(...this.traduzir(a, ultima));
     });
-    return out.reverse().slice(0, MAX_ACOES_COMPACTO);
+    return out.reverse().slice(0, MAX_ACOES);
   });
 
   private traduzir(a: AcaoPainel, ultima: boolean): AcaoVista[] {
@@ -305,19 +192,19 @@ export class PainelRobo {
       case 'produto': {
         const loja = NOME_LOJA[a.loja ?? ''] ?? 'loja';
         return [
-          linha('sacola', `${a.produto ? 'Produto encontrado: ' + this.curto(a.produto) : 'Produto encontrado'} (${loja})`, 'Encontrado', 'achado'),
+          linha('cubo', `${a.produto ? 'Produto encontrado: ' + this.curto(a.produto) : 'Produto encontrado'} (${loja})`, 'Encontrado', 'achado'),
           linha('doc', 'Link e mensagem prontos', 'Concluído', 'ok'),
         ];
       }
       case 'semProduto': {
         const txt = {
-          catalogoVazio: 'Ainda sem produtos — garimpando as primeiras ofertas',
+          catalogoVazio: 'Ainda sem produtos — buscando as primeiras ofertas',
           nenhumLiberado: 'Nenhum produto liberado agora',
           cedeu: grupoNome ? `"${grupoNome}" sem produto agora — vez do próximo grupo` : 'Vez do próximo grupo',
           repetido: grupoNome ? `"${grupoNome}" só tem assunto repetido agora` : 'Só assunto repetido agora',
         }[a.motivo ?? ''] ?? 'Nada para postar agora';
         if (a.motivo === 'foraDoHorario') {
-          return [linha('relogio', `Fora do horário — garimpando${a.ate ? `, posta de novo às ${hhmm(a.ate)}` : ''}`, 'Fora do horário', 'espera')];
+          return [linha('relogio', `Fora do horário${a.ate ? ` — posta de novo às ${hhmm(a.ate)}` : ''}`, 'Fora do horário', 'espera')];
         }
         return [linha('relogio', a.ate ? `${txt} — nova busca às ${hhmm(a.ate)}` : txt, 'Aguardando', 'espera')];
       }
@@ -326,8 +213,8 @@ export class PainelRobo {
       case 'postando':
         return [linha('grupos', 'Postando produto nos grupos…', ultima ? 'Em andamento' : 'Feito', ultima ? 'andamento' : 'neutro')];
       case 'enviado': {
-        const canal = a.canal === 'telegram' ? 'Telegram' : 'WhatsApp';
-        return [linha('envio', `Enviado para ${a.destino ? `"${a.destino}"` : 'o grupo'} (${canal})`, 'Concluído', 'ok')];
+        const canal = a.canal === 'telegram' ? ' (Telegram)' : '';
+        return [linha('envio', `Enviado para ${a.destino ? `"${a.destino}"` : 'o grupo'}${canal}`, 'Concluído', 'ok')];
       }
       case 'concluido':
         return [linha('check', a.produto ? `Publicado: ${this.curto(a.produto)}` : 'Produto publicado', 'Sucesso', 'ok')];
@@ -340,7 +227,7 @@ export class PainelRobo {
     }
   }
 
-  // ---- Estatísticas de hoje ----
+  // ---- Estatísticas de hoje (cartão "Postados hoje") ----
 
   protected readonly stats = computed(() => {
     const h = this.statusService.status()?.hoje ?? null;
@@ -361,26 +248,15 @@ export class PainelRobo {
 
   escolherAlvo(alvo: AlvoGrupos): void {
     this.runControl.escolherAlvo(alvo);
-    if (alvo === 'selecionados') this.escolhendoGrupos.set(true);
-  }
-
-  abrirProdutos(): void {
-    this.statsAbertas.set(false);
-    this.verProdutos.emit();
   }
 
   toggleSelecionado(id: string, marcado: boolean): void {
     this.runControl.toggleSelecionado(id, marcado);
   }
 
-  protected logoDaLoja(loja: string | null): string {
-    return `lojas/${loja && NOME_LOJA[loja] ? loja : 'mercadolivre'}.svg`;
-  }
-
-  private canaisTexto(canais: string[]): string {
-    if (canais.includes('whatsapp') && canais.includes('telegram')) return 'Enviado no WhatsApp e no Telegram';
-    if (canais.includes('telegram')) return 'Enviado no Telegram';
-    return 'Enviado no WhatsApp';
+  abrirProdutos(): void {
+    this.statsAbertas.set(false);
+    this.verProdutos.emit();
   }
 
   private curto(texto: string, max = 70): string {

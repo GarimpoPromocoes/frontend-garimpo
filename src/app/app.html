@@ -96,30 +96,18 @@
       </div>
 
       <div class="topbar-actions">
-        <!-- Status das conexoes (WhatsApp, Telegram e lojas) + sino do que caiu. -->
-        <!-- role=status: quando o robô liga ou para, o leitor de tela avisa sem tirar o foco de onde está. -->
-        <span class="topbar-robo" role="status">
-        @if (runControl.rodandoContinuo()) {
-          <span class="badge badge-running">
-            <span class="badge-dot"></span>
-            {{ runControl.pausado() ? 'Robô pausado' : runControl.postandoAgora() ? 'Postando agora' : 'Robô ligado' }}
-          </span>
-        } @else if (runControl.lendoGanhos()) {
-          <span class="badge badge-running"><span class="badge-dot"></span>Lendo ganhos</span>
-        } @else {
-          <span class="badge badge-off"><span class="badge-dot"></span>Robô parado</span>
-        }
-        </span>
-        <app-status-conexoes />
+        <!-- Os números do momento (tempo ativo, postados hoje, próxima postagem) e o sino do que caiu. -->
+        <app-topo-kpis />
         <app-sino />
       </div>
     </header>
 
-    <!-- Ligar/parar o robô nas outras páginas: fica no canto de baixo e some quando abre qualquer
-         janela. No Painel o controle grande já está na tela, então este não aparece. -->
+    <!-- Ligar, pausar e parar o robô: botões redondos no canto de baixo, em todas as telas. Somem
+         quando abre qualquer janela. role=status: o leitor de tela avisa quando o robô liga ou para. -->
     <div
       class="bot-control-fixo"
-      [class.bot-control-oculto]="algumModalAberto() || aba() === 'painel'"
+      role="status"
+      [class.bot-control-oculto]="algumModalAberto()"
       [class.bot-control-acima]="mostrarEsperaMl()"
     >
       @if (!runControl.algoRodando()) {
@@ -127,7 +115,8 @@
           type="button"
           class="bot-fab bot-fab-ligar"
           [disabled]="runControl.iniciando()"
-          [title]="runControl.podeLigar() ? null : 'Faltam passos de configuração — ligar mostra o que falta'"
+          [title]="runControl.iniciando() ? 'Ligando o robô…' : runControl.podeLigar() ? 'Ligar robô' : 'Ligar robô — faltam passos de configuração'"
+          [attr.aria-label]="runControl.iniciando() ? 'Ligando o robô' : 'Ligar robô'"
           (click)="runControl.executar()"
         >
           @if (runControl.iniciando()) {
@@ -135,14 +124,16 @@
           } @else {
             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8.5 5.6v12.8a1 1 0 0 0 1.52.85l10.2-6.4a1 1 0 0 0 0-1.7l-10.2-6.4a1 1 0 0 0-1.52.85Z" /></svg>
           }
-          <span>{{ runControl.iniciando() ? 'Ligando…' : 'Ligar robô' }}</span>
         </button>
       } @else {
         @if (runControl.postandoAgora()) {
           <button
             type="button"
             class="bot-fab bot-fab-pausa"
+            [class.bot-fab-ligar]="runControl.pausado()"
             [disabled]="runControl.pausando() || runControl.parando()"
+            [title]="runControl.pausado() ? 'Retomar robô' : 'Pausar robô'"
+            [attr.aria-label]="runControl.pausado() ? 'Retomar robô' : 'Pausar robô'"
             (click)="runControl.alternarPausa()"
           >
             @if (runControl.pausando()) {
@@ -152,26 +143,29 @@
             } @else {
               <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6.5" y="5.5" width="4" height="13" rx="1.2" /><rect x="13.5" y="5.5" width="4" height="13" rx="1.2" /></svg>
             }
-            <span>{{ runControl.pausado() ? 'Retomar robô' : 'Pausar robô' }}</span>
           </button>
         }
         <button
           type="button"
           class="bot-fab bot-fab-parar"
           [disabled]="runControl.parando()"
+          [title]="runControl.parando() ? 'Parando o robô…' : 'Parar robô'"
+          [attr.aria-label]="runControl.parando() ? 'Parando o robô' : 'Parar robô'"
           (click)="runControl.parar()"
         >
           @if (runControl.parando()) {
             <span class="bot-fab-spinner"></span>
           } @else {
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6.5" y="6.5" width="11" height="11" rx="2" /></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6.5" y="6.5" width="11" height="11" rx="2.5" /></svg>
           }
-          <span>{{ runControl.parando() ? 'Parando…' : 'Parar robô' }}</span>
         </button>
       }
+      <span class="sr-only">
+        {{ runControl.pausado() ? 'Robô pausado' : runControl.rodandoContinuo() ? 'Robô ligado' : runControl.lendoGanhos() ? 'Lendo ganhos' : 'Robô parado' }}
+      </span>
     </div>
 
-    <main class="content" id="conteudo" tabindex="-1" [class.content-painel]="aba() === 'painel'"
+    <main class="content" id="conteudo" tabindex="-1"
       [class.content-tela-cheia]="aba() === 'estatisticas'">
       @if (configService.erro()) {
         <div class="alert-banner" role="alert">{{ configService.erro() }}</div>
@@ -206,7 +200,7 @@
 
           <!-- Visão para leigos: estado, pipeline do produto da vez, contexto, últimas ações e números
                do dia. O log detalhado continua no modal de atividade ("Ver logs detalhados"). -->
-          <app-painel-robo (verProdutos)="produtosModalAberto.set(true)" (verLogs)="atividadeModalAberta.set(true)" />
+          <app-painel-robo (verProdutos)="produtosModalAberto.set(true)" (verLogs)="atividadeModalAberta.set(true)" (irPara)="irPara($event)" />
         }
 
         @case ('grupos') {

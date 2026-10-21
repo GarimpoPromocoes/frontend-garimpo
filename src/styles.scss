@@ -40,6 +40,19 @@
   --danger-soft: #fbeeec;
   --danger-border: #eed2cd;
 
+  /* Painel: o azul so do icone de membros, a barra do grafico e o vidro dos botoes flutuantes. */
+  --azul: #2f6fd6;
+  --azul-soft: #e8f0fc;
+  --vermelho-icone: #c9543b;
+  --barra: #f2cd78;
+  --barra-forte: #e0a520;
+  --vidro-topo: rgba(255, 255, 255, 0.74);
+  --vidro-base: rgba(255, 255, 255, 0.42);
+  --vidro-borda: rgba(255, 255, 255, 0.7);
+  --vidro-brilho: rgba(255, 255, 255, 0.9);
+  --vidro-sombra: 0 10px 26px rgba(42, 29, 18, 0.16), 0 2px 6px rgba(42, 29, 18, 0.08);
+  --vidro-reflexo: rgba(255, 255, 255, 0.55);
+
   /* Foco de teclado: anel escuro (visível no claro e no dourado). Nos campos,
      o contorno escurece e ganha um halo dourado. */
   --focus: #241a11;
@@ -132,6 +145,18 @@
   --danger: #ff9a8f;
   --danger-soft: #3a1b16;
   --danger-border: #74342b;
+
+  --azul: #8ab4f5;
+  --azul-soft: #1b2638;
+  --vermelho-icone: #ff9a8f;
+  --barra: #b8862a;
+  --barra-forte: #f0b93a;
+  --vidro-topo: rgba(255, 255, 255, 0.14);
+  --vidro-base: rgba(255, 255, 255, 0.05);
+  --vidro-borda: rgba(255, 255, 255, 0.2);
+  --vidro-brilho: rgba(255, 255, 255, 0.28);
+  --vidro-sombra: 0 10px 26px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3);
+  --vidro-reflexo: rgba(255, 255, 255, 0.12);
 
   --focus: #e0a520;
   --focus-halo: 0 0 0 3px rgba(224, 165, 32, 0.45);
@@ -3782,444 +3807,298 @@ app-status-conexoes {
   display: none;
 }
 
-/* ---- Painel: a visão para quem não lê log ----
-   Cabe numa tela só: uma linha com estado + números + controles, a pipeline
-   do produto da vez (loja na Origem, canais no Postando) e as últimas ações
-   ocupando o que sobra, rolando por dentro. Os números do dia ficam no modal
-   do ícone de gráfico. O amarelo só acende no que está acontecendo agora. */
+/* ---- Painel ----
+   Quatro cartões com os números do dia, o gráfico de 30 dias ao lado das últimas ações e os
+   grupos embaixo. Tempo ativo e próxima postagem ficam no cabeçalho; ligar/parar, no botão
+   flutuante. */
 app-painel-robo {
-  flex: 1;
-  min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 18px;
   min-width: 0;
 }
 
-/* Cabeçalho: um cartão comum, sem bloco de cor. */
-.pv-topo {
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 14px 28px;
-  padding: 20px 22px;
-}
-/* O robo num quadrado dourado, como os icones dos cartoes de Estatisticas. */
-.pv-robo {
+.pn-kpis {
   display: grid;
-  place-items: center;
-  width: 64px;
-  height: 64px;
-  flex-shrink: 0;
-  margin-right: -10px;
-  border-radius: var(--radius-sm);
-  background: var(--gold-soft);
-  color: var(--text);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
 }
-.pv-robo svg {
-  width: 34px;
-  height: 34px;
-}
-.pv-topo[data-estado='online'] .pv-robo {
-  background: var(--gold);
-  color: var(--on-gold);
-}
-.pv-estado {
-  flex: 1 1 240px;
-  min-width: 0;
-}
-.pv-nome {
+.pn-kpi {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin: 0;
-  font-size: 24px;
-  font-weight: 700;
-  font-stretch: var(--estreita);
-  line-height: 1.2;
+  gap: 18px;
+  min-height: 108px;
+  padding: 20px;
+  text-align: left;
+  font: inherit;
   color: var(--text);
-}
-.pv-luz {
-  width: 8px;
-  height: 8px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: var(--border-strong);
-}
-.pv-topo[data-estado='online'] .pv-luz {
-  background: var(--ok);
-  animation: pulse-dot 1.6s ease-in-out infinite;
-}
-.pv-topo[data-estado='pausado'] .pv-luz,
-.pv-topo[data-estado='religando'] .pv-luz,
-.pv-topo[data-estado='ganhos'] .pv-luz {
-  background: var(--gold);
-}
-.pv-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 4px 12px;
-  border-radius: 999px;
-  font-size: 14px;
-  font-weight: 600;
-  font-stretch: 100%;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  color: var(--text-soft);
-}
-.pv-topo[data-estado='online'] .pv-pill {
-  background: var(--ok-soft);
-  border-color: var(--ok-border);
-  color: var(--ok);
-}
-.pv-topo[data-estado='pausado'] .pv-pill,
-.pv-topo[data-estado='religando'] .pv-pill {
-  background: var(--gold-soft);
-  border-color: var(--gold-border);
-  color: var(--gold-ink);
-}
-.pv-frase {
-  margin: 6px 0 0;
-  font-size: 15px;
-  color: var(--text-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.pv-kpis {
-  display: flex;
-  gap: 28px;
-  margin: 0;
-}
-.pv-kpis div {
-  position: relative;
-  min-width: 0;
-  padding-left: 30px;
-}
-.pv-kpis dt {
-  font-size: 13px;
-  color: var(--text-muted);
-  white-space: nowrap;
-}
-/* O icone fica a esquerda do rotulo e do valor. */
-.pv-kpis dt svg {
-  position: absolute;
-  left: 0;
-  top: 1px;
-  width: 20px;
-  height: 20px;
-  color: var(--text-soft);
-}
-.pv-kpis dd {
-  margin: 4px 0 0;
-  font-size: 22px;
-  font-weight: 700;
-  font-stretch: var(--estreita);
-  line-height: 1.1;
-  color: var(--text);
-  font-variant-numeric: tabular-nums;
-}
-
-.pv-controles {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.pv-divisor {
-  width: 1px;
-  height: 24px;
-  margin: 0 4px;
-  background: var(--border);
-}
-.pv-divisor-alto {
-  height: 56px;
-  margin: 0;
-}
-.pv-icone-btn {
-  width: 48px;
-  height: 48px;
-  display: grid;
-  place-items: center;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-control);
   background: var(--surface);
-  color: var(--text-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
   cursor: pointer;
   transition:
-    background 0.14s ease,
-    color 0.14s ease;
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
-.pv-icone-btn svg {
-  width: 20px;
-  height: 20px;
-}
-.pv-icone-btn:hover:not(:disabled),
-.pv-icone-btn[aria-expanded='true'] {
-  background: var(--surface-3);
-  color: var(--text);
-}
-.pv-icone-btn:disabled {
-  opacity: 0.5;
-  cursor: progress;
-}
-.pv-ligar svg,
-.pv-parar svg {
-  width: 15px;
-  height: 15px;
-}
-.pv-ligar,
-.pv-parar {
-  min-width: 150px;
-  min-height: 48px;
-  margin-left: 8px;
-  font-size: 16px;
-}
-
-/* "Escolher grupos": uma caixinha que abre embaixo do ícone. */
-.pv-grupos-ancora {
-  position: relative;
-}
-.pv-grupos {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  z-index: 20;
-  width: 300px;
-  max-height: 60vh;
-  overflow: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 16px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+.pn-kpi:hover {
+  border-color: var(--border-strong);
   box-shadow: var(--shadow);
 }
-.pv-erro {
-  flex-basis: 100%;
-  margin: 0;
-  padding: 10px 14px;
-  border-radius: var(--radius-sm);
-  background: var(--danger-soft);
-  color: var(--danger);
-  font-size: 14px;
-  font-weight: 600;
+.pn-kpi:focus-visible {
+  outline: 2px solid var(--focus);
+  box-shadow: var(--focus-halo);
 }
-
-/* Pipeline: cinco cartões com seta entre eles; a etapa da vez ganha a borda amarela. */
-.pv-pipeline {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.pv-etapas {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 26px;
-}
-.pv-etapa {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 4px;
-  padding: 14px 12px 12px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  min-width: 0;
-  transition:
-    border-color 0.25s ease,
-    box-shadow 0.25s ease;
-}
-.pv-etapa + .pv-etapa::before {
-  content: '';
-  position: absolute;
-  left: -19px;
-  top: 50%;
-  width: 9px;
-  height: 9px;
-  border-top: 2px solid var(--border-strong);
-  border-right: 2px solid var(--border-strong);
-  transform: translateY(-50%) rotate(45deg);
-}
-.pv-etapa-icone {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
+.pn-kpi-icone {
+  flex-shrink: 0;
+  width: 66px;
+  height: 66px;
   display: grid;
   place-items: center;
-  background: var(--surface-2);
-  color: var(--text-soft);
-  margin-bottom: 2px;
+  border-radius: 16px;
 }
-.pv-etapa-icone svg {
-  width: 24px;
-  height: 24px;
+.pn-kpi-icone svg {
+  width: 30px;
+  height: 30px;
 }
-.pv-etapa-titulo {
-  font-size: 16px;
-  font-weight: 700;
-  font-stretch: var(--estreita);
-  color: var(--text);
+.pn-kpi-icone[data-cor='ouro'] {
+  background: var(--gold-soft);
+  color: var(--espresso);
 }
-.pv-etapa-sub {
-  max-width: 100%;
-  font-size: 13px;
-  color: var(--text-muted);
-  line-height: 1.35;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.pv-etapa-selo {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 24px;
-  margin-top: 2px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-muted);
-}
-.pv-etapa-logo {
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
-  border-radius: 50%;
-  background: var(--logo-placa);
-  padding: 3px;
-}
-.pv-marca {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: 2px solid var(--border-strong);
-  flex-shrink: 0;
-}
-/* Destino no Postando: só os ícones; apagado = desconectado. Detalhe no title. */
-.pv-canais {
-  display: inline-flex;
-  gap: 4px;
-}
-.pv-canais img {
-  width: 20px;
-  height: 20px;
-  object-fit: contain;
-  border-radius: 50%;
-}
-.pv-canais .pv-canal-off {
-  filter: grayscale(1);
-  opacity: 0.45;
-}
-
-.pv-etapa[data-estado='ok'] .pv-etapa-icone {
+.pn-kpi-icone[data-cor='verde'] {
   background: var(--ok-soft);
   color: var(--ok);
 }
-.pv-etapa[data-estado='ok'] .pv-etapa-selo {
+.pn-kpi-icone[data-cor='azul'] {
+  background: var(--azul-soft);
+  color: var(--azul);
+}
+.pn-kpi-icone[data-cor='vermelho'] {
+  background: var(--danger-soft);
+  color: var(--vermelho-icone);
+}
+.pn-kpi-texto {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.pn-kpi-rotulo {
+  font-size: 15px;
+  color: var(--text-soft);
+}
+.pn-kpi-valor {
+  font-size: 30px;
+  font-weight: 800;
+  font-stretch: var(--estreita);
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.pn-variacao {
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-bottom: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--ok-soft);
   color: var(--ok);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
 }
-.pv-etapa[data-estado='ok'] .pv-marca {
-  border: none;
-  background: var(--ok)
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 12.5 4 4L18 8'/%3E%3C/svg%3E")
-    center / 11px no-repeat;
-}
-.pv-etapa[data-estado='andamento'] .pv-etapa-icone {
-  background: var(--gold);
-  color: var(--on-gold);
-}
-.pv-etapa[data-estado='andamento'] .pv-etapa-selo {
-  color: var(--gold-ink);
-}
-.pv-etapa[data-estado='andamento'] .pv-marca {
-  border-color: var(--gold-deep);
-  border-right-color: transparent;
-  animation: pv-gira 0.9s linear infinite;
-}
-.pv-etapa[data-estado='espera'] .pv-etapa-icone {
-  background: var(--gold-soft);
-  color: var(--gold-ink);
-}
-.pv-etapa[data-estado='espera'] .pv-etapa-selo {
-  color: var(--gold-ink);
-}
-.pv-etapa[data-estado='espera'] .pv-marca {
-  border-color: var(--gold-deep);
-  border-style: dashed;
-}
-.pv-etapa[data-estado='erro'] .pv-etapa-icone {
+.pn-variacao[data-subiu='false'] {
   background: var(--danger-soft);
   color: var(--danger);
 }
-.pv-etapa[data-estado='erro'] .pv-etapa-selo {
-  color: var(--danger);
+.pn-variacao svg {
+  width: 13px;
+  height: 13px;
 }
-.pv-etapa[data-estado='erro'] .pv-marca {
-  border-color: var(--danger);
-  background: var(--danger);
-}
-.pv-etapa-atual {
-  border: 2px solid var(--gold);
-  background: var(--gold-soft);
-  box-shadow: 0 8px 20px rgba(221, 163, 0, 0.16);
-}
-.pv-pipeline-nota {
-  display: flex;
-  justify-content: center;
-  min-width: 0;
-  margin: 0;
-  font-size: 13px;
-  color: var(--text-muted);
-  text-align: center;
-  white-space: nowrap;
-}
-.pv-produto-grupo {
+.pn-kpi-chevron {
   flex-shrink: 0;
+  color: var(--text-muted);
+  display: grid;
 }
-.pv-produto {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: var(--text-soft);
-}
-@keyframes pv-gira {
-  to {
-    transform: rotate(360deg);
-  }
+.pn-kpi-chevron svg {
+  width: 20px;
+  height: 20px;
 }
 
-/* Últimas ações: pega a altura que sobra e rola por dentro. */
-.pv-acoes {
+.pn-meio {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: 18px;
+  height: 392px;
+}
+.pn-meio > .card {
+  min-height: 0;
+  padding: 22px 22px 18px;
+}
+.pn-meio > .card h2,
+.gf h2 {
+  font-size: 21px;
+  font-weight: 800;
+}
+
+/* Gráfico de barras dos 30 dias: eixo y à esquerda, grade fraca, barras douradas finas. */
+.pn-grafico {
+  gap: 14px;
+}
+.pn-plot {
   flex: 1;
   min-height: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 12px;
-  padding: 18px 22px 8px;
+  padding: 10px 0 24px;
 }
-.pv-acoes .card-header {
+.pn-eixo-y {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  /* Cada número fica no meio da sua linha da grade. */
+  margin: -8px 0;
+}
+.pn-area {
+  position: relative;
+  min-height: 0;
+}
+.pn-grade {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+}
+.pn-grade span {
+  height: 1px;
+  background: var(--border);
+}
+.pn-grade span:last-child {
+  background: var(--border-strong);
+}
+.pn-barras {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+}
+.pn-coluna {
+  position: relative;
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  outline: none;
+}
+.pn-barra {
+  position: relative;
+  width: 64%;
+  border-radius: 4px 4px 0 0;
+  background: var(--barra);
+  transition: background 0.12s;
+}
+.pn-coluna:hover .pn-barra,
+.pn-coluna:focus-visible .pn-barra {
+  background: var(--barra-forte);
+}
+.pn-coluna:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--focus);
+  border-radius: 4px;
+}
+.pn-rotulo-x {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.pn-dica {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  z-index: 2;
+  transform: translateX(-50%);
+  padding: 6px 10px;
+  border-radius: var(--radius-xs);
+  background: var(--espresso);
+  color: var(--on-espresso);
+  font-size: 12px;
+  white-space: nowrap;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.1s;
+}
+.pn-coluna:hover .pn-dica,
+.pn-coluna:focus-visible .pn-dica {
+  opacity: 1;
+  visibility: visible;
+}
+/* Nas pontas, a dica não sai do cartão. */
+.pn-coluna:nth-child(-n + 2) .pn-dica {
+  left: 0;
+  transform: none;
+}
+.pn-coluna:nth-last-child(-n + 2) .pn-dica {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+.pn-acoes {
+  gap: 8px;
+}
+.pn-acoes .card-header {
   align-items: center;
 }
-.pv-acoes .est-cartao-icone {
-  width: 52px;
-  height: 52px;
-  color: var(--gold-deep);
-}
-.pv-logs {
-  min-height: 42px;
+.pn-ver-todas {
+  gap: 8px;
   font-weight: 600;
 }
-.pv-logs svg {
-  width: 17px;
-  height: 17px;
+.pn-ver-todas svg {
+  width: 16px;
+  height: 16px;
 }
+.pn-acoes .pv-acao {
+  grid-template-columns: 50px 24px minmax(0, 1fr) auto;
+  padding: 11px 0;
+}
+/* Nos selos das ações a cor já diz o estado: sem a bolinha. */
+.pn-acoes .pv-selo {
+  padding: 4px 12px;
+  border-color: transparent;
+}
+.pn-acoes .pv-selo::before {
+  display: none;
+}
+.pn-acoes .pv-selo[data-tom='neutro'],
+.pn-acoes .pv-selo[data-tom='espera'] {
+  background: var(--surface-3);
+  color: var(--text-soft);
+}
+
+.pn-alvo {
+  width: min(460px, 100%);
+}
+
+/* Lista das últimas ações (Painel): rola por dentro do cartão. */
 .pv-lista {
   flex: 1;
   min-height: 0;
@@ -4317,43 +4196,36 @@ app-painel-robo {
   color: var(--danger);
 }
 
-/* Grupos postando: um cartão por grupo marcado; clicar abre a lista dele. */
+/* Grupos: um cartão por grupo marcado para postar; clicar abre a lista dele. */
 .gf {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 0;
-}
-.gf-titulo {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text-soft);
+  padding: 22px;
+  gap: 16px;
 }
 .gf-cartoes {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
 }
 .gf-cartao {
   width: 100%;
   height: 100%;
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 14px 16px;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 18px 18px 26px;
   text-align: left;
   font: inherit;
   color: var(--text);
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
   cursor: pointer;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 .gf-cartao:hover {
   border-color: var(--border-strong);
@@ -4365,39 +4237,57 @@ app-painel-robo {
 }
 .gf-cartao-vez {
   border-color: var(--gold-border);
-  background: var(--gold-soft);
 }
-.gf-cartao-topo {
+.gf-ponto {
+  align-self: flex-start;
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  margin-top: 9px;
+  border-radius: 50%;
+  background: var(--border-strong);
+}
+/* Verde = a vez dele agora. */
+.gf-ponto-vez {
+  background: var(--ok);
+  box-shadow: 0 0 0 4px var(--ok-soft);
+}
+.gf-corpo {
+  flex: 1;
+  min-width: 0;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  flex-direction: column;
+  gap: 2px;
 }
 .gf-nome {
-  font-size: 16px;
+  font-size: 18px;
+  font-weight: 800;
+  font-stretch: var(--estreita);
   overflow-wrap: anywhere;
 }
-.gf-fonte,
-.gf-rodape {
-  font-size: 13px;
+.gf-membros {
+  font-size: 14px;
   color: var(--text-muted);
 }
 .gf-numeros {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 12px;
-  font-size: 13px;
-  color: var(--text-soft);
+  gap: 4px 20px;
+  white-space: nowrap;
+  margin-top: 8px;
+  font-size: 15px;
+  color: var(--text-muted);
 }
 .gf-numeros b {
   color: var(--text);
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
-.gf-ok b {
-  color: var(--ok);
-}
-.gf-erro b {
-  color: var(--danger);
+.gf-chevron {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: var(--text-muted);
 }
 
 /* Janela com a lista de um grupo. */
@@ -4516,6 +4406,67 @@ a.gf-item-titulo:hover {
   }
 }
 
+/* Cabeçalho: tempo ativo, postados hoje e a próxima postagem, separados por uma linha fina. */
+.tk {
+  display: flex;
+  align-items: center;
+  margin: 0 8px 0 0;
+}
+.tk-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 26px;
+  color: var(--text-soft);
+}
+.tk-item + .tk-item {
+  border-left: 1px solid var(--border);
+}
+.tk-item svg {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+.tk-item dt {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+.tk-item dd {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.35;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+@media (max-width: 1100px) {
+  .tk-item {
+    padding: 0 14px;
+  }
+  .tk-item svg {
+    display: none;
+  }
+}
+@media (max-width: 640px) {
+  .tk {
+    margin: 0;
+  }
+  .tk-item {
+    padding: 0 10px;
+  }
+  .tk-item:first-child {
+    padding-left: 0;
+  }
+  .tk-item dt {
+    font-size: 12px;
+  }
+  .tk-item dd {
+    font-size: 15px;
+  }
+}
+
 /* Modal das estatísticas de hoje. */
 .pv-stats {
   width: min(620px, 100%);
@@ -4605,87 +4556,48 @@ a.gf-item-titulo:hover {
   margin-left: 4px;
 }
 
-/* Telas estreitas: a página volta a rolar e a pipeline vira lista vertical. */
+/* Telas estreitas: os cartões passam pra duas colunas e o gráfico fica em cima das ações. */
+@media (max-width: 1280px) {
+  .pn-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
 @media (max-width: 1000px) {
-  app-painel-robo {
-    flex: none;
-  }
-  .pv-acoes {
-    flex: none;
-  }
-  .pv-lista {
-    overflow: visible;
-  }
-  .pv-etapas {
+  .pn-meio {
     grid-template-columns: minmax(0, 1fr);
-    gap: 6px;
+    height: auto;
   }
-  .pv-etapa {
-    display: grid;
-    grid-template-columns: 40px minmax(0, 1fr) auto;
-    grid-template-rows: auto auto;
-    align-items: center;
-    text-align: left;
-    column-gap: 12px;
-    row-gap: 0;
-    padding: 10px 14px;
+  .pn-grafico {
+    height: 340px;
   }
-  .pv-etapa + .pv-etapa::before {
-    display: none;
-  }
-  .pv-etapa-icone {
-    grid-row: 1 / span 2;
-    margin: 0;
-  }
-  .pv-etapa-sub {
-    grid-column: 2;
-  }
-  .pv-etapa-selo {
-    grid-column: 3;
-    grid-row: 1 / span 2;
-    margin: 0;
+  .pn-acoes {
+    max-height: 460px;
   }
 }
 @media (max-width: 720px) {
-  .pv-topo {
+  .pn-kpis {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pn-kpi {
+    min-height: 88px;
     padding: 16px;
   }
-  .pv-kpis {
-    flex-basis: 100%;
-    justify-content: space-between;
-    gap: 12px;
+  .pn-kpi-icone {
+    width: 54px;
+    height: 54px;
   }
-  .pv-controles {
-    flex-basis: 100%;
-  }
-  .pv-ligar,
-  .pv-parar {
-    flex: 1;
-  }
-  .pv-grupos {
-    left: 0;
-    right: auto;
-    width: min(300px, calc(100vw - 48px));
+  .pn-rotulo-x {
+    font-size: 11px;
   }
   .pv-tiles {
     grid-template-columns: minmax(0, 1fr);
   }
-  .pv-acao {
-    grid-template-columns: 40px 20px minmax(0, 1fr);
+  .pn-acoes .pv-acao {
+    grid-template-columns: 44px 20px minmax(0, 1fr);
   }
-  .pv-acao .pv-selo {
+  .pn-acoes .pv-acao .pv-selo {
     grid-column: 3;
     justify-self: start;
-  }
-}
-@media (max-width: 460px) {
-  .pv-etapa {
-    grid-template-columns: 40px minmax(0, 1fr);
-  }
-  .pv-etapa-selo {
-    grid-column: 2;
-    grid-row: auto;
-    margin-top: 4px;
   }
 }
 
