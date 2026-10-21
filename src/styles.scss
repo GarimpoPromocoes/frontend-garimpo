@@ -4098,6 +4098,217 @@ app-painel-robo {
   width: min(460px, 100%);
 }
 
+/* Pipeline: cinco cartões com seta entre eles; a etapa da vez ganha a borda amarela. */
+.pv-pipeline {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pv-etapas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 26px;
+}
+.pv-etapa {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+  padding: 14px 12px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  min-width: 0;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.pv-etapa + .pv-etapa::before {
+  content: '';
+  position: absolute;
+  left: -19px;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  border-top: 2px solid var(--border-strong);
+  border-right: 2px solid var(--border-strong);
+  transform: translateY(-50%) rotate(45deg);
+}
+.pv-etapa-icone {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  color: var(--text-soft);
+  margin-bottom: 2px;
+}
+.pv-etapa-icone svg {
+  width: 24px;
+  height: 24px;
+}
+.pv-etapa-titulo {
+  font-size: 16px;
+  font-weight: 700;
+  font-stretch: var(--estreita);
+  color: var(--text);
+}
+.pv-etapa-sub {
+  max-width: 100%;
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pv-etapa-selo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.pv-etapa-logo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: var(--logo-placa);
+  padding: 3px;
+}
+.pv-marca {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--border-strong);
+  flex-shrink: 0;
+}
+/* Destino no Postando: só os ícones; apagado = desconectado. Detalhe no title. */
+.pv-canais {
+  display: inline-flex;
+  gap: 4px;
+}
+.pv-canais img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  border-radius: 50%;
+}
+.pv-canais .pv-canal-off {
+  filter: grayscale(1);
+  opacity: 0.45;
+}
+
+.pv-etapa[data-estado='ok'] .pv-etapa-icone {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+.pv-etapa[data-estado='ok'] .pv-etapa-selo {
+  color: var(--ok);
+}
+.pv-etapa[data-estado='ok'] .pv-marca {
+  border: none;
+  background: var(--ok)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 12.5 4 4L18 8'/%3E%3C/svg%3E")
+    center / 11px no-repeat;
+}
+.pv-etapa[data-estado='andamento'] .pv-etapa-icone {
+  background: var(--gold);
+  color: var(--on-gold);
+}
+.pv-etapa[data-estado='andamento'] .pv-etapa-selo {
+  color: var(--gold-ink);
+}
+.pv-etapa[data-estado='andamento'] .pv-marca {
+  border-color: var(--gold-deep);
+  border-right-color: transparent;
+  animation: pv-gira 0.9s linear infinite;
+}
+.pv-etapa[data-estado='espera'] .pv-etapa-icone {
+  background: var(--gold-soft);
+  color: var(--gold-ink);
+}
+.pv-etapa[data-estado='espera'] .pv-etapa-selo {
+  color: var(--gold-ink);
+}
+.pv-etapa[data-estado='espera'] .pv-marca {
+  border-color: var(--gold-deep);
+  border-style: dashed;
+}
+.pv-etapa[data-estado='erro'] .pv-etapa-icone {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.pv-etapa[data-estado='erro'] .pv-etapa-selo {
+  color: var(--danger);
+}
+.pv-etapa[data-estado='erro'] .pv-marca {
+  border-color: var(--danger);
+  background: var(--danger);
+}
+.pv-etapa-atual {
+  border: 2px solid var(--gold);
+  background: var(--gold-soft);
+  box-shadow: 0 8px 20px rgba(221, 163, 0, 0.16);
+}
+@keyframes pv-gira {
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* Telas estreitas: a pipeline vira lista vertical. */
+@media (max-width: 1000px) {
+  .pv-etapas {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+  .pv-etapa {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    align-items: center;
+    text-align: left;
+    column-gap: 12px;
+    row-gap: 0;
+    padding: 10px 14px;
+  }
+  .pv-etapa + .pv-etapa::before {
+    display: none;
+  }
+  .pv-etapa-icone {
+    grid-row: 1 / span 2;
+    margin: 0;
+  }
+  .pv-etapa-sub {
+    grid-column: 2;
+  }
+  .pv-etapa-selo {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    margin: 0;
+  }
+}
+@media (max-width: 460px) {
+  .pv-etapa {
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+  .pv-etapa-selo {
+    grid-column: 2;
+    grid-row: auto;
+    margin-top: 4px;
+  }
+}
+
 /* Lista das últimas ações (Painel): rola por dentro do cartão. */
 .pv-lista {
   flex: 1;

@@ -1,6 +1,7 @@
 import { Component, DestroyRef, HostListener, computed, effect, inject, output, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { AcaoPainel, AlvoGrupos, JobsService } from '../../../core/services/jobs.service';
+import { AcaoPainel, AlvoGrupos, EstadoEtapa, EtapaPainelId, JobsService } from '../../../core/services/jobs.service';
+import { VerificacaoService } from '../../../core/services/verificacao.service';
 import { RunControlService } from '../../../core/services/run-control.service';
 import { StatusService } from '../../../core/services/status.service';
 import { PainelService } from '../../../core/services/painel.service';
@@ -21,6 +22,26 @@ interface AcaoVista {
   selo: string;
   tom: Tom;
 }
+
+interface EtapaVista {
+  id: EtapaPainelId;
+  titulo: string;
+  sub: string;
+  estado: EstadoEtapa;
+  selo: string;
+  atual: boolean;
+  icone: Icone;
+  loja: string | null;
+}
+
+const ORDEM: EtapaPainelId[] = ['buscando', 'origem', 'preparando', 'postando', 'concluido'];
+const BASE: Record<EtapaPainelId, { titulo: string; sub: string; icone: Icone }> = {
+  buscando: { titulo: 'Buscando produto', sub: 'Procurando promoções', icone: 'busca' },
+  origem: { titulo: 'Origem do produto', sub: 'De qual loja ele vem', icone: 'sacola' },
+  preparando: { titulo: 'Preparando conteúdo', sub: 'Gerando link e mensagem', icone: 'doc' },
+  postando: { titulo: 'Postando', sub: 'Enviando para os grupos', icone: 'envio' },
+  concluido: { titulo: 'Concluído', sub: 'Produto publicado', icone: 'check' },
+};
 
 interface Barra {
   dia: string;
@@ -71,6 +92,7 @@ export class PainelRobo {
   protected jobs = inject(JobsService);
   protected statusService = inject(StatusService);
   private painelService = inject(PainelService);
+  private verificacao = inject(VerificacaoService);
 
   protected readonly escolhendoGrupos = signal(false);
   protected readonly statsAbertas = signal(false);
@@ -96,6 +118,90 @@ export class PainelRobo {
 
   private readonly painel = computed(() => this.jobs.painel());
   private readonly numeros = computed(() => this.painelService.numeros());
+
+  // ---- Pipeline do produto da vez ----
+
+  /** A pipeline só vale com o robô de postagem rodando agora; parado, tudo volta a "pendente". */
+  protected readonly aoVivo = computed(() => this.runControl.postandoAgora() && !!this.painel()?.atual);
+
+  protected readonly etapas = computed<EtapaVista[]>(() => {
+    const p = this.painel();
+    const vivo = this.aoVivo();
+    const pausado = this.runControl.pausado();
+    return ORDEM.map((id) => {
+      const base = BASE[id];
+      const e = vivo && p ? p.etapas[id] : { estado: 'pendente' as EstadoEtapa, ate: null, motivo: null };
+      const atual = vivo && p?.atual === id;
+      const v: EtapaVista = { id, titulo: base.titulo, sub: base.sub, estado: e.estado, selo: '', atual, icone: base.icone, loja: null };
+      v.selo = { pendente: 'Aguardando', andamento: 'Em andamento…', espera: 'Aguardando', ok: 'Concluído', erro: 'Erro' }[e.estado];
+
+      if (id === 'buscando') {
+        if (e.estado === 'espera') {
+          v.sub = {
+            catalogoVazio: 'Buscando as primeiras ofertas',
+            nenhumLiberado: 'Nada liberado agora',
+            cedeu: 'Passando a vez pro próximo grupo',
+            repetido: 'Só assunto repetido neste grupo',
+            foraDoHorario: 'Fora do horário',
+          }[e.motivo ?? ''] ?? 'Esperando novidade';
+          if (e.ate) v.selo = e.motivo === 'foraDoHorario' ? `Posta de novo às ${hhmm(e.ate)}` : `Nova busca às ${hhmm(e.ate)}`;
+        } else if (e.estado === 'ok') v.sub = 'Promoção escolhida';
+        else if (e.estado === 'erro') v.sub = 'Falhou — tenta de novo sozinho';
+        else if (atual && p?.grupo?.nome) v.sub = `Para "${p.grupo.nome}"`;
+      }
+      if (id === 'origem' && e.estado === 'ok' && p?.produto) {
+        v.loja = p.produto.loja;
+        v.sub = p.produto.grupoOrigem ? `Clonado de "${p.produto.grupoOrigem}"` : p.produto.tipo === 'cupom' ? 'Cupom da loja' : 'Garimpado na loja';
+        v.selo = NOME_LOJA[p.produto.loja ?? ''] ?? 'Loja';
+      }
+      if (id === 'preparando' && e.estado === 'ok') v.sub = 'Link e mensagem prontos';
+      if (id === 'postando') {
+        if (e.estado === 'espera') {
+          v.sub = 'Esperando o horário sorteado';
+          v.selo = e.ate ? `Agendado ${hhmm(e.ate)}` : 'Agendado';
+        } else if (e.estado === 'andamento') v.selo = 'Enviando…';
+        else if (e.estado === 'ok') v.sub = this.canaisTexto(p?.canais ?? []);
+        else if (e.estado === 'erro') v.sub = e.motivo ? this.curto(e.motivo) : 'A mensagem não saiu';
+      }
+      if (id === 'concluido' && e.estado === 'ok') v.selo = 'Sucesso';
+      if (atual && pausado) v.selo = 'Pausado';
+      return v;
+    });
+  });
+
+  /** Destino no Postando: WhatsApp e Telegram dos grupos marcados. */
+  protected readonly destino = computed(() => {
+    const alvo = this.gruposAlvo();
+    return {
+      whatsapp: alvo.length,
+      whatsappConectado: this.verificacao.whatsappConectado(),
+      telegram: alvo.filter((g) => !!g.grupoTelegram).length,
+      telegramConectado: this.verificacao.telegramConectado(),
+    };
+  });
+
+  protected readonly tituloWhatsapp = computed(() => {
+    const d = this.destino();
+    if (!d.whatsappConectado) return 'WhatsApp não conectado';
+    return `WhatsApp: ${d.whatsapp} ${d.whatsapp === 1 ? 'grupo ativo' : 'grupos ativos'}`;
+  });
+
+  protected readonly tituloTelegram = computed(() => {
+    const d = this.destino();
+    if (!d.telegramConectado) return 'Telegram não conectado';
+    if (!d.telegram) return 'Telegram: nenhum canal ligado';
+    return `Telegram: ${d.telegram} ${d.telegram === 1 ? 'canal ativo' : 'canais ativos'}`;
+  });
+
+  protected logoDaLoja(loja: string | null): string {
+    return `lojas/${loja && NOME_LOJA[loja] ? loja : 'mercadolivre'}.svg`;
+  }
+
+  private canaisTexto(canais: string[]): string {
+    if (canais.includes('whatsapp') && canais.includes('telegram')) return 'Enviado no WhatsApp e no Telegram';
+    if (canais.includes('telegram')) return 'Enviado no Telegram';
+    return 'Enviado no WhatsApp';
+  }
 
   // ---- Grupos marcados para postar ----
 

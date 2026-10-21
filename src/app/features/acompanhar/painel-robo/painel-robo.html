@@ -68,7 +68,33 @@
   </button>
 </section>
 
-<!-- 2. Postagens dos últimos 30 dias e as últimas ações, lado a lado. -->
+<!-- 2. A pipeline do produto da vez: a loja aparece na Origem e os canais no Postando. -->
+<section class="pv-pipeline" aria-label="Etapas do produto da vez">
+  <ol class="pv-etapas">
+    @for (e of etapas(); track e.id) {
+      <li class="pv-etapa" [attr.data-estado]="e.estado" [class.pv-etapa-atual]="e.atual" [attr.aria-current]="e.atual ? 'step' : null">
+        <span class="pv-etapa-icone"><ng-container *ngTemplateOutlet="icone; context: { $implicit: e.icone }" /></span>
+        <strong class="pv-etapa-titulo">{{ e.titulo }}</strong>
+        <span class="pv-etapa-sub" [title]="e.sub">{{ e.sub }}</span>
+        <span class="pv-etapa-selo">
+          @if (e.id === 'postando') {
+            <span class="pv-canais">
+              <img src="lojas/whatsapp.svg" [class.pv-canal-off]="!destino().whatsappConectado" [title]="tituloWhatsapp()" [attr.alt]="tituloWhatsapp()" />
+              <img src="lojas/telegram.png" [class.pv-canal-off]="!destino().telegramConectado || !destino().telegram" [title]="tituloTelegram()" [attr.alt]="tituloTelegram()" />
+            </span>
+          } @else if (e.loja) {
+            <img class="pv-etapa-logo" [src]="logoDaLoja(e.loja)" alt="" />
+          } @else {
+            <span class="pv-marca" aria-hidden="true"></span>
+          }
+          {{ e.selo }}
+        </span>
+      </li>
+    }
+  </ol>
+</section>
+
+<!-- 3. Postagens dos últimos 30 dias e as últimas ações, lado a lado. -->
 <div class="pn-meio">
   <section class="card pn-grafico" aria-labelledby="pn-grafico-titulo">
     <div>
@@ -141,7 +167,7 @@
   </section>
 </div>
 
-<!-- 3. Os grupos marcados para postar: clicar abre a lista de cada um. -->
+<!-- 4. Os grupos marcados para postar: clicar abre a lista de cada um. -->
 <app-grupos-fila [grupoDaVez]="grupoDaVez()" [numeros]="numerosDosGrupos()" />
 
 <!-- Grupos ativos: em quais grupos o robô publica. -->
