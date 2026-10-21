@@ -33,6 +33,12 @@ const RE_CUPOM = /^Cupo(?:m|ns)\b/;
 
 const TOM_DA_TAG: Record<string, Tom> = { OK: 'ok', AVISO: 'aviso', ERRO: 'erro', PASSO: 'destaque' };
 
+// Etapas da rodada (bot-ml/src/postagem/grupos.js): uma depois da outra, sempre nesta ordem.
+const EMOJI_DA_ETAPA: Record<string, string> = { '1': '👉', '2': '📥', '3': '🧩', '4': '⏳', '5': '🚀' };
+const RE_ETAPA = /^Etapa (\d) — (.+)$/;
+// Saida crua do OCR (Tesseract) quando a imagem tem uma faixa fina demais: nao diz nada a ninguem.
+const RE_RUIDO_OCR = /^(Image too small to scale!!|Line cannot be recognized!!)/;
+
 function linhaDeCupom(tag: string, texto: string): { emoji: string; texto: string; tom: Tom } {
   return { emoji: '🎟️', texto: texto.replace(/^Cupo(?:m|ns):\s*/, ''), tom: TOM_DA_TAG[tag] ?? 'info' };
 }
@@ -70,6 +76,13 @@ function traduzirPorTag(tag: string, texto: string): { emoji: string; texto: str
 
       m = texto.match(/^Loja sorteada: (.+?) \(/i);
       if (m) return { emoji: '🎲', texto: `Próxima postagem: produto da ${m[1]}.`, tom: 'info' };
+
+      m = texto.match(RE_ETAPA);
+      if (m) return { emoji: EMOJI_DA_ETAPA[m[1]] ?? '▶️', texto: `Etapa ${m[1]}: ${m[2]}`, tom: 'destaque' };
+      m = texto.match(/^Na espera: (.+)$/);
+      if (m) return { emoji: '🗂️', texto: `Enquanto espera a hora de postar: ${m[1]}`, tom: 'info' };
+      m = texto.match(/^Clonagem "(.+?)": preparando o mais antigo da fila — (.+?)\.?$/);
+      if (m) return { emoji: '🔧', texto: `${m[1]}: preparando o mais antigo da fila — ${m[2]}.`, tom: 'info' };
 
       return { emoji: '▶️', texto, tom: 'destaque' };
     }
@@ -136,6 +149,18 @@ function traduzirPorTag(tag: string, texto: string): { emoji: string; texto: str
       }
       m = texto.match(/^Proxima postagem prevista: (.+?) \(em ~(.+?)\) — ja buscando o produto\.?$/i);
       if (m) return { emoji: '⏰', texto: `Próxima postagem às ${m[1]} (em ~${m[2]}).`, tom: 'destaque' };
+
+      if (/^Postagem em etapas:/i.test(texto)) return { emoji: '🧭', texto, tom: 'info' };
+      m = texto.match(/^Clonagem "(.+?)": descartado da fila — (.+)$/);
+      if (m) return { emoji: '🗑️', texto: `${m[1]}: tirei da fila — ${m[2]}`, tom: 'aviso' };
+      m = texto.match(/^Clonagem "(.+?)": li (.+)$/);
+      if (m) return { emoji: '🔎', texto: `${m[1]}: li ${m[2]}`, tom: 'info' };
+      m = texto.match(/^Clonagem "(.+?)": nada pra postar agora — (.+)$/);
+      if (m) return { emoji: '⏳', texto: `${m[1]}: nada pra postar agora — ${m[2]}`, tom: 'info' };
+      m = texto.match(/^Garimpo pra "(.+?)": (.+)$/);
+      if (m) return { emoji: '⛏️', texto: `Garimpo pra ${m[1]}: ${m[2]}`, tom: 'info' };
+      m = texto.match(/^Fora do horario: (.+)$/);
+      if (m) return { emoji: '🌙', texto: `Fora do horário: ${m[1]}`, tom: 'info' };
 
       m = texto.match(/^Temporada de hoje: (.+)$/i);
       if (m) return { emoji: '🎉', texto: `Tema do dia: ${m[1]}`, tom: 'info' };
@@ -318,6 +343,7 @@ function classificarLinha(raw: string): Token | null {
     return item ? { item, ehCandidato: false } : null;
   }
 
+  if (RE_RUIDO_OCR.test(bruta)) return null;
   return { item: { tipo: 'linha', emoji: '•', texto: bruta, tom: 'neutro' }, ehCandidato: false };
 }
 
