@@ -1,4 +1,4 @@
-/* Clonagem de grupos: resumo em números, passo a passo, lista dos grupos com a chave
+/* Clonagem de grupos: lista dos grupos com a chave
    "Meu garimpo / Clonagem" e a janela de escolher os concorrentes. */
 :host {
   display: flex;
@@ -7,35 +7,6 @@
   min-width: 0;
 }
 
-/* ---- Resumo ---- */
-.cl-numeros {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
-}
-.cl-numero {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 18px 20px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-
-  small {
-    display: block;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-soft);
-  }
-  strong {
-    display: block;
-    font-size: 28px;
-    font-weight: 800;
-    font-stretch: var(--estreita);
-    line-height: 1.15;
-  }
-}
 .cl-numero-icone {
   flex-shrink: 0;
   width: 52px;

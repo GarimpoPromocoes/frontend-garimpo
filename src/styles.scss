@@ -4714,6 +4714,16 @@ a.gf-item-titulo:hover {
 .tk-item + .tk-item {
   border-left: 1px solid var(--border);
 }
+/* Números da Clonagem: cada ícone na cor que ele tinha nos cartões da tela. */
+.tk-item svg[data-cor='ouro'] {
+  color: var(--gold-deep);
+}
+.tk-item svg[data-cor='azul'] {
+  color: var(--azul);
+}
+.tk-item svg[data-cor='verde'] {
+  color: var(--ok);
+}
 .tk-item svg {
   width: 22px;
   height: 22px;

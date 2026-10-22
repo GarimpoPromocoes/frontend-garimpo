@@ -68,7 +68,7 @@
   }
 
   <div class="main-area">
-    <header class="topbar" [class.topbar-estatisticas]="aba() === 'estatisticas'">
+    <header class="topbar" [class.topbar-estatisticas]="aba() === 'estatisticas'" [class.topbar-clonagem]="aba() === 'garimpo'">
       <button
         type="button"
         class="menu-toggle"
@@ -84,7 +84,7 @@
 
       <div class="topbar-title">
         <h1>{{ abaAtual().titulo }}</h1>
-        @if (aba() !== 'estatisticas') {
+        @if (aba() !== 'estatisticas' && aba() !== 'garimpo') {
           <p>{{ abaAtual().descricao }}</p>
         }
       </div>
@@ -101,6 +101,9 @@
              personalizada e os logs (janelas abertas daqui, de qualquer página) e o sino. -->
         @if (aba() === 'estatisticas') {
           <app-estatisticas-controles class="topbar-controles" />
+        } @else if (aba() === 'garimpo') {
+          <!-- Clonagem: os números da tela no lugar do tempo ativo, da oferta e dos logs. -->
+          <app-clonagem-numeros />
         } @else {
         <app-topo-kpis />
         <button type="button" class="topbar-botao" [class.topbar-botao-aberto]="buscaModalAberta()"

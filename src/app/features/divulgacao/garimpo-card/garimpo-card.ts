@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { ConfigService, FonteProdutos } from '../../../core/services/config.service';
 import { JobsService } from '../../../core/services/jobs.service';
+import { ClonagemResumoService } from '../../../core/services/clonagem-resumo.service';
 
 const MAX_GRUPOS = 50;
 /** Quanto esperar o robô conectar o WhatsApp e anotar a lista de grupos. */
@@ -37,6 +38,7 @@ export class GarimpoCard {
   protected configService = inject(ConfigService);
   private http = inject(HttpClient);
   private jobs = inject(JobsService);
+  private resumoTela = inject(ClonagemResumoService);
 
   protected readonly maxGrupos = MAX_GRUPOS;
   protected readonly maxChips = MAX_CHIPS;
@@ -95,6 +97,7 @@ export class GarimpoCard {
     return (nome || '?').trim().charAt(0).toUpperCase() || '?';
   }
 
+  /** Os três números da tela; aparecem no cabeçalho (app-clonagem-numeros). */
   protected readonly contagem = computed(() => {
     const grupos = this.gruposDestino();
     const clonagem = grupos.filter((g) => this.fonteDe(g.id) === 'clonagem').length;
@@ -290,6 +293,8 @@ export class GarimpoCard {
         this.rClona.set(Object.fromEntries(Object.entries(s.clona).map(([id, l]) => [id, [...l]])));
       });
     });
+    // Os números vão pro cabeçalho e mudam junto com a chave de cada grupo, mesmo antes de salvar.
+    effect(() => this.resumoTela.contagem.set(this.contagem()));
     void this.carregarGruposDoWhatsapp();
   }
 

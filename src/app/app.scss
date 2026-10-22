@@ -481,6 +481,14 @@
   .topbar-estatisticas app-estatisticas-controles {
     margin-left: auto;
   }
+  /* Clonagem: o sino fica sozinho na linha do menu; os números descem pra última linha. */
+  .topbar-clonagem app-sino {
+    margin-left: auto;
+  }
+  app-clonagem-numeros {
+    order: 4;
+    flex-basis: 100%;
+  }
   app-topo-kpis {
     order: 4;
     flex-basis: 100%;

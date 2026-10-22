@@ -24,6 +24,7 @@ import { BuscaCard } from './features/divulgacao/busca-card/busca-card';
 import { OwnerCard } from './features/admin/owner-card/owner-card';
 import { Estatisticas } from './features/acompanhar/estatisticas/estatisticas';
 import { EstatisticasAbas, EstatisticasControles } from './features/acompanhar/estatisticas/estatisticas-abas';
+import { ClonagemNumeros } from './features/divulgacao/garimpo-card/clonagem-numeros';
 import { LojaDialog } from './features/conexoes/loja-dialog/loja-dialog';
 import { WhatsappDialog } from './features/conexoes/whatsapp-dialog/whatsapp-dialog';
 import { TelegramDialog } from './features/conexoes/telegram-dialog/telegram-dialog';
@@ -149,6 +150,7 @@ const CHAVE_ABA = 'promobot:aba';
     TopoKpis,
     EstatisticasAbas,
     EstatisticasControles,
+    ClonagemNumeros,
     DesafioMlDialog,
     ConfirmacaoDialog,
     Sino,
