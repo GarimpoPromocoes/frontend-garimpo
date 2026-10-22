@@ -6336,6 +6336,8 @@ app-lojas-card {
 .lj-grade {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  /* Cada cartão na altura do que tem: sem esticar pra igualar o vizinho (sobrava espaço vazio). */
+  align-items: start;
   gap: 16px;
 }
 .lj-cartao {
@@ -6421,7 +6423,6 @@ app-lojas-card {
 }
 .lj-texto {
   margin: 0;
-  flex: 1;
   font-size: 13px;
   line-height: 1.45;
   color: var(--text-soft);
@@ -6429,8 +6430,6 @@ app-lojas-card {
 .lj-acao {
   width: 100%;
   min-height: 42px;
-  /* Sem o texto (loja funcionando), o botão continua no pé do cartão, alinhado com os outros. */
-  margin-top: auto;
 }
 .lj-breve {
   list-style: none;

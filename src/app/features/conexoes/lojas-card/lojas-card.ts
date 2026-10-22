@@ -16,7 +16,6 @@ interface Loja {
   estado: EstadoLoja;
   /** Por que caiu (só em 'atencao'). */
   motivo: string;
-  comoConectar: string;
 }
 
 /** Loja que aparece na grade mas ainda não tem integração. */
@@ -54,7 +53,7 @@ export class LojasCard implements OnInit {
     const conexao = (p: Provedor) => this.conexoes.statusDe(p);
     // Loja que já funcionou e caiu vira um aviso no sino: aqui ela aparece como "precisa entrar de novo".
     const avisoDe = (p: Provedor) => this.avisos.avisos().find((a) => a.origem === p);
-    const completar = (l: Pick<Loja, 'provedor' | 'nome' | 'logo' | 'conectada' | 'comoConectar'>): Loja => {
+    const completar = (l: Pick<Loja, 'provedor' | 'nome' | 'logo' | 'conectada'>): Loja => {
       const aviso = avisoDe(l.provedor);
       return {
         ...l,
@@ -63,14 +62,13 @@ export class LojasCard implements OnInit {
       };
     };
 
-    const base: Pick<Loja, 'provedor' | 'nome' | 'logo' | 'conectada' | 'comoConectar'>[] = [
+    const base: Pick<Loja, 'provedor' | 'nome' | 'logo' | 'conectada'>[] = [
       {
         provedor: 'mercadolivre',
         nome: 'Mercado Livre',
         logo: 'lojas/mercadolivre.svg',
         // O ML só tem essa sessão de navegador — sem ela, nada funciona.
         conectada: this.verificacao.mercadoLivreConectado(),
-        comoConectar: 'Entre com a sua conta de afiliado do Mercado Livre, aqui mesmo no painel.',
       },
       {
         provedor: 'amazon',
@@ -80,7 +78,6 @@ export class LojasCard implements OnInit {
         // acrescenta o link curto. A tag não "cai" — não precisa de checagem
         // ao vivo pra decidir esse badge.
         conectada: conexao('amazon')?.status === 'conectado',
-        comoConectar: 'Informe a sua tag de associado (termina com -20) e, se quiser o link curto, entre na conta.',
       },
       {
         provedor: 'shopee',
@@ -88,7 +85,6 @@ export class LojasCard implements OnInit {
         logo: 'lojas/shopee.svg',
         // Shopee e' 100% API: estar conectada = as chaves ainda serem aceitas.
         conectada: this.verificacao.shopeeConectado(),
-        comoConectar: 'Informe as chaves (App ID e Secret) do painel de Afiliados da Shopee.',
       },
     ];
     return base.map(completar);

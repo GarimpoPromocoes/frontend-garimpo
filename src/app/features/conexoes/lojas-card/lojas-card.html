@@ -34,11 +34,9 @@
           </div>
         </div>
 
-        <!-- Funcionando: o selo já diz tudo. Sem conectar ou caída: como resolver. -->
-        @if (loja.estado !== 'ok') {
-          <p class="lj-texto">
-            @if (loja.estado === 'atencao') { {{ loja.motivo }} } @else { {{ loja.comoConectar }} }
-          </p>
+        <!-- O selo e o botão já dizem tudo; texto só quando a loja caiu (o motivo). -->
+        @if (loja.estado === 'atencao' && loja.motivo) {
+          <p class="lj-texto">{{ loja.motivo }}</p>
         }
 
         <button
