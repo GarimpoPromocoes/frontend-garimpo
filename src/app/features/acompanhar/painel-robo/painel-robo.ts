@@ -9,9 +9,9 @@ import { GruposFila } from '../grupos-fila/grupos-fila';
 import { duracao } from '../topo-kpis/topo-kpis';
 
 type Icone =
-  | 'busca' | 'sacola' | 'doc' | 'envio' | 'check' | 'alerta' | 'relogio' | 'grupos' | 'externo'
-  | 'cubo' | 'etiqueta' | 'pessoas' | 'dinheiro' | 'seta' | 'subiu' | 'desceu' | 'chevron';
-/** Abas do app que os cartões do Painel abrem. */
+  | 'busca' | 'sacola' | 'doc' | 'envio' | 'check' | 'alerta' | 'relogio' | 'grupos'
+  | 'navegar' | 'seta' | 'subiu' | 'desceu';
+/** Abas do app que o Painel abre. */
 export type DestinoPainel = 'estatisticas' | 'grupos';
 
 interface EtapaVista {
@@ -43,8 +43,8 @@ function hhmm(iso: string | null | undefined): string {
 }
 
 /**
- * O Painel: os números do dia em quatro cartões, a pipeline do produto da vez e os grupos
- * marcados para postar. O log completo abre pelo botão "Logs" do topo. O gráfico das postagens por dia fica em Estatísticas. O tempo ativo e a próxima postagem ficam no cabeçalho
+ * O Painel: onde publicar agora (os grupos que recebem as postagens e os números de hoje), a
+ * pipeline do produto da vez e os grupos marcados para postar. O log completo abre pelo botão "Logs" do topo. O gráfico das postagens por dia fica em Estatísticas. O tempo ativo e a próxima postagem ficam no cabeçalho
  * (topo-kpis); ligar, pausar e parar, no botão flutuante.
  */
 @Component({
@@ -63,7 +63,6 @@ export class PainelRobo {
   private painelService = inject(PainelService);
   private verificacao = inject(VerificacaoService);
 
-  protected readonly escolhendoGrupos = signal(false);
   protected readonly statsAbertas = signal(false);
 
   constructor() {
@@ -81,7 +80,6 @@ export class PainelRobo {
 
   @HostListener('document:keydown.escape')
   protected fecharComEsc(): void {
-    this.escolhendoGrupos.set(false);
     this.statsAbertas.set(false);
   }
 
@@ -174,15 +172,22 @@ export class PainelRobo {
 
   // ---- Grupos marcados para postar ----
 
+  /** Ligado, vale o que o robô está usando; parado, o que está escolhido na tela. */
+  protected readonly alvoVisto = computed<AlvoGrupos>(() => {
+    const manual = this.statusService.status()?.agendamento?.manual;
+    const alvo = this.runControl.algoRodando() ? manual?.alvo : this.runControl.alvo();
+    return alvo === 'selecionados' ? 'selecionados' : 'todos';
+  });
+
   private readonly gruposAlvo = computed(() => {
     const todos = this.runControl.grupos();
+    if (this.alvoVisto() !== 'selecionados') return todos;
     const manual = this.statusService.status()?.agendamento?.manual;
-    const ligado = this.runControl.algoRodando();
-    const alvo = ligado ? manual?.alvo : this.runControl.alvo();
-    if (alvo !== 'selecionados') return todos;
-    const ids = new Set(ligado ? manual?.ids ?? [] : [...this.runControl.selecionados()]);
+    const ids = new Set(this.runControl.algoRodando() ? manual?.ids ?? [] : [...this.runControl.selecionados()]);
     return todos.filter((g) => ids.has(g.id));
   });
+
+  protected readonly idsAtivos = computed(() => new Set(this.gruposAlvo().map((g) => g.id)));
 
   protected readonly grupoDaVez = computed(() =>
     this.runControl.postandoAgora() && this.painel()?.atual ? this.painel()?.grupo?.nome ?? null : null
@@ -194,7 +199,7 @@ export class PainelRobo {
     return m;
   });
 
-  // ---- Os quatro cartões ----
+  // ---- Onde publicar agora ----
 
   protected readonly gruposAtivos = computed(() => this.gruposAlvo().length);
 
@@ -242,12 +247,24 @@ export class PainelRobo {
 
   // ---- Ações ----
 
+  /** "Escolher" sem nada escolhido ainda começa com todos marcados (aí é só tirar). */
   escolherAlvo(alvo: AlvoGrupos): void {
+    if (alvo === 'selecionados' && this.runControl.selecionados().size === 0) {
+      for (const g of this.runControl.grupos()) this.runControl.toggleSelecionado(g.id, true);
+    }
     this.runControl.escolherAlvo(alvo);
   }
 
-  toggleSelecionado(id: string, marcado: boolean): void {
-    this.runControl.toggleSelecionado(id, marcado);
+  /** Tocar num grupo tira ou põe de volta. Em "Todos", tirar um passa para "Escolher" com os outros. */
+  alternarGrupo(id: string): void {
+    if (this.runControl.algoRodando()) return;
+    const ativo = this.idsAtivos().has(id);
+    if (this.runControl.alvo() === 'todos') {
+      for (const g of this.runControl.grupos()) this.runControl.toggleSelecionado(g.id, g.id !== id);
+      this.runControl.escolherAlvo('selecionados');
+      return;
+    }
+    this.runControl.toggleSelecionado(id, !ativo);
   }
 
   abrirProdutos(): void {

@@ -68,7 +68,7 @@
   }
 
   <div class="main-area">
-    <header class="topbar">
+    <header class="topbar" [class.topbar-estatisticas]="aba() === 'estatisticas'">
       <button
         type="button"
         class="menu-toggle"
@@ -84,13 +84,20 @@
 
       <div class="topbar-title">
         <h1>{{ abaAtual().titulo }}</h1>
-        <p>{{ abaAtual().descricao }}</p>
+        <!-- Em Estatísticas, as abas da tela (Postagens, Ganhos, Membros, Vendas) ficam embaixo do
+             título, e a oferta personalizada e os logs saem do topo. -->
+        @if (aba() === 'estatisticas') {
+          <app-estatisticas-abas class="topbar-abas" />
+        } @else {
+          <p>{{ abaAtual().descricao }}</p>
+        }
       </div>
 
       <div class="topbar-actions">
         <!-- Os números do momento (tempo ativo e próxima postagem), a oferta
              personalizada e os logs (janelas abertas daqui, de qualquer página) e o sino. -->
         <app-topo-kpis />
+        @if (aba() !== 'estatisticas') {
         <button type="button" class="topbar-botao" [class.topbar-botao-aberto]="buscaModalAberta()"
           aria-haspopup="dialog" title="Buscar as melhores ofertas de um produto e escolher qual postar"
           (click)="buscaModalAberta.set(true)">
@@ -103,6 +110,7 @@
           <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg>
           <span class="topbar-botao-texto">Logs</span>
         </button>
+        }
         <app-sino />
       </div>
     </header>

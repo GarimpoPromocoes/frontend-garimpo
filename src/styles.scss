@@ -2461,6 +2461,26 @@ body:has(.modal-fundo) .bot-control-fixo {
   animation: pulse-dot 1.6s ease-in-out infinite;
 }
 
+/* ---- Abas de Estatísticas no cabeçalho (só nessa tela, no lugar de Oferta personalizada e Logs) ---- */
+/* Ficam embaixo do título, no lugar do subtítulo. Sem espaço (celular), rolam de lado. */
+app-estatisticas-abas.topbar-abas {
+  display: flex;
+  max-width: 100%;
+  margin-top: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+app-estatisticas-abas.topbar-abas::-webkit-scrollbar {
+  display: none;
+}
+.topbar-abas .segmented-abas {
+  flex-wrap: nowrap;
+  background: var(--surface);
+}
+.topbar-abas .segmented-abas .segmented-option {
+  flex: 0 0 auto;
+}
+
 /* ---- Botões do topo que abrem janelas (Oferta personalizada, Logs) ---- */
 .topbar-botao {
   height: 38px;
@@ -3781,95 +3801,200 @@ app-painel-robo {
   min-width: 0;
 }
 
-.pn-kpis {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 18px;
-}
-.pn-kpi {
+/* Onde publicar agora: os grupos que recebem as postagens (fichas que ligam e desligam) e, embaixo,
+   os números de hoje. */
+.pn-onde {
   display: flex;
-  align-items: center;
-  gap: 18px;
-  min-height: 108px;
-  padding: 20px;
-  text-align: left;
-  font: inherit;
-  color: var(--text);
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 20px 14px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
+}
+.pn-onde-topo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.pn-onde-icone {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--gold-soft);
+  border: 1px solid var(--gold-border);
+  color: var(--gold-ink);
+}
+.pn-onde-icone svg {
+  width: 20px;
+  height: 20px;
+}
+.pn-onde-texto {
+  flex: 1;
+  min-width: 0;
+}
+.pn-onde-titulo {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+.pn-onde-sub {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--text-soft);
+}
+.pn-onde-sub strong {
+  color: var(--text);
+}
+.segmented.pn-onde-seg {
+  align-self: center;
+  flex-shrink: 0;
+}
+.pn-onde-seg .segmented-option {
+  min-height: 32px;
+  padding: 5px 14px;
+  font-size: 13px;
+}
+.pn-onde-seg .segmented-option-active,
+.pn-onde-seg .segmented-option-active:disabled {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 2px rgba(26, 26, 24, 0.12);
+}
+.pn-onde-grupos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.pn-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 5px 14px 5px 8px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--text-soft);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
   cursor: pointer;
   transition:
-    border-color 0.15s,
-    box-shadow 0.15s;
+    background 0.14s ease,
+    border-color 0.14s ease;
 }
-.pn-kpi:hover {
-  border-color: var(--border-strong);
-  box-shadow: var(--shadow);
+.pn-chip:hover:not(:disabled) {
+  border-color: var(--border-control);
 }
-.pn-kpi:focus-visible {
+.pn-chip:focus-visible {
   outline: 2px solid var(--focus);
   box-shadow: var(--focus-halo);
 }
-.pn-kpi-icone {
+.pn-chip:disabled {
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+.pn-chip-on {
+  color: var(--text);
+  font-weight: 500;
+  background: var(--gold-soft);
+  border-color: var(--gold-border);
+}
+.pn-chip-on:hover:not(:disabled) {
+  border-color: var(--gold);
+}
+.pn-chip-marca {
   flex-shrink: 0;
-  width: 66px;
-  height: 66px;
+  width: 18px;
+  height: 18px;
   display: grid;
   place-items: center;
-  border-radius: 16px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-control);
 }
-.pn-kpi-icone svg {
-  width: 30px;
-  height: 30px;
+.pn-chip-on .pn-chip-marca {
+  border-color: var(--gold-deep);
+  background: var(--gold-deep);
+  color: #fff;
 }
-.pn-kpi-icone[data-cor='ouro'] {
-  background: var(--gold-soft);
-  color: var(--espresso);
+.pn-chip-marca svg {
+  width: 11px;
+  height: 11px;
 }
-.pn-kpi-icone[data-cor='verde'] {
-  background: var(--ok-soft);
-  color: var(--ok);
-}
-.pn-kpi-icone[data-cor='azul'] {
-  background: var(--azul-soft);
-  color: var(--azul);
-}
-.pn-kpi-icone[data-cor='vermelho'] {
-  background: var(--danger-soft);
-  color: var(--vermelho-icone);
-}
-.pn-kpi-texto {
-  flex: 1;
-  min-width: 0;
+.pn-onde-rodape {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.pn-kpi-rotulo {
-  font-size: 15px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
   color: var(--text-soft);
 }
-.pn-kpi-valor {
-  font-size: 30px;
-  font-weight: 800;
-  font-stretch: var(--estreita);
-  line-height: 1.15;
+.pn-onde-hoje {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+}
+.pn-onde-rotulo {
+  color: var(--text-soft);
+}
+.pn-onde-num {
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+}
+button.pn-onde-num {
+  cursor: pointer;
+}
+button.pn-onde-num:hover {
+  text-decoration: underline;
+}
+.pn-onde-num strong {
+  color: var(--text);
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
-  overflow-wrap: anywhere;
+}
+.pn-onde-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--gold-ink);
+  background: none;
+  border: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.pn-onde-link svg {
+  width: 14px;
+  height: 14px;
 }
 .pn-variacao {
-  align-self: flex-end;
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  margin-bottom: 6px;
-  padding: 3px 10px;
+  margin-left: -8px;
+  padding: 1px 7px;
   border-radius: 999px;
   background: var(--ok-soft);
   color: var(--ok);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -3880,15 +4005,6 @@ app-painel-robo {
 .pn-variacao svg {
   width: 13px;
   height: 13px;
-}
-.pn-kpi-chevron {
-  flex-shrink: 0;
-  color: var(--text-muted);
-  display: grid;
-}
-.pn-kpi-chevron svg {
-  width: 20px;
-  height: 20px;
 }
 
 
@@ -4014,10 +4130,6 @@ app-grafico-barras {
   transform: none;
 }
 
-
-.pn-alvo {
-  width: min(460px, 100%);
-}
 
 /* Pipeline: cinco cartões com seta entre eles; a etapa da vez ganha a borda amarela. */
 .pv-pipeline {
@@ -4632,14 +4744,7 @@ a.gf-item-titulo:hover {
     flex: 1;
     min-height: 0;
     display: grid;
-    grid-template-rows: minmax(min-content, 0.75fr) minmax(min-content, 1fr) minmax(160px, 1.35fr);
-  }
-  .content-painel .pn-kpis {
-    min-height: 0;
-  }
-  .content-painel .pn-kpi {
-    min-height: 0;
-    height: 100%;
+    grid-template-rows: auto minmax(min-content, 1fr) minmax(160px, 1.35fr);
   }
   .content-painel .pv-pipeline {
     min-height: 0;
@@ -4674,23 +4779,21 @@ a.gf-item-titulo:hover {
   }
 }
 
-/* Telas estreitas: os cartões passam pra duas colunas, depois pra uma. */
-@media (max-width: 1280px) {
-  .pn-kpis {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
+/* Telas estreitas: o "Todos / Escolher" desce pra baixo do título. */
 @media (max-width: 720px) {
-  .pn-kpis {
-    grid-template-columns: minmax(0, 1fr);
+  .pn-onde {
+    padding: 14px 16px 12px;
   }
-  .pn-kpi {
-    min-height: 88px;
-    padding: 16px;
+  .pn-onde-topo {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    row-gap: 10px;
   }
-  .pn-kpi-icone {
-    width: 54px;
-    height: 54px;
+  .pn-onde-texto {
+    flex: 1 1 calc(100% - 54px);
+  }
+  .segmented.pn-onde-seg {
+    margin-left: 54px;
   }
   .pv-tiles {
     grid-template-columns: minmax(0, 1fr);
@@ -5339,7 +5442,7 @@ app-postagens-card {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 10px 16px;
 }
 .est-controles {

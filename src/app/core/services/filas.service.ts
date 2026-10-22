@@ -15,6 +15,9 @@ export interface ResumoFila {
   contagens: ContagemFila;
   maisAntigoNaFila: string | null;
   ultimaPostagemEm: string | null;
+  /** Mensagens que de fato saíram no grupo (postagens_grupo), hoje e desde sempre. */
+  postadosHoje: number;
+  postadosTotal: number;
   filaLidaEm: string | null;
 }
 

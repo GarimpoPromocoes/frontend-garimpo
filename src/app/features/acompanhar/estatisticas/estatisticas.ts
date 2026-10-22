@@ -6,41 +6,20 @@ import { PostagensCard } from './postagens-card';
 import { GanhosService } from '../../../core/services/ganhos.service';
 import { EstatisticasService } from '../../../core/services/estatisticas.service';
 import { RunControlService } from '../../../core/services/run-control.service';
+import { EstatisticasVisaoService } from '../../../core/services/estatisticas-visao.service';
 
-type Visao = 'postagens' | 'ganhos' | 'membros' | 'vendas';
-
-const VISOES: { id: Visao; label: string }[] = [
-  { id: 'postagens', label: 'Postagens' },
-  { id: 'ganhos', label: 'Ganhos' },
-  { id: 'membros', label: 'Membros dos grupos' },
-  { id: 'vendas', label: 'Vendas por grupo' },
-];
 const PERIODOS = [7, 30, 90];
-const CHAVE_VISAO = 'promobot:estatisticas:visao';
 const VIGIA_MS = 3000;
-
-function visaoSalva(): Visao {
-  try {
-    const v = localStorage.getItem(CHAVE_VISAO);
-    if (VISOES.some((x) => x.id === v)) return v as Visao;
-  } catch {}
-  return 'ganhos';
-}
 
 @Component({
   selector: 'app-estatisticas',
   standalone: true,
   imports: [GanhosCard, MembrosCard, VendasCard, PostagensCard],
-  // As três visões ocupam a altura da janela, sem a página rolar.
+  // As visões ocupam a altura da janela, sem a página rolar. As abas (Postagens, Ganhos, Membros,
+  // Vendas) ficam no cabeçalho: app-estatisticas-abas.
   host: { class: 'ganhos-pagina' },
   template: `
     <div class="est-barra">
-      <div class="segmented segmented-abas" role="group" aria-label="O que ver">
-        @for (v of visoes; track v.id) {
-          <button type="button" class="segmented-option" [class.segmented-option-active]="visao() === v.id"
-            [attr.aria-pressed]="visao() === v.id" (click)="escolher(v.id)">{{ v.label }}</button>
-        }
-      </div>
       <div class="est-controles">
         @if (visao() !== 'ganhos') {
           <div class="segmented segmented-abas segmented-abas-periodo" role="group" aria-label="Período">
@@ -79,9 +58,8 @@ export class Estatisticas implements OnInit, OnDestroy {
   private ganhos = inject(GanhosService);
   private est = inject(EstatisticasService);
   private runControl = inject(RunControlService);
-  protected readonly visoes = VISOES;
   protected readonly periodos = PERIODOS;
-  protected readonly visao = signal<Visao>(visaoSalva());
+  protected readonly visao = inject(EstatisticasVisaoService).visao;
   protected readonly dias = signal(30);
   protected readonly pedindo = signal(false);
   protected readonly erroAcao = signal<string | null>(null);
@@ -110,13 +88,6 @@ export class Estatisticas implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.timer) clearInterval(this.timer);
-  }
-
-  protected escolher(v: Visao): void {
-    this.visao.set(v);
-    try {
-      localStorage.setItem(CHAVE_VISAO, v);
-    } catch {}
   }
 
   protected async atualizar(): Promise<void> {

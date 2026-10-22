@@ -22,7 +22,7 @@
                 <span><b>{{ g.contagens.fila }}</b> na fila</span>
               }
               <span><b>{{ g.contagens.pronto + g.contagens.espera }}</b> {{ g.fonte === 'clonagem' ? 'prontos' : 'no estoque' }}</span>
-              <span class="gf-ok"><b>{{ g.contagens.postado }}</b> postados</span>
+              <span class="gf-ok" [title]="numero(g.postadosTotal) + ' no total'"><b>{{ g.postadosHoje }}</b> {{ g.postadosHoje === 1 ? 'postado' : 'postados' }} hoje</span>
               @if (g.fonte === 'clonagem') {
                 <span class="gf-erro"><b>{{ g.contagens.recusado }}</b> recusados</span>
               }

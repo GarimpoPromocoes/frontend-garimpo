@@ -1,7 +1,8 @@
-import { Component, DestroyRef, HostListener, computed, inject, input, signal } from '@angular/core';
+import { Component, DestroyRef, HostListener, computed, effect, inject, input, signal } from '@angular/core';
 import { FilaDoGrupo, FilasService, ItemFila, ResumoFila, StatusFila } from '../../../core/services/filas.service';
 import { RunControlService } from '../../../core/services/run-control.service';
 import { StatusService } from '../../../core/services/status.service';
+import { JobsService } from '../../../core/services/jobs.service';
 
 type Filtro = 'todos' | StatusFila;
 
@@ -54,6 +55,7 @@ export class GruposFila {
   private filas = inject(FilasService);
   private runControl = inject(RunControlService);
   private statusService = inject(StatusService);
+  private jobs = inject(JobsService);
 
   protected readonly filtros = FILTROS;
   protected readonly aberto = signal<string | null>(null);
@@ -70,6 +72,16 @@ export class GruposFila {
     inject(DestroyRef).onDestroy(() => {
       clearInterval(resumo);
       clearInterval(lista);
+    });
+    // Saiu uma postagem: os cartões (postados, último post) e a lista aberta atualizam na hora.
+    let concluidos: number | null = null;
+    effect(() => {
+      const n = this.jobs.painel()?.hoje?.concluidos ?? null;
+      if (concluidos !== null && n !== null && n !== concluidos) {
+        void this.filas.carregarResumo();
+        if (this.aberto()) void this.recarregarLista();
+      }
+      concluidos = n;
     });
   }
 
@@ -165,6 +177,10 @@ export class GruposFila {
     if (/ofertas/.test(it.origem)) return 'Garimpado na página de ofertas';
     const grupo = it.origem.match(/^garimpo:\s*(.+)$/);
     return grupo ? `Clonado de "${grupo[1]}"` : it.origem;
+  }
+
+  protected numero(n: number | null | undefined): string {
+    return (n ?? 0).toLocaleString('pt-BR');
   }
 
   protected horaDe(iso: string | null): string {

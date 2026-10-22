@@ -461,6 +461,10 @@
   .topbar-botao:first-of-type {
     margin-left: auto;
   }
+  /* Em Estatísticas não tem Oferta personalizada nem Logs: o sino encosta na direita sozinho. */
+  .topbar-estatisticas app-sino {
+    margin-left: auto;
+  }
   app-topo-kpis {
     order: 4;
     flex-basis: 100%;
