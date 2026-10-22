@@ -1,6 +1,6 @@
-<!-- Aviso só quando tem algo a resolver: uma loja caiu (com o atalho) ou nenhuma está conectada. -->
+<!-- Aviso só quando tem algo a resolver: uma conexão caiu (com o atalho), nenhum canal ou nenhuma loja conectada. -->
 @if (resumo(); as r) {
-<div class="card lj-resumo" role="status" [attr.data-tom]="r.tom">
+<div class="card lj-resumo" role="status" data-tom="atencao">
   <span class="lj-resumo-icone" aria-hidden="true">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5"/><path d="M12 16v.1"/></svg>
   </span>
@@ -8,51 +8,64 @@
     <strong>{{ r.titulo }}</strong>
     <span>{{ r.texto }}</span>
   </div>
-  @if (r.resolver; as loja) {
-    <button type="button" class="btn btn-primary" (click)="abrir(loja.provedor)">Resolver {{ loja.nome }}</button>
+  @if (r.resolver; as conta) {
+    <button type="button" class="btn btn-primary" (click)="abrir(conta.provedor)">Resolver {{ conta.nome }}</button>
   }
 </div>
 }
 
-<section class="lj-secao" aria-labelledby="lj-suas">
-  <h2 class="lj-secao-titulo" id="lj-suas">Suas lojas</h2>
-  <div class="lj-grade">
-    @for (loja of lojas(); track loja.provedor) {
-      <article class="lj-cartao" [attr.data-estado]="loja.estado">
-        <div class="lj-topo">
-          <span class="lj-logo"><img [src]="loja.logo" alt="" /></span>
-          <div class="lj-nome">
-            <strong>{{ loja.nome }}</strong>
-            <span class="lj-selo" [attr.data-estado]="loja.estado">
-              <i aria-hidden="true"></i>
-              @switch (loja.estado) {
-                @case ('ok') { Funcionando }
-                @case ('atencao') { Precisa entrar de novo }
-                @default { Não conectada }
-              }
-            </span>
-          </div>
-        </div>
-
-        <!-- O selo e o botão já dizem tudo; texto só quando a loja caiu (o motivo). -->
-        @if (loja.estado === 'atencao' && loja.motivo) {
-          <p class="lj-texto">{{ loja.motivo }}</p>
-        }
-
-        <button
-          type="button"
-          class="btn lj-acao"
-          [class.btn-primary]="loja.estado !== 'ok'"
-          [class.btn-ghost]="loja.estado === 'ok'"
-          (click)="abrir(loja.provedor)"
-        >
-          @switch (loja.estado) {
-            @case ('ok') { Gerenciar conta }
-            @case ('atencao') { Entrar de novo }
-            @default { Conectar {{ loja.nome }} }
+<!-- Um cartão: logo, nome, selo e o botão. Texto só quando caiu (o motivo). -->
+<ng-template #cartao let-c>
+  <article class="lj-cartao" [attr.data-estado]="c.estado">
+    <div class="lj-topo">
+      <span class="lj-logo"><img [src]="c.logo" alt="" /></span>
+      <div class="lj-nome">
+        <strong>{{ c.nome }}</strong>
+        <span class="lj-selo" [attr.data-estado]="c.estado">
+          <i aria-hidden="true"></i>
+          @switch (c.estado) {
+            @case ('ok') { Funcionando }
+            @case ('atencao') { Precisa entrar de novo }
+            @default { {{ ehCanal(c) ? 'Não conectado' : 'Não conectada' }} }
           }
-        </button>
-      </article>
+        </span>
+      </div>
+    </div>
+
+    @if (c.estado === 'atencao' && c.motivo) {
+      <p class="lj-texto">{{ c.motivo }}</p>
+    }
+
+    <button
+      type="button"
+      class="btn lj-acao"
+      [class.btn-primary]="c.estado !== 'ok'"
+      [class.btn-ghost]="c.estado === 'ok'"
+      (click)="abrir(c.provedor)"
+    >
+      @switch (c.estado) {
+        @case ('ok') { Gerenciar conta }
+        @case ('atencao') { Entrar de novo }
+        @default { Conectar {{ c.nome }} }
+      }
+    </button>
+  </article>
+</ng-template>
+
+<section class="lj-secao" aria-labelledby="lj-canais">
+  <h2 class="lj-secao-titulo" id="lj-canais">Canais de envio</h2>
+  <div class="lj-grade">
+    @for (c of canais(); track c.provedor) {
+      <ng-container *ngTemplateOutlet="cartao; context: { $implicit: c }" />
+    }
+  </div>
+</section>
+
+<section class="lj-secao" aria-labelledby="lj-suas">
+  <h2 class="lj-secao-titulo" id="lj-suas">Lojas de afiliado</h2>
+  <div class="lj-grade">
+    @for (c of lojas(); track c.provedor) {
+      <ng-container *ngTemplateOutlet="cartao; context: { $implicit: c }" />
     }
   </div>
 </section>

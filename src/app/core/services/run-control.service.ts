@@ -71,10 +71,10 @@ export class RunControlService {
     () => this.statusService.status()?.agendamento?.manual?.proximaRodadaEm ?? null
   );
 
-  readonly pendencias = computed<{ texto: string; aba: 'whatsapp' | 'lojas' | 'grupos' }[]>(() => {
-    const itens: { texto: string; aba: 'whatsapp' | 'lojas' | 'grupos' }[] = [];
+  readonly pendencias = computed<{ texto: string; aba: 'lojas' | 'grupos' }[]>(() => {
+    const itens: { texto: string; aba: 'lojas' | 'grupos' }[] = [];
     if (!this.canalConectado()) {
-      itens.push({ texto: 'Conectar um canal de envio (WhatsApp ou Telegram)', aba: 'whatsapp' });
+      itens.push({ texto: 'Conectar um canal de envio (WhatsApp ou Telegram)', aba: 'lojas' });
     }
     if (!this.lojasConectadas().length) {
       itens.push({ texto: 'Conectar pelo menos uma loja de afiliado (Mercado Livre, Amazon ou Shopee)', aba: 'lojas' });

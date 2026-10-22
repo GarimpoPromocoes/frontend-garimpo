@@ -12,7 +12,6 @@ import { TelegramUiService } from './core/services/telegram-ui.service';
 import { ConfirmacaoService } from './core/services/confirmacao.service';
 import { BuscaService } from './core/services/busca.service';
 import { LoginCard } from './features/auth/login-card/login-card';
-import { WhatsappCard } from './features/conexoes/whatsapp-card/whatsapp-card';
 import { LojasCard } from './features/conexoes/lojas-card/lojas-card';
 import { RegrasPostagem } from './features/divulgacao/regras-postagem/regras-postagem';
 import { GroupsCard } from './features/divulgacao/groups-card/groups-card';
@@ -40,7 +39,6 @@ export type AbaId =
   | 'grupos'
   | 'garimpo'
   | 'regras'
-  | 'whatsapp'
   | 'lojas'
   | 'dono';
 
@@ -95,17 +93,10 @@ const ABAS: Aba[] = [
   },
 
   {
-    id: 'whatsapp',
-    label: 'WhatsApp e Telegram',
-    titulo: 'WhatsApp e Telegram',
-    descricao: 'Por onde o robô envia as promoções para os grupos.',
-    secao: 'Conexões',
-  },
-  {
     id: 'lojas',
-    label: 'Lojas de afiliado',
-    titulo: 'Lojas de afiliado',
-    descricao: 'As contas que geram os links que dão comissão: Mercado Livre, Amazon e Shopee.',
+    label: 'Conexões',
+    titulo: 'Conexões',
+    descricao: 'Por onde o robô envia as promoções e as lojas que geram os links com a sua comissão.',
     secao: 'Conexões',
     badge: 'lojas',
   },
@@ -133,7 +124,6 @@ const CHAVE_ABA = 'promobot:aba';
   standalone: true,
   imports: [
     LoginCard,
-    WhatsappCard,
     LojasCard,
     RegrasPostagem,
     GroupsCard,
@@ -209,10 +199,12 @@ export class App implements OnInit, OnDestroy {
       }
       case 'lojas': {
         if (!s) return null;
-        // Nenhuma loja é obrigatória: o badge só aparece quando não há nenhuma
-        // conectada, ou quando uma que funcionava caiu.
-        if (!this.runControl.lojasConectadas().length) return '!';
-        const caidas = this.avisos.avisos().filter((a) => ['mercadolivre', 'amazon', 'shopee'].includes(a.origem)).length;
+        // Conexões: o badge só aparece quando não há nenhuma loja ou nenhum canal de envio
+        // conectado, ou quando uma conexão que funcionava caiu.
+        if (!this.runControl.lojasConectadas().length || !this.runControl.canalConectado()) return '!';
+        const caidas = this.avisos
+          .avisos()
+          .filter((a) => ['mercadolivre', 'amazon', 'shopee', 'whatsapp', 'telegram'].includes(a.origem)).length;
         return caidas ? String(caidas) : null;
       }
       case 'atividade':
@@ -275,6 +267,8 @@ export class App implements OnInit, OnDestroy {
       if ((salva as string) === 'ganhos') salva = 'estatisticas';
       // Oferta personalizada também: agora é um modal aberto pelo topo.
       if ((salva as string) === 'busca') salva = 'painel';
+      // WhatsApp e Telegram entraram na tela de Conexões (a antiga Lojas de afiliado).
+      if ((salva as string) === 'whatsapp') salva = 'lojas';
       if (salva && ABAS.some((a) => a.id === salva)) this.aba.set(salva);
     } catch (_) {
     }
@@ -292,7 +286,6 @@ export class App implements OnInit, OnDestroy {
       void import('./features/acompanhar/estatisticas/estatisticas');
       void import('./features/divulgacao/produtos-card/produtos-card');
       void import('./features/divulgacao/busca-card/busca-card');
-      void import('./features/conexoes/whatsapp-card/whatsapp-card');
       void import('./features/conexoes/lojas-card/lojas-card');
       void import('./features/divulgacao/regras-postagem/regras-postagem');
       if (this.auth.usuario()?.admin) void import('./features/admin/owner-card/owner-card');
