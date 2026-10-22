@@ -1,13 +1,19 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { GanhosService } from './ganhos.service';
+import { EstatisticasService } from './estatisticas.service';
+import { RunControlService } from './run-control.service';
 
 export type VisaoEstatisticas = 'postagens' | 'ganhos' | 'membros' | 'vendas';
 
-export const VISOES_ESTATISTICAS: { id: VisaoEstatisticas; label: string }[] = [
-  { id: 'postagens', label: 'Postagens' },
-  { id: 'ganhos', label: 'Ganhos' },
-  { id: 'membros', label: 'Membros dos grupos' },
-  { id: 'vendas', label: 'Vendas por grupo' },
+/** "curto" entra no lugar do nome em tela mais estreita, pra caber tudo no topo. */
+export const VISOES_ESTATISTICAS: { id: VisaoEstatisticas; label: string; curto: string }[] = [
+  { id: 'postagens', label: 'Postagens', curto: 'Postagens' },
+  { id: 'ganhos', label: 'Ganhos', curto: 'Ganhos' },
+  { id: 'membros', label: 'Membros dos grupos', curto: 'Membros' },
+  { id: 'vendas', label: 'Vendas por grupo', curto: 'Vendas' },
 ];
+
+export const PERIODOS_ESTATISTICAS = [7, 30, 90];
 
 const CHAVE_VISAO = 'promobot:estatisticas:visao';
 
@@ -20,17 +26,55 @@ function visaoSalva(): VisaoEstatisticas {
 }
 
 /**
- * Qual visão de Estatísticas está aberta. As abas ficam no cabeçalho (app.html) e o conteúdo na
- * tela (Estatisticas); os dois leem daqui.
+ * O estado da tela de Estatísticas: a visão aberta, o período e o "Atualizar agora". As abas, o
+ * período e o botão de atualizar ficam no cabeçalho (app.html); o conteúdo, na tela (Estatisticas).
+ * Os dois leem daqui.
  */
 @Injectable({ providedIn: 'root' })
 export class EstatisticasVisaoService {
+  private ganhos = inject(GanhosService);
+  private est = inject(EstatisticasService);
+  private runControl = inject(RunControlService);
+
   readonly visao = signal<VisaoEstatisticas>(visaoSalva());
+  readonly dias = signal(30);
+  readonly pedindo = signal(false);
+  readonly erroAcao = signal<string | null>(null);
+
+  /** O robô de postagem está ligado (no painel ou fora dele): a atualização fica bloqueada. */
+  readonly roboRodando = computed(
+    () => this.runControl.rodandoContinuo() || this.runControl.postandoAgora() || this.runControl.processoExterno()
+  );
+
+  readonly lendo = computed(() => this.pedindo() || this.ganhos.lendoAgora());
 
   escolher(v: VisaoEstatisticas): void {
     this.visao.set(v);
     try {
       localStorage.setItem(CHAVE_VISAO, v);
     } catch {}
+  }
+
+  /** Lê ganhos e vendas de uma vez e recarrega tudo. Só com o robô parado. */
+  async atualizar(): Promise<void> {
+    if (this.roboRodando() || this.lendo()) return;
+    this.pedindo.set(true);
+    this.erroAcao.set(null);
+    const r = await this.est.atualizar();
+    await this.recarregarTudo();
+    this.pedindo.set(false);
+    // Sem mensagem quando dá certo: o ícone girando e cada loja aparecendo já contam o que está
+    // acontecendo.
+    if (!r.ok) this.erroAcao.set(r.erro ?? null);
+  }
+
+  async recarregarTudo(): Promise<void> {
+    const dias = this.dias();
+    await Promise.all([
+      this.ganhos.carregar(),
+      this.est.carregarMembros(dias),
+      this.est.carregarVendas(dias),
+      this.est.carregarPostagens(dias),
+    ]);
   }
 }

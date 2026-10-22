@@ -16,7 +16,7 @@
               <strong class="gf-nome">{{ g.nome }}</strong>
               @if (ehDaVez(g)) { <span class="pv-selo" data-tom="andamento">Vez dele agora</span> }
             </span>
-            <span class="gf-fonte">{{ fonteTexto(g) }}</span>
+            <span class="gf-fonte" [title]="fonteTexto(g)">{{ fonteTexto(g) }}</span>
             <span class="gf-numeros">
               @if (g.fonte === 'clonagem') {
                 <span><b>{{ g.contagens.fila }}</b> na fila</span>

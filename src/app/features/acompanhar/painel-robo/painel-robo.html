@@ -76,8 +76,8 @@
       <span class="pn-onde-num"><strong>{{ numero(membrosTotais()) }}</strong> membros</span>
       <span class="pn-onde-num"><strong>{{ receitaHoje() }}</strong> de receita</span>
     </span>
-    <button type="button" class="pn-onde-link" (click)="irPara.emit('estatisticas')">
-      Ver estatísticas <ng-container *ngTemplateOutlet="icone; context: { $implicit: 'seta' }" />
+    <button type="button" class="pn-onde-link" aria-haspopup="dialog" (click)="verProdutos.emit()">
+      Ver produtos <ng-container *ngTemplateOutlet="icone; context: { $implicit: 'seta' }" />
     </button>
   </div>
 </section>
@@ -156,7 +156,7 @@
         <div><dt>Publicadas no total</dt><dd>{{ statusService.status()?.produtosPublicados ?? '—' }}</dd></div>
         <div>
           <dt>Na fila</dt>
-          <dd>{{ statusService.status()?.produtosCatalogo ?? '—' }} <button type="button" class="btn-link" (click)="abrirProdutos()">Ver produtos</button></dd>
+          <dd>{{ statusService.status()?.produtosCatalogo ?? '—' }}</dd>
         </div>
         <div><dt>Cupons disponíveis</dt><dd>{{ statusService.status()?.cuponsAtivos ?? '—' }}</dd></div>
       </dl>

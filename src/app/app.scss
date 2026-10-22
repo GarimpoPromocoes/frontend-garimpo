@@ -210,6 +210,12 @@
   margin-top: 2px;
 }
 
+/* Estatísticas: só o h1 no título (as abas ficam ao lado e pegam o espaço do meio). */
+.topbar-estatisticas .topbar-title {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
 .topbar-actions {
   display: flex;
   align-items: center;
@@ -334,6 +340,15 @@
   overflow: hidden;
 }
 @media (max-width: 1000px) {
+  /* Estatísticas: o título desce pra linha dele e as abas vêm logo embaixo, rolando de lado se
+     não couberem. */
+  .topbar-estatisticas .topbar-title {
+    flex-basis: 100%;
+  }
+  .topbar-estatisticas app-estatisticas-abas {
+    order: 4;
+    flex-basis: 100%;
+  }
   .content-tela-cheia {
     overflow-y: auto;
   }
@@ -461,8 +476,9 @@
   .topbar-botao:first-of-type {
     margin-left: auto;
   }
-  /* Em Estatísticas não tem Oferta personalizada nem Logs: o sino encosta na direita sozinho. */
-  .topbar-estatisticas app-sino {
+  /* Em Estatísticas não tem Oferta personalizada nem Logs: o período e o atualizar encostam na
+     direita, junto do sino. */
+  .topbar-estatisticas app-estatisticas-controles {
     margin-left: auto;
   }
   app-topo-kpis {

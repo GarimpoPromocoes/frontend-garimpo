@@ -16,7 +16,6 @@ interface Loja {
   estado: EstadoLoja;
   /** Por que caiu (só em 'atencao'). */
   motivo: string;
-  conferidaEm: string | null;
   comoConectar: string;
 }
 
@@ -61,7 +60,6 @@ export class LojasCard implements OnInit {
         ...l,
         estado: aviso ? 'atencao' : l.conectada ? 'ok' : 'off',
         motivo: aviso?.texto ?? '',
-        conferidaEm: conexao(l.provedor)?.ultimaValidacao ?? null,
       };
     };
 
@@ -96,7 +94,7 @@ export class LojasCard implements OnInit {
     return base.map(completar);
   });
 
-  /** A frase do topo: quantas funcionam e qual resolver primeiro. */
+  /** O aviso do topo, só quando tem algo a resolver. Tudo certo: nada (os cartões já mostram). */
   protected readonly resumo = computed(() => {
     const lojas = this.lojas();
     const ok = lojas.filter((l) => l.estado === 'ok').length;
@@ -117,23 +115,8 @@ export class LojasCard implements OnInit {
         resolver: null,
       };
     }
-    return {
-      tom: 'ok',
-      titulo: ok === lojas.length ? 'Todas as lojas funcionando' : `${ok} de ${lojas.length} lojas funcionando`,
-      texto: ok === lojas.length ? 'Os links das ofertas saem com a sua comissão.' : 'Quer mais ofertas? Conecte as outras lojas abaixo.',
-      resolver: null,
-    };
+    return null;
   });
-
-  protected quando(iso: string): string {
-    const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return '';
-    const hoje = new Date();
-    const hora = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    return d.toDateString() === hoje.toDateString()
-      ? `hoje, às ${hora}`
-      : `em ${d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}, às ${hora}`;
-  }
 
   ngOnInit(): void {
     this.conexoes.carregar();

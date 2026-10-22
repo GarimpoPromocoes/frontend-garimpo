@@ -1,20 +1,18 @@
-<!-- Situação das lojas numa frase: quantas funcionam e, se alguma caiu, o atalho para resolver. -->
-<div class="card lj-resumo" role="status" [attr.data-tom]="resumo().tom">
+<!-- Aviso só quando tem algo a resolver: uma loja caiu (com o atalho) ou nenhuma está conectada. -->
+@if (resumo(); as r) {
+<div class="card lj-resumo" role="status" [attr.data-tom]="r.tom">
   <span class="lj-resumo-icone" aria-hidden="true">
-    @if (resumo().tom === 'ok') {
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
-    } @else {
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5"/><path d="M12 16v.1"/></svg>
-    }
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5"/><path d="M12 16v.1"/></svg>
   </span>
   <div class="lj-resumo-texto">
-    <strong>{{ resumo().titulo }}</strong>
-    <span>{{ resumo().texto }}</span>
+    <strong>{{ r.titulo }}</strong>
+    <span>{{ r.texto }}</span>
   </div>
-  @if (resumo().resolver; as r) {
-    <button type="button" class="btn btn-primary" (click)="abrir(r.provedor)">Resolver {{ r.nome }}</button>
+  @if (r.resolver; as loja) {
+    <button type="button" class="btn btn-primary" (click)="abrir(loja.provedor)">Resolver {{ loja.nome }}</button>
   }
 </div>
+}
 
 <section class="lj-secao" aria-labelledby="lj-suas">
   <h2 class="lj-secao-titulo" id="lj-suas">Suas lojas</h2>
@@ -36,16 +34,12 @@
           </div>
         </div>
 
-        <p class="lj-texto">
-          @switch (loja.estado) {
-            @case ('ok') {
-              @if (loja.conferidaEm) { Conferida {{ quando(loja.conferidaEm) }}. }
-              Os links das ofertas saem com a sua comissão.
-            }
-            @case ('atencao') { {{ loja.motivo }} }
-            @default { {{ loja.comoConectar }} }
-          }
-        </p>
+        <!-- Funcionando: o selo já diz tudo. Sem conectar ou caída: como resolver. -->
+        @if (loja.estado !== 'ok') {
+          <p class="lj-texto">
+            @if (loja.estado === 'atencao') { {{ loja.motivo }} } @else { {{ loja.comoConectar }} }
+          </p>
+        }
 
         <button
           type="button"
@@ -78,14 +72,6 @@
     }
   </ul>
 </section>
-
-<details class="lj-duvida">
-  <summary>Por que preciso conectar uma loja?</summary>
-  <p>
-    O robô usa a sua conta de afiliado para trocar o link de cada oferta pelo seu. É assim que a comissão das vendas
-    cai para você. Basta uma loja conectada para ele começar.
-  </p>
-</details>
 
 @if (erro(); as e) {
   <div class="alert-banner">

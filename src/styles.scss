@@ -2461,24 +2461,119 @@ body:has(.modal-fundo) .bot-control-fixo {
   animation: pulse-dot 1.6s ease-in-out infinite;
 }
 
-/* ---- Abas de Estatísticas no cabeçalho (só nessa tela, no lugar de Oferta personalizada e Logs) ---- */
-/* Ficam embaixo do título, no lugar do subtítulo. Sem espaço (celular), rolam de lado. */
+/* ---- Estatísticas: o topo vira a barra da tela ----
+   Abas ao lado do título; na direita, o período e o "Atualizar agora" (só o ícone, redondo como o
+   sino). Tudo na altura dos outros botões do topo (38px), em pílula, como Oferta personalizada e
+   Logs. A aba aberta fica escura; o período escolhido, dourado claro (como as fichas do Painel). */
 app-estatisticas-abas.topbar-abas {
+  flex: 1 1 auto;
+  min-width: 0;
   display: flex;
-  max-width: 100%;
-  margin-top: 8px;
   overflow-x: auto;
   scrollbar-width: none;
 }
 app-estatisticas-abas.topbar-abas::-webkit-scrollbar {
   display: none;
 }
-.topbar-abas .segmented-abas {
-  flex-wrap: nowrap;
-  background: var(--surface);
+app-estatisticas-controles.topbar-controles {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
-.topbar-abas .segmented-abas .segmented-option {
+.segmented.topbar-seg {
+  flex-shrink: 0;
+  flex-wrap: nowrap;
+  align-self: center;
+  gap: 2px;
+  padding: 3px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+.topbar-seg .segmented-option {
   flex: 0 0 auto;
+  min-height: 30px;
+  padding: 4px 13px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.topbar-seg-claro .segmented-option-active {
+  background: var(--gold-soft);
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--gold-border);
+}
+.topbar-seg .rotulo-curto {
+  display: none;
+}
+@media (max-width: 1440px) {
+  .topbar-seg .rotulo-longo {
+    display: none;
+  }
+  .topbar-seg .rotulo-curto {
+    display: inline;
+  }
+}
+.topbar-seg .rotulo-d {
+  display: none;
+}
+/* O período só encurta ("7d") quando nem os nomes curtos das abas cabem. */
+@media (min-width: 1001px) and (max-width: 1200px) {
+  .topbar-seg .rotulo-dias {
+    display: none;
+  }
+  .topbar-seg .rotulo-d {
+    display: inline;
+  }
+}
+.topbar-icone {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--text-soft);
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s,
+    color 0.15s;
+}
+.topbar-icone svg {
+  width: 18px;
+  height: 18px;
+}
+.topbar-icone:hover:not(:disabled) {
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+  color: var(--text);
+}
+.topbar-icone:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+.topbar-icone:disabled {
+  cursor: not-allowed;
+  color: var(--text-muted);
+  background: var(--surface-2);
+}
+/* Lendo: as setas giram pra onde apontam (sentido anti-horário). */
+.topbar-icone-girando {
+  color: var(--gold-ink);
+}
+.topbar-icone-girando:disabled {
+  cursor: progress;
+  color: var(--gold-ink);
+  background: var(--gold-soft);
+  border-color: var(--gold-border);
+}
+.topbar-icone-girando svg {
+  animation: girar 1s linear infinite reverse;
 }
 
 /* ---- Botões do topo que abrem janelas (Oferta personalizada, Logs) ---- */
@@ -4399,13 +4494,25 @@ app-grafico-barras {
   font-stretch: var(--estreita);
   color: var(--text);
 }
+/* Mesma grade dos cartões do Fluxo: cinco colunas iguais, mesmo espaço entre eles. */
 .gf-cartoes {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 26px;
+}
+@media (max-width: 1000px) {
+  .gf-cartoes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+}
+@media (max-width: 560px) {
+  .gf-cartoes {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 .gf-cartao {
   width: 100%;
@@ -4450,6 +4557,12 @@ app-grafico-barras {
 .gf-rodape {
   font-size: 13px;
   color: var(--text-muted);
+}
+.gf-fonte {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .gf-numeros {
   display: flex;
@@ -4730,28 +4843,24 @@ a.gf-item-titulo:hover {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
-.pv-totais .btn-link {
-  font-size: 13px;
-  margin-left: 4px;
-}
 
-/* Tela de computador: o Painel ocupa a altura inteira. Os números, o fluxo e os grupos dividem o
-   espaço (os grupos ficam com a maior parte) e cada cartão cresce junto, em vez de sobrar um vazio
-   embaixo. Com muitos grupos, a lista rola por dentro. Em tela baixa ou estreita a página rola
-   normalmente. */
+/* Tela de computador: o Painel ocupa a altura inteira. Os cartões do Fluxo e dos Grupos têm a mesma
+   largura e a mesma altura (--pn-linha); os grupos ficam com o resto da tela e, com muitos, a
+   lista rola por dentro. Em tela baixa ou estreita a página rola normalmente. */
 @media (min-width: 1001px) and (min-height: 640px) {
   .content-painel app-painel-robo {
     flex: 1;
     min-height: 0;
     display: grid;
-    grid-template-rows: auto minmax(min-content, 1fr) minmax(160px, 1.35fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    /* Altura de uma linha de cartões: a mesma no Fluxo e nos Grupos. */
+    --pn-linha: clamp(180px, 24vh, 220px);
   }
   .content-painel .pv-pipeline {
     min-height: 0;
   }
   .content-painel .pv-etapas {
-    flex: 1;
-    min-height: 0;
+    grid-auto-rows: var(--pn-linha);
   }
   .content-painel .pv-etapa {
     justify-content: center;
@@ -4763,7 +4872,9 @@ a.gf-item-titulo:hover {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-    grid-auto-rows: minmax(140px, 1fr);
+    align-content: start;
+    /* Pelo menos a altura do Fluxo; cresce se o texto do grupo pedir (tela mais estreita). */
+    grid-auto-rows: minmax(var(--pn-linha), auto);
     padding: 2px;
     margin: -2px;
   }
@@ -4882,26 +4993,6 @@ app-ganhos-card {
   color: var(--text);
   pointer-events: none;
 }
-.ganhos-atualizar {
-  min-height: 44px;
-  padding: 8px 16px;
-  background: var(--gold-soft);
-  border-color: var(--gold-border);
-  color: var(--text);
-  font-weight: 600;
-}
-.ganhos-atualizar:hover:not(:disabled) {
-  border-color: var(--gold);
-}
-.ganhos-atualizar svg {
-  width: 18px;
-  height: 18px;
-}
-/* As setas do icone apontam no sentido anti-horario: gira pra onde elas apontam. */
-.ganhos-atualizar-lendo svg {
-  animation: girar 1s linear infinite reverse;
-}
-
 /* Um bloco por loja, tingido com a cor dela (a mesma do grafico). */
 .ganhos-plataformas {
   list-style: none;
@@ -6338,6 +6429,8 @@ app-lojas-card {
 .lj-acao {
   width: 100%;
   min-height: 42px;
+  /* Sem o texto (loja funcionando), o botão continua no pé do cartão, alinhado com os outros. */
+  margin-top: auto;
 }
 .lj-breve {
   list-style: none;
@@ -6377,20 +6470,4 @@ app-lojas-card {
 .lj-breve-item:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
-}
-.lj-duvida {
-  padding: 16px 20px;
-  border-radius: var(--radius);
-  background: var(--surface-2);
-  font-size: 14px;
-  color: var(--text-soft);
-}
-.lj-duvida summary {
-  font-weight: 700;
-  color: var(--text);
-  cursor: pointer;
-}
-.lj-duvida p {
-  margin: 10px 0 0;
-  line-height: 1.5;
 }

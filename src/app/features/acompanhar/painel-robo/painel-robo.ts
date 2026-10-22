@@ -267,11 +267,6 @@ export class PainelRobo {
     this.runControl.toggleSelecionado(id, !ativo);
   }
 
-  abrirProdutos(): void {
-    this.statsAbertas.set(false);
-    this.verProdutos.emit();
-  }
-
   private curto(texto: string, max = 70): string {
     return texto.length > max ? texto.slice(0, max - 1) + '…' : texto;
   }

@@ -84,20 +84,25 @@
 
       <div class="topbar-title">
         <h1>{{ abaAtual().titulo }}</h1>
-        <!-- Em Estatísticas, as abas da tela (Postagens, Ganhos, Membros, Vendas) ficam embaixo do
-             título, e a oferta personalizada e os logs saem do topo. -->
-        @if (aba() === 'estatisticas') {
-          <app-estatisticas-abas class="topbar-abas" />
-        } @else {
+        @if (aba() !== 'estatisticas') {
           <p>{{ abaAtual().descricao }}</p>
         }
       </div>
 
+      <!-- Em Estatísticas o topo vira a barra da tela: as abas ao lado do título e, na direita, o
+           período e o "Atualizar agora" no lugar dos números do momento, da oferta personalizada e
+           dos logs. A altura do topo é a mesma das outras telas. -->
+      @if (aba() === 'estatisticas') {
+        <app-estatisticas-abas class="topbar-abas" />
+      }
+
       <div class="topbar-actions">
         <!-- Os números do momento (tempo ativo e próxima postagem), a oferta
              personalizada e os logs (janelas abertas daqui, de qualquer página) e o sino. -->
+        @if (aba() === 'estatisticas') {
+          <app-estatisticas-controles class="topbar-controles" />
+        } @else {
         <app-topo-kpis />
-        @if (aba() !== 'estatisticas') {
         <button type="button" class="topbar-botao" [class.topbar-botao-aberto]="buscaModalAberta()"
           aria-haspopup="dialog" title="Buscar as melhores ofertas de um produto e escolher qual postar"
           (click)="buscaModalAberta.set(true)">
