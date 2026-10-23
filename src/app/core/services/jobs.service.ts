@@ -484,16 +484,6 @@ export class JobsService {
     }
   }
 
-  /** Pausa ou retoma a postagem sem fechar o robô (navegador e WhatsApp continuam abertos). */
-  async pausar(pausado: boolean): Promise<{ ok: boolean; erro?: string }> {
-    try {
-      await firstValueFrom(this.http.post(`/api/jobs/grupos/continuo/${pausado ? 'pausar' : 'retomar'}`, {}));
-      return { ok: true };
-    } catch (e: any) {
-      return { ok: false, erro: e?.error?.erro || 'Não foi possível pausar agora.' };
-    }
-  }
-
   async pararTudo(): Promise<void> {
     await firstValueFrom(this.http.post('/api/jobs/parar-tudo', {}));
   }

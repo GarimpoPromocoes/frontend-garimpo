@@ -18,11 +18,11 @@ const VIGIA_MS = 3000;
   // agora" ficam no cabeçalho (estatisticas-abas.ts); o estado, em EstatisticasVisaoService.
   host: { class: 'ganhos-pagina' },
   template: `
-    <!-- Bot ligado: o "Atualizar agora" do cabeçalho fica desligado e o aviso diz por quê. -->
-    @if (tela.roboRodando() || tela.erroAcao()) {
+    <!-- Bot ligado: o "Atualizar agora" fica na fila e o aviso diz quando sai. -->
+    @if (tela.avisoAcao() || tela.erroAcao()) {
       <div class="est-barra">
-        @if (tela.roboRodando()) {
-          <span class="est-atualizar-aviso" id="est-atualizar-aviso"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><path d="M12 7.6v.1"/></svg>Você só pode atualizar quando o bot estiver parado</span>
+        @if (tela.avisoAcao()) {
+          <span class="est-atualizar-aviso" role="status"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><path d="M12 7.6v.1"/></svg>{{ tela.avisoAcao() }}</span>
         }
         @if (tela.erroAcao()) {
           <p class="error-text" role="alert">{{ tela.erroAcao() }}</p>
@@ -53,6 +53,8 @@ export class Estatisticas implements OnInit, OnDestroy {
       // Membros só são lidos com o robô ligado (WhatsApp aberto): parado, não adianta perguntar.
       const membrosPendentes = this.est.aguardandoMembros() && this.runControl.rodandoContinuo();
       if (ganhosPendentes || membrosPendentes) void this.tela.recarregarTudo();
+      // O robô já atendeu o pedido da fila: o aviso sai.
+      else if (this.tela.avisoAcao()) this.tela.avisoAcao.set(null);
     }, VIGIA_MS);
   }
 

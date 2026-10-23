@@ -39,12 +39,11 @@ export class EstatisticasAbas {
         }
       </div>
     }
-    <!-- Vale para todas as visões: lê ganhos e vendas de uma vez e recarrega tudo. Só com o robô
-         parado: ligado, ele mesmo lê na espera entre uma postagem e outra. -->
+    <!-- Vale para todas as visões: lê ganhos, vendas e membros de uma vez e recarrega tudo. Com o
+         robô ligado também funciona: ele lê na espera entre uma postagem e outra, sem parar. -->
     <button type="button" class="topbar-icone" [class.topbar-icone-girando]="tela.lendo()"
-      [disabled]="tela.lendo() || tela.roboRodando()"
+      [disabled]="tela.lendo()"
       [attr.aria-label]="tela.lendo() ? 'Lendo ganhos e vendas…' : 'Atualizar agora'"
-      [attr.aria-describedby]="tela.roboRodando() ? 'est-atualizar-aviso' : null"
       [title]="dica()"
       (click)="tela.atualizar()">
       <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 3.5V8h4.5"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 20.5V16h-4.5"/></svg>
@@ -56,8 +55,8 @@ export class EstatisticasControles {
   protected readonly periodos = PERIODOS_ESTATISTICAS;
 
   protected dica(): string {
-    if (this.tela.roboRodando()) return 'Você só pode atualizar quando o bot estiver parado';
     if (this.tela.lendo()) return 'Lendo ganhos e vendas…';
-    return 'Atualizar agora: ler ganhos e vendas';
+    if (this.tela.roboRodando()) return 'Atualizar agora: o robô lê ganhos, vendas e membros na próxima pausa entre postagens';
+    return 'Atualizar agora: ler ganhos, vendas e membros';
   }
 }

@@ -122,7 +122,7 @@
       </div>
     </header>
 
-    <!-- Ligar, pausar e parar o robô: botões redondos no canto de baixo, em todas as telas. Somem
+    <!-- Ligar e parar o robô: botões redondos no canto de baixo, em todas as telas. Somem
          quando abre qualquer janela. role=status: o leitor de tela avisa quando o robô liga ou para. -->
     <div
       class="bot-control-fixo"
@@ -146,25 +146,6 @@
           }
         </button>
       } @else {
-        @if (runControl.postandoAgora()) {
-          <button
-            type="button"
-            class="bot-fab bot-fab-pausa"
-            [class.bot-fab-ligar]="runControl.pausado()"
-            [disabled]="runControl.pausando() || runControl.parando()"
-            [title]="runControl.pausado() ? 'Retomar robô' : 'Pausar robô'"
-            [attr.aria-label]="runControl.pausado() ? 'Retomar robô' : 'Pausar robô'"
-            (click)="runControl.alternarPausa()"
-          >
-            @if (runControl.pausando()) {
-              <span class="bot-fab-spinner"></span>
-            } @else if (runControl.pausado()) {
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5.6v12.8a1 1 0 0 0 1.52.85l10.2-6.4a1 1 0 0 0 0-1.7l-10.2-6.4A1 1 0 0 0 7 5.6Z" /></svg>
-            } @else {
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6.5" y="5.5" width="4" height="13" rx="1.2" /><rect x="13.5" y="5.5" width="4" height="13" rx="1.2" /></svg>
-            }
-          </button>
-        }
         <button
           type="button"
           class="bot-fab bot-fab-parar"

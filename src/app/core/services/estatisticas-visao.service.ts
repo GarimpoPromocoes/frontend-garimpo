@@ -40,8 +40,10 @@ export class EstatisticasVisaoService {
   readonly dias = signal(30);
   readonly pedindo = signal(false);
   readonly erroAcao = signal<string | null>(null);
+  /** Robô ligado: o pedido ficou na fila e ele lê na próxima espera entre postagens. */
+  readonly avisoAcao = signal<string | null>(null);
 
-  /** O robô de postagem está ligado (no painel ou fora dele): a atualização fica bloqueada. */
+  /** O robô de postagem está ligado (no painel ou fora dele): ele mesmo atende o "Atualizar agora". */
   readonly roboRodando = computed(
     () => this.runControl.rodandoContinuo() || this.runControl.postandoAgora() || this.runControl.processoExterno()
   );
@@ -55,17 +57,24 @@ export class EstatisticasVisaoService {
     } catch {}
   }
 
-  /** Lê ganhos e vendas de uma vez e recarrega tudo. Só com o robô parado. */
+  /**
+   * Lê ganhos, vendas e membros de uma vez e recarrega tudo. Com o robô parado, na hora; ligado, o
+   * robô atende na próxima espera entre postagens, sem precisar parar.
+   */
   async atualizar(): Promise<void> {
-    if (this.roboRodando() || this.lendo()) return;
+    if (this.lendo()) return;
     this.pedindo.set(true);
     this.erroAcao.set(null);
+    this.avisoAcao.set(null);
     const r = await this.est.atualizar();
     await this.recarregarTudo();
     this.pedindo.set(false);
-    // Sem mensagem quando dá certo: o ícone girando e cada loja aparecendo já contam o que está
-    // acontecendo.
+    // Robô parado: sem mensagem quando dá certo — o ícone girando e cada loja aparecendo já contam
+    // o que está acontecendo. Ligado, a leitura sai depois: avisa.
     if (!r.ok) this.erroAcao.set(r.erro ?? null);
+    else if (r.modo === 'na-fila' && this.roboRodando()) {
+      this.avisoAcao.set('Pedido enviado: o robô atualiza na próxima pausa entre uma postagem e outra.');
+    }
   }
 
   async recarregarTudo(): Promise<void> {
