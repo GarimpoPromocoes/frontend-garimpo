@@ -2,7 +2,6 @@ import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ConfigService } from '../../../core/services/config.service';
 import { StatusService } from '../../../core/services/status.service';
-import { DatasEspeciais } from '../datas-especiais/datas-especiais';
 import { HORARIO_PADRAO, dentroDoHorario, duracaoJanela, horaValida, passaDaMeiaNoite } from './horario';
 import { COPY_MAX, COPY_PADRAO, EXEMPLO_COM_CUPOM, EXEMPLO_SEM_CUPOM, VARIAVEIS_COPY, aplicarModelo, formatarWhatsApp } from './copy';
 
@@ -101,7 +100,7 @@ function ehNumero(texto: string): boolean {
 @Component({
   selector: 'app-regras-postagem',
   standalone: true,
-  imports: [FormsModule, DatasEspeciais],
+  imports: [FormsModule],
   templateUrl: './regras-postagem.html',
   styleUrl: './regras-postagem.scss',
 })

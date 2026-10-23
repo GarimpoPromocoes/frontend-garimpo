@@ -2629,6 +2629,21 @@ app-estatisticas-controles.topbar-controles {
     white-space: nowrap;
   }
 }
+/* Botão sozinho no topo (Datas especiais, em Regras de postagem): sem os números do momento ao
+   lado, o texto cabe — só vira ícone no celular. */
+@media (min-width: 761px) {
+  .topbar-botao.topbar-botao-com-texto {
+    width: auto;
+    padding: 0 14px;
+  }
+  .topbar-botao-com-texto .topbar-botao-texto {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
+  }
+}
 
 /* ---- Sino de avisos (topo, canto direito) ---- */
 app-sino {
@@ -3670,6 +3685,23 @@ app-status-conexoes {
   box-shadow: none;
 }
 .modal-busca .card-header {
+  padding-right: 44px;
+}
+
+/* Datas especiais dentro do modal do topo (Regras de postagem): o card perde a moldura, o modal já
+   é a caixa; o cabeçalho abre espaço pro X de fechar. */
+.modal-datas {
+  padding: 20px 22px;
+  position: relative;
+  width: min(980px, 100%);
+}
+.modal-datas app-datas-especiais > .rg-card {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  box-shadow: none;
+}
+.modal-datas .rg-cabeca {
   padding-right: 44px;
 }
 

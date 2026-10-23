@@ -20,6 +20,7 @@ import { PainelRobo } from './features/acompanhar/painel-robo/painel-robo';
 import { ConsoleCard } from './features/acompanhar/console-card/console-card';
 import { ProdutosCard } from './features/divulgacao/produtos-card/produtos-card';
 import { BuscaCard } from './features/divulgacao/busca-card/busca-card';
+import { DatasEspeciais } from './features/divulgacao/datas-especiais/datas-especiais';
 import { OwnerCard } from './features/admin/owner-card/owner-card';
 import { Estatisticas } from './features/acompanhar/estatisticas/estatisticas';
 import { EstatisticasAbas, EstatisticasControles } from './features/acompanhar/estatisticas/estatisticas-abas';
@@ -132,6 +133,7 @@ const CHAVE_ABA = 'promobot:aba';
     ConsoleCard,
     ProdutosCard,
     BuscaCard,
+    DatasEspeciais,
     OwnerCard,
     Estatisticas,
     LojaDialog,
@@ -176,6 +178,8 @@ export class App implements OnInit, OnDestroy {
   protected readonly produtosModalAberto = signal(false);
   /** Oferta personalizada (buscar ofertas de um produto) — abre pelo botão do topo, no lugar de ser uma aba. */
   protected readonly buscaModalAberta = signal(false);
+  /** Datas especiais — abre pelo botão do topo em Regras de postagem, no lugar de ser um card da tela. */
+  protected readonly datasModalAberta = signal(false);
 
   protected readonly algumModalAberto = computed(() =>
     !!this.lojasUi.aberta() ||
@@ -187,7 +191,8 @@ export class App implements OnInit, OnDestroy {
     this.buscaService.postagemAberta() ||
     this.atividadeModalAberta() ||
     this.produtosModalAberto() ||
-    this.buscaModalAberta(),
+    this.buscaModalAberta() ||
+    this.datasModalAberta(),
   );
 
   protected badgeDe(id: AbaId): string | null {
