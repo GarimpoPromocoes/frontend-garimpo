@@ -52,9 +52,10 @@ export class Estatisticas implements OnInit, OnDestroy {
         this.ganhos.leituras().some((r) => r.pedidoEm && (!r.lidoEm || r.pedidoEm > r.lidoEm));
       // Membros só são lidos com o robô ligado (WhatsApp aberto): parado, não adianta perguntar.
       const membrosPendentes = this.est.aguardandoMembros() && this.runControl.rodandoContinuo();
-      if (ganhosPendentes || membrosPendentes) void this.tela.recarregarTudo();
-      // O robô já atendeu o pedido da fila: o aviso sai.
-      else if (this.tela.avisoAcao()) this.tela.avisoAcao.set(null);
+      const passouDoPrazo = this.tela.roboAtualizandoAte() > 0 && Date.now() > this.tela.roboAtualizandoAte();
+      if ((ganhosPendentes || membrosPendentes) && !passouDoPrazo) void this.tela.recarregarTudo();
+      // O robô já atendeu o pedido (ou demorou demais): para de girar e o aviso sai.
+      else if (this.tela.avisoAcao() || this.tela.roboAtualizandoAte()) this.tela.terminouNoRobo();
     }, VIGIA_MS);
   }
 

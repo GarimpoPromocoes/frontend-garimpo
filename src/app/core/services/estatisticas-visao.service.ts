@@ -16,6 +16,8 @@ export const VISOES_ESTATISTICAS: { id: VisaoEstatisticas; label: string; curto:
 export const PERIODOS_ESTATISTICAS = [7, 30, 90];
 
 const CHAVE_VISAO = 'promobot:estatisticas:visao';
+/** Quanto tempo, no máximo, o ícone gira esperando o robô ligado terminar de atualizar. */
+const PRAZO_ROBO_MS = 3 * 60 * 1000;
 
 function visaoSalva(): VisaoEstatisticas {
   try {
@@ -40,15 +42,23 @@ export class EstatisticasVisaoService {
   readonly dias = signal(30);
   readonly pedindo = signal(false);
   readonly erroAcao = signal<string | null>(null);
-  /** Robô ligado: o pedido ficou na fila e ele lê na próxima espera entre postagens. */
+  /** Robô ligado: diz o que ele está fazendo com o pedido (some quando ele termina). */
   readonly avisoAcao = signal<string | null>(null);
+  /** Robô ligado largou o que fazia para atualizar: o ícone gira até ele terminar (com prazo). */
+  readonly roboAtualizandoAte = signal(0);
 
   /** O robô de postagem está ligado (no painel ou fora dele): ele mesmo atende o "Atualizar agora". */
   readonly roboRodando = computed(
     () => this.runControl.rodandoContinuo() || this.runControl.postandoAgora() || this.runControl.processoExterno()
   );
 
-  readonly lendo = computed(() => this.pedindo() || this.ganhos.lendoAgora());
+  readonly lendo = computed(() => this.pedindo() || this.ganhos.lendoAgora() || this.roboAtualizandoAte() > 0);
+
+  /** O robô terminou (ou passou do prazo): para de girar e tira o aviso. */
+  terminouNoRobo(): void {
+    this.roboAtualizandoAte.set(0);
+    this.avisoAcao.set(null);
+  }
 
   escolher(v: VisaoEstatisticas): void {
     this.visao.set(v);
@@ -58,8 +68,8 @@ export class EstatisticasVisaoService {
   }
 
   /**
-   * Lê ganhos, vendas e membros de uma vez e recarrega tudo. Com o robô parado, na hora; ligado, o
-   * robô atende na próxima espera entre postagens, sem precisar parar.
+   * Lê ganhos, vendas e membros de uma vez e recarrega tudo. Com o robô parado, na hora; ligado
+   * pelo painel, ele larga o que estava fazendo (busca de produto, espera), atualiza e depois volta.
    */
   async atualizar(): Promise<void> {
     if (this.lendo()) return;
@@ -67,10 +77,15 @@ export class EstatisticasVisaoService {
     this.erroAcao.set(null);
     this.avisoAcao.set(null);
     const r = await this.est.atualizar();
+    // Antes de recarregar: os pedidos ainda abertos mantêm o ícone girando até o robô terminar.
+    if (r.ok && r.modo === 'robo-ligado') {
+      this.roboAtualizandoAte.set(Date.now() + PRAZO_ROBO_MS);
+      this.avisoAcao.set('O robô parou o que estava fazendo para atualizar — depois volta a postar.');
+    }
     await this.recarregarTudo();
     this.pedindo.set(false);
     // Robô parado: sem mensagem quando dá certo — o ícone girando e cada loja aparecendo já contam
-    // o que está acontecendo. Ligado, a leitura sai depois: avisa.
+    // o que está acontecendo. Ligado fora do painel (terminal), a leitura sai na próxima espera.
     if (!r.ok) this.erroAcao.set(r.erro ?? null);
     else if (r.modo === 'na-fila' && this.roboRodando()) {
       this.avisoAcao.set('Pedido enviado: o robô atualiza na próxima pausa entre uma postagem e outra.');

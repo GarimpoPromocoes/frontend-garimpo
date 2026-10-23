@@ -56,7 +56,7 @@ export class EstatisticasControles {
 
   protected dica(): string {
     if (this.tela.lendo()) return 'Lendo ganhos e vendas…';
-    if (this.tela.roboRodando()) return 'Atualizar agora: o robô lê ganhos, vendas e membros na próxima pausa entre postagens';
+    if (this.tela.roboRodando()) return 'Atualizar agora: o robô para o que está fazendo, lê ganhos, vendas e membros e depois volta a postar';
     return 'Atualizar agora: ler ganhos, vendas e membros';
   }
 }
