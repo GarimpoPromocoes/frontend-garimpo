@@ -128,6 +128,33 @@ export class ConfigService {
     }
   }
 
+  /** Marca d'água da conta (PNG), ou null sem nenhuma cadastrada. */
+  async marcaDagua(): Promise<Blob | null> {
+    try {
+      return await firstValueFrom(this.http.get('/api/config/marca-dagua', { responseType: 'blob' }));
+    } catch {
+      return null;
+    }
+  }
+
+  async salvarMarcaDagua(arquivo: File): Promise<{ ok: boolean; erro?: string }> {
+    try {
+      await firstValueFrom(this.http.put('/api/config/marca-dagua', arquivo, { headers: { 'Content-Type': arquivo.type } }));
+      return { ok: true };
+    } catch (e: any) {
+      return { ok: false, erro: e?.error?.erro || 'Não consegui salvar a marca d’água.' };
+    }
+  }
+
+  async removerMarcaDagua(): Promise<{ ok: boolean; erro?: string }> {
+    try {
+      await firstValueFrom(this.http.delete('/api/config/marca-dagua'));
+      return { ok: true };
+    } catch (e: any) {
+      return { ok: false, erro: e?.error?.erro || 'Não consegui remover a marca d’água.' };
+    }
+  }
+
   async salvar(partial: Record<string, unknown>): Promise<{ ok: boolean; erro?: string }> {
     try {
       const atualizado = await firstValueFrom(this.http.put<DashboardConfig>('/api/config', partial));

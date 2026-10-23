@@ -86,7 +86,7 @@
     </div>
   </div>
 
-  <div class="rg-itens rg-itens-3">
+  <div class="rg-itens rg-itens-4">
     <button type="button" class="rg-item" (click)="abrir('copy')">
       <span class="rg-item-rotulo">
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg>
@@ -140,6 +140,22 @@
       }
       <span class="rg-item-editar" aria-hidden="true"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16Z"/><path d="m13.5 6.5 4 4"/></svg>Editar</span>
     </button>
+
+    <button type="button" class="rg-item" [class.rg-item-off]="!marcaUrl()" (click)="abrir('marca')">
+      <span class="rg-item-rotulo">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><rect x="6" y="13" width="12" height="4" rx="2"/><circle cx="8" cy="15" r="0.6" fill="currentColor"/></svg>
+        Marca d’água
+      </span>
+      @if (marcaUrl(); as url) {
+        <span class="rg-item-valor">Ligada</span>
+        <img class="marca-mini" [src]="url" alt="Sua marca d’água" />
+        <span class="rg-item-sub">Entra no lugar da marca dos concorrentes</span>
+      } @else {
+        <span class="rg-item-valor">Sem marca</span>
+        <span class="rg-item-sub">A marca dos concorrentes é só apagada</span>
+      }
+      <span class="rg-item-editar" aria-hidden="true"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16Z"/><path d="m13.5 6.5 4 4"/></svg>Editar</span>
+    </button>
   </div>
 </section>
 
@@ -157,6 +173,7 @@
               @case ('divulgacao') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-6-6 18-3.5-7.5L3 11Z"/></svg> }
               @case ('alerta') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg> }
               @case ('copy') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9a1.5 1.5 0 0 1-1.5 1.5H9l-4 4v-4.5"/><path d="M8 8.5h8M8 12h5"/></svg> }
+              @case ('marca') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><rect x="6" y="13" width="12" height="4" rx="2"/><circle cx="8" cy="15" r="0.6" fill="currentColor"/></svg> }
               @case ('horario') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2M12 19v2M4.2 7l1.7 1M18.1 16l1.7 1M3 12h2M19 12h2M4.2 17l1.7-1M18.1 8l1.7-1"/><circle cx="12" cy="12" r="4"/></svg> }
             }
           </span>
@@ -170,6 +187,7 @@
                 @case ('alerta') { Aviso de queda }
                 @case ('horario') { Horário de funcionamento }
                 @case ('copy') { Texto da postagem }
+                @case ('marca') { Marca d’água }
               }
             </h2>
             <p class="card-subtitle">
@@ -180,6 +198,7 @@
                 @case ('divulgacao') { Um recado seu com o Linktree dos seus grupos, que sai esporadicamente — no máximo 1 ou 2 vezes por dia em cada grupo. }
                 @case ('alerta') { Se o Mercado Livre, a Amazon, a Shopee ou o Telegram cair enquanto o robô roda, ele avisa pelo WhatsApp para você reconectar. }
                 @case ('copy') { Monte a mensagem do produto do seu jeito. As partes entre chaves viram os dados de cada oferta. }
+                @case ('marca') { Quando a foto de uma oferta chega com a marca d’água de outro grupo, o robô apaga a marca dele e coloca a sua no mesmo lugar. }
                 @case ('horario') { Dentro do horário o robô posta normalmente. Fora dele não manda nada nos grupos, mas continua garimpando ofertas para o dia seguinte. }
               }
             </p>
@@ -580,6 +599,49 @@
           } @else {
             <div class="info-box">Com o horário desligado, o robô posta a qualquer hora do dia e da noite.</div>
           }
+        }
+
+        @case ('marca') {
+          <div class="marca-palco">
+            @if (rMarcaMostrar(); as url) {
+              <img [src]="url" alt="Prévia da marca d’água" />
+            } @else {
+              <span class="marca-vazia">Nenhuma marca d’água cadastrada</span>
+            }
+          </div>
+
+          <div class="marca-acoes">
+            <label class="btn btn-ghost" [class.marca-desligado]="salvando() || rMarcaConferindo()">
+              <input type="file" accept="image/png,image/jpeg,image/webp" hidden [disabled]="salvando() || rMarcaConferindo()" (change)="escolherMarca(campoMarca)" #campoMarca />
+              {{ rMarcaConferindo() ? 'Conferindo…' : rMarcaMostrar() ? 'Trocar imagem' : 'Escolher imagem' }}
+            </label>
+            @if (rMarcaMostrar()) {
+              <button type="button" class="btn btn-danger-soft" [disabled]="salvando()" (click)="removerMarca()">Remover</button>
+            }
+          </div>
+          @if (rMarcaRemover()) {
+            <div class="info-box">Ao salvar, a marca é removida: a dos concorrentes continua sendo apagada, mas nada entra no lugar.</div>
+          }
+
+          <div class="regra-como">
+            <strong>Regras da imagem</strong>
+            <ul>
+              <li><strong>PNG com fundo transparente</strong> (recomendado). JPG e WebP também servem, mas saem com fundo.</li>
+              <li><strong>Deitada</strong>, no formato de faixa: de {{ regrasMarca.minProporcao }} a {{ regrasMarca.maxProporcao }} vezes mais larga que alta (ex.: 660×128 px).</li>
+              <li>Pelo menos <strong>{{ regrasMarca.minLargura }}×{{ regrasMarca.minAltura }} px</strong> e no máximo <strong>2 MB</strong>.</li>
+              <li>Foto do perfil à esquerda e o seu <strong>&#64;</strong> em letra grande e clara — ela é reduzida ao tamanho da marca do concorrente.</li>
+            </ul>
+          </div>
+
+          <div class="regra-como">
+            <strong>Como fica, na prática</strong>
+            <ol>
+              <li>A foto da oferta chega com o card de outro grupo (foto do perfil + &#64;).</li>
+              <li>A IA apaga o card e redesenha o fundo atrás dele.</li>
+              <li>A sua marca entra no mesmo lugar, cobrindo onde ele estava.</li>
+            </ol>
+            <p class="hint-text">Foto que chega sem marca de concorrente vai para o grupo como está.</p>
+          </div>
         }
 
         @case ('alerta') {

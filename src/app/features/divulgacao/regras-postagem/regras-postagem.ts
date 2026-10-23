@@ -1,14 +1,15 @@
-import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, WritableSignal, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ConfigService } from '../../../core/services/config.service';
 import { StatusService } from '../../../core/services/status.service';
 import { HORARIO_PADRAO, dentroDoHorario, duracaoJanela, horaValida, passaDaMeiaNoite } from './horario';
+import { REGRAS_MARCA, conferirMarca } from './marca-dagua';
 import { COPY_MAX, COPY_PADRAO, EXEMPLO_COM_CUPOM, EXEMPLO_SEM_CUPOM, VARIAVEIS_COPY, aplicarModelo, formatarWhatsApp } from './copy';
 
 /** Quantas mensagens de divulgação diferentes dá pra cadastrar (o robô alterna entre elas). */
 const MAX_DIVULGACOES = 3;
 
-type Janela = 'frequencia' | 'repeticao' | 'cupons' | 'divulgacao' | 'alerta' | 'horario' | 'copy';
+type Janela = 'frequencia' | 'repeticao' | 'cupons' | 'divulgacao' | 'alerta' | 'horario' | 'copy' | 'marca';
 
 interface Ritmo {
   id: string;
@@ -173,7 +174,60 @@ export class RegrasPostagem {
 
   constructor() {
     const t = setInterval(() => this.agora.set(new Date()), 30000);
-    inject(DestroyRef).onDestroy(() => clearInterval(t));
+    inject(DestroyRef).onDestroy(() => {
+      clearInterval(t);
+      this.trocarUrl(this.marcaUrl, null);
+      this.trocarUrl(this.rMarcaPrevia, null);
+    });
+    void this.carregarMarca();
+  }
+
+  // ---- marca d'água ---------------------------------------------------------
+
+  protected readonly regrasMarca = REGRAS_MARCA;
+  /** A marca salva (endereço local da imagem), ou null sem nenhuma. */
+  protected readonly marcaUrl = signal<string | null>(null);
+  /** Imagem escolhida na janela, ainda não salva. */
+  protected readonly rMarcaArquivo = signal<File | null>(null);
+  protected readonly rMarcaPrevia = signal<string | null>(null);
+  protected readonly rMarcaRemover = signal(false);
+  protected readonly rMarcaConferindo = signal(false);
+  /** O que a janela mostra: a escolhida agora, a salva, ou nada (remover marcado). */
+  protected readonly rMarcaMostrar = computed(() => this.rMarcaPrevia() ?? (this.rMarcaRemover() ? null : this.marcaUrl()));
+
+  private trocarUrl(alvo: WritableSignal<string | null>, url: string | null): void {
+    const antiga = alvo();
+    if (antiga) URL.revokeObjectURL(antiga);
+    alvo.set(url);
+  }
+
+  private async carregarMarca(): Promise<void> {
+    const blob = await this.configService.marcaDagua();
+    this.trocarUrl(this.marcaUrl, blob ? URL.createObjectURL(blob) : null);
+  }
+
+  async escolherMarca(campo: HTMLInputElement): Promise<void> {
+    const arquivo = campo.files?.[0];
+    campo.value = '';
+    if (!arquivo) return;
+    this.erro.set(null);
+    this.rMarcaConferindo.set(true);
+    const r = await conferirMarca(arquivo);
+    this.rMarcaConferindo.set(false);
+    if (r.erro) {
+      this.erro.set(r.erro);
+      return;
+    }
+    this.rMarcaArquivo.set(arquivo);
+    this.rMarcaRemover.set(false);
+    this.trocarUrl(this.rMarcaPrevia, URL.createObjectURL(arquivo));
+  }
+
+  removerMarca(): void {
+    this.erro.set(null);
+    this.rMarcaArquivo.set(null);
+    this.trocarUrl(this.rMarcaPrevia, null);
+    this.rMarcaRemover.set(true);
   }
 
   protected readonly horario = computed(() => {
@@ -311,6 +365,9 @@ export class RegrasPostagem {
     const modelo = this.cfg()?.copy?.modelo ?? '';
     this.rCopy.set(modelo.trim() ? modelo : COPY_PADRAO);
     this.rCopyComCupom.set(true);
+    this.rMarcaArquivo.set(null);
+    this.trocarUrl(this.rMarcaPrevia, null);
+    this.rMarcaRemover.set(false);
     this.janela.set(j);
   }
 
@@ -370,6 +427,11 @@ export class RegrasPostagem {
     const j = this.janela();
     if (!j) return;
     this.erro.set(null);
+
+    if (j === 'marca') {
+      await this.salvarMarca();
+      return;
+    }
 
     let partial: Record<string, unknown>;
     if (j === 'frequencia') {
@@ -450,6 +512,23 @@ export class RegrasPostagem {
 
     this.salvando.set(true);
     const r = await this.configService.salvar(partial);
+    this.salvando.set(false);
+    if (!r.ok) {
+      this.erro.set(r.erro ?? 'Erro ao salvar.');
+      return;
+    }
+    this.janela.set(null);
+  }
+
+  private async salvarMarca(): Promise<void> {
+    const arquivo = this.rMarcaArquivo();
+    if (!arquivo && !this.rMarcaRemover()) {
+      this.janela.set(null);
+      return;
+    }
+    this.salvando.set(true);
+    const r = arquivo ? await this.configService.salvarMarcaDagua(arquivo) : await this.configService.removerMarcaDagua();
+    if (r.ok) await this.carregarMarca();
     this.salvando.set(false);
     if (!r.ok) {
       this.erro.set(r.erro ?? 'Erro ao salvar.');
