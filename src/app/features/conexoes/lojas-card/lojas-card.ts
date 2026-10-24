@@ -114,30 +114,23 @@ export class LojasCard implements OnInit {
     ];
   });
 
-  /** O aviso do topo, só quando tem algo a resolver. Tudo certo: nada (os cartões já mostram). */
+  /**
+   * O aviso do topo, só quando falta um canal ou uma loja inteira. Conexão que caiu não ganha
+   * aviso aqui: o cartão dela já mostra o estado e o botão de entrar de novo.
+   */
   protected readonly resumo = computed(() => {
     const canais = this.canais();
     const lojas = this.lojas();
-    const caida = [...canais, ...lojas].find((c) => c.estado === 'atencao') ?? null;
-    if (caida) {
-      return {
-        titulo: `${caida.nome} desconectou`,
-        texto: `${caida.nome} precisa que você entre de novo. As outras conexões seguem normalmente.`,
-        resolver: caida,
-      };
-    }
     if (!canais.some((c) => c.estado === 'ok')) {
       return {
         titulo: 'Nenhum canal de envio conectado',
         texto: 'Conecte o WhatsApp ou o Telegram para o robô enviar as promoções.',
-        resolver: null,
       };
     }
     if (!lojas.some((l) => l.estado === 'ok')) {
       return {
         titulo: 'Nenhuma loja conectada',
         texto: 'Conecte pelo menos uma loja para o robô gerar os seus links de afiliado.',
-        resolver: null,
       };
     }
     return null;
