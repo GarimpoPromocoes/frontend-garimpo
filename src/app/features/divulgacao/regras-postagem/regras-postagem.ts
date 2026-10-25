@@ -159,6 +159,7 @@ export class RegrasPostagem {
       ativo: d?.ativo ?? false,
       texto: d?.texto ?? '',
       textos: d?.textos?.length ? d.textos : d?.texto ? [d.texto] : [],
+      imagens: d?.imagens ?? [],
       link: d?.link ?? '',
       maxPorDia: d?.maxPorDia ?? 1,
     };
@@ -178,6 +179,7 @@ export class RegrasPostagem {
       clearInterval(t);
       this.trocarUrl(this.marcaUrl, null);
       this.trocarUrl(this.rMarcaPrevia, null);
+      for (const url of Object.values(this.divImagemUrls())) URL.revokeObjectURL(url);
     });
     void this.carregarMarca();
   }
@@ -271,6 +273,12 @@ export class RegrasPostagem {
   protected readonly rDivAtivo = signal(false);
   /** Até MAX_DIVULGACOES mensagens; o robô alterna entre elas. */
   protected readonly rDivTextos = signal<string[]>(['']);
+  /** Imagem de cada mensagem (id do upload), na mesma posição do texto. '' = sem imagem. */
+  protected readonly rDivImagens = signal<string[]>(['']);
+  /** Qual mensagem está com a imagem subindo agora (-1 = nenhuma). */
+  protected readonly rDivSubindo = signal(-1);
+  /** Endereço local de cada imagem já vista (por id), pra mostrar na janela. */
+  protected readonly divImagemUrls = signal<Record<string, string>>({});
   protected readonly maxDivulgacoes = MAX_DIVULGACOES;
   protected readonly rDivLink = signal('');
   protected readonly rDivMax = signal(1);
@@ -292,20 +300,31 @@ export class RegrasPostagem {
     formatarWhatsApp(aplicarModelo(this.rCopy().trim() ? this.rCopy() : COPY_PADRAO, this.rCopyComCupom() ? EXEMPLO_COM_CUPOM : EXEMPLO_SEM_CUPOM)),
   );
 
-  /** Previa de como cada mensagem sai no grupo (mesma regra do backend). */
+  /** As mensagens que valem: com texto ou só com imagem (em branco não é salva). */
+  private divMensagens(): { texto: string; imagem: string }[] {
+    const imagens = this.rDivImagens();
+    return this.rDivTextos()
+      .map((t, i) => ({ texto: (t || '').trim(), imagem: imagens[i] || '' }))
+      .filter((m) => m.texto || m.imagem);
+  }
+
+  /** Previa de como cada mensagem sai no grupo (mesma regra do backend), com a imagem em cima. */
   protected readonly rDivPreviews = computed(() => {
     const l = (this.rDivLink() || '').trim();
-    // Mensagem em branco não é salva; só o link sozinho quando nenhuma foi escrita.
-    const escritos = this.rDivTextos().map((t) => (t || '').trim()).filter(Boolean);
-    return (escritos.length ? escritos : [''])
-      .map((t) => {
-        if (!t && !l) return '';
-        if (!l) return t;
-        if (t.includes('{link}')) return t.split('{link}').join(l);
-        if (t.includes('[LINK DOS GRUPOS]')) return t.split('[LINK DOS GRUPOS]').join(l);
-        return t ? `${t}\n\n🔗 ${l}` : l;
+    const urls = this.divImagemUrls();
+    // Só o link sozinho quando nenhuma mensagem foi escrita.
+    const mensagens = this.divMensagens();
+    return (mensagens.length ? mensagens : [{ texto: '', imagem: '' }])
+      .map(({ texto: t, imagem }) => {
+        let texto = t;
+        if (l) {
+          if (t.includes('{link}')) texto = t.split('{link}').join(l);
+          else if (t.includes('[LINK DOS GRUPOS]')) texto = t.split('[LINK DOS GRUPOS]').join(l);
+          else texto = t ? `${t}\n\n🔗 ${l}` : l;
+        }
+        return { texto, imagem: imagem ? (urls[imagem] ?? null) : null };
       })
-      .filter(Boolean);
+      .filter((p) => p.texto || p.imagem);
   });
 
   protected mudarDivTexto(i: number, texto: string): void {
@@ -313,11 +332,54 @@ export class RegrasPostagem {
   }
 
   protected adicionarDivTexto(): void {
-    this.rDivTextos.update((lista) => (lista.length < MAX_DIVULGACOES ? [...lista, ''] : lista));
+    if (this.rDivTextos().length >= MAX_DIVULGACOES) return;
+    this.rDivTextos.update((lista) => [...lista, '']);
+    this.rDivImagens.update((lista) => [...lista, '']);
   }
 
   protected removerDivTexto(i: number): void {
-    this.rDivTextos.update((lista) => (lista.length > 1 ? lista.filter((_, k) => k !== i) : lista));
+    if (this.rDivTextos().length <= 1) return;
+    this.rDivTextos.update((lista) => lista.filter((_, k) => k !== i));
+    this.rDivImagens.update((lista) => lista.filter((_, k) => k !== i));
+  }
+
+  /** Imagem escolhida pra mensagem i: sobe na hora e guarda o id (vale ao salvar a janela). */
+  async escolherDivImagem(i: number, campo: HTMLInputElement): Promise<void> {
+    const arquivo = campo.files?.[0];
+    campo.value = '';
+    if (!arquivo) return;
+    this.erro.set(null);
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(arquivo.type)) {
+      this.erro.set('A imagem precisa ser PNG, JPG ou WebP.');
+      return;
+    }
+    if (arquivo.size > 5 * 1024 * 1024) {
+      this.erro.set('A imagem pode ter no máximo 5 MB.');
+      return;
+    }
+    this.rDivSubindo.set(i);
+    const r = await this.configService.subirDivulgacaoImagem(arquivo);
+    this.rDivSubindo.set(-1);
+    if (!r.id) {
+      this.erro.set(r.erro ?? 'Não consegui enviar a imagem.');
+      return;
+    }
+    const id = r.id;
+    if (!this.divImagemUrls()[id]) this.divImagemUrls.update((m) => ({ ...m, [id]: URL.createObjectURL(arquivo) }));
+    this.rDivImagens.update((lista) => lista.map((v, k) => (k === i ? id : v)));
+  }
+
+  removerDivImagem(i: number): void {
+    this.rDivImagens.update((lista) => lista.map((v, k) => (k === i ? '' : v)));
+  }
+
+  /** Busca as imagens salvas que a janela ainda não mostrou. */
+  private async carregarDivImagens(ids: string[]): Promise<void> {
+    for (const id of ids) {
+      if (!id || this.divImagemUrls()[id]) continue;
+      const blob = await this.configService.divulgacaoImagem(id);
+      if (blob) this.divImagemUrls.update((m) => ({ ...m, [id]: URL.createObjectURL(blob) }));
+    }
   }
 
   protected readonly rPorDia = computed(() => postsPorDia(Number(this.rMin()), Number(this.rMax())));
@@ -353,6 +415,8 @@ export class RegrasPostagem {
     const d = this.divulgacao();
     this.rDivAtivo.set(d.ativo);
     this.rDivTextos.set(d.textos.length ? [...d.textos] : ['']);
+    this.rDivImagens.set(this.rDivTextos().map((_, i) => d.imagens[i] || ''));
+    void this.carregarDivImagens(this.rDivImagens());
     this.rDivLink.set(d.link);
     this.rDivMax.set(d.maxPorDia === 2 ? 2 : 1);
     const al = this.alerta();
@@ -459,15 +523,23 @@ export class RegrasPostagem {
       }
       partial = { postagem: { cooldownHoras: cooldown, repostarAposDias: repostar } };
     } else if (j === 'divulgacao') {
-      // Mensagem em branco não conta: some da lista ao salvar.
-      const textos = this.rDivTextos().map((t) => (t || '').trim()).filter(Boolean).slice(0, MAX_DIVULGACOES);
+      if (this.rDivSubindo() >= 0) {
+        this.erro.set('Espere a imagem terminar de subir.');
+        return;
+      }
+      // Mensagem sem texto e sem imagem não conta: some da lista ao salvar.
+      const mensagens = this.divMensagens().slice(0, MAX_DIVULGACOES);
+      const textos = mensagens.map((m) => m.texto);
+      const imagens = mensagens.map((m) => m.imagem);
       const link = (this.rDivLink() || '').trim();
       const max = Number(this.rDivMax()) === 2 ? 2 : 1;
-      if (this.rDivAtivo() && !textos.length && !link) {
+      if (this.rDivAtivo() && !mensagens.length && !link) {
         this.erro.set('Escreva a mensagem ou informe o link antes de ativar a divulgação.');
         return;
       }
-      partial = { divulgacao: { ativo: this.rDivAtivo(), texto: textos[0] ?? '', textos, link, maxPorDia: max } };
+      partial = {
+        divulgacao: { ativo: this.rDivAtivo(), texto: textos.find(Boolean) ?? '', textos, imagens, link, maxPorDia: max },
+      };
     } else if (j === 'horario') {
       const inicio = (this.rHorInicio() || '').trim();
       const fim = (this.rHorFim() || '').trim();

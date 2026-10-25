@@ -54,6 +54,8 @@ export interface Divulgacao {
   texto: string;
   /** De 1 a 3 mensagens (chamada + "copyright"), aceitam {link}. O robô alterna entre elas. */
   textos?: string[];
+  /** Imagem de cada mensagem (id do upload), na mesma posição do texto. '' = sem imagem. */
+  imagens?: string[];
   /** Linktree (ou outro link) com os outros grupos do cliente. */
   link: string;
   /** Teto por dia por grupo: 1 ou 2. */
@@ -143,6 +145,27 @@ export class ConfigService {
       return { ok: true };
     } catch (e: any) {
       return { ok: false, erro: e?.error?.erro || 'Não consegui salvar a marca d’água.' };
+    }
+  }
+
+  /** Imagem de uma mensagem de divulgação (pelo id do upload). */
+  async divulgacaoImagem(id: string): Promise<Blob | null> {
+    try {
+      return await firstValueFrom(this.http.get(`/api/config/divulgacao-imagem/${encodeURIComponent(id)}`, { responseType: 'blob' }));
+    } catch {
+      return null;
+    }
+  }
+
+  /** Sobe a imagem de uma mensagem de divulgação e devolve o id dela (vai junto com a mensagem ao salvar). */
+  async subirDivulgacaoImagem(arquivo: File): Promise<{ id?: string; erro?: string }> {
+    try {
+      const r = await firstValueFrom(
+        this.http.put<{ id: string }>('/api/config/divulgacao-imagem', arquivo, { headers: { 'Content-Type': arquivo.type } }),
+      );
+      return { id: r.id };
+    } catch (e: any) {
+      return { erro: e?.error?.erro || 'Não consegui enviar a imagem.' };
     }
   }
 

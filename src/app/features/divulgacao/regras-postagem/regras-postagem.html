@@ -433,8 +433,8 @@
               <span class="field-rotulo">Mensagens</span>
               <span class="hint">
                 Sua chamada e assinatura. Escreva <strong>&#123;link&#125;</strong> onde o link deve aparecer — se não escrever,
-                o link entra automaticamente no fim. Com mais de uma mensagem, o robô alterna entre elas
-                (até {{ maxDivulgacoes }}).
+                o link entra automaticamente no fim. Cada mensagem pode ter uma imagem, que sai junto como
+                nas ofertas. Com mais de uma mensagem, o robô alterna entre elas (até {{ maxDivulgacoes }}).
               </span>
               @for (t of rDivTextos(); track $index; let i = $index) {
                 <div class="div-mensagem">
@@ -451,6 +451,25 @@
                     (ngModelChange)="mudarDivTexto(i, $event)"
                     placeholder="🚨 NÃO PERCA NENHUMA PROMOÇÃO!&#10;Confira nossos outros grupos de ofertas 👇&#10;&#123;link&#125;"
                   ></textarea>
+                  <div class="div-imagem">
+                    @if (rDivImagens()[i]; as id) {
+                      @if (divImagemUrls()[id]; as url) {
+                        <img class="div-imagem-mini" [src]="url" [alt]="'Imagem da mensagem ' + (i + 1)" />
+                      } @else {
+                        <span class="div-imagem-mini div-imagem-carregando" aria-hidden="true"></span>
+                      }
+                    }
+                    <label class="btn btn-ghost btn-sm" [class.marca-desligado]="salvando() || rDivSubindo() >= 0">
+                      <input type="file" accept="image/png,image/jpeg,image/webp" hidden
+                        [disabled]="salvando() || rDivSubindo() >= 0"
+                        (change)="escolherDivImagem(i, campoDivImagem)" #campoDivImagem />
+                      {{ rDivSubindo() === i ? 'Enviando…' : rDivImagens()[i] ? 'Trocar imagem' : '+ Imagem' }}
+                    </label>
+                    @if (rDivImagens()[i]) {
+                      <button type="button" class="btn btn-ghost btn-sm" [disabled]="salvando()" (click)="removerDivImagem(i)"
+                        [attr.aria-label]="'Tirar a imagem da mensagem ' + (i + 1)">Tirar imagem</button>
+                    }
+                  </div>
                 </div>
               }
               @if (rDivTextos().length < maxDivulgacoes) {
@@ -488,7 +507,14 @@
                 <span class="field-rotulo" id="regras-postagem-9">{{ rDivPreviews().length > 1 ? 'Prévias' : 'Prévia' }}</span>
                 <div role="group" aria-labelledby="regras-postagem-9" class="div-previas">
                   @for (p of rDivPreviews(); track $index) {
-                    <div class="info-box" style="white-space: pre-wrap">{{ p }}</div>
+                    <div class="info-box div-previa">
+                      @if (p.imagem) {
+                        <img class="div-previa-imagem" [src]="p.imagem" alt="" />
+                      }
+                      @if (p.texto) {
+                        <span style="white-space: pre-wrap">{{ p.texto }}</span>
+                      }
+                    </div>
                   }
                 </div>
               </div>
