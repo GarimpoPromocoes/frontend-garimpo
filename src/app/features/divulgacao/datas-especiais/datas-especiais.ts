@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { ConfigService, TemaEvento } from '../../../core/services/config.service';
 import { ConfirmacaoService } from '../../../core/services/confirmacao.service';
+import { GruposOrigemService } from '../../../core/services/grupos-origem.service';
 import { ChipInput } from '../../../shared/chip-input/chip-input';
 
 /** Data que já vem pronta no robô (bot-ml/src/curadoria/sazonalidade.js). */
@@ -98,6 +99,12 @@ export class DatasEspeciais implements OnInit {
   private http = inject(HttpClient);
   protected configService = inject(ConfigService);
   private confirmacao = inject(ConfirmacaoService);
+  private origem = inject(GruposOrigemService);
+
+  /** Grupos de clonagem não garimpam: a data só adianta o que os concorrentes postarem. */
+  protected readonly gruposClonagem = computed(() => this.origem.contagem().clonagem);
+  /** Grupos de garimpo: durante a data, parte das buscas usa as palavras dela. */
+  protected readonly gruposGarimpo = computed(() => this.origem.contagem().garimpo);
 
   protected readonly meses = MESES_LONGOS;
   protected readonly nivel = nivel;

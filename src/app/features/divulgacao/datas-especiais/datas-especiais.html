@@ -43,6 +43,13 @@
       O robô ignora as datas comemorativas e segue só pelo desconto e pelas vendas de cada produto.
     </p>
   } @else {
+    @if (gruposClonagem()) {
+      <p class="rg-vazio">
+        Nos grupos de clonagem ({{ gruposClonagem() }}), a data não busca produtos: ela adianta na fila
+        os produtos da ocasião que os concorrentes postarem.
+      </p>
+    }
+
     @if (ativasHoje().length) {
       <p class="rg-hoje">
         <strong>Valendo hoje:</strong>
@@ -201,6 +208,12 @@
         </div>
         <input type="range" min="1" max="30" step="1" aria-label="Prioridade" [attr.aria-valuetext]="nivel(r.peso)" [ngModel]="r.peso" (ngModelChange)="atualizar('peso', $event)" />
         <small>Quanto mais forte, mais o robô insiste nesses produtos. As datas prontas ficam entre média e forte.</small>
+        @if (gruposGarimpo()) {
+          <small>Nos grupos de garimpo, o robô também busca esses produtos durante a data (quanto mais forte, mais buscas).</small>
+        }
+        @if (gruposClonagem()) {
+          <small>Nos grupos de clonagem, os produtos da data que os concorrentes postarem passam na frente da fila.</small>
+        }
       </div>
 
       <div class="field">
