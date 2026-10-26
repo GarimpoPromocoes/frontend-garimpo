@@ -1,0 +1,92 @@
+<div class="modal-fundo" (click)="cancelar.emit()">
+  <div class="modal-caixa cl-janela" role="dialog" aria-modal="true" aria-labelledby="cl-janela-titulo" (click)="$event.stopPropagation()">
+    <div class="cl-janela-cabeca">
+      <span class="cl-numero-icone" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
+      </span>
+      <div>
+        <h2 id="cl-janela-titulo">De quais grupos o “{{ nome() }}” clona?</h2>
+        <p class="card-subtitle">Os produtos deles saem no seu grupo com o seu link de afiliado.</p>
+      </div>
+      <button type="button" class="btn-fechar" (click)="cancelar.emit()" aria-label="Fechar" title="Fechar">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6 18 18M18 6 6 18" /></svg>
+      </button>
+    </div>
+
+    <div class="cl-modos" role="radiogroup" aria-label="De onde clonar">
+      <button type="button" role="radio" class="cl-modo" [class.cl-modo-ativo]="modoTodos()" [attr.aria-checked]="modoTodos()" (click)="escolherTodos()">
+        <strong>Todos os grupos</strong>
+        <span>Clona de todo grupo em que este WhatsApp está</span>
+      </button>
+      <button type="button" role="radio" class="cl-modo" [class.cl-modo-ativo]="!modoTodos()" [attr.aria-checked]="!modoTodos()" (click)="modoTodos.set(false)">
+        <strong>Só os que eu escolher</strong>
+        <span>{{ lista().length }} de até {{ maxGrupos }} marcados</span>
+      </button>
+    </div>
+
+    @if (!modoTodos()) {
+      <div class="cl-janela-busca">
+        <label class="cl-busca">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input type="search" placeholder="Buscar ou digitar o nome do grupo" aria-label="Buscar ou digitar o nome do grupo"
+            [value]="busca()" (input)="busca.set($any($event.target).value)" (keydown.enter)="adicionarDigitado()" />
+        </label>
+        <button type="button" class="btn btn-ghost cl-atualizar" [disabled]="zap.atualizando()" (click)="zap.atualizar()"
+          [attr.aria-label]="zap.atualizando() ? 'Atualizando a lista' : 'Atualizar a lista de grupos do WhatsApp'"
+          [title]="zap.atualizando() ? 'Atualizando a lista…' : 'Atualizar a lista de grupos do WhatsApp'">
+          <svg [class.cl-girando]="zap.atualizando()" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 3.5V8h4.5"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 20.5V16h-4.5"/></svg>
+        </button>
+      </div>
+      @if (zap.erro(); as e) {
+        <span class="hint error-text" role="alert">{{ e }}</span>
+      }
+
+      <div class="cl-janela-legenda">
+        <span>
+          Grupos em que este WhatsApp está
+          @if (zap.lista().em) { · lista de {{ zap.horaDaLista() }} }
+        </span>
+        <span>Marcados primeiro</span>
+      </div>
+
+      <ul class="cl-opcoes">
+        @if (podeAdicionarDigitado()) {
+          <li>
+            <button type="button" class="cl-opcao-nova" (click)="adicionarDigitado()">
+              + Adicionar “{{ busca().trim() }}” pelo nome
+            </button>
+          </li>
+        }
+        @for (o of opcoes(); track o.nome) {
+          <li>
+            <label class="cl-opcao" [class.cl-opcao-marcada]="o.marcado">
+              <input type="checkbox" [checked]="o.marcado" (change)="alternar(o.nome)" />
+              <span class="cl-opcao-texto">
+                <strong>{{ o.nome }}</strong>
+                <small>{{ o.detalhe }}</small>
+              </span>
+              @if (o.lendo) { <span class="cl-selo">Lendo</span> }
+              @if (o.faltando) { <span class="cl-selo cl-selo-erro">Não encontrado</span> }
+            </label>
+          </li>
+        } @empty {
+          <li class="cl-opcoes-vazio">
+            @if (busca().trim()) {
+              Nenhum grupo com esse nome na lista.
+            } @else {
+              Clique em atualizar para ler os grupos do seu WhatsApp — ou digite o nome do grupo acima.
+            }
+          </li>
+        }
+      </ul>
+    }
+
+    <div class="modal-rodape cl-janela-rodape">
+      <span class="cl-janela-conta">
+        @if (modoTodos()) { Clona de todos os grupos } @else { <b>{{ lista().length }}</b> {{ lista().length === 1 ? 'grupo marcado' : 'grupos marcados' }} }
+      </span>
+      <button type="button" class="btn btn-ghost" (click)="cancelar.emit()">Cancelar</button>
+      <button type="button" class="btn btn-primary" (click)="usar()">Usar {{ modoTodos() ? 'todos' : 'estes grupos' }}</button>
+    </div>
+  </div>
+</div>

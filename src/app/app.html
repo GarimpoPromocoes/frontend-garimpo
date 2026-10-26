@@ -38,7 +38,6 @@
             @case ('atividade') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l2.5-7 5 14 2.5-7h6"/></svg> }
             @case ('dono') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 20 6v5.4c0 4.4-3.1 8.2-8 9.8-4.9-1.6-8-5.4-8-9.8V6Z"/><path d="m9.2 12.2 2 2 3.6-3.8"/></svg> }
             @case ('grupos') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 19v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V19"/><circle cx="9" cy="7" r="3.4"/><path d="M22 19v-1.5a4 4 0 0 0-3-3.87"/><path d="M16.5 4.2a3.4 3.4 0 0 1 0 6.6"/></svg> }
-            @case ('garimpo') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20.5 20.5-5.2-5.2"/><path d="M8 10.5h5M10.5 8v5"/></svg> }
             @case ('regras') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h7M14 7h7M3 17h4M11 17h10"/><circle cx="12" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg> }
             @case ('lojas') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v5M15 3v5"/><path d="M6.5 8h11v3a5.5 5.5 0 0 1-11 0Z"/><path d="M12 16.5V21"/></svg> }
             }
@@ -67,7 +66,7 @@
   }
 
   <div class="main-area">
-    <header class="topbar" [class.topbar-estatisticas]="aba() === 'estatisticas'" [class.topbar-clonagem]="aba() === 'garimpo'">
+    <header class="topbar" [class.topbar-estatisticas]="aba() === 'estatisticas'" [class.topbar-grupos]="aba() === 'grupos'">
       <button
         type="button"
         class="menu-toggle"
@@ -83,7 +82,7 @@
 
       <div class="topbar-title">
         <h1>{{ abaAtual().titulo }}</h1>
-        @if (aba() !== 'estatisticas' && aba() !== 'garimpo') {
+        @if (aba() !== 'estatisticas' && aba() !== 'grupos') {
           <p>{{ abaAtual().descricao }}</p>
         }
       </div>
@@ -94,15 +93,19 @@
       @if (aba() === 'estatisticas') {
         <app-estatisticas-abas class="topbar-abas" />
       }
+      <!-- Em Grupos o filtro por origem fica ao lado do título e, na direita, os números da origem
+           no lugar do tempo ativo, da oferta personalizada e dos logs. -->
+      @if (aba() === 'grupos') {
+        <app-grupos-filtro class="topbar-abas" />
+      }
 
       <div class="topbar-actions">
         <!-- Os números do momento (tempo ativo e próxima postagem), a oferta
              personalizada e os logs (janelas abertas daqui, de qualquer página) e o sino. -->
         @if (aba() === 'estatisticas') {
           <app-estatisticas-controles class="topbar-controles" />
-        } @else if (aba() === 'garimpo') {
-          <!-- Clonagem: os números da tela no lugar do tempo ativo, da oferta e dos logs. -->
-          <app-clonagem-numeros />
+        } @else if (aba() === 'grupos') {
+          <app-grupos-numeros />
         } @else if (aba() === 'regras') {
           <!-- Regras de postagem: só o botão das datas especiais, no lugar do tempo ativo, da oferta e dos logs. -->
           <button type="button" class="topbar-botao topbar-botao-com-texto" [class.topbar-botao-aberto]="datasModalAberta()"
@@ -215,14 +218,6 @@
         @case ('grupos') {
           @defer (on immediate) {
             <app-groups-card />
-          } @placeholder {
-            <div class="card card-carregando">Carregando…</div>
-          }
-        }
-
-        @case ('garimpo') {
-          @defer (on immediate) {
-            <app-garimpo-card />
           } @placeholder {
             <div class="card card-carregando">Carregando…</div>
           }

@@ -1,12 +1,18 @@
+@if (erroCard(); as e) {
+  <div class="info-box info-box-erro" role="alert">{{ e }}</div>
+}
+
 <div class="grupos-grade">
-  @for (g of grupos(); track g.id) {
-    <button type="button" class="grupo-card" (click)="abrir(g)">
+  @for (g of visiveis(); track g.id) {
+    <article class="grupo-card">
       <div class="grupo-card-topo">
-        <span class="grupo-avatar" [class.grupo-avatar-tudo]="g.geral" [class.grupo-avatar-sobras]="g.coringa">
+        <span class="grupo-avatar" [class.grupo-avatar-tudo]="g.geral" [class.grupo-avatar-sobras]="g.coringa"
+          [class.grupo-avatar-clonagem]="fonteDe(g) === 'clonagem' && !g.geral && !g.coringa">
           {{ inicial(g) }}
         </span>
         <div class="grupo-card-nomes">
-          <span class="grupo-card-nome">{{ g.nome }}</span>
+          <!-- O botão do nome cobre o card todo: o clique em qualquer canto abre a janela do grupo. -->
+          <button type="button" class="grupo-card-nome grupo-card-abrir" (click)="abrir(g)">{{ g.nome }}</button>
           <span class="grupo-card-zap" [title]="g.groupName">
             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 11.6a8.4 8.4 0 0 1-12.3 7.4L3.5 20.5l1.6-4.6A8.4 8.4 0 1 1 20.5 11.6Z"/></svg>
             <span>{{ g.groupName }}</span>
@@ -20,6 +26,40 @@
         </div>
       </div>
 
+      <div class="grupo-origem" role="radiogroup" [attr.aria-label]="'Origem dos produtos de ' + g.nome">
+        <button type="button" role="radio" class="grupo-origem-opcao" data-fonte="garimpo"
+          [class.grupo-origem-ativa]="fonteDe(g) === 'garimpo'" [attr.aria-checked]="fonteDe(g) === 'garimpo'"
+          [disabled]="trocando() === g.id"
+          title="Ofertas e buscas no Mercado Livre, Amazon e Shopee pelas palavras do grupo"
+          (click)="definirFonte(g, 'garimpo')">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9 5 4.5h14L20.5 9"/><path d="M3.5 9h17v9.5a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5Z"/></svg>
+          Garimpar
+        </button>
+        <button type="button" role="radio" class="grupo-origem-opcao" data-fonte="clonagem"
+          [class.grupo-origem-ativa]="fonteDe(g) === 'clonagem'" [attr.aria-checked]="fonteDe(g) === 'clonagem'"
+          [disabled]="trocando() === g.id"
+          title="Produtos dos grupos dos concorrentes, com o seu link de afiliado"
+          (click)="definirFonte(g, 'clonagem')">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
+          Clonar
+        </button>
+      </div>
+
+      @if (fonteDe(g) === 'clonagem') {
+        <div class="grupo-card-corpo grupo-card-clona">
+          <span class="grupo-card-rotulo">Clona de</span>
+          @for (nome of concorrentesDe(g).slice(0, maxConcorrentes); track nome) {
+            <span class="grupo-concorrente" [class.grupo-concorrente-erro]="zap.naoEncontrado(nome)" [title]="zap.naoEncontrado(nome) ? 'Este WhatsApp não está neste grupo' : nome">
+              <i aria-hidden="true"></i><span>{{ nome }}</span>
+            </span>
+          } @empty {
+            <span class="grupo-concorrente"><i aria-hidden="true"></i><span>Todos os grupos deste WhatsApp</span></span>
+          }
+          @if (concorrentesDe(g).length > maxConcorrentes) {
+            <span class="grupo-tag grupo-tag-mais">+{{ concorrentesDe(g).length - maxConcorrentes }}</span>
+          }
+        </div>
+      } @else {
       <div class="grupo-card-corpo">
         @if (g.geral) {
           <span class="grupo-selo grupo-selo-tudo">Recebe tudo</span>
@@ -39,22 +79,31 @@
           }
         }
       </div>
+      }
 
       <div class="grupo-card-rodape">
         <span>
           @if (g.geral) {
             Qualquer promoção
           } @else {
-            {{ g.palavras.length }} {{ g.palavras.length === 1 ? 'palavra' : 'palavras' }}
+            {{ plural(g.palavras.length, 'palavra', 'palavras') }}
+          }
+          @if (g.palavrasExcluir.length) {
+            · <span class="grupo-card-exclui">{{ plural(g.palavrasExcluir.length, 'exclusão', 'exclusões') }}</span>
           }
         </span>
-        @if (g.palavrasExcluir.length) {
-          <span class="grupo-card-exclui">
-            {{ g.palavrasExcluir.length }} {{ g.palavrasExcluir.length === 1 ? 'exclusão' : 'exclusões' }}
-          </span>
+        @if (fonteDe(g) === 'clonagem') {
+          <button type="button" class="grupo-card-acao" (click)="escolherConcorrentes(g)">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16Z"/><path d="m13.5 6.5 4 4"/></svg>
+            Escolher concorrentes
+          </button>
         }
       </div>
-    </button>
+    </article>
+  } @empty {
+    @if (grupos().length) {
+      <p class="grupos-vazio">Nenhum grupo neste filtro.</p>
+    }
   }
 
   <button type="button" class="grupo-card grupo-card-novo" (click)="criar()">
@@ -62,7 +111,7 @@
       <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
     </span>
     <span class="grupo-novo-titulo">{{ grupos().length ? 'Adicionar grupo' : 'Adicionar o primeiro grupo' }}</span>
-    <span class="grupo-novo-texto">O robô só publica nos grupos cadastrados aqui.</span>
+    <span class="grupo-novo-texto">Escolha o grupo do WhatsApp, o assunto e se ele vai garimpar ou clonar.</span>
   </button>
 </div>
 
@@ -120,6 +169,41 @@
         <span class="hint">Cada promoção que sair neste grupo do WhatsApp sai também neste grupo do Telegram.</span>
       </div>
 
+      <fieldset class="grupo-fontes">
+        <legend class="field-rotulo">De onde vêm os produtos?</legend>
+        <div class="grupo-fontes-opcoes" role="radiogroup" aria-label="De onde vêm os produtos">
+          <button type="button" role="radio" class="grupo-fonte" data-fonte="garimpo"
+            [class.grupo-fonte-ativa]="r.fonte !== 'clonagem'" [attr.aria-checked]="r.fonte !== 'clonagem'"
+            (click)="atualizar('fonte', 'garimpo')">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9 5 4.5h14L20.5 9"/><path d="M3.5 9h17v9.5a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5Z"/></svg>
+            <strong>Garimpar</strong>
+            <small>Busca no Mercado Livre, Amazon e Shopee pelo assunto do grupo.</small>
+          </button>
+          <button type="button" role="radio" class="grupo-fonte" data-fonte="clonagem"
+            [class.grupo-fonte-ativa]="r.fonte === 'clonagem'" [attr.aria-checked]="r.fonte === 'clonagem'"
+            (click)="atualizar('fonte', 'clonagem')">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
+            <strong>Clonar</strong>
+            <small>Copia os produtos dos grupos dos concorrentes, com o seu link de afiliado.</small>
+          </button>
+        </div>
+        @if (r.fonte === 'clonagem') {
+          <div class="grupo-concorrentes">
+            <div>
+              <strong>Concorrentes</strong>
+              <span>
+                @if ((r.gruposClonagem ?? []).length) {
+                  {{ resumoConcorrentes(r.gruposClonagem ?? []) }}
+                } @else {
+                  Todos os grupos em que este WhatsApp está
+                }
+              </span>
+            </div>
+            <button type="button" class="btn btn-ghost btn-sm" (click)="escolherNoRascunho()">Escolher concorrentes</button>
+          </div>
+        }
+      </fieldset>
+
       <div class="grupo-modos">
         <label class="grupo-modo" [class.grupo-modo-ativo]="r.geral">
           <input type="checkbox" [ngModel]="r.geral" (ngModelChange)="atualizar('geral', $event)" />
@@ -150,7 +234,7 @@
             }
           </div>
           <span class="hint">
-            Produtos com essas palavras no título ou na categoria vão para este grupo.
+            Produtos com essas palavras no título ou na categoria vão para este grupo@if (r.fonte === 'clonagem') { — na clonagem também: o que os concorrentes postam fora do assunto não entra}.
             Até {{ maxAssunto }} palavras ({{ r.palavras.length }}/{{ maxAssunto }}).
           </span>
           <app-chip-input role="group" aria-labelledby="groups-card-4"
@@ -202,4 +286,10 @@
       </div>
     </div>
   </div>
+}
+
+<!-- Por último no DOM: fica por cima da janela do grupo quando é aberta de dentro dela. -->
+@if (escolha(); as e) {
+  <app-concorrentes-dialog [nome]="e.nome" [grupos]="e.grupos" [escolher]="e.escolher"
+    (concluir)="concluirEscolha($event)" (cancelar)="escolha.set(null)" />
 }

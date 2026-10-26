@@ -1923,6 +1923,291 @@ body:has(.modal-fundo) .bot-control-fixo {
   color: var(--text-muted);
 }
 
+/* Origem dos produtos no card: o nome é o botão que abre a janela e cobre o card todo; a chave
+   "Garimpar / Clonar" e o "Escolher concorrentes" ficam por cima dele. */
+app-groups-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+.grupo-card {
+  position: relative;
+}
+.grupo-card-abrir {
+  display: block;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+  &:focus-visible {
+    outline: none;
+  }
+}
+.grupo-card:has(.grupo-card-abrir:focus-visible) {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+.grupo-avatar-clonagem {
+  background: var(--azul-soft);
+  color: var(--azul);
+  border-color: #cfdcf3;
+}
+.grupo-origem {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+.grupo-origem-opcao {
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-soft);
+  cursor: pointer;
+
+  svg {
+    width: 15px;
+    height: 15px;
+  }
+  &:hover:not(:disabled) {
+    color: var(--text);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 1px;
+  }
+  &:disabled {
+    cursor: progress;
+  }
+}
+.grupo-origem-ativa {
+  background: var(--surface);
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(42, 29, 18, 0.12);
+
+  &[data-fonte='garimpo'] {
+    color: var(--gold-ink);
+  }
+  &[data-fonte='clonagem'] {
+    color: var(--azul);
+  }
+}
+.grupo-card-rotulo {
+  flex-basis: 100%;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.grupo-concorrente {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text);
+
+  i {
+    flex-shrink: 0;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--ok);
+  }
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+.grupo-concorrente-erro {
+  border-color: var(--danger-border);
+  background: var(--danger-soft);
+  color: var(--danger);
+
+  i {
+    background: var(--danger);
+  }
+}
+.grupo-card-rodape {
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: 4px;
+}
+.grupo-card-acao {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gold-ink);
+  white-space: nowrap;
+  cursor: pointer;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+  &:hover {
+    color: var(--text);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+.grupos-vazio {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 18px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* Na janela do grupo: garimpar ou clonar. */
+.grupo-fontes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+
+  legend {
+    padding: 0;
+    margin-bottom: 8px;
+  }
+}
+.grupo-fontes-opcoes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.grupo-fonte {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 13px 15px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font: inherit;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+
+  svg {
+    width: 20px;
+    height: 20px;
+    margin-bottom: 2px;
+  }
+  &[data-fonte='garimpo'] svg {
+    color: var(--gold-deep);
+  }
+  &[data-fonte='clonagem'] svg {
+    color: var(--azul);
+  }
+  strong {
+    font-size: 15px;
+  }
+  small {
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--text-muted);
+  }
+  &:hover {
+    border-color: var(--border-strong);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 1px;
+  }
+}
+.grupo-fonte-ativa {
+  padding: 12px 14px;
+  border-width: 2px;
+
+  &[data-fonte='garimpo'] {
+    border-color: var(--gold);
+    background: var(--gold-soft);
+  }
+  &[data-fonte='clonagem'] {
+    border-color: var(--azul);
+    background: var(--azul-soft);
+  }
+  small {
+    color: var(--text-soft);
+  }
+}
+.grupo-concorrentes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+  span {
+    font-size: 13px;
+    color: var(--text-soft);
+    overflow-wrap: anywhere;
+  }
+}
+@media (max-width: 560px) {
+  .grupo-fontes-opcoes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 /* Janela de edicao do grupo. */
 .modal-grupo {
   width: min(640px, 100%);
@@ -2465,14 +2750,16 @@ body:has(.modal-fundo) .bot-control-fixo {
    Abas ao lado do título; na direita, o período e o "Atualizar agora" (só o ícone, redondo como o
    sino). Tudo na altura dos outros botões do topo (38px), em pílula, como Oferta personalizada e
    Logs. A aba aberta fica escura; o período escolhido, dourado claro (como as fichas do Painel). */
-app-estatisticas-abas.topbar-abas {
+app-estatisticas-abas.topbar-abas,
+app-grupos-filtro.topbar-abas {
   flex: 1 1 auto;
   min-width: 0;
   display: flex;
   overflow-x: auto;
   scrollbar-width: none;
 }
-app-estatisticas-abas.topbar-abas::-webkit-scrollbar {
+app-estatisticas-abas.topbar-abas::-webkit-scrollbar,
+app-grupos-filtro.topbar-abas::-webkit-scrollbar {
   display: none;
 }
 app-estatisticas-controles.topbar-controles {
@@ -4828,7 +5115,7 @@ a.gf-item-titulo:hover {
 .tk-item + .tk-item {
   border-left: 1px solid var(--border);
 }
-/* Números da Clonagem: cada ícone na cor que ele tinha nos cartões da tela. */
+/* Números da origem em Grupos: cada ícone na cor da chave do card. */
 .tk-item svg[data-cor='ouro'] {
   color: var(--gold-deep);
 }
@@ -4842,6 +5129,15 @@ a.gf-item-titulo:hover {
   width: 22px;
   height: 22px;
   flex-shrink: 0;
+}
+/* Em Grupos são três números ao lado do filtro: mais juntos, e sem ícone antes de tela bem larga. */
+app-grupos-numeros .tk-item {
+  padding: 0 16px;
+}
+@media (max-width: 1600px) {
+  app-grupos-numeros .tk-item svg {
+    display: none;
+  }
 }
 .tk-item dt {
   font-size: 13px;

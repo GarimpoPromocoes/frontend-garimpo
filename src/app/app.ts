@@ -15,7 +15,6 @@ import { LoginCard } from './features/auth/login-card/login-card';
 import { LojasCard } from './features/conexoes/lojas-card/lojas-card';
 import { RegrasPostagem } from './features/divulgacao/regras-postagem/regras-postagem';
 import { GroupsCard } from './features/divulgacao/groups-card/groups-card';
-import { GarimpoCard } from './features/divulgacao/garimpo-card/garimpo-card';
 import { PainelRobo } from './features/acompanhar/painel-robo/painel-robo';
 import { ConsoleCard } from './features/acompanhar/console-card/console-card';
 import { ProdutosCard } from './features/divulgacao/produtos-card/produtos-card';
@@ -24,11 +23,11 @@ import { DatasEspeciais } from './features/divulgacao/datas-especiais/datas-espe
 import { OwnerCard } from './features/admin/owner-card/owner-card';
 import { Estatisticas } from './features/acompanhar/estatisticas/estatisticas';
 import { EstatisticasAbas, EstatisticasControles } from './features/acompanhar/estatisticas/estatisticas-abas';
-import { ClonagemNumeros } from './features/divulgacao/garimpo-card/clonagem-numeros';
 import { LojaDialog } from './features/conexoes/loja-dialog/loja-dialog';
 import { WhatsappDialog } from './features/conexoes/whatsapp-dialog/whatsapp-dialog';
 import { TelegramDialog } from './features/conexoes/telegram-dialog/telegram-dialog';
 import { TopoKpis } from './features/acompanhar/topo-kpis/topo-kpis';
+import { GruposFiltro, GruposNumeros } from './features/divulgacao/groups-card/grupos-topo';
 import { DesafioMlDialog } from './features/acompanhar/desafio-ml-dialog/desafio-ml-dialog';
 import { ConfirmacaoDialog } from './shared/confirmacao-dialog/confirmacao-dialog';
 import { Sino } from './shared/sino/sino';
@@ -38,7 +37,6 @@ export type AbaId =
   | 'atividade'
   | 'estatisticas'
   | 'grupos'
-  | 'garimpo'
   | 'regras'
   | 'lojas'
   | 'dono';
@@ -74,16 +72,9 @@ const ABAS: Aba[] = [
     id: 'grupos',
     label: 'Grupos',
     titulo: 'Grupos do WhatsApp',
-    descricao: 'Escolha para quais grupos as promoções vão e o tema de cada um.',
+    descricao: 'Escolha para quais grupos as promoções vão, o tema de cada um e se ele garimpa ou clona.',
     secao: 'Divulgação',
     badge: 'grupos',
-  },
-  {
-    id: 'garimpo',
-    label: 'Clonagem',
-    titulo: 'Clonagem de grupos',
-    descricao: 'Quais grupos recebem o seu garimpo nas lojas e quais recebem a clonagem dos concorrentes.',
-    secao: 'Divulgação',
   },
   {
     id: 'regras',
@@ -128,7 +119,6 @@ const CHAVE_ABA = 'promobot:aba';
     LojasCard,
     RegrasPostagem,
     GroupsCard,
-    GarimpoCard,
     PainelRobo,
     ConsoleCard,
     ProdutosCard,
@@ -142,7 +132,8 @@ const CHAVE_ABA = 'promobot:aba';
     TopoKpis,
     EstatisticasAbas,
     EstatisticasControles,
-    ClonagemNumeros,
+    GruposFiltro,
+    GruposNumeros,
     DesafioMlDialog,
     ConfirmacaoDialog,
     Sino,
@@ -274,6 +265,8 @@ export class App implements OnInit, OnDestroy {
       if ((salva as string) === 'busca') salva = 'painel';
       // WhatsApp e Telegram entraram na tela de Conexões (a antiga Lojas de afiliado).
       if ((salva as string) === 'whatsapp') salva = 'lojas';
+      // Clonagem entrou na tela de Grupos (a origem fica no card de cada grupo).
+      if ((salva as string) === 'garimpo') salva = 'grupos';
       if (salva && ABAS.some((a) => a.id === salva)) this.aba.set(salva);
     } catch (_) {
     }
@@ -287,7 +280,6 @@ export class App implements OnInit, OnDestroy {
   private preCarregarAbas(): void {
     const carregar = () => {
       void import('./features/divulgacao/groups-card/groups-card');
-      void import('./features/divulgacao/garimpo-card/garimpo-card');
       void import('./features/acompanhar/estatisticas/estatisticas');
       void import('./features/divulgacao/produtos-card/produtos-card');
       void import('./features/divulgacao/busca-card/busca-card');
