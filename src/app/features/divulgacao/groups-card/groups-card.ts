@@ -1,6 +1,8 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ConfigService, FonteProdutos, GrupoTematico } from '../../../core/services/config.service';
+import { ConfigService, FonteProdutos, GrupoTematico, LOJAS_AFILIADO, LojaAfiliado } from '../../../core/services/config.service';
+import { VerificacaoService } from '../../../core/services/verificacao.service';
+import { ConexoesService } from '../../../core/services/conexoes.service';
 import { ConfirmacaoService } from '../../../core/services/confirmacao.service';
 import { GruposWhatsappService } from '../../../core/services/grupos-whatsapp.service';
 import { GruposOrigemService } from '../../../core/services/grupos-origem.service';
@@ -21,6 +23,7 @@ const GRUPO_VAZIO = (): GrupoTematico => ({
   grupoTelegram: '',
   fonte: 'garimpo',
   gruposClonagem: [],
+  lojas: [],
 });
 
 const copiar = (g: GrupoTematico): GrupoTematico => ({
@@ -29,10 +32,14 @@ const copiar = (g: GrupoTematico): GrupoTematico => ({
   palavrasExcluir: [...(g.palavrasExcluir ?? [])],
   gruposEspelho: [...(g.gruposEspelho ?? [])],
   gruposClonagem: [...(g.gruposClonagem ?? [])],
+  lojas: [...(g.lojas ?? [])],
 });
 
 /** Quantas palavras do assunto aparecem no card antes do "+N". */
 const MAX_PALAVRAS_CARD = 5;
+
+/** Quantas palavras aparecem como chip na janela do grupo antes do "+N outros". */
+const MAX_CHIPS_MODAL = 5;
 
 /** Quantos concorrentes aparecem como etiqueta no card antes do "+N". */
 const MAX_CONCORRENTES_CARD = 3;
@@ -72,6 +79,10 @@ export class GroupsCard {
   private confirmacao = inject(ConfirmacaoService);
   protected zap = inject(GruposWhatsappService);
   private origem = inject(GruposOrigemService);
+  private verificacao = inject(VerificacaoService);
+  private conexoes = inject(ConexoesService);
+
+  protected readonly lojasAfiliado = LOJAS_AFILIADO;
 
   protected readonly grupos = signal<GrupoTematico[]>([]);
   /** Janela de concorrentes aberta (uma por vez). */
@@ -101,6 +112,14 @@ export class GroupsCard {
   protected readonly novo = signal(false);
   protected readonly salvando = signal(false);
   protected readonly erro = signal<string | null>(null);
+
+  /** Nomes do grupo destravados para edição (grupo novo já abre assim). */
+  protected readonly editandoBasico = signal(false);
+  /** "Nunca incluir" e assunto: chips com × ou o campo de digitar. */
+  protected readonly editandoFiltro = signal(false);
+  protected readonly editandoAssunto = signal(false);
+  protected readonly maxConcorrentesModal = MAX_CHIPS_MODAL - 2;
+  protected readonly maxTagsModal = MAX_CHIPS_MODAL;
 
   protected readonly maxPalavras = MAX_PALAVRAS_CARD;
   protected readonly maxAssunto = MAX_ASSUNTO;
@@ -166,13 +185,35 @@ export class GroupsCard {
   abrir(g: GrupoTematico): void {
     this.erro.set(null);
     this.novo.set(false);
+    this.reiniciarEdicao(false);
     this.rascunho.set({ ...copiar(g), fonte: this.fonteDe(g) });
   }
 
   criar(): void {
     this.erro.set(null);
     this.novo.set(true);
+    this.reiniciarEdicao(true);
     this.rascunho.set(GRUPO_VAZIO());
+  }
+
+  private reiniciarEdicao(novo: boolean): void {
+    this.editandoBasico.set(novo);
+    this.editandoFiltro.set(false);
+    this.editandoAssunto.set(novo);
+  }
+
+  /** O × do chip: tira só aquele concorrente (vazio = volta a clonar de todos). */
+  removerConcorrente(nome: string): void {
+    const r = this.rascunho();
+    if (!r) return;
+    this.atualizar('gruposClonagem', (r.gruposClonagem ?? []).filter((n) => n !== nome));
+  }
+
+  /** O × do chip: tira só aquela palavra do assunto ou do "Nunca incluir". */
+  removerTag(campo: 'palavras' | 'palavrasExcluir', palavra: string): void {
+    const r = this.rascunho();
+    if (!r) return;
+    this.atualizar(campo, r[campo].filter((p) => p !== palavra));
   }
 
   fechar(): void {
@@ -183,6 +224,61 @@ export class GroupsCard {
 
   atualizar<K extends keyof GrupoTematico>(campo: K, valor: GrupoTematico[K]): void {
     this.rascunho.update((r) => (r ? { ...r, [campo]: valor } : r));
+  }
+
+  // ---- lojas do grupo -------------------------------------------------------
+
+  /** Vazio = todas. */
+  protected lojasMarcadas(g: GrupoTematico): LojaAfiliado[] {
+    const l = g.lojas ?? [];
+    return l.length ? l : LOJAS_AFILIADO.map((x) => x.id);
+  }
+
+  protected lojaMarcada(g: GrupoTematico, loja: LojaAfiliado): boolean {
+    return this.lojasMarcadas(g).includes(loja);
+  }
+
+  /** Só as lojas efetivamente conectadas aparecem no seletor. */
+  protected readonly lojasVisiveis = computed(() =>
+    LOJAS_AFILIADO.filter((l) =>
+      l.id === 'mercadolivre'
+        ? this.verificacao.mercadoLivreConectado()
+        : l.id === 'shopee'
+          ? this.verificacao.shopeeConectado()
+          : this.conexoes.statusDe('amazon')?.status === 'conectado',
+    ),
+  );
+
+  /** Marca/desmarca uma loja. A última marcada (entre as conectadas) não sai: grupo sem loja não posta nada. */
+  alternarLoja(loja: LojaAfiliado): void {
+    const r = this.rascunho();
+    if (!r) return;
+    const atuais = this.lojasMarcadas(r);
+    const visiveisMarcadas = this.lojasVisiveis().filter((l) => atuais.includes(l.id));
+    if (atuais.includes(loja) && visiveisMarcadas.length <= 1) return;
+    const nova = atuais.includes(loja) ? atuais.filter((l) => l !== loja) : [...atuais, loja];
+    const ordenada = LOJAS_AFILIADO.map((x) => x.id).filter((l) => nova.includes(l));
+    this.atualizar('lojas', ordenada.length === LOJAS_AFILIADO.length ? [] : ordenada);
+  }
+
+  /** O que aparece ao lado da loja na janela: desligada no painel ou não conectada. */
+  protected avisoDaLoja(loja: LojaAfiliado): string {
+    if ((this.configService.config()?.lojasDesligadas ?? []).includes(loja)) return 'desligada em Conexões';
+    const conectada =
+      loja === 'mercadolivre'
+        ? this.verificacao.mercadoLivreConectado()
+        : loja === 'shopee'
+          ? this.verificacao.shopeeConectado()
+          : this.conexoes.statusDe('amazon')?.status === 'conectado';
+    return conectada ? '' : 'não conectada';
+  }
+
+  /** "só Mercado Livre", "só Amazon e Shopee" — no rodapé do card. Vazio quando usa todas. */
+  protected resumoLojas(g: GrupoTematico): string {
+    const l = g.lojas ?? [];
+    if (!l.length || l.length === LOJAS_AFILIADO.length) return '';
+    const nomes = LOJAS_AFILIADO.filter((x) => l.includes(x.id)).map((x) => x.nome);
+    return `só ${nomes.join(' e ')}`;
   }
 
   /** Apaga de uma vez todas as tags de um dos campos do grupo (pode/não pode entrar). */

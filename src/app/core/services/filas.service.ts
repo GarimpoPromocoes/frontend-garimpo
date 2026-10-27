@@ -42,6 +42,8 @@ export interface FilaDoGrupo {
   grupo: ResumoFila;
   itens: ItemFila[];
   total: number;
+  /** A aba que veio: 'todos' ou um status. */
+  status?: StatusFila | 'todos';
 }
 
 @Injectable({ providedIn: 'root' })
@@ -61,7 +63,10 @@ export class FilasService {
     }
   }
 
-  async doGrupo(id: string): Promise<FilaDoGrupo> {
-    return firstValueFrom(this.http.get<FilaDoGrupo>(`/api/filas/${encodeURIComponent(id)}`));
+  /** A lista do grupo já filtrada pela aba (a api filtra antes do corte de 400 itens). */
+  async doGrupo(id: string, status: StatusFila | 'todos' = 'todos'): Promise<FilaDoGrupo> {
+    return firstValueFrom(
+      this.http.get<FilaDoGrupo>(`/api/filas/${encodeURIComponent(id)}`, { params: { status } }),
+    );
   }
 }
