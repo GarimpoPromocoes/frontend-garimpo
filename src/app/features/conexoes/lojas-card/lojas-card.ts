@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { ConexoesService, Provedor } from '../../../core/services/conexoes.service';
 import { LojasUiService } from '../../../core/services/lojas-ui.service';
@@ -8,6 +8,7 @@ import { AvisosService } from '../../../core/services/avisos.service';
 import { ProvedorConexao } from '../../../core/services/status.service';
 import { WhatsappUiService } from '../../../core/services/whatsapp-ui.service';
 import { TelegramUiService } from '../../../core/services/telegram-ui.service';
+import { ConfigService, LojaAfiliado } from '../../../core/services/config.service';
 
 /** ok = funcionando; atencao = funcionava e caiu (precisa entrar de novo); off = nunca conectada. */
 type EstadoConexao = 'ok' | 'atencao' | 'off';
@@ -21,6 +22,10 @@ interface Conta {
   estado: EstadoConexao;
   /** Por que caiu (só em 'atencao'). */
   motivo: string;
+  /** Loja de afiliado (tem a chave de ligar/desligar). */
+  loja?: boolean;
+  /** Desligada no painel: continua conectada, mas o robô não usa. */
+  desligada?: boolean;
 }
 
 /** Loja que aparece na grade mas ainda não tem integração. */
@@ -51,6 +56,7 @@ export class LojasCard implements OnInit {
   private telegramUi = inject(TelegramUiService);
   private confirmacao = inject(ConfirmacaoService);
   private avisos = inject(AvisosService);
+  private configService = inject(ConfigService);
 
   // Ainda em desenvolvimento: ficam visíveis, mas o clique só avisa.
   // Quando uma ficar pronta, ela sai daqui e entra em `lojas` com o provedor.
@@ -85,7 +91,18 @@ export class LojasCard implements OnInit {
     }),
   ]);
 
+  /** Lojas desligadas no painel (config da conta). */
+  private readonly desligadas = computed(() => new Set<string>(this.configService.config()?.lojasDesligadas ?? []));
+  /** Loja cuja chave de ligar/desligar está gravando. */
+  protected readonly alternando = signal<string | null>(null);
+  protected readonly erroLigar = signal<{ provedor: string; texto: string } | null>(null);
+
   protected readonly lojas = computed<Conta[]>(() => {
+    const desligadas = this.desligadas();
+    return this.lojasConectadas().map((c) => ({ ...c, loja: true, desligada: desligadas.has(c.provedor) }));
+  });
+
+  private readonly lojasConectadas = computed<Conta[]>(() => {
     const conexao = (p: Provedor) => this.conexoes.statusDe(p);
     return [
       this.completar({
@@ -133,8 +150,29 @@ export class LojasCard implements OnInit {
         texto: 'Conecte pelo menos uma loja para o robô gerar os seus links de afiliado.',
       };
     }
+    if (!lojas.some((l) => l.estado === 'ok' && !l.desligada)) {
+      return {
+        titulo: 'Todas as lojas estão desligadas',
+        texto: 'O robô não garimpa, não clona e não posta enquanto nenhuma loja estiver ligada. Ligue pelo menos uma.',
+      };
+    }
     return null;
   });
+
+  /** Liga ou desliga a loja sem mexer na conexão: vale na hora, até com o robô rodando. */
+  async alternarLoja(c: Conta): Promise<void> {
+    if (this.alternando()) return;
+    const loja = c.provedor as LojaAfiliado;
+    const atual = this.configService.config()?.lojasDesligadas ?? [];
+    const lista = c.desligada ? atual.filter((l) => l !== loja) : [...atual.filter((l) => l !== loja), loja];
+    this.erroLigar.set(null);
+    this.alternando.set(c.provedor);
+    const r = await this.configService.salvar({ lojasDesligadas: lista });
+    this.alternando.set(null);
+    if (!r.ok) {
+      this.erroLigar.set({ provedor: c.provedor, texto: r.erro ?? `Não consegui ${c.desligada ? 'ligar' : 'desligar'} a ${c.nome}.` });
+    }
+  }
 
   protected ehCanal(c: Conta): boolean {
     return CANAIS.includes(c.provedor);

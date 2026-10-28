@@ -13,15 +13,15 @@
 
 <!-- Um cartão: logo, nome, selo e o botão. Texto só quando caiu (o motivo). -->
 <ng-template #cartao let-c>
-  <article class="lj-cartao" [attr.data-estado]="c.estado">
+  <article class="lj-cartao" [attr.data-estado]="c.estado" [class.lj-cartao-desligada]="c.desligada">
     <div class="lj-topo">
       <span class="lj-logo"><img [src]="c.logo" alt="" /></span>
       <div class="lj-nome">
         <strong>{{ c.nome }}</strong>
-        <span class="lj-selo" [attr.data-estado]="c.estado">
+        <span class="lj-selo" [attr.data-estado]="c.desligada && c.estado === 'ok' ? 'desligada' : c.estado">
           <i aria-hidden="true"></i>
           @switch (c.estado) {
-            @case ('ok') { Funcionando }
+            @case ('ok') { {{ c.desligada ? 'Desligada' : 'Funcionando' }} }
             @case ('atencao') { Precisa entrar de novo }
             @default { {{ ehCanal(c) ? 'Não conectado' : 'Não conectada' }} }
           }
@@ -31,6 +31,33 @@
 
     @if (c.estado === 'atencao' && c.motivo) {
       <p class="lj-texto">{{ c.motivo }}</p>
+    }
+
+    <!-- Desligar a loja sem desconectar: a sessão fica guardada e religar é só um clique. -->
+    @if (c.loja && (c.estado !== 'off' || c.desligada)) {
+      <div class="lj-ligar">
+        <button
+          type="button"
+          class="toggle-switch"
+          role="switch"
+          [class.toggle-switch-on]="!c.desligada"
+          [attr.aria-checked]="!c.desligada"
+          [attr.aria-label]="(c.desligada ? 'Ligar ' : 'Desligar ') + c.nome"
+          [disabled]="alternando() === c.provedor"
+          (click)="alternarLoja(c)"
+        >
+          <span class="toggle-switch-thumb"></span>
+        </button>
+        <span class="lj-ligar-texto">
+          <strong>{{ c.desligada ? 'Desligada' : 'Ligada' }}</strong>
+          <small>
+            {{ c.desligada ? 'O robô não usa esta loja. A conta segue conectada.' : 'O robô usa esta loja.' }}
+          </small>
+        </span>
+      </div>
+      @if (erroLigar()?.provedor === c.provedor) {
+        <p class="lj-texto lj-texto-erro" role="alert">{{ erroLigar()?.texto }}</p>
+      }
     }
 
     <button

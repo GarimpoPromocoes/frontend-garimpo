@@ -110,12 +110,16 @@ export class GruposFila {
 
   protected readonly erroResumo = this.filas.erroResumo;
 
+  /** A lista já vem filtrada da api; o filtro aqui só garante que nada de outra aba apareça. */
   protected readonly itensVisiveis = computed<ItemFila[]>(() => {
     const l = this.lista();
     if (!l) return [];
     const f = this.filtro();
     return f === 'todos' ? l.itens : l.itens.filter((it) => it.status === f);
   });
+
+  /** Aba trocada e a lista dela ainda não chegou. */
+  protected readonly trocandoAba = signal(false);
 
   protected fonteTexto(g: ResumoFila): string {
     if (g.fonte === 'garimpo') return 'Garimpo nas lojas';
@@ -131,8 +135,21 @@ export class GruposFila {
   protected contagem(id: Filtro): number {
     const c = this.lista()?.grupo.contagens;
     if (!c) return 0;
-    if (id === 'todos') return this.lista()?.total ?? 0;
+    if (id === 'todos') return Object.values(c).reduce((soma, n) => soma + (n ?? 0), 0);
     return c[id] ?? 0;
+  }
+
+  /** Postados, recusados e vencidos ficam 3 dias na lista (como na fila do robô). */
+  protected ehDosUltimosDias(): boolean {
+    return ['postado', 'recusado', 'vencido'].includes(this.filtro());
+  }
+
+  async escolherFiltro(f: Filtro): Promise<void> {
+    if (f === this.filtro()) return;
+    this.filtro.set(f);
+    this.trocandoAba.set(true);
+    await this.recarregarLista();
+    if (this.filtro() === f) this.trocandoAba.set(false);
   }
 
   protected status(it: ItemFila) {
@@ -199,19 +216,23 @@ export class GruposFila {
   fechar(): void {
     this.aberto.set(null);
     this.lista.set(null);
+    this.trocandoAba.set(false);
   }
 
   private async recarregarLista(): Promise<void> {
     const id = this.aberto();
+    const filtro = this.filtro();
     if (!id) return;
+    // Resposta que chega depois de trocar de grupo ou de aba é descartada.
+    const valeAinda = () => this.aberto() === id && this.filtro() === filtro;
     try {
-      const r = await this.filas.doGrupo(id);
-      if (this.aberto() === id) {
+      const r = await this.filas.doGrupo(id, filtro);
+      if (valeAinda()) {
         this.lista.set(r);
         this.erroLista.set(null);
       }
     } catch (e: any) {
-      if (this.aberto() === id) this.erroLista.set(e?.error?.erro || 'Não consegui carregar a lista deste grupo.');
+      if (valeAinda()) this.erroLista.set(e?.error?.erro || 'Não consegui carregar a lista deste grupo.');
     }
   }
 }

@@ -29,9 +29,23 @@ export interface GrupoTematico {
   fonte?: FonteProdutos;
   /** Na clonagem: de quais grupos dos concorrentes ele clona (pedaços do nome; vazio = todos). */
   gruposClonagem?: string[];
+  /**
+   * Lojas do grupo: onde ele garimpa (garimpo) ou de quais lojas ele pega os links dos grupos que
+   * clona (clonagem). Vazio = todas.
+   */
+  lojas?: LojaAfiliado[];
 }
 
 export type FonteProdutos = 'garimpo' | 'clonagem';
+
+export type LojaAfiliado = 'mercadolivre' | 'amazon' | 'shopee';
+
+/** As lojas de afiliado, na ordem de sempre. */
+export const LOJAS_AFILIADO: { id: LojaAfiliado; nome: string; logo: string }[] = [
+  { id: 'mercadolivre', nome: 'Mercado Livre', logo: 'lojas/mercadolivre.svg' },
+  { id: 'amazon', nome: 'Amazon', logo: 'lojas/amazon.svg' },
+  { id: 'shopee', nome: 'Shopee', logo: 'lojas/shopee.svg' },
+];
 
 export interface Agendamento {
   intervaloMinMinutos: number;
@@ -130,6 +144,8 @@ export interface DashboardConfig {
   /** Modelo do texto da postagem, com {variaveis}. Vazio = o texto padrão do robô. */
   copy?: { modelo: string };
   garimpo?: Garimpo;
+  /** Lojas desligadas na tela Conexões: seguem conectadas, mas o robô não usa até religar. */
+  lojasDesligadas?: LojaAfiliado[];
 }
 
 @Injectable({ providedIn: 'root' })

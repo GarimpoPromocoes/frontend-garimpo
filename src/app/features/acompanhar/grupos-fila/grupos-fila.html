@@ -64,13 +64,13 @@
 
       <div class="gf-filtros" role="group" aria-label="Filtrar por status">
         @for (f of filtros; track f.id) {
-          @if (f.id === 'todos' || contagem(f.id) > 0) {
+          @if (f.id === 'todos' || contagem(f.id) > 0 || filtro() === f.id) {
             <button
               type="button"
               class="gf-filtro"
               [class.gf-filtro-ativo]="filtro() === f.id"
               [attr.aria-pressed]="filtro() === f.id"
-              (click)="filtro.set(f.id)"
+              (click)="escolherFiltro(f.id)"
             >
               {{ f.rotulo }} <span class="gf-filtro-n">{{ contagem(f.id) }}</span>
             </button>
@@ -78,7 +78,7 @@
         }
       </div>
 
-      @if (carregandoLista()) {
+      @if (carregandoLista() || trocandoAba()) {
         <p class="hint-text">Carregando a lista…</p>
       } @else if (erroLista()) {
         <p class="hint-text" role="alert">{{ erroLista() }}</p>
@@ -112,6 +112,9 @@
         </ul>
         @if ((lista()?.total ?? 0) > (lista()?.itens?.length ?? 0)) {
           <p class="hint-text">Mostrando os {{ lista()?.itens?.length }} primeiros de {{ lista()?.total }}.</p>
+        }
+        @if (ehDosUltimosDias()) {
+          <p class="hint-text">Mostra os últimos 3 dias.</p>
         }
       }
     </div>
