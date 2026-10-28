@@ -17,12 +17,12 @@ export function duracao(ms: number): string {
   selector: 'app-topo-kpis',
   standalone: true,
   template: `
-    <dl class="tk">
-      <div class="tk-item">
+    <dl class="tk tk-mini">
+      <div class="tk-item" [title]="'Tempo ativo: ' + tempoAtivo()">
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 2" /></svg>
         <div><dt>Tempo ativo</dt><dd>{{ tempoAtivo() }}</dd></div>
       </div>
-      <div class="tk-item">
+      <div class="tk-item" [title]="proxima().rotulo + ': ' + proxima().valor">
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2.5 4.5 13.5H12l-1 8 8.5-11H12Z" /></svg>
         <div><dt>{{ proxima().rotulo }}</dt><dd>{{ proxima().valor }}</dd></div>
       </div>

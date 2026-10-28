@@ -27,6 +27,8 @@ export interface GrupoTematico {
   publico?: string;
   /** De onde vêm os produtos deste grupo: garimpo próprio nas lojas ou clonagem dos concorrentes. */
   fonte?: FonteProdutos;
+  /** Na clonagem: sem nada que sirva na fila dos concorrentes, garimpa nas lojas (Garimpar + Clonar). */
+  garimpoReserva?: boolean;
   /** Na clonagem: de quais grupos dos concorrentes ele clona (pedaços do nome; vazio = todos). */
   gruposClonagem?: string[];
   /**
@@ -208,7 +210,7 @@ export class ConfigService {
     }
   }
 
-  /** Cupons achados nos outros grupos nas últimas 48h (null = não consegui ler). */
+  /** Cupons achados hoje nos outros grupos (null = não consegui ler). */
   async cuponsDosGrupos(): Promise<CupomDeGrupo[] | null> {
     try {
       const r = await firstValueFrom(this.http.get<{ cupons: CupomDeGrupo[] }>('/api/config/cupons-dos-grupos'));

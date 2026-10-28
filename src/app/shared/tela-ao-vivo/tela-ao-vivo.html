@@ -1,0 +1,52 @@
+@if (src(); as s) {
+  <div class="tela-loja" [class.tela-loja-atualizando]="atualizando()">
+    <div class="tela-loja-barra">
+      <span class="tela-loja-ponto"></span>
+      <span>{{ rotulo() }} — ao vivo</span>
+      <span class="tela-loja-espaco"></span>
+      @if (erro(); as e) {
+        <span class="tela-loja-estado tela-loja-erro" role="alert">{{ e }}</span>
+      } @else if (atualizando()) {
+        <span class="tela-loja-estado"><span class="login-spinner"></span> Atualizando…</span>
+      } @else {
+        <span class="tela-loja-estado">Clique na imagem para interagir</span>
+      }
+    </div>
+    <div class="tela-loja-imagem">
+      <img
+        #imagem
+        [src]="s"
+        [alt]="'Tela do navegador do robô — ' + rotulo()"
+        tabindex="0"
+        draggable="false"
+        (click)="aoClicar($event)"
+        (wheel)="aoRolar($event)"
+        (keydown)="aoTeclar($event)"
+      />
+      @if (marca(); as m) {
+        <span class="tela-loja-clique" [style.left.%]="m.x * 100" [style.top.%]="m.y * 100"></span>
+      }
+    </div>
+  </div>
+  <div class="tela-loja-digitar">
+    <input
+      type="text"
+      [attr.aria-label]="'Texto para digitar na tela ' + rotulo()"
+      placeholder="Precisa digitar algo? Clique no campo da tela e escreva aqui"
+      autocomplete="off"
+      [value]="texto()"
+      (input)="texto.set($any($event.target).value)"
+      (keydown.enter)="enviarTexto()"
+    />
+    <button type="button" class="btn btn-ghost btn-sm" (click)="enviarTexto()">Digitar</button>
+    <button type="button" class="btn btn-ghost btn-sm" (click)="tecla('Enter')">Enter</button>
+    <button type="button" class="btn btn-ghost btn-sm" (click)="tecla('Backspace')">Apagar</button>
+  </div>
+} @else if (demorou()) {
+  <ng-content select="[demorou]" />
+} @else {
+  <div class="login-trabalhando">
+    <span class="login-spinner"></span>
+    <span>{{ carregando() }}</span>
+  </div>
+}

@@ -7,6 +7,8 @@
           <p class="card-subtitle" role="status">
             @if (fim(); as f) {
               {{ f.ok ? 'Tudo certo — a conta está conectada.' : 'O login não foi concluído.' }}
+            } @else if (noNavegador()) {
+              Você está no navegador do robô. Entre na sua conta como faria no site.
             } @else if (pedido()) {
               {{ artigoM() }} {{ rotulo() }} pediu mais uma confirmação. Responda aqui.
             } @else if (emLogin()) {
@@ -31,7 +33,7 @@
       </div>
 
       @if (emLogin()) {
-        @if (etapas().length) {
+        @if (etapas().length && !noNavegador()) {
           <ol class="login-trilha">
             @for (e of etapas(); track $index; let ultima = $last) {
               <li [class.login-trilha-atual]="ultima && trabalhando()">
@@ -68,11 +70,13 @@
           }
         } @else if (pedido(); as p) {
           <div class="login-pedido">
-            <h3>{{ p.titulo }}</h3>
+            @if (p.forma !== 'navegador') {
+              <h3>{{ p.titulo }}</h3>
+            }
             @if (p.subtitulo) {
               <p class="pagina-subtitulo">{{ p.subtitulo }}</p>
             }
-            @if (p.texto) {
+            @if (p.texto && p.forma !== 'navegador') {
               <p class="hint-text">{{ p.texto }}</p>
             }
 
@@ -157,6 +161,20 @@
                 <div class="verif-links">
                   <button type="button" class="btn-link" [disabled]="jobsService.respondendoLogin()" (click)="outraForma()">
                     Usar outra forma de entrar
+                  </button>
+                </div>
+              }
+
+              @case ('navegador') {
+                <app-tela-ao-vivo [rotulo]="rotulo()" carregando="Abrindo o navegador…">
+                  <div class="login-trabalhando" demorou>
+                    <span class="login-spinner"></span>
+                    <span>A tela do navegador está demorando para chegar…</span>
+                  </div>
+                </app-tela-ao-vivo>
+                <div class="verif-links">
+                  <button type="button" class="btn-link" [disabled]="jobsService.respondendoLogin()" (click)="voltarAoGuiado()">
+                    Deixar o robô conduzir de novo
                   </button>
                 </div>
               }
@@ -278,7 +296,14 @@
         } @else {
           <div class="login-trabalhando">
             <span class="login-spinner"></span>
-            <span>Falando com {{ artigo() }} {{ rotulo() }}…</span>
+            <span>{{ assumindo() ? 'Abrindo o navegador…' : 'Falando com ' + artigo() + ' ' + rotulo() + '…' }}</span>
+          </div>
+        }
+        @if (!fim() && !noNavegador()) {
+          <div class="assumir-navegador">
+            <button type="button" [disabled]="assumindo()" (click)="assumirNavegador()" title="Ver a tela de verdade e digitar você mesmo">
+              Assumir o navegador
+            </button>
           </div>
         }
       } @else if (conectada()) {

@@ -93,7 +93,8 @@ export interface AcaoPagina {
  */
 export interface PedidoLogin {
   id: string;
-  forma: 'credenciais' | 'senha' | 'codigo' | 'captcha' | 'escolha' | 'robo' | 'qrcode' | 'pagina' | 'camera' | 'grade';
+  /** 'navegador': a pessoa assumiu o navegador — a tela de verdade, ao vivo (app-tela-ao-vivo). */
+  forma: 'credenciais' | 'senha' | 'codigo' | 'captcha' | 'escolha' | 'robo' | 'qrcode' | 'pagina' | 'camera' | 'grade' | 'navegador';
   provedor: Provedor;
   titulo: string;
   /** Título da própria página, quando o nosso título é outro (forma 'pagina'). */
@@ -424,6 +425,16 @@ export class JobsService {
     } catch (e: any) {
       this.respondendoLogin.set(false);
       return { ok: false, erro: e?.error?.erro || 'Não consegui enviar a resposta.' };
+    }
+  }
+
+  /** "Assumir o navegador": o robô para de conduzir o login e a tela de verdade vem para o painel. */
+  async assumirNavegador(): Promise<{ ok: boolean; erro?: string }> {
+    try {
+      await firstValueFrom(this.http.post('/api/jobs/login/assumir', {}));
+      return { ok: true };
+    } catch (e: any) {
+      return { ok: false, erro: e?.error?.erro || 'Não consegui assumir o navegador.' };
     }
   }
 

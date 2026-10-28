@@ -2381,6 +2381,16 @@ app-groups-card {
     background: radial-gradient(circle, var(--gold-deep) 0 5px, var(--surface) 5.5px);
   }
 }
+/* Origem dos produtos: dá pra marcar as duas, então o marcador é quadrado (caixa), não bolinha. */
+.gm-fontes .gm-radio {
+  border-radius: 6px;
+}
+.gm-fontes .gm-fonte-ativa .gm-radio {
+  border-color: var(--gold-deep);
+  background: var(--gold-deep)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.5 4.5L19 7.5'/%3E%3C/svg%3E")
+    center / 15px no-repeat;
+}
 
 /* Lojas do grupo. */
 .gm-lojas {
@@ -2659,6 +2669,40 @@ app-groups-card {
 }
 .btn-link:disabled {
   opacity: 0.5;
+  cursor: default;
+}
+/* "Assumir o navegador": link discreto no rodapé do login; a tela de verdade abre no lugar do passo a passo. */
+.assumir-navegador {
+  display: flex;
+  justify-content: center;
+  margin-top: 14px;
+}
+.assumir-navegador button {
+  padding: 2px 4px;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 12px;
+  opacity: 0.7;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 2px;
+  transition:
+    opacity 0.14s ease,
+    text-decoration-color 0.14s ease;
+}
+.assumir-navegador button:hover:not(:disabled) {
+  opacity: 1;
+  text-decoration-color: currentColor;
+}
+.assumir-navegador button:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+  opacity: 1;
+}
+.assumir-navegador button:disabled {
   cursor: default;
 }
 /* "ou" + botão de entrar com Google, embaixo do formulário de conta e senha. */
@@ -3255,22 +3299,19 @@ app-estatisticas-controles.topbar-controles {
   outline: 3px solid var(--focus);
   outline-offset: 2px;
 }
-/* Tela estreita: só o ícone, redondo como o sino. O cabeçalho também tem os números do momento
-   (topo-kpis), então o texto sai antes do resto apertar. */
-@media (max-width: 1500px) {
-  .topbar-botao {
-    width: 38px;
-    padding: 0;
-    justify-content: center;
-  }
-  .topbar-botao-texto {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-  }
+/* Só o ícone, redondo como o sino (o nome fica no title e pra leitor de tela). */
+.topbar-botao {
+  width: 38px;
+  padding: 0;
+  justify-content: center;
+}
+.topbar-botao-texto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 /* Botão sozinho no topo (Datas especiais, em Regras de postagem): sem os números do momento ao
    lado, o texto cabe — só vira ícone no celular. */
@@ -4071,6 +4112,9 @@ app-sino {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+}
+.tela-loja-erro {
+  color: var(--danger);
 }
 /* A caixa encolhe até o tamanho da imagem: o clique e a marca usam as mesmas proporções. */
 .tela-loja-imagem {
@@ -5345,6 +5389,40 @@ a.gf-item-titulo:hover {
 }
 .tk-item + .tk-item {
   border-left: 1px solid var(--border);
+}
+/* Cabeçalho do Painel: os dois números numa pílula só, da altura dos botões de ícone. O rótulo
+   fica no tooltip e para leitores de tela. */
+.tk-mini {
+  height: 38px;
+  padding: 0 4px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+}
+.tk-mini .tk-item {
+  gap: 7px;
+  padding: 0 12px;
+}
+.tk-mini .tk-item + .tk-item {
+  border-left: 1px solid var(--border);
+}
+.tk-mini .tk-item svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+}
+.tk-mini .tk-item dt {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.tk-mini .tk-item dd {
+  font-size: 14px;
+  font-weight: 600;
 }
 /* Números da origem em Grupos: cada ícone na cor da chave do card. */
 .tk-item svg[data-cor='ouro'] {

@@ -8,6 +8,7 @@ import { LojasUiService } from '../../../core/services/lojas-ui.service';
 import { ConfirmacaoService } from '../../../core/services/confirmacao.service';
 import { VerificacaoService } from '../../../core/services/verificacao.service';
 import { GanhosService } from '../../../core/services/ganhos.service';
+import { TelaAoVivo } from '../../../shared/tela-ao-vivo/tela-ao-vivo';
 
 const ROTULO: Record<Provedor, string> = {
   mercadolivre: 'Mercado Livre',
@@ -83,7 +84,7 @@ interface CampoModal {
 @Component({
   selector: 'app-loja-dialog',
   standalone: true,
-  imports: [FormsModule, NgTemplateOutlet],
+  imports: [FormsModule, NgTemplateOutlet, TelaAoVivo],
   templateUrl: './loja-dialog.html',
 })
 export class LojaDialog {
@@ -231,7 +232,13 @@ export class LojaDialog {
     if (!t || this.pedido() || this.fim() || !this.emLogin()) return null;
     return t.etapas === this.etapas().length ? t.pedido : null;
   });
-  protected readonly janelaLarga = computed(() => (this.pedido() ?? this.paginaEsperando())?.forma === 'camera');
+  protected readonly janelaLarga = computed(() =>
+    ['camera', 'navegador'].includes((this.pedido() ?? this.paginaEsperando())?.forma ?? ''),
+  );
+  /** A pessoa assumiu o navegador: a tela de verdade está no modal. */
+  protected readonly noNavegador = computed(() => this.pedido()?.forma === 'navegador');
+  /** Clicou em "Assumir o navegador" e a tela ainda não chegou. */
+  protected readonly assumindo = signal(false);
 
   /** Quadros marcados no desafio de imagens (forma 'grade'). */
   protected readonly quadrosMarcados = signal<number[]>([]);
@@ -297,6 +304,11 @@ export class LojaDialog {
       } else if (p || this.fim()) {
         this.ultimaPagina.set(null);
       }
+    });
+
+    // A tela ao vivo chegou (ou o login acabou): sai do "Abrindo o navegador…".
+    effect(() => {
+      if (this.noNavegador() || this.fim() || !this.emLogin()) untracked(() => this.assumindo.set(false));
     });
 
     // Cada pergunta nova do robô começa com os campos limpos.
@@ -452,6 +464,21 @@ export class LojaDialog {
 
   protected reenviarCodigo(): void {
     void this.responderCom({ acao: 'reenviar' });
+  }
+
+  protected async assumirNavegador(): Promise<void> {
+    this.assumindo.set(true);
+    this.erro.set(null);
+    const r = await this.jobsService.assumirNavegador();
+    if (!r.ok) {
+      this.assumindo.set(false);
+      this.erro.set(r.erro ?? null);
+    }
+  }
+
+  /** Sai da tela ao vivo: o robô lê a página de novo e volta a conduzir. */
+  protected voltarAoGuiado(): void {
+    void this.responderCom({ acao: 'voltar' });
   }
 
   // ---- câmera do reconhecimento facial ---------------------------------------

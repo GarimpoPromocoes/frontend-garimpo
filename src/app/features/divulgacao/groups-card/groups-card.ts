@@ -136,14 +136,40 @@ export class GroupsCard {
 
   // ---- origem (Garimpar / Clonar) -------------------------------------------
 
-  async definirFonte(g: GrupoTematico, fonte: FonteProdutos): Promise<void> {
-    if (this.fonteDe(g) === fonte || this.trocando()) return;
+  // Dá pra marcar as duas: Clonar + Garimpar = clona primeiro e, sem nada na fila dos concorrentes,
+  // garimpa nas lojas (fonte "clonagem" com garimpoReserva). Pelo menos uma fica marcada.
+
+  protected garimpa(g: GrupoTematico): boolean {
+    return this.fonteDe(g) === 'garimpo' || !!g.garimpoReserva;
+  }
+
+  protected clona(g: GrupoTematico): boolean {
+    return this.fonteDe(g) === 'clonagem';
+  }
+
+  /** A origem depois de marcar/desmarcar `qual`; null = ficaria sem nenhuma (não muda). */
+  private origemTrocada(g: GrupoTematico, qual: FonteProdutos): Pick<GrupoTematico, 'fonte' | 'garimpoReserva'> | null {
+    const garimpa = qual === 'garimpo' ? !this.garimpa(g) : this.garimpa(g);
+    const clona = qual === 'clonagem' ? !this.clona(g) : this.clona(g);
+    if (!garimpa && !clona) return null;
+    return clona ? { fonte: 'clonagem', garimpoReserva: garimpa } : { fonte: 'garimpo', garimpoReserva: false };
+  }
+
+  async alternarOrigem(g: GrupoTematico, qual: FonteProdutos): Promise<void> {
+    const nova = this.origemTrocada(g, qual);
+    if (!nova || this.trocando()) return;
     this.erroCard.set(null);
     this.trocando.set(g.id);
-    const ok = await this.gravar(this.grupos().map((x) => (x.id === g.id ? { ...x, fonte } : x)), this.erroCard);
+    const ok = await this.gravar(this.grupos().map((x) => (x.id === g.id ? { ...x, ...nova } : x)), this.erroCard);
     this.trocando.set(null);
     // Acabou de virar clonagem e ainda clona de todos: já abre a escolha dos concorrentes.
-    if (ok && fonte === 'clonagem' && !(g.gruposClonagem ?? []).length) this.escolherConcorrentes(g, true);
+    if (ok && !this.clona(g) && nova.fonte === 'clonagem' && !(g.gruposClonagem ?? []).length) this.escolherConcorrentes(g, true);
+  }
+
+  alternarOrigemRascunho(qual: FonteProdutos): void {
+    const r = this.rascunho();
+    const nova = r && this.origemTrocada(r, qual);
+    if (r && nova) this.rascunho.set({ ...r, ...nova });
   }
 
   escolherConcorrentes(g: GrupoTematico, escolher = false): void {

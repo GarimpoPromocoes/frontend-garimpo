@@ -252,7 +252,7 @@
         @case ('repeticao') {
           <div class="field">
             <span class="field-rotulo" id="regras-postagem-2">Tempo mínimo antes de repetir</span>
-            <span class="hint">Nesse período o mesmo produto não volta ao grupo — nem se o preço cair.</span>
+            <span class="hint">Nesse período o mesmo produto só volta ao grupo se o preço cair 10% ou mais, o desconto subir 10 pontos ou virar oferta relâmpago.</span>
             <div role="group" aria-labelledby="regras-postagem-2" class="regra-chips">
               @for (o of opcoesCooldown; track o.horas) {
                 <button type="button" class="regra-chip" [class.regra-chip-ativa]="n(rCooldown()) === o.horas" (click)="rCooldown.set(o.horas)">
@@ -285,8 +285,11 @@
           <div class="regra-como">
             <strong>Como fica, na prática</strong>
             <ol>
-              <li>Postou um produto: ele fica <strong>{{ textoHoras(n(rCooldown())) }}</strong> sem voltar a esse grupo.</li>
-              <li>Depois disso, volta assim que <strong>o preço baixar ou o desconto subir</strong>.</li>
+              <li>
+                Postou um produto: ele fica <strong>{{ textoHoras(n(rCooldown())) }}</strong> sem voltar a esse grupo — a não ser
+                que o preço caia <strong>10% ou mais</strong>, o desconto suba 10 pontos ou ele vire <strong>oferta relâmpago</strong>.
+              </li>
+              <li>Depois disso, volta assim que <strong>o preço baixar ou o desconto subir</strong>, qualquer valor.</li>
               @if (n(rRepostar()) > 0) {
                 <li>E passados <strong>{{ rRepostar() }} dias</strong>, pode voltar mesmo com o mesmo preço.</li>
               } @else {
@@ -306,8 +309,14 @@
             <div class="regra-como" id="regras-postagem-cupons-ajuda">
               <ol>
                 <li>
-                  O robô lê as mensagens dos grupos em que o seu WhatsApp está (menos os seus) e guarda todo
-                  <strong>código</strong> de cupom que aparecer. Cada código vale 48h desde a última vez que foi visto.
+                  O robô lê as mensagens de todos os grupos e canais em que o WhatsApp dele está (menos os seus, e não
+                  só os da clonagem) e guarda todo <strong>código</strong> de cupom que aparecer. Os códigos valem só no dia:
+                  virou o dia, ele joga fora os de ontem e começa a juntar os de hoje.
+                </li>
+                <li>
+                  As listas do dia saem <strong>bem separadas</strong>: o horário de funcionamento é dividido em partes
+                  iguais e sai no máximo uma por parte. Com 2x, uma de manhã e outra no fim da tarde; com 3x, manhã,
+                  tarde e noite.
                 </li>
                 <li>
                   Na hora da lista, ele lê os grupos de novo e <strong>sorteia a loja</strong>: entram as ligadas que juntaram
