@@ -1,10 +1,24 @@
 import { Component, DestroyRef, WritableSignal, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ConfigService } from '../../../core/services/config.service';
+import { ConfigService, CupomDeGrupo } from '../../../core/services/config.service';
 import { StatusService } from '../../../core/services/status.service';
 import { HORARIO_PADRAO, dentroDoHorario, duracaoJanela, horaValida, passaDaMeiaNoite } from './horario';
 import { REGRAS_MARCA, conferirMarca } from './marca-dagua';
 import { COPY_MAX, COPY_PADRAO, EXEMPLO_COM_CUPOM, EXEMPLO_SEM_CUPOM, VARIAVEIS_COPY, aplicarModelo, formatarWhatsApp } from './copy';
+import {
+  EXEMPLO_CUPONS,
+  LINK_MAX,
+  LISTA_COPY_MAX,
+  LISTA_COPY_PADRAO,
+  LISTA_MAX_CUPONS,
+  LOJAS,
+  OPCOES_LISTA_POR_DIA,
+  VARIAVEIS_LISTA,
+  comporLista,
+  lojasPadrao,
+  valorCurto,
+  type Loja,
+} from './lista-cupons';
 
 /** Quantas mensagens de divulgação diferentes dá pra cadastrar (o robô alterna entre elas). */
 const MAX_DIVULGACOES = 3;
@@ -41,26 +55,7 @@ const OPCOES_REPOSTAR = [
   { dias: 30, rotulo: '30 dias' },
 ];
 
-/** Prefixo dos códigos de cupom: mesma regra do backend (config.service.js / nomeCupom.js). */
-const PREFIXO_PADRAO = 'GARIMPO';
-const PREFIXO_MIN = 3;
-const PREFIXO_MAX = 12;
-
-/** Divisões prontas das mensagens: só cupom / produto com cupom (o resto é produto sem cupom). */
-const DIVISOES = [
-  { nome: 'Poucos cupons', soCupom: 5, produtoCupom: 10 },
-  { nome: 'Equilibrado', soCupom: 10, produtoCupom: 25 },
-  { nome: 'Muitos cupons', soCupom: 20, produtoCupom: 40 },
-];
-
-function limparPrefixo(p: string): string {
-  return (p || '')
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toUpperCase()
-    .replace(/[^A-Z0-9]/g, '')
-    .slice(0, PREFIXO_MAX);
-}
+/** Atalhos da faixa "produto com cupom" (o resto é produto sem cupom). */
 
 function textoHoras(h: number): string {
   if (!h) return 'sem espera';
@@ -112,9 +107,14 @@ export class RegrasPostagem {
   protected readonly ritmos = RITMOS;
   protected readonly opcoesCooldown = OPCOES_COOLDOWN;
   protected readonly opcoesRepostar = OPCOES_REPOSTAR;
-  protected readonly divisoes = DIVISOES;
-  protected readonly prefixoPadrao = PREFIXO_PADRAO;
-  protected readonly prefixoMax = PREFIXO_MAX;
+  protected readonly opcoesListaPorDia = OPCOES_LISTA_POR_DIA;
+  protected readonly listaMaxCupons = LISTA_MAX_CUPONS;
+  protected readonly lojas = LOJAS;
+  protected readonly linkMax = LINK_MAX;
+  protected readonly listaCopyMax = LISTA_COPY_MAX;
+  protected readonly listaCopyPadrao = LISTA_COPY_PADRAO;
+  protected readonly variaveisLista = VARIAVEIS_LISTA;
+  protected readonly valorCurto = valorCurto;
   protected readonly textoHoras = textoHoras;
   protected readonly ehNumero = ehNumero;
   protected readonly n = (v: unknown): number => Number(v) || 0;
@@ -144,11 +144,11 @@ export class RegrasPostagem {
 
   protected readonly cupons = computed(() => {
     const c = this.cfg()?.cupons;
-    const prefixo = limparPrefixo(c?.prefixo ?? '') || PREFIXO_PADRAO;
     const ativo = c?.ativo ?? true;
-    const soCupom = ativo ? (c?.percentualSozinho ?? 10) : 0;
-    const produtoCupom = ativo ? (c?.percentualProduto ?? 15) : 0;
-    return { ativo, prefixo, exemplo: `${prefixo}10OFF`, soCupom, produtoCupom, produto: 100 - soCupom - produtoCupom };
+    const porDia = ativo ? (c?.lista?.porDia ?? 0) : 0;
+    const lojas = lojasPadrao(c?.lista?.lojas);
+    const lojasLigadas = LOJAS.filter((l) => lojas[l.id].ativa).map((l) => l.nome);
+    return { ativo, porDia, lojasLigadas };
   });
 
   protected readonly cuponsDisponiveis = computed(() => this.statusService.status()?.cuponsAtivos ?? null);
@@ -263,13 +263,19 @@ export class RegrasPostagem {
   protected readonly rCooldown = signal(48);
   protected readonly rRepostar = signal(14);
   protected readonly rCupomAtivo = signal(true);
-  protected readonly rCupomPrefixo = signal('');
-  /** As duas alças do slider: fim do "só cupom" e fim do "produto com cupom" (0–100). */
-  protected readonly rCorte1 = signal(10);
-  protected readonly rCorte2 = signal(25);
-  protected readonly rSoCupom = computed(() => Number(this.rCorte1()));
-  protected readonly rProdutoCupom = computed(() => Number(this.rCorte2()) - Number(this.rCorte1()));
-  protected readonly rProdutoSem = computed(() => 100 - Number(this.rCorte2()));
+  /** Lista de cupons: vezes por dia em cada grupo (0 = desligada) e, por loja, imagem e link. */
+  protected readonly rCupomPorDia = signal(0);
+  protected readonly rCupomLojas = signal(lojasPadrao());
+  /** Loja com a imagem subindo agora (null = nenhuma). */
+  /** Loja da lista de cupons com os campos abertos (uma por vez, pra janela não virar um paredão). */
+  protected readonly rCupomAberta = signal<Loja | null>(null);
+  /** Explicação de "como funciona", atrás do "i" do cabeçalho. */
+  protected readonly rCupomAjuda = signal(false);
+  protected readonly rCupomSubindo = signal<Loja | null>(null);
+  /** Erro da imagem ou do texto, mostrado na própria loja (o rodapé fica longe). */
+  protected readonly rCupomErros = signal<Partial<Record<Loja, string>>>({});
+  /** Cupons que o robô já achou nos grupos (null = carregando ou sem leitura). */
+  protected readonly cuponsAchados = signal<CupomDeGrupo[] | null>(null);
   protected readonly rDivAtivo = signal(false);
   /** Até MAX_DIVULGACOES mensagens; o robô alterna entre elas. */
   protected readonly rDivTextos = signal<string[]>(['']);
@@ -387,10 +393,30 @@ export class RegrasPostagem {
   protected readonly rRitmo = computed(
     () => RITMOS.find((r) => r.min === Number(this.rMin()) && r.max === Number(this.rMax()))?.id ?? 'personalizado',
   );
-  /** Como os códigos vão sair com o prefixo digitado (mesma ordem de tentativa do robô). */
-  protected readonly rCupomExemplos = computed(() => {
-    const p = limparPrefixo(this.rCupomPrefixo()) || PREFIXO_PADRAO;
-    return [`${p}10OFF`, `${p}OFF10`, `${p}20REAIS`, `${p}FRETE`];
+  /** Cupons achados de cada loja (null = carregando). */
+  protected readonly cuponsPorLoja = computed(() => {
+    const achados = this.cuponsAchados();
+    const out = {} as Record<Loja, CupomDeGrupo[] | null>;
+    for (const l of LOJAS) out[l.id] = achados ? achados.filter((c) => c.loja === l.id) : null;
+    return out;
+  });
+  /** Prévia da mensagem de cada loja: com os cupons achados, ou os de exemplo enquanto não há nenhum. */
+  protected readonly rListaPrevias = computed(() => {
+    const out = {} as Record<Loja, string>;
+    for (const { id } of LOJAS) {
+      const achados = this.cuponsPorLoja()[id];
+      const l = this.rCupomLojas()[id];
+      out[id] = formatarWhatsApp(comporLista(id, achados?.length ? achados : EXEMPLO_CUPONS[id], l.link, l.copy));
+    }
+    return out;
+  });
+  protected readonly rListaImagemUrls = computed(() => {
+    const out = {} as Record<Loja, string | null>;
+    for (const { id } of LOJAS) {
+      const img = this.rCupomLojas()[id].imagem;
+      out[id] = img ? (this.divImagemUrls()[img] ?? null) : null;
+    }
+    return out;
   });
   /** O tempo mínimo vence a "repetição liberada": avisa quando um anula o outro. */
   protected readonly rConflitoRepeticao = computed(() => {
@@ -408,10 +434,13 @@ export class RegrasPostagem {
     this.rCooldown.set(r.cooldownHoras);
     this.rRepostar.set(r.repostarAposDias);
     this.rCupomAtivo.set(c?.ativo ?? true);
-    this.rCupomPrefixo.set(c?.prefixo ?? '');
-    const soCupom = c?.percentualSozinho ?? 10;
-    this.rCorte1.set(soCupom);
-    this.rCorte2.set(Math.min(100, soCupom + (c?.percentualProduto ?? 15)));
+    this.rCupomPorDia.set(c?.lista?.porDia ?? 0);
+    this.rCupomLojas.set(lojasPadrao(c?.lista?.lojas));
+    this.rCupomErros.set({});
+    if (j === 'cupons') {
+      void this.carregarDivImagens(Object.values(this.rCupomLojas()).map((l) => l.imagem));
+      void this.configService.cuponsDosGrupos().then((lista) => this.cuponsAchados.set(lista));
+    }
     const d = this.divulgacao();
     this.rDivAtivo.set(d.ativo);
     this.rDivTextos.set(d.textos.length ? [...d.textos] : ['']);
@@ -432,6 +461,8 @@ export class RegrasPostagem {
     this.rMarcaArquivo.set(null);
     this.trocarUrl(this.rMarcaPrevia, null);
     this.rMarcaRemover.set(false);
+    this.rCupomAberta.set(null);
+    this.rCupomAjuda.set(false);
     this.janela.set(j);
   }
 
@@ -441,27 +472,61 @@ export class RegrasPostagem {
     this.erro.set(null);
   }
 
-  /** As alças não se cruzam: a primeira nunca passa da segunda. */
-  mudarCorte1(v: number): void {
-    this.rCorte1.set(Math.max(0, Math.min(Number(v) || 0, Number(this.rCorte2()))));
+  /** Liga/desliga uma loja da lista de cupons; ligar já abre os campos dela. */
+  ligarLojaCupom(loja: Loja): void {
+    const ativa = !this.rCupomLojas()[loja].ativa;
+    this.mudarLojaCupom(loja, { ativa });
+    this.rCupomAberta.set(ativa ? loja : this.rCupomAberta() === loja ? null : this.rCupomAberta());
   }
 
-  mudarCorte2(v: number): void {
-    this.rCorte2.set(Math.min(100, Math.max(Number(v) || 0, Number(this.rCorte1()))));
+  /** Muda um campo de uma loja na janela de cupons. */
+  mudarLojaCupom(loja: Loja, mudanca: Partial<{ ativa: boolean; imagem: string; link: string; copy: string }>): void {
+    this.rCupomLojas.update((m) => ({ ...m, [loja]: { ...m[loja], ...mudanca } }));
   }
 
-  escolherDivisao(d: { soCupom: number; produtoCupom: number }): void {
-    this.rCorte1.set(d.soCupom);
-    this.rCorte2.set(d.soCupom + d.produtoCupom);
+  private erroDaLoja(loja: Loja, msg: string | null): void {
+    this.rCupomErros.update((m) => ({ ...m, [loja]: msg ?? undefined }));
+    if (msg) this.rCupomAberta.set(loja);
   }
 
-  divisaoAtiva(d: { soCupom: number; produtoCupom: number }): boolean {
-    return this.rSoCupom() === d.soCupom && this.rProdutoCupom() === d.produtoCupom;
+  /** Imagem da mensagem de cupons de uma loja: sobe na hora (mesma pasta da divulgação) e vale ao salvar a janela. */
+  async escolherImagemCupons(loja: Loja, campo: HTMLInputElement): Promise<void> {
+    const arquivo = campo.files?.[0];
+    campo.value = '';
+    if (!arquivo) return;
+    this.erroDaLoja(loja, null);
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(arquivo.type)) {
+      this.erroDaLoja(loja, 'A imagem precisa ser PNG, JPG ou WebP.');
+      return;
+    }
+    if (arquivo.size > 5 * 1024 * 1024) {
+      this.erroDaLoja(loja, 'A imagem pode ter no máximo 5 MB.');
+      return;
+    }
+    this.rCupomSubindo.set(loja);
+    const r = await this.configService.subirDivulgacaoImagem(arquivo);
+    this.rCupomSubindo.set(null);
+    if (!r.id) {
+      this.erroDaLoja(loja, r.erro ?? 'Não consegui enviar a imagem.');
+      return;
+    }
+    const id = r.id;
+    if (!this.divImagemUrls()[id]) this.divImagemUrls.update((m) => ({ ...m, [id]: URL.createObjectURL(arquivo) }));
+    this.mudarLojaCupom(loja, { imagem: id });
   }
 
-  /** O campo já mostra o prefixo do jeito que vai sair: maiúsculo, sem espaço, acento ou símbolo. */
-  mudarPrefixo(v: string): void {
-    this.rCupomPrefixo.set(limparPrefixo(v));
+  /** Coloca a variável no texto da loja, onde está o cursor (ou no fim). */
+  inserirVariavelLista(loja: Loja, nome: string, campo: HTMLTextAreaElement): void {
+    const atual = this.rCupomLojas()[loja].copy;
+    const ini = campo.selectionStart ?? atual.length;
+    const fim = campo.selectionEnd ?? atual.length;
+    const trecho = `{${nome}}`;
+    this.mudarLojaCupom(loja, { copy: atual.slice(0, ini) + trecho + atual.slice(fim) });
+    const pos = ini + trecho.length;
+    setTimeout(() => {
+      campo.focus();
+      campo.setSelectionRange(pos, pos);
+    });
   }
 
   /** Coloca a variável onde está o cursor do campo (ou no fim). */
@@ -567,17 +632,36 @@ export class RegrasPostagem {
     } else if (j === 'alerta') {
       partial = { alertaConexao: { ativo: this.rAlertaAtivo(), grupo: (this.rAlertaGrupo() || '').trim() } };
     } else {
-      const prefixo = limparPrefixo(this.rCupomPrefixo());
-      if (prefixo && prefixo.length < PREFIXO_MIN) {
-        this.erro.set(`O prefixo precisa de pelo menos ${PREFIXO_MIN} letras ou números (ou deixe em branco para usar ${PREFIXO_PADRAO}).`);
-        return;
+      for (const l of LOJAS) {
+        const loja = this.rCupomLojas()[l.id];
+        const link = loja.link.trim();
+        if (link && !/^https?:\/\/\S+$/i.test(link)) {
+          this.erroDaLoja(l.id, 'O link precisa começar com http:// ou https://.');
+          this.erro.set(`Confira o link ${l.daLoja}.`);
+          return;
+        }
+        if (loja.copy.trim() && !loja.copy.includes('{cupons}')) {
+          this.erroDaLoja(l.id, 'Coloque {cupons} no texto — é onde entram os códigos.');
+          this.erro.set(`Confira o texto ${l.daLoja}.`);
+          return;
+        }
       }
+      // Texto igual ao padrão (ou vazio) grava vazio: a loja segue o texto padrão do robô.
+      const lojas = Object.fromEntries(
+        LOJAS.map(({ id }) => {
+          const l = this.rCupomLojas()[id];
+          return [id, { ...l, link: l.link.trim(), copy: l.copy === LISTA_COPY_PADRAO || !l.copy.trim() ? '' : l.copy }];
+        }),
+      );
+      // "Só cupom" do ritmo (um cupom por mensagem, com o nosso prefixo) saiu: a lista de cupons
+      // dos grupos tomou o lugar. Zera aqui pra conta antiga parar de reservar vez pra ele.
       partial = {
         cupons: {
           ativo: this.rCupomAtivo(),
-          prefixo,
-          percentualSozinho: this.rSoCupom(),
-          percentualProduto: this.rProdutoCupom(),
+          percentualSozinho: 0,
+          // Sem porcentagem: produto vai com o cupom sempre que tiver um.
+          percentualProduto: 0,
+          lista: { porDia: Number(this.rCupomPorDia()), lojas },
         },
       };
     }

@@ -271,3 +271,131 @@
 .regra-como .hint-text {
   margin: 10px 0 0;
 }
+
+/* Lista de cupons: uma linha por loja; a loja aberta mostra os campos e a previa lado a lado. */
+.cupom-lojas {
+  /* Item do flex da janela: com overflow hidden ele encolheria e cortaria a loja aberta em vez
+     de deixar a janela rolar. */
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.cupom-loja + .cupom-loja {
+  border-top: 1px solid var(--border);
+}
+.cupom-loja-off .cupom-loja-nome {
+  color: var(--text-muted);
+}
+.cupom-loja-topo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 0 0 12px;
+}
+.toggle-switch-sm {
+  width: 34px;
+  height: 20px;
+}
+.toggle-switch-sm .toggle-switch-thumb {
+  top: 3px;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+}
+.toggle-switch-sm.toggle-switch-on .toggle-switch-thumb {
+  transform: translateX(14px);
+}
+.cupom-loja-abrir {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 12px 0 0;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+.cupom-loja-abrir:disabled {
+  cursor: default;
+}
+.cupom-loja-abrir:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: -3px;
+}
+.cupom-loja-nome {
+  font-size: 14px;
+  font-weight: 500;
+}
+.cupom-loja-conta {
+  margin-left: auto;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+.cupom-loja-seta {
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+  transition: transform 0.16s ease;
+}
+.cupom-loja-aberta .cupom-loja-seta {
+  transform: rotate(180deg);
+}
+.cupom-loja-corpo {
+  padding: 4px 12px 14px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 300px);
+  gap: 16px;
+  align-items: start;
+}
+.cupom-loja-campos {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.cupom-loja-copy {
+  min-height: 170px;
+}
+.cupom-loja-padrao {
+  align-self: flex-start;
+}
+@media (max-width: 720px) {
+  .cupom-loja-corpo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* "i" do cabecalho que mostra/esconde a explicacao de como funciona. */
+.modal-titulo-linha {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-info {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--border-control);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  font: italic 600 12px/1 Georgia, serif;
+  cursor: pointer;
+}
+.btn-info:hover,
+.btn-info-on {
+  border-color: var(--text);
+  color: var(--text);
+}
+.btn-info:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}

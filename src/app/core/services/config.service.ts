@@ -40,12 +40,35 @@ export interface Agendamento {
 
 export interface Cupons {
   ativo: boolean;
-  /** Começo do nome dos códigos que o robô cria nas lojas (vazio = GARIMPO). */
+  /** Antigo: começo dos códigos que o robô criava (hoje o Mercado Livre gera o código). */
   prefixo?: string;
-  /** % das mensagens que são só um cupom. */
+  /** Antigo: % das mensagens que são só um cupom (a lista de cupons tomou o lugar). */
   percentualSozinho?: number;
-  /** % das mensagens que são produto com cupom. O resto (100 − os dois) é produto sem cupom. */
+  /** % das mensagens que são produto com cupom. O resto é produto sem cupom. */
   percentualProduto?: number;
+  /** Mensagem "lista de cupons": vezes por dia em cada grupo (0 = desligada) e a imagem (id do upload). */
+  lista?: { porDia: number; lojas: Partial<Record<'mercadolivre' | 'shopee' | 'amazon', LojaListaCupons>> };
+}
+
+/** Lista de cupons de uma loja: se entra no revezamento, a imagem (id do upload) e o link do fim. */
+export interface LojaListaCupons {
+  ativa: boolean;
+  imagem: string;
+  link: string;
+  /** Texto da mensagem, com {cupons} (vazio = o padrão do robô). */
+  copy: string;
+}
+
+/** Cupom que o robô achou nas mensagens dos outros grupos (vai na próxima lista de cupons). */
+export interface CupomDeGrupo {
+  codigo: string;
+  tipo: 'percentual' | 'valorFixo' | 'frete' | null;
+  valor: number | null;
+  minimo: number | null;
+  limite: number | null;
+  loja: 'mercadolivre' | 'amazon' | 'shopee' | null;
+  grupos: string[];
+  vistoEm: string;
 }
 
 export interface Divulgacao {
@@ -166,6 +189,16 @@ export class ConfigService {
       return { id: r.id };
     } catch (e: any) {
       return { erro: e?.error?.erro || 'Não consegui enviar a imagem.' };
+    }
+  }
+
+  /** Cupons achados nos outros grupos nas últimas 48h (null = não consegui ler). */
+  async cuponsDosGrupos(): Promise<CupomDeGrupo[] | null> {
+    try {
+      const r = await firstValueFrom(this.http.get<{ cupons: CupomDeGrupo[] }>('/api/config/cupons-dos-grupos'));
+      return r.cupons ?? [];
+    } catch {
+      return null;
     }
   }
 

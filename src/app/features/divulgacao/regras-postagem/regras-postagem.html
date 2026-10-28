@@ -59,13 +59,11 @@
         Cupons de desconto
       </span>
       @if (cupons().ativo) {
-        <span class="rg-item-valor">{{ cupons().soCupom + cupons().produtoCupom }}%</span>
-        <span class="regra-barra rg-barra" aria-hidden="true">
-          <span class="regra-barra-lista" [style.width.%]="cupons().soCupom"></span>
-          <span class="regra-barra-produto" [style.width.%]="cupons().produtoCupom"></span>
-          <span class="regra-barra-ofertas" [style.width.%]="cupons().produto"></span>
+        <span class="rg-item-valor">{{ cupons().porDia ? cupons().porDia + 'x por dia' : 'Sem lista' }}</span>
+        <span class="rg-item-sub">
+          {{ cupons().porDia ? (cupons().lojasLigadas.join(', ') || 'Nenhuma loja') : 'Lista de cupons desligada' }} ·
+          produto com cupom sempre que tiver
         </span>
-        <span class="rg-item-sub">das mensagens com cupom</span>
       } @else {
         <span class="rg-item-valor">Desligado</span>
         <span class="rg-item-sub">Só saem ofertas comuns</span>
@@ -162,7 +160,7 @@
 <!-- ================================ janelas ================================ -->
 @if (janela(); as j) {
   <div class="modal-fundo" (click)="fechar()">
-    <div class="modal-caixa modal-grupo" [class.modal-copy]="j === 'copy'" role="dialog" aria-modal="true" aria-label="Ajustar regra de postagem" (click)="$event.stopPropagation()">
+    <div class="modal-caixa modal-grupo" [class.modal-copy]="j === 'copy' || j === 'cupons'" role="dialog" aria-modal="true" aria-label="Ajustar regra de postagem" (click)="$event.stopPropagation()">
       <div class="card-header">
         <div class="grupo-modal-titulo">
           <span class="regra-icone">
@@ -178,7 +176,7 @@
             }
           </span>
           <div>
-            <h2>
+            <h2 class="modal-titulo-linha">
               @switch (j) {
                 @case ('frequencia') { Frequência das postagens }
                 @case ('repeticao') { Repetição de produtos }
@@ -189,12 +187,17 @@
                 @case ('copy') { Texto da postagem }
                 @case ('marca') { Marca d’água }
               }
+              @if (j === 'cupons') {
+                <button type="button" class="btn-info" [class.btn-info-on]="rCupomAjuda()"
+                  [attr.aria-expanded]="rCupomAjuda()" aria-controls="regras-postagem-cupons-ajuda"
+                  aria-label="Como funciona" title="Como funciona" (click)="rCupomAjuda.set(!rCupomAjuda())">i</button>
+              }
             </h2>
             <p class="card-subtitle">
               @switch (j) {
                 @case ('frequencia') { O robô sorteia a espera dentro da faixa — assim o envio parece de gente, não de robô. }
                 @case ('repeticao') { Evita que a mesma oferta apareça de novo cedo demais no mesmo grupo. }
-                @case ('cupons') { O cupom vai na mensagem como código: quem compra só digita no fim da compra, sem ativar nada na página do produto. }
+                @case ('cupons') { O robô junta os códigos de cupom que aparecem nos outros grupos e manda uma mensagem só de cupons, quantas vezes por dia você escolher. }
                 @case ('divulgacao') { Um recado seu com o Linktree dos seus grupos, que sai esporadicamente — no máximo 1 ou 2 vezes por dia em cada grupo. }
                 @case ('alerta') { Se o Mercado Livre, a Amazon, a Shopee ou o Telegram cair enquanto o robô roda, ele avisa pelo WhatsApp para você reconectar. }
                 @case ('copy') { Monte a mensagem do produto do seu jeito. As partes entre chaves viram os dados de cada oferta. }
@@ -299,6 +302,28 @@
         }
 
         @case ('cupons') {
+          @if (rCupomAjuda()) {
+            <div class="regra-como" id="regras-postagem-cupons-ajuda">
+              <ol>
+                <li>
+                  O robô lê as mensagens dos grupos em que o seu WhatsApp está (menos os seus) e guarda todo
+                  <strong>código</strong> de cupom que aparecer. Cada código vale 48h desde a última vez que foi visto.
+                </li>
+                <li>
+                  Na hora da lista, ele lê os grupos de novo e <strong>sorteia a loja</strong>: entram as ligadas que juntaram
+                  cupom novo desde a última vez. Cada loja sai uma vez por rodada, em ordem aleatória, antes de alguma repetir.
+                </li>
+                <li>
+                  A mensagem leva até {{ listaMaxCupons }} códigos dessa loja (os que ainda não saíram no grupo primeiro), com o
+                  texto, a imagem e o link que você pôs para ela.
+                </li>
+                <li>Cupom que não diz de qual loja é fica de fora.</li>
+                <li>Cupom de <strong>primeira compra</strong> é sempre ignorado.</li>
+                <li>Nas ofertas de produto, o cupom vai junto <strong>sempre que tiver</strong> um; sem cupom, a oferta sai normal.</li>
+                <li>A lista não conta como oferta: não muda o ritmo das postagens nem a repetição de produtos.</li>
+              </ol>
+            </div>
+          }
           <div class="toggle-row">
             <button
               type="button"
@@ -310,104 +335,141 @@
             >
               <span class="toggle-switch-thumb"></span>
             </button>
-            <span class="toggle-label">Procurar cupons e colocar nas mensagens</span>
+            <span class="toggle-label">Usar cupons nas mensagens</span>
           </div>
 
           @if (rCupomAtivo()) {
             <div class="field">
-              <span class="field-rotulo" id="regras-postagem-4">Como as mensagens se dividem</span>
-              <span class="hint">
-                Arraste as duas bolinhas. Em cada grupo o robô segue essa proporção: olha as últimas mensagens e manda
-                o tipo que está mais atrasado.
-              </span>
-              <div role="group" aria-labelledby="regras-postagem-4" class="regra-chips">
-                @for (d of divisoes; track d.nome) {
-                  <button type="button" class="regra-chip" [class.regra-chip-ativa]="divisaoAtiva(d)" (click)="escolherDivisao(d)">
-                    {{ d.nome }}
-                  </button>
-                }
-              </div>
-              <div class="ritmo-slider">
-                <div class="regra-barra regra-barra-grande ritmo-trilho" aria-hidden="true">
-                  <span class="regra-barra-lista" [style.width.%]="rSoCupom()"></span>
-                  <span class="regra-barra-produto" [style.width.%]="rProdutoCupom()"></span>
-                  <span class="regra-barra-ofertas" [style.width.%]="rProdutoSem()"></span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  step="1"
-                  aria-label="Fim da faixa só cupom"
-                  [class.ritmo-alca-acima]="rCorte1() >= rCorte2() && rCorte1() > 50"
-                  [ngModel]="rCorte1()"
-                  (ngModelChange)="mudarCorte1($event)"
-                />
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  step="1"
-                  aria-label="Fim da faixa produto com cupom"
-                  [ngModel]="rCorte2()"
-                  (ngModelChange)="mudarCorte2($event)"
-                />
-              </div>
-              <div class="regra-legenda">
-                <span><i class="regra-ponto regra-ponto-lista"></i>Só cupom <strong>{{ rSoCupom() }}%</strong></span>
-                <span><i class="regra-ponto regra-ponto-produto"></i>Produto com cupom <strong>{{ rProdutoCupom() }}%</strong></span>
-                <span><i class="regra-ponto regra-ponto-ofertas"></i>Produto sem cupom <strong>{{ rProdutoSem() }}%</strong></span>
-              </div>
-            </div>
-
-            <div class="field">
-              <label for="regras-postagem-5">Prefixo dos seus cupons</label>
-              <span class="hint">
-                Começo dos códigos que o robô cria quando o Mercado Livre libera a ferramenta de cupons de afiliado para a
-                sua conta (hoje não está liberada). Só letras e números, de 3 a {{ prefixoMax }}. Em branco, usa
-                {{ prefixoPadrao }}.
-              </span>
-              <input id="regras-postagem-5"
-                type="text"
-                [attr.maxlength]="prefixoMax"
-                autocapitalize="characters"
-                spellcheck="false"
-                [ngModel]="rCupomPrefixo()"
-                (ngModelChange)="mudarPrefixo($event)"
-                [placeholder]="prefixoPadrao"
-              />
-              <div class="regra-chips">
-                @for (ex of rCupomExemplos(); track ex) {
-                  <span class="regra-chip">{{ ex }}</span>
+              <span class="field-rotulo" id="regras-postagem-cupons-vezes">Mensagem de cupons — quantas vezes por dia, em cada grupo</span>
+              <div role="group" aria-labelledby="regras-postagem-cupons-vezes" class="regra-chips">
+                @for (o of opcoesListaPorDia; track o.vezes) {
+                  <button type="button" class="regra-chip" [class.regra-chip-ativa]="n(rCupomPorDia()) === o.vezes"
+                    (click)="rCupomPorDia.set(o.vezes)">{{ o.rotulo }}</button>
                 }
               </div>
             </div>
 
-            <div class="regra-como">
-              <strong>Como fica, na prática</strong>
-              <ol>
-                <li>
-                  Só vai cupom com <strong>código</strong>, que a pessoa digita no fim da compra. Cupom de ativar na página do
-                  produto não entra — é trabalho a mais para quem compra.
-                </li>
-                <li>
-                  De onde vem o código: o que a página do produto da Amazon manda inserir, o código da loja que veio numa
-                  mensagem clonada (ex.: MELI20) e os códigos com o seu prefixo, quando o Mercado Livre liberar a ferramenta
-                  de cupons de afiliado para a sua conta.
-                </li>
-                <li><strong>Produto com cupom</strong>: a mensagem sai com o preço já com o cupom e a linha 🎟️ com o código.</li>
-                <li>
-                  <strong>Clonagem</strong>: código da loja na mensagem do concorrente vai igual; o código pessoal dele, não.
-                </li>
-                <li>Cupom de <strong>primeira compra</strong> é sempre ignorado.</li>
-              </ol>
-            </div>
-            <span class="hint">
-              O passo a passo de cada cupom (de que loja veio, para qual produto vale ou por que não serviu) aparece no console do Painel.
-              @if (cuponsDisponiveis() !== null) {
-                Hoje há {{ cuponsDisponiveis() }} {{ cuponsDisponiveis() === 1 ? 'cupom guardado' : 'cupons guardados' }}.
+            @if (n(rCupomPorDia()) > 0) {
+              <div class="cupom-lojas" role="group" aria-label="Lojas da mensagem de cupons">
+              @for (l of lojas; track l.id) {
+                <section class="cupom-loja" [class.cupom-loja-off]="!rCupomLojas()[l.id].ativa"
+                  [class.cupom-loja-aberta]="rCupomAberta() === l.id"
+                  [attr.aria-label]="'Mensagem de cupons ' + l.daLoja">
+                  <div class="cupom-loja-topo">
+                    <button
+                      type="button"
+                      class="toggle-switch toggle-switch-sm"
+                      role="switch"
+                      [attr.aria-checked]="rCupomLojas()[l.id].ativa"
+                      [attr.aria-label]="'Mandar cupons ' + l.daLoja"
+                      [class.toggle-switch-on]="rCupomLojas()[l.id].ativa"
+                      (click)="ligarLojaCupom(l.id)"
+                    >
+                      <span class="toggle-switch-thumb"></span>
+                    </button>
+                    <button type="button" class="cupom-loja-abrir" [disabled]="!rCupomLojas()[l.id].ativa"
+                      [attr.aria-expanded]="rCupomAberta() === l.id"
+                      (click)="rCupomAberta.set(rCupomAberta() === l.id ? null : l.id)">
+                      <span class="cupom-loja-nome">{{ l.nome }}</span>
+                      <span class="cupom-loja-conta">
+                        @if (cuponsPorLoja()[l.id]; as achados) {
+                          {{ achados.length ? achados.length + (achados.length === 1 ? ' cupom' : ' cupons') : 'nenhum cupom ainda' }}
+                        }
+                      </span>
+                      @if (rCupomLojas()[l.id].ativa) {
+                        <svg class="cupom-loja-seta" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                      }
+                    </button>
+                  </div>
+
+                  @if (rCupomLojas()[l.id].ativa && rCupomAberta() === l.id) {
+                    <div class="cupom-loja-corpo">
+                      <div class="cupom-loja-campos">
+                        <div class="field">
+                          <span class="field-rotulo">Imagem</span>
+                          <div class="div-imagem">
+                            @if (rCupomLojas()[l.id].imagem) {
+                              @if (rListaImagemUrls()[l.id]; as url) {
+                                <img class="div-imagem-mini" [src]="url" [alt]="'Imagem da mensagem de cupons ' + l.daLoja" />
+                              } @else {
+                                <span class="div-imagem-mini div-imagem-carregando" aria-hidden="true"></span>
+                              }
+                            }
+                            <label class="btn btn-ghost btn-sm" [class.marca-desligado]="salvando() || !!rCupomSubindo()">
+                              <input type="file" accept="image/png,image/jpeg,image/webp" hidden
+                                [disabled]="salvando() || !!rCupomSubindo()"
+                                (change)="escolherImagemCupons(l.id, campoImagem)" #campoImagem />
+                              {{ rCupomSubindo() === l.id ? 'Enviando…' : rCupomLojas()[l.id].imagem ? 'Trocar imagem' : '+ Imagem' }}
+                            </label>
+                            @if (rCupomLojas()[l.id].imagem) {
+                              <button type="button" class="btn btn-ghost btn-sm" [disabled]="salvando()"
+                                (click)="mudarLojaCupom(l.id, { imagem: '' })">Tirar imagem</button>
+                            } @else {
+                              <span class="hint">Sem imagem, vai o banner de cupom com as cores da loja.</span>
+                            }
+                          </div>
+                        </div>
+
+                        <div class="field">
+                          <label [for]="'regras-postagem-cupons-link-' + l.id">Link no fim da mensagem</label>
+                          <input [id]="'regras-postagem-cupons-link-' + l.id"
+                            type="text"
+                            inputmode="url"
+                            [maxlength]="linkMax"
+                            [ngModel]="rCupomLojas()[l.id].link"
+                            (ngModelChange)="mudarLojaCupom(l.id, { link: $event })"
+                            placeholder="Opcional. Ex.: a sua lojinha de afiliado"
+                          />
+                        </div>
+
+                        <div class="field">
+                          <label [for]="'regras-postagem-cupons-copy-' + l.id">Texto da mensagem</label>
+                          <div class="copy-variaveis" role="group" [attr.aria-label]="'Partes da mensagem ' + l.daLoja">
+                            @for (v of variaveisLista; track v.nome) {
+                              <button type="button" class="regra-chip" [title]="v.dica"
+                                [attr.aria-label]="'Inserir ' + v.rotulo + ': ' + v.dica"
+                                (click)="inserirVariavelLista(l.id, v.nome, campoCopyLista)">{{ v.rotulo }}</button>
+                            }
+                          </div>
+                          <textarea #campoCopyLista
+                            [id]="'regras-postagem-cupons-copy-' + l.id"
+                            class="copy-campo cupom-loja-copy"
+                            [maxlength]="listaCopyMax"
+                            [ngModel]="rCupomLojas()[l.id].copy"
+                            (ngModelChange)="mudarLojaCupom(l.id, { copy: $event })"
+                          ></textarea>
+                          @if (rCupomLojas()[l.id].copy !== listaCopyPadrao) {
+                            <button type="button" class="btn btn-ghost btn-sm cupom-loja-padrao"
+                              (click)="mudarLojaCupom(l.id, { copy: listaCopyPadrao })">Voltar ao texto padrão</button>
+                          }
+                        </div>
+
+                        @if (rCupomErros()[l.id]; as e) {
+                          <div class="info-box info-box-erro" role="alert">{{ e }}</div>
+                        }
+                      </div>
+
+                      <div class="field">
+                        <span class="field-rotulo">Prévia</span>
+                        <div class="copy-balao">
+                          @if (rListaImagemUrls()[l.id]; as url) {
+                            <img class="div-previa-imagem" [src]="url" alt="" />
+                          } @else {
+                            <span class="copy-balao-foto">Banner de cupom {{ l.daLoja }}</span>
+                          }
+                          <div class="copy-balao-texto" [innerHTML]="rListaPrevias()[l.id]"></div>
+                        </div>
+                        @if (!cuponsPorLoja()[l.id]?.length) {
+                          <span class="hint">Com cupons de exemplo, até o robô achar os desta loja.</span>
+                        }
+                      </div>
+                    </div>
+                  }
+                </section>
               }
-            </span>
+              </div>
+            }
+
           } @else {
             <div class="info-box">Com os cupons desligados, só saem ofertas comuns.</div>
           }
