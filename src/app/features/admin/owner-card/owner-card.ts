@@ -2,9 +2,11 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { AdminService, Cliente } from '../../../core/services/admin.service';
 import { ConfirmacaoService } from '../../../core/services/confirmacao.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { Info } from '../../../shared/info/info';
 
 @Component({
   selector: 'app-owner-card',
+  imports: [Info],
   standalone: true,
   templateUrl: './owner-card.html',
 })

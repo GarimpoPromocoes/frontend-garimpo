@@ -3,7 +3,14 @@
     <div class="modal-caixa modal-login" role="dialog" aria-modal="true" aria-label="Conexão com a loja" [class.modal-login-largo]="janelaLarga()" (click)="$event.stopPropagation()">
       <div class="card-header">
         <div class="loja-titulo">
-          <span class="loja-logo-caixa loja-logo-caixa-sm"><img class="loja-logo loja-logo-sm" [src]="logo()" [alt]="rotulo()" /></span>
+          <div class="modal-titulo-linha">
+            <span class="loja-logo-caixa loja-logo-caixa-sm"><img class="loja-logo loja-logo-sm" [src]="logo()" [alt]="rotulo()" /></span>
+            @if (temAjuda()) {
+              <button type="button" class="btn-info" [class.btn-info-on]="mostrarAjuda()"
+                [attr.aria-expanded]="mostrarAjuda()" aria-controls="loja-ajuda"
+                aria-label="Como funciona" title="Como funciona" (click)="mostrarAjuda.set(!mostrarAjuda())">i</button>
+            }
+          </div>
           <p class="card-subtitle" role="status">
             @if (fim(); as f) {
               {{ f.ok ? 'Tudo certo — a conta está conectada.' : 'O login não foi concluído.' }}
@@ -31,6 +38,18 @@
           </svg>
         </button>
       </div>
+
+      @if (temAjuda() && mostrarAjuda()) {
+        <div class="regra-como" id="loja-ajuda">
+          @if (conectada()) {
+            Os dados de acesso estão guardados com criptografia: se {{ artigo() }} {{ rotulo() }} derrubar a sessão durante o
+            trabalho, o robô entra de novo sozinho.
+          } @else if (ajuda(); as a) {
+            {{ a.texto }}
+            <a [href]="a.link" target="_blank" rel="noopener">{{ a.rotuloLink }}</a>
+          }
+        </div>
+      }
 
       @if (emLogin()) {
         @if (etapas().length && !noNavegador()) {
@@ -307,13 +326,6 @@
           </div>
         }
       } @else if (conectada()) {
-        @if (loginGuardado()?.salvo) {
-          <p class="hint-text">
-            Os dados de acesso estão guardados com criptografia: se {{ artigo() }} {{ rotulo() }} derrubar a sessão durante o
-            trabalho, o robô entra de novo sozinho.
-          </p>
-        }
-
         <div class="form-actions">
           @if (painelPediuLogin()) {
             <button type="button" class="btn btn-primary" [disabled]="enviando()" (click)="entrarDeNovo()">Entrar de novo</button>
@@ -323,13 +335,6 @@
           </button>
         </div>
       } @else {
-        @if (ajuda(); as a) {
-          <div class="info-box">
-            {{ a.texto }}
-            <a [href]="a.link" target="_blank" rel="noopener">{{ a.rotuloLink }}</a>
-          </div>
-        }
-
         @for (campo of campos(); track campo.nome) {
           <div class="field">
             <label [for]="'loja-' + campo.nome">

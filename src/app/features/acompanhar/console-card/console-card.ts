@@ -1,9 +1,11 @@
 import { Component, ElementRef, computed, effect, inject, input, output, viewChild } from '@angular/core';
 import { JobsService } from '../../../core/services/jobs.service';
 import { FeedItem, construirFeed } from './log-feed';
+import { Info } from '../../../shared/info/info';
 
 @Component({
   selector: 'app-console-card',
+  imports: [Info],
   standalone: true,
   templateUrl: './console-card.html',
 })

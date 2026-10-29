@@ -14,12 +14,16 @@ const ROTULO: Record<Provedor, string> = {
   mercadolivre: 'Mercado Livre',
   amazon: 'Amazon',
   shopee: 'Shopee',
+  nike: 'Nike',
+  adidas: 'Adidas',
 };
 
 const LOGO: Record<Provedor, string> = {
   mercadolivre: 'lojas/mercadolivre.svg',
   amazon: 'lojas/amazon.svg',
   shopee: 'lojas/shopee.svg',
+  nike: 'lojas/nike.png',
+  adidas: 'lojas/adidas.png',
 };
 
 // "o Mercado Livre" x "a Amazon": o artigo muda por loja.
@@ -27,6 +31,8 @@ const ARTIGO: Record<Provedor, 'o' | 'a'> = {
   mercadolivre: 'o',
   amazon: 'a',
   shopee: 'a',
+  nike: 'a',
+  adidas: 'a',
 };
 
 // Garimpo e link da Shopee saem da API (App ID/Secret). O login de navegador
@@ -63,6 +69,18 @@ const AJUDA: Partial<Record<Provedor, { texto: string; link: string; rotuloLink:
     texto: 'Sua tag de associado aparece no painel da Amazon Associados (termina com -20, por exemplo minhaloja-20).',
     link: 'https://associados.amazon.com.br',
     rotuloLink: 'Abrir Amazon Associados',
+  },
+  nike: {
+    texto:
+      'A Nike é pela Awin: basta o seu ID de afiliado (o número no canto do painel da Awin). O robô monta o link de afiliado sozinho, sem login. Na clonagem, o link da Nike que o concorrente postar vira o seu, com o texto e a foto da mensagem dele.',
+    link: 'https://ui.awin.com',
+    rotuloLink: 'Abrir a Awin',
+  },
+  adidas: {
+    texto:
+      'A Adidas é pela Awin: basta o seu ID de afiliado (o número no canto do painel da Awin). O robô monta o link de afiliado sozinho, sem login. Na clonagem, o link da Adidas que o concorrente postar vira o seu, com o texto e a foto da mensagem dele.',
+    link: 'https://ui.awin.com',
+    rotuloLink: 'Abrir a Awin',
   },
 };
 
@@ -140,6 +158,12 @@ export class LojaDialog {
     const p = this.provedor();
     return (p && AJUDA[p]) || null;
   });
+
+  /** Explicação de como funciona, atrás do "i" do cabeçalho. */
+  protected readonly mostrarAjuda = signal(false);
+  protected readonly temAjuda = computed(
+    () => !this.emLogin() && (this.conectada() ? !!this.loginGuardado()?.salvo : !!this.ajuda()),
+  );
 
   protected readonly logo = computed(() => {
     const p = this.provedor();
@@ -276,6 +300,11 @@ export class LojaDialog {
     // Ao abrir a Amazon, confere a última leitura dos ganhos (pra saber se o painel pediu login).
     effect(() => {
       if (this.provedor() === 'amazon') untracked(() => void this.ganhos.carregar());
+    });
+    // Cada loja abre com a explicação fechada.
+    effect(() => {
+      this.provedor();
+      untracked(() => this.mostrarAjuda.set(false));
     });
     // Entrou de novo na Amazon: já pede a leitura dos ganhos, pra "Sessão expirada" sumir na hora.
     effect(() => {

@@ -3,9 +3,14 @@
     <div class="modal-caixa modal-login" role="dialog" aria-modal="true" aria-label="Conexão com o WhatsApp" (click)="$event.stopPropagation()">
       <div class="card-header">
         <div class="loja-titulo">
-          <span class="loja-logo-caixa loja-logo-caixa-sm">
-            <img class="loja-logo loja-logo-sm" src="lojas/whatsapp.svg" alt="WhatsApp" />
-          </span>
+          <div class="modal-titulo-linha">
+            <span class="loja-logo-caixa loja-logo-caixa-sm">
+              <img class="loja-logo loja-logo-sm" src="lojas/whatsapp.svg" alt="WhatsApp" />
+            </span>
+            <button type="button" class="btn-info" [class.btn-info-on]="mostrarAjuda()"
+              [attr.aria-expanded]="mostrarAjuda()" aria-controls="whatsapp-ajuda"
+              aria-label="Como funciona" title="Como funciona" (click)="mostrarAjuda.set(!mostrarAjuda())">i</button>
+          </div>
           <p class="card-subtitle" role="status">
             @if (desconectando()) {
               Desconectando…
@@ -28,6 +33,13 @@
           </svg>
         </button>
       </div>
+
+      @if (mostrarAjuda()) {
+        <div class="regra-como" id="whatsapp-ajuda">
+          É por este número que o robô envia as promoções para os seus grupos — sem esta conexão ele não tem por onde
+          enviar. Ele também lê os grupos de concorrentes em que este WhatsApp está, para a clonagem e os cupons.
+        </div>
+      }
 
       @if (sucesso()) {
         <div class="info-box info-box-ok">
@@ -76,7 +88,6 @@
           <button type="button" class="btn btn-danger" (click)="desconectar()">Desconectar</button>
         </div>
       } @else {
-        <div class="info-box">Sem esta conexão o robô não tem por onde enviar as promoções.</div>
         <div class="form-actions">
           <button type="button" class="btn btn-wpp" (click)="conectar()">Conectar agora</button>
         </div>

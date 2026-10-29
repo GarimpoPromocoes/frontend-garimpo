@@ -17,9 +17,9 @@
 <div class="card">
   <div class="card-header">
     <div>
-      <h2>{{ compacto() ? 'O que está acontecendo' : 'Atividade do robô' }}</h2>
-      @if (!compacto()) {
-        <p class="card-subtitle">Acompanhe em tempo real, passo a passo, o que o robô está fazendo.</p>
+      <h2 class="modal-titulo-linha">{{ compacto() ? 'O que está acontecendo' : 'Atividade do robô' }} <app-info #info controla="console-ajuda" /></h2>
+      @if (info.aberto()) {
+        <div class="regra-como regra-como-cabeca" id="console-ajuda">Acompanhe em tempo real, passo a passo, o que o robô está fazendo. Cada linha é um passo: garimpo, postagem, cupons, quedas de conexão. É o primeiro lugar para olhar quando algo não saiu como esperado.</div>
       }
     </div>
     <div class="card-acoes">

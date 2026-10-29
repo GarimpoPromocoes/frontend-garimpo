@@ -2,10 +2,13 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { ConfigService, TemaEvento } from '../../../core/services/config.service';
+import { ConfigService, DashboardConfig, TemaEvento } from '../../../core/services/config.service';
+
+type Sazonalidade = DashboardConfig['sazonalidade'];
 import { ConfirmacaoService } from '../../../core/services/confirmacao.service';
 import { GruposOrigemService } from '../../../core/services/grupos-origem.service';
 import { ChipInput } from '../../../shared/chip-input/chip-input';
+import { Info } from '../../../shared/info/info';
 
 /** Data que já vem pronta no robô (bot-ml/src/curadoria/sazonalidade.js). */
 interface DataPronta {
@@ -21,6 +24,9 @@ interface DataPronta {
 interface Rascunho {
   /** Posição na lista salva; null = data nova. */
   indice: number | null;
+  /** Editando uma data pronta: o nome dela (salvar cria a sua no lugar). */
+  substitui: string | null;
+  ativo: boolean;
   nome: string;
   inicioDia: number;
   inicioMes: number;
@@ -47,6 +53,8 @@ const NIVEIS = [
 function nivel(peso: number): string {
   return (NIVEIS.find((n) => peso <= n.ate) ?? NIVEIS[NIVEIS.length - 1]).nome;
 }
+
+const chave = (nome: string) => String(nome || '').trim().toLowerCase();
 
 function partes(mmdd: string): { mes: number; dia: number } {
   const [m, d] = String(mmdd || '').split('-').map(Number);
@@ -92,7 +100,7 @@ function diasAte(inicio: string, fim: string, hoje = new Date()): number {
 @Component({
   selector: 'app-datas-especiais',
   standalone: true,
-  imports: [FormsModule, ChipInput],
+  imports: [FormsModule, ChipInput, Info],
   templateUrl: './datas-especiais.html',
 })
 export class DatasEspeciais implements OnInit {
@@ -115,21 +123,35 @@ export class DatasEspeciais implements OnInit {
 
   protected readonly ativo = computed(() => this.configService.config()?.sazonalidade.ativo ?? true);
   protected readonly eventos = computed(() => this.configService.config()?.sazonalidade.eventos ?? []);
+  private readonly prontasDesligadas = computed(() => this.configService.config()?.sazonalidade.prontasDesligadas ?? []);
+  private readonly prontasRemovidas = computed(() => this.configService.config()?.sazonalidade.prontasRemovidas ?? []);
+  /** Prontas que não aparecem: excluídas ou trocadas por uma versão editada. */
+  private readonly prontasFora = computed(() => {
+    const fora = new Set(this.prontasRemovidas().map(chave));
+    for (const ev of this.eventos()) if (ev.substitui) fora.add(chave(ev.substitui));
+    return fora;
+  });
+  protected readonly removidas = computed(() =>
+    this.prontas().filter((d) => this.prontasRemovidas().some((n) => chave(n) === chave(d.nome))),
+  );
+  protected prontaLigada(nome: string): boolean {
+    return !this.prontasDesligadas().some((n) => chave(n) === chave(nome));
+  }
 
   protected readonly cards = computed(() =>
     this.eventos().map((ev, indice) => {
       const faltam = diasAte(ev.inicio, ev.fim);
-      return { ev, indice, faltam, periodo: periodo(ev.inicio, ev.fim), nivel: nivel(Number(ev.peso) || 10) };
+      return { ev, indice, faltam, ligada: ev.ativo !== false, periodo: periodo(ev.inicio, ev.fim), nivel: nivel(Number(ev.peso) || 10) };
     }),
   );
 
   /** O que está puxando as ofertas hoje: prontas + cadastradas, mais fortes primeiro. */
   protected readonly ativasHoje = computed(() => {
     const suas = this.eventos()
-      .filter((ev) => ativaHoje(ev.inicio, ev.fim))
+      .filter((ev) => ev.ativo !== false && ativaHoje(ev.inicio, ev.fim))
       .map((ev) => ({ nome: ev.nome, peso: Number(ev.peso) || 10, sua: true }));
     const prontas = this.prontas()
-      .filter((d) => d.ativa)
+      .filter((d) => d.ativa && !this.prontasFora().has(chave(d.nome)) && this.prontaLigada(d.nome))
       .map((d) => ({ nome: d.nome, peso: d.peso, sua: false }));
     return [...suas, ...prontas].sort((a, b) => b.peso - a.peso);
   });
@@ -138,6 +160,7 @@ export class DatasEspeciais implements OnInit {
   protected readonly calendario = computed(() => {
     const grupos = new Map<string, (DataPronta & { periodo: string; faltam: number })[]>();
     for (const d of this.prontas()) {
+      if (this.prontasFora().has(chave(d.nome))) continue;
       const lista = grupos.get(d.grupo) ?? [];
       lista.push({ ...d, periodo: periodo(d.inicio, d.fim), faltam: diasAte(d.inicio, d.fim) });
       grupos.set(d.grupo, lista);
@@ -183,6 +206,8 @@ export class DatasEspeciais implements OnInit {
     this.erro.set(null);
     this.rascunho.set({
       indice: null,
+      substitui: null,
+      ativo: true,
       nome: '',
       inicioDia: hoje.getDate(),
       inicioMes: hoje.getMonth() + 1,
@@ -199,6 +224,8 @@ export class DatasEspeciais implements OnInit {
     this.erro.set(null);
     this.rascunho.set({
       indice,
+      substitui: ev.substitui ?? null,
+      ativo: ev.ativo !== false,
       nome: ev.nome,
       inicioDia: i.dia,
       inicioMes: i.mes,
@@ -206,6 +233,25 @@ export class DatasEspeciais implements OnInit {
       fimMes: f.mes,
       peso: Number(ev.peso) || 10,
       palavras: [...ev.palavras],
+    });
+  }
+
+  /** Editar uma pronta: abre com os dados dela; salvar grava a sua versão no lugar. */
+  abrirPronta(d: DataPronta): void {
+    const i = partes(d.inicio);
+    const f = partes(d.fim);
+    this.erro.set(null);
+    this.rascunho.set({
+      indice: null,
+      substitui: d.nome,
+      ativo: this.prontaLigada(d.nome),
+      nome: d.nome,
+      inicioDia: i.dia,
+      inicioMes: i.mes,
+      fimDia: f.dia,
+      fimMes: f.mes,
+      peso: d.peso,
+      palavras: [...d.palavras],
     });
   }
 
@@ -227,7 +273,23 @@ export class DatasEspeciais implements OnInit {
   }
 
   async alternarAtivo(): Promise<void> {
-    await this.gravar(this.eventos(), !this.ativo());
+    await this.gravar({ ativo: !this.ativo() });
+  }
+
+  /** Liga/desliga uma data sua sem abrir a janela. */
+  async alternarSua(indice: number): Promise<void> {
+    const eventos = this.eventos().map((ev, i) => (i === indice ? { ...ev, ativo: ev.ativo === false } : ev));
+    await this.gravar({ eventos });
+  }
+
+  async alternarPronta(nome: string): Promise<void> {
+    const atuais = this.prontasDesligadas();
+    const prontasDesligadas = this.prontaLigada(nome) ? [...atuais, nome] : atuais.filter((n) => chave(n) !== chave(nome));
+    await this.gravar({ prontasDesligadas });
+  }
+
+  async restaurarProntas(): Promise<void> {
+    await this.gravar({ prontasRemovidas: [] });
   }
 
   async salvar(): Promise<void> {
@@ -248,29 +310,45 @@ export class DatasEspeciais implements OnInit {
       fim: mmdd(Number(r.fimMes), Number(r.fimDia)),
       peso: Math.max(1, Math.min(30, Number(r.peso) || 10)),
       palavras: r.palavras,
+      ativo: r.ativo,
+      substitui: r.substitui,
     };
     const atuais = this.eventos();
     const lista = r.indice === null ? [...atuais, ev] : atuais.map((x, i) => (i === r.indice ? ev : x));
-    if (await this.gravar(lista, this.ativo())) this.rascunho.set(null);
+    if (await this.gravar({ eventos: lista })) this.rascunho.set(null);
   }
 
+  /** Excluir: a sua some; uma pronta (editada ou não) vai para as excluídas, que dá pra restaurar. */
   async remover(): Promise<void> {
     const r = this.rascunho();
-    if (!r || r.indice === null) return;
+    if (!r || (r.indice === null && !r.substitui)) return;
     const ok = await this.confirmacao.pedir({
-      titulo: `Remover "${r.nome || 'esta data'}"?`,
-      texto: 'O robô deixa de dar preferência aos produtos dela. As datas que já vêm prontas continuam valendo.',
-      confirmar: 'Remover',
+      titulo: `Excluir "${r.nome || 'esta data'}"?`,
+      texto: r.substitui
+        ? 'O robô deixa de dar preferência aos produtos dela. Dá para trazer de volta em "Restaurar datas excluídas".'
+        : 'O robô deixa de dar preferência aos produtos dela.',
+      confirmar: 'Excluir',
       perigo: true,
     });
     if (!ok) return;
-    if (await this.gravar(this.eventos().filter((_, i) => i !== r.indice), this.ativo())) this.rascunho.set(null);
+    const mudanca: Partial<Sazonalidade> = { eventos: this.eventos().filter((_, i) => i !== r.indice) };
+    if (r.substitui) mudanca.prontasRemovidas = [...this.prontasRemovidas(), r.substitui];
+    if (await this.gravar(mudanca)) this.rascunho.set(null);
   }
 
-  private async gravar(eventos: TemaEvento[], ativo: boolean): Promise<boolean> {
+  /** Grava a sazonalidade inteira (a API troca a lista toda), com a mudança por cima. */
+  private async gravar(mudanca: Partial<Sazonalidade>): Promise<boolean> {
     this.erro.set(null);
     this.salvando.set(true);
-    const r = await this.configService.salvar({ sazonalidade: { ativo, eventos } });
+    const r = await this.configService.salvar({
+      sazonalidade: {
+        ativo: this.ativo(),
+        eventos: this.eventos(),
+        prontasDesligadas: this.prontasDesligadas(),
+        prontasRemovidas: this.prontasRemovidas(),
+        ...mudanca,
+      },
+    });
     this.salvando.set(false);
     if (!r.ok) {
       this.erro.set(r.erro ?? 'Erro ao salvar.');

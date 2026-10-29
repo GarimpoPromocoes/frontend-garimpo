@@ -1,5 +1,6 @@
 import { Component, DestroyRef, WritableSignal, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Info } from '../../../shared/info/info';
 import { ConfigService, CupomDeGrupo } from '../../../core/services/config.service';
 import { StatusService } from '../../../core/services/status.service';
 import { HORARIO_PADRAO, dentroDoHorario, duracaoJanela, horaValida, passaDaMeiaNoite } from './horario';
@@ -96,7 +97,7 @@ function ehNumero(texto: string): boolean {
 @Component({
   selector: 'app-regras-postagem',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, Info],
   templateUrl: './regras-postagem.html',
   styleUrl: './regras-postagem.scss',
 })
@@ -269,8 +270,8 @@ export class RegrasPostagem {
   /** Loja com a imagem subindo agora (null = nenhuma). */
   /** Loja da lista de cupons com os campos abertos (uma por vez, pra janela não virar um paredão). */
   protected readonly rCupomAberta = signal<Loja | null>(null);
-  /** Explicação de "como funciona", atrás do "i" do cabeçalho. */
-  protected readonly rCupomAjuda = signal(false);
+  /** Explicação de "como funciona", atrás do "i" do cabeçalho (fechada ao abrir cada janela). */
+  protected readonly rAjuda = signal(false);
   protected readonly rCupomSubindo = signal<Loja | null>(null);
   /** Erro da imagem ou do texto, mostrado na própria loja (o rodapé fica longe). */
   protected readonly rCupomErros = signal<Partial<Record<Loja, string>>>({});
@@ -462,7 +463,7 @@ export class RegrasPostagem {
     this.trocarUrl(this.rMarcaPrevia, null);
     this.rMarcaRemover.set(false);
     this.rCupomAberta.set(null);
-    this.rCupomAjuda.set(false);
+    this.rAjuda.set(false);
     this.janela.set(j);
   }
 

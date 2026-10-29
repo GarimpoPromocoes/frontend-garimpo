@@ -9,7 +9,8 @@ const PASSO_ESPERA_MS = 500;
 
 export interface GruposDoWhatsapp {
   em: string | null;
-  grupos: { nome: string; canal: boolean; lendo: boolean }[];
+  /** lidoPor: os grupos de clonagem da conta que leem dele (pelo nome). */
+  grupos: { nome: string; canal: boolean; lendo: boolean; lidoPor?: string[] }[];
   naoEncontrados: string[];
 }
 

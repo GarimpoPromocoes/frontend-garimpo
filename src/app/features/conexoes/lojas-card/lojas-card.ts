@@ -15,7 +15,7 @@ type EstadoConexao = 'ok' | 'atencao' | 'off';
 
 /** Um cartão da tela: um canal de envio (WhatsApp, Telegram) ou uma loja de afiliado. */
 interface Conta {
-  provedor: ProvedorConexao;
+  provedor: ProvedorConexao | 'nike' | 'adidas';
   nome: string;
   logo: string;
   conectada: boolean;
@@ -35,7 +35,7 @@ interface LojaEmBreve {
   logo: string;
 }
 
-const CANAIS: ProvedorConexao[] = ['whatsapp', 'telegram'];
+const CANAIS: string[] = ['whatsapp', 'telegram'];
 
 /**
  * Conexões: os canais por onde o robô envia (WhatsApp e Telegram) e as lojas que geram os links
@@ -62,9 +62,7 @@ export class LojasCard implements OnInit {
   // Quando uma ficar pronta, ela sai daqui e entra em `lojas` com o provedor.
   protected readonly emBreve: LojaEmBreve[] = [
     { id: 'shein', nome: 'Shein', logo: 'lojas/shein.png' },
-    { id: 'nike', nome: 'Nike', logo: 'lojas/nike.png' },
     { id: 'netshoes', nome: 'Netshoes', logo: 'lojas/netshoes.png' },
-    { id: 'adidas', nome: 'Adidas', logo: 'lojas/adidas.png' },
     { id: 'centauro', nome: 'Centauro', logo: 'lojas/centauro.png' },
   ];
 
@@ -102,6 +100,9 @@ export class LojasCard implements OnInit {
     return this.lojasConectadas().map((c) => ({ ...c, loja: true, desligada: desligadas.has(c.provedor) }));
   });
 
+  protected readonly lojasLigadas = computed(() => this.lojas().filter((c) => !c.desligada));
+  protected readonly lojasDesligadas = computed(() => this.lojas().filter((c) => c.desligada));
+
   private readonly lojasConectadas = computed<Conta[]>(() => {
     const conexao = (p: Provedor) => this.conexoes.statusDe(p);
     return [
@@ -127,6 +128,19 @@ export class LojasCard implements OnInit {
         logo: 'lojas/shopee.svg',
         // Shopee e' 100% API: estar conectada = as chaves ainda serem aceitas.
         conectada: this.verificacao.shopeeConectado(),
+      }),
+      // Nike e Adidas: pela Awin, so' o ID de afiliado (o link e' montado, nada cai).
+      this.completar({
+        provedor: 'nike',
+        nome: 'Nike',
+        logo: 'lojas/nike.png',
+        conectada: conexao('nike')?.status === 'conectado',
+      }),
+      this.completar({
+        provedor: 'adidas',
+        nome: 'Adidas',
+        logo: 'lojas/adidas.png',
+        conectada: conexao('adidas')?.status === 'conectado',
       }),
     ];
   });
@@ -182,7 +196,7 @@ export class LojasCard implements OnInit {
     this.conexoes.carregar();
   }
 
-  abrir(provedor: ProvedorConexao): void {
+  abrir(provedor: Conta['provedor']): void {
     if (provedor === 'whatsapp') this.whatsappUi.abrir();
     else if (provedor === 'telegram') this.telegramUi.abrir();
     else this.lojasUi.abrir(provedor);

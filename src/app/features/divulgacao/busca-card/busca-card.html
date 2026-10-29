@@ -2,12 +2,12 @@
   <div class="card">
     <div class="card-header">
       <div>
-        <h2>Buscar ofertas de um produto</h2>
-        <p class="card-subtitle">
-          Digite o produto — marca e modelo ajudam ("iPhone 15 128GB", "Echo Dot 3"). O robô procura nas lojas
+        <h2 class="modal-titulo-linha">Buscar ofertas de um produto <app-info #info controla="busca-ajuda" /></h2>
+        @if (info.aberto()) {
+          <div class="regra-como regra-como-cabeca" id="busca-ajuda">Digite o produto — marca e modelo ajudam ("iPhone 15 128GB", "Echo Dot 3"). O robô procura nas lojas
           conectadas e lista as melhores ofertas, da mais barata pra cima. Você escolhe a que quer postar e ele
-          monta a postagem com o seu link de afiliado.
-        </p>
+          monta a postagem com o seu link de afiliado.</div>
+        }
       </div>
     </div>
 

@@ -5,6 +5,7 @@ import { BuscaService, GrupoPublicacao, LojaBusca, OfertaLista } from '../../../
 import { ConfigService } from '../../../core/services/config.service';
 import { RunControlService } from '../../../core/services/run-control.service';
 import { FonteFoto, FotoEditor } from './foto-editor/foto-editor';
+import { Info } from '../../../shared/info/info';
 
 const NOME_LOJA: Record<string, string> = {
   mercadolivre: 'Mercado Livre',
@@ -45,7 +46,7 @@ export function formatarWhatsapp(texto: string): string {
 @Component({
   selector: 'app-busca-card',
   standalone: true,
-  imports: [FormsModule, NgTemplateOutlet, FotoEditor],
+  imports: [Info, FormsModule, NgTemplateOutlet, FotoEditor],
   templateUrl: './busca-card.html',
   styleUrl: './busca-card.scss',
 })

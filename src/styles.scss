@@ -5668,17 +5668,6 @@ app-ganhos-card {
   align-items: center;
   gap: 8px;
 }
-.ganhos-info {
-  display: inline-grid;
-  place-items: center;
-  color: var(--text-muted);
-  border-radius: 50%;
-  cursor: help;
-}
-.ganhos-info svg {
-  width: 19px;
-  height: 19px;
-}
 .ganhos-mes {
   display: flex;
   align-items: center;
@@ -5954,10 +5943,6 @@ app-ganhos-card {
 }
 .est-kpi-rotulo b {
   font-weight: 600;
-}
-.est-kpi .ganhos-info svg {
-  width: 18px;
-  height: 18px;
 }
 .est-kpi .ganhos-kpi-valor {
   font-size: 38px;
@@ -7242,4 +7227,103 @@ app-lojas-card {
 .lj-breve-item:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
+}
+
+/* "i" do cabecalho dos modais que mostra/esconde a explicacao de como funciona. */
+.modal-titulo-linha {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-info {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--border-control);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  font: italic 600 12px/1 Georgia, serif;
+  cursor: pointer;
+}
+.btn-info:hover,
+.btn-info-on {
+  border-color: var(--text);
+  color: var(--text);
+}
+.btn-info:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Explicacao aberta pelo "i" logo abaixo do titulo de um cartao. */
+.regra-como-cabeca {
+  margin-top: 10px;
+  max-width: 72ch;
+  line-height: 1.5;
+}
+
+
+/* Datas especiais: cada linha com a chave de ligar e o lapis de editar. */
+.datas-linha {
+  grid-template-columns: 44px minmax(0, 1fr) auto auto;
+}
+.datas-linha-off .rg-linha-texto,
+.datas-linha-off .rg-linha-quando,
+.datas-linha-off .rg-linha-icone {
+  opacity: 0.5;
+}
+.datas-acoes {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.toggle-switch-sm {
+  width: 36px;
+  height: 20px;
+}
+.toggle-switch-sm .toggle-switch-thumb {
+  width: 14px;
+  height: 14px;
+}
+.toggle-switch-sm.toggle-switch-on .toggle-switch-thumb {
+  transform: translateX(16px);
+}
+.datas-editar {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.datas-editar svg {
+  width: 16px;
+  height: 16px;
+}
+.datas-editar:hover {
+  color: var(--text);
+  border-color: var(--border);
+}
+.datas-editar:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+@media (max-width: 640px) {
+  .datas-linha {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+  .datas-acoes {
+    grid-column: 2;
+    justify-self: start;
+  }
 }

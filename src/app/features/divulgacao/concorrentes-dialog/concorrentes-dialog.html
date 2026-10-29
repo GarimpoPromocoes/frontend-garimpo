@@ -5,8 +5,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
       </span>
       <div>
-        <h2 id="cl-janela-titulo">De quais grupos o “{{ nome() }}” clona?</h2>
-        <p class="card-subtitle">Os produtos deles saem no seu grupo com o seu link de afiliado.</p>
+        <h2 id="cl-janela-titulo" class="modal-titulo-linha">De quais grupos o “{{ nome() }}” clona? <app-info #info controla="cl-ajuda" /></h2>
+        @if (info.aberto()) {
+          <div class="regra-como regra-como-cabeca" id="cl-ajuda">Os produtos deles saem no seu grupo com o seu link de afiliado. O selo ao lado de um grupo mostra se outro grupo seu já clona dele.</div>
+        }
       </div>
       <button type="button" class="btn-fechar" (click)="cancelar.emit()" aria-label="Fechar" title="Fechar">
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6 18 18M18 6 6 18" /></svg>
@@ -65,7 +67,11 @@
                 <strong>{{ o.nome }}</strong>
                 <small>{{ o.detalhe }}</small>
               </span>
-              @if (o.lendo) { <span class="cl-selo">Lendo</span> }
+              @if (o.outros.length) {
+                <span class="cl-selo" [title]="'Já é clonado por: ' + o.outros.join(', ')">
+                  {{ o.outros.length === 1 ? 'No ' + o.outros[0] : 'Em ' + o.outros.length + ' grupos' }}
+                </span>
+              }
               @if (o.faltando) { <span class="cl-selo cl-selo-erro">Não encontrado</span> }
             </label>
           </li>

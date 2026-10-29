@@ -88,11 +88,24 @@
 <section class="lj-secao" aria-labelledby="lj-suas">
   <h2 class="lj-secao-titulo" id="lj-suas">Lojas de afiliado</h2>
   <div class="lj-grade">
-    @for (c of lojas(); track c.provedor) {
+    @for (c of lojasLigadas(); track c.provedor) {
       <ng-container *ngTemplateOutlet="cartao; context: { $implicit: c }" />
     }
   </div>
 </section>
+
+<!-- Desligada (segue conectada, mas o robô não usa) fica numa fileira à parte: a de cima é só o que
+     está trabalhando. Religar pela chave do cartão a devolve lá pra cima. -->
+@if (lojasDesligadas().length) {
+  <section class="lj-secao" aria-labelledby="lj-desligadas">
+    <h2 class="lj-secao-titulo lj-secao-titulo-leve" id="lj-desligadas">Desligadas</h2>
+    <div class="lj-grade">
+      @for (c of lojasDesligadas(); track c.provedor) {
+        <ng-container *ngTemplateOutlet="cartao; context: { $implicit: c }" />
+      }
+    </div>
+  </section>
+}
 
 <section class="lj-secao" aria-labelledby="lj-breve">
   <h2 class="lj-secao-titulo lj-secao-titulo-leve" id="lj-breve">Em breve</h2>

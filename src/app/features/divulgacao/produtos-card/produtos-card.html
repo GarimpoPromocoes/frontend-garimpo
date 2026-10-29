@@ -1,10 +1,10 @@
 <div class="card">
   <div class="card-header">
     <div>
-      <h2>Produtos garimpados</h2>
-      <p class="card-subtitle">
-        Tudo que o robô encontrou e ainda pode virar promoção. O que não deve sair pode ser removido aqui.
-      </p>
+      <h2 class="modal-titulo-linha">Produtos garimpados <app-info #info controla="produtos-ajuda" /></h2>
+      @if (info.aberto()) {
+        <div class="regra-como regra-como-cabeca" id="produtos-ajuda">Tudo que o robô encontrou e ainda pode virar promoção. O que não deve sair pode ser removido aqui.</div>
+      }
     </div>
     <div class="prod-resumo">
       <span><strong>{{ produtos.total() }}</strong> no catálogo</span>

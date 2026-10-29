@@ -3,9 +3,14 @@
     <div class="modal-caixa modal-login" role="dialog" aria-modal="true" aria-label="Conexão com o Telegram" (click)="$event.stopPropagation()">
       <div class="card-header">
         <div class="loja-titulo">
-          <span class="loja-logo-caixa loja-logo-caixa-sm">
-            <img class="loja-logo loja-logo-sm" src="lojas/telegram.png" alt="Telegram" />
-          </span>
+          <div class="modal-titulo-linha">
+            <span class="loja-logo-caixa loja-logo-caixa-sm">
+              <img class="loja-logo loja-logo-sm" src="lojas/telegram.png" alt="Telegram" />
+            </span>
+            <button type="button" class="btn-info" [class.btn-info-on]="mostrarAjuda()"
+              [attr.aria-expanded]="mostrarAjuda()" aria-controls="telegram-ajuda"
+              aria-label="Como funciona" title="Como funciona" (click)="mostrarAjuda.set(!mostrarAjuda())">i</button>
+          </div>
           <p class="card-subtitle" role="status">
             @if (desconectando()) {
               Desconectando…
@@ -30,6 +35,16 @@
           </svg>
         </button>
       </div>
+
+      @if (mostrarAjuda()) {
+        <div class="regra-como" id="telegram-ajuda">
+          <ol>
+            <li>Conecte uma conta do Telegram que participe dos grupos onde as promoções devem sair (precisa poder enviar mensagens neles).</li>
+            <li>Para postar num grupo, abra ele em <strong>Grupos</strong> e preencha o <strong>nome do grupo no Telegram</strong>.</li>
+            <li>Cada postagem do WhatsApp sai lá também.</li>
+          </ol>
+        </div>
+      }
 
       @if (sucesso()) {
         <div class="info-box info-box-ok">
@@ -95,19 +110,10 @@
             @if (c.extra) { <span>&nbsp;· {{ c.extra }}</span> }
           </p>
         }
-        <div class="info-box">
-          Para postar no Telegram, abra o grupo em <strong>Grupos</strong> e preencha o
-          <strong>nome do grupo no Telegram</strong>. Cada postagem do WhatsApp sai lá também.
-        </div>
         <div class="form-actions">
           <button type="button" class="btn btn-danger" (click)="desconectar()">Desconectar</button>
         </div>
       } @else {
-        <div class="info-box">
-          Conecte uma conta do Telegram que participe dos grupos onde as promoções devem sair (precisa poder enviar
-          mensagens neles).
-        </div>
-
         @if (precisaCreds()) {
           <div class="field">
             <label for="tg-api-id">api_id do Telegram</label>

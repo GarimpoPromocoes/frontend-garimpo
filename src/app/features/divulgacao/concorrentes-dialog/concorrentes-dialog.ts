@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { GruposWhatsappService, mesmoNome } from '../../../core/services/grupos-whatsapp.service';
+import { Info } from '../../../shared/info/info';
 
 const MAX_GRUPOS = 50;
 
@@ -9,6 +10,7 @@ const MAX_GRUPOS = 50;
  */
 @Component({
   selector: 'app-concorrentes-dialog',
+  imports: [Info],
   standalone: true,
   templateUrl: './concorrentes-dialog.html',
   styleUrl: './concorrentes-dialog.scss',
@@ -66,16 +68,20 @@ export class ConcorrentesDialog implements OnInit {
   /** Os grupos do WhatsApp mais os nomes digitados, marcados primeiro. */
   protected readonly opcoes = computed(() => {
     const termo = this.busca().trim().toLowerCase();
-    const doZap = this.zap.lista().grupos.map((w) => ({
-      nome: w.nome,
-      marcado: this.naLista(w.nome),
-      lendo: w.lendo,
-      faltando: false,
-      detalhe: w.canal ? 'Canal' : 'Grupo',
-    }));
+    // Só os OUTROS grupos que clonam dele: se é este, o quadradinho já diz.
+    const doZap = this.zap.lista().grupos.map((w) => {
+      const outros = (w.lidoPor || []).filter((g) => g && !mesmoNome(g, this.nome()));
+      return {
+        nome: w.nome,
+        marcado: this.naLista(w.nome),
+        outros,
+        faltando: false,
+        detalhe: w.canal ? 'Canal' : 'Grupo',
+      };
+    });
     const digitados = this.lista()
       .filter((n) => !doZap.some((w) => mesmoNome(w.nome, n)))
-      .map((nome) => ({ nome, marcado: true, lendo: false, faltando: this.zap.naoEncontrado(nome), detalhe: 'Digitado pelo nome' }));
+      .map((nome) => ({ nome, marcado: true, outros: [] as string[], faltando: this.zap.naoEncontrado(nome), detalhe: 'Digitado pelo nome' }));
     return [...digitados, ...doZap]
       .filter((o) => !termo || o.nome.toLowerCase().includes(termo))
       .sort((a, b) => Number(b.marcado) - Number(a.marcado));

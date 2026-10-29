@@ -271,7 +271,7 @@ export class GroupsCard {
         ? this.verificacao.mercadoLivreConectado()
         : l.id === 'shopee'
           ? this.verificacao.shopeeConectado()
-          : this.conexoes.statusDe('amazon')?.status === 'conectado',
+          : this.conexoes.statusDe(l.id)?.status === 'conectado',
     ),
   );
 
@@ -295,7 +295,7 @@ export class GroupsCard {
         ? this.verificacao.mercadoLivreConectado()
         : loja === 'shopee'
           ? this.verificacao.shopeeConectado()
-          : this.conexoes.statusDe('amazon')?.status === 'conectado';
+          : this.conexoes.statusDe(loja)?.status === 'conectado';
     return conectada ? '' : 'não conectada';
   }
 

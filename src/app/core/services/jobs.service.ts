@@ -459,11 +459,12 @@ export class JobsService {
    * dessa ação) continuaria "vencendo" pra sempre até a próxima checagem, e a
    * ação que o usuário acabou de fazer pareceria não ter efeito nenhum.
    */
-  esquecerVerificacao(chave: keyof VerificacaoConexoes): void {
+  /** `chave` sem checagem ao vivo (Nike, Adidas): nada a esquecer. */
+  esquecerVerificacao(chave: string): void {
     const atual = this.verificacao();
     if (!atual || !(chave in atual)) return;
     const resto = { ...atual };
-    delete resto[chave];
+    delete resto[chave as keyof VerificacaoConexoes];
     this.verificacao.set(Object.keys(resto).length ? resto : null);
   }
 

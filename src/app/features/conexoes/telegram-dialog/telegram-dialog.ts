@@ -20,6 +20,8 @@ import { TelegramUiService } from '../../../core/services/telegram-ui.service';
   templateUrl: './telegram-dialog.html',
 })
 export class TelegramDialog {
+  /** Explicação de como funciona, atrás do "i" do cabeçalho. */
+  protected readonly mostrarAjuda = signal(false);
   protected statusService = inject(StatusService);
   protected jobsService = inject(JobsService);
   protected verificacao = inject(VerificacaoService);

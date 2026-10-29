@@ -76,8 +76,6 @@ function tetoRedondo(max: number): number {
 export class GanhosCard implements OnInit, OnDestroy {
   protected ganhos = inject(GanhosService);
   protected readonly lojas = LOJAS;
-  protected readonly dicaGanhos =
-    'Valores lidos dos painéis de afiliado de cada loja. O robô lê de tempos em tempos; "Atualizar agora", no alto da tela, pede uma leitura na hora.';
   private readonly tamanho = signal<{ w: number; h: number } | null>(null);
   private readonly geometria = computed(() => {
     const t = this.tamanho();

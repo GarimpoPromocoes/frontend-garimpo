@@ -6,10 +6,12 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>
     </span>
     <div class="rg-cabeca-texto">
-      <h2 id="rg-principais-titulo">Configurações principais</h2>
-      <p>Quando e com que ritmo o robô publica. Clique numa regra para ajustar.</p>
+      <h2 id="rg-principais-titulo" class="modal-titulo-linha">Configurações principais <app-info #infoPrincipais controla="rg-principais-titulo-ajuda" /></h2>
     </div>
   </div>
+  @if (infoPrincipais.aberto()) {
+    <div class="regra-como" id="rg-principais-titulo-ajuda">Quando e com que ritmo o robô publica. Clique numa regra para ajustar.</div>
+  }
 
   <div class="rg-itens rg-itens-4">
     <button type="button" class="rg-item" (click)="abrir('frequencia')">
@@ -79,10 +81,12 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9a1.5 1.5 0 0 1-1.5 1.5H9l-4 4v-4.5"/><path d="M8 8.5h8M8 12h5"/></svg>
     </span>
     <div class="rg-cabeca-texto">
-      <h2 id="rg-mensagens-titulo">Mensagens</h2>
-      <p>O texto das ofertas e os recados que o robô manda além delas.</p>
+      <h2 id="rg-mensagens-titulo" class="modal-titulo-linha">Mensagens <app-info #infoMensagens controla="rg-mensagens-titulo-ajuda" /></h2>
     </div>
   </div>
+  @if (infoMensagens.aberto()) {
+    <div class="regra-como" id="rg-mensagens-titulo-ajuda">O texto das ofertas e os recados que o robô manda além delas. Clique numa regra para ajustar.</div>
+  }
 
   <div class="rg-itens rg-itens-4">
     <button type="button" class="rg-item" (click)="abrir('copy')">
@@ -187,30 +191,132 @@
                 @case ('copy') { Texto da postagem }
                 @case ('marca') { Marca d’água }
               }
-              @if (j === 'cupons') {
-                <button type="button" class="btn-info" [class.btn-info-on]="rCupomAjuda()"
-                  [attr.aria-expanded]="rCupomAjuda()" aria-controls="regras-postagem-cupons-ajuda"
-                  aria-label="Como funciona" title="Como funciona" (click)="rCupomAjuda.set(!rCupomAjuda())">i</button>
+              <button type="button" class="btn-info" [class.btn-info-on]="rAjuda()"
+                [attr.aria-expanded]="rAjuda()" aria-controls="regras-postagem-ajuda"
+                aria-label="Como funciona" title="Como funciona" (click)="rAjuda.set(!rAjuda())">i</button>
+              @if (j === 'horario' && rHorAtivo()) {
+                <span class="regra-titulo-pill" title="Tempo postando por dia">{{ rHorDuracao() }}/dia</span>
+              } @else if (j === 'frequencia') {
+                <span class="regra-titulo-pill" title="Postagens por dia em cada grupo, mais ou menos">{{ rPorDia() }}/dia</span>
               }
             </h2>
-            <p class="card-subtitle">
-              @switch (j) {
-                @case ('frequencia') { O robô sorteia a espera dentro da faixa — assim o envio parece de gente, não de robô. }
-                @case ('repeticao') { Evita que a mesma oferta apareça de novo cedo demais no mesmo grupo. }
-                @case ('cupons') { O robô junta os códigos de cupom que aparecem nos outros grupos e manda uma mensagem só de cupons, quantas vezes por dia você escolher. }
-                @case ('divulgacao') { Um recado seu com o Linktree dos seus grupos, que sai esporadicamente — no máximo 1 ou 2 vezes por dia em cada grupo. }
-                @case ('alerta') { Se o Mercado Livre, a Amazon, a Shopee ou o Telegram cair enquanto o robô roda, ele avisa pelo WhatsApp para você reconectar. }
-                @case ('copy') { Monte a mensagem do produto do seu jeito. As partes entre chaves viram os dados de cada oferta. }
-                @case ('marca') { Quando a foto de uma oferta chega com a marca d’água de outro grupo, o robô apaga a marca dele e coloca a sua no mesmo lugar. }
-                @case ('horario') { Dentro do horário o robô posta normalmente. Fora dele não manda nada nos grupos, mas continua garimpando ofertas para o dia seguinte. }
-              }
-            </p>
           </div>
         </div>
         <button type="button" class="btn-fechar" (click)="fechar()" aria-label="Fechar" title="Fechar">
           <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6 18 18M18 6 6 18" /></svg>
         </button>
       </div>
+
+      @if (rAjuda()) {
+        <div class="regra-como" id="regras-postagem-ajuda">
+          @switch (j) {
+            @case ('frequencia') {
+              <p class="regra-como-intro">O robô sorteia a espera dentro da faixa — assim o envio parece de gente, não de robô.</p>
+              <p class="regra-como-intro">Cada ritmo é uma faixa de espera entre uma postagem e outra; o número no título é quantas saem por dia em cada grupo, mais ou menos.</p>
+            }
+            @case ('copy') {
+              <p class="regra-como-intro">Monte a mensagem do produto do seu jeito. As partes entre chaves viram os dados de cada oferta.</p>
+              <ol>
+                <li>Clique numa parte para colocá-la onde está o cursor.</li>
+                <li>Linha com uma parte que o produto não tem (ex.: o cupom) some sozinha.</li>
+                <li>*negrito*, _itálico_ e ~riscado~ funcionam como no WhatsApp.</li>
+              </ol>
+            }
+            @case ('alerta') {
+              <p class="regra-como-intro">Se o Mercado Livre, a Amazon, a Shopee ou o Telegram cair enquanto o robô roda, ele avisa pelo WhatsApp para você reconectar.</p>
+              <ol>
+                <li>O WhatsApp não notifica o celular do próprio número que enviou a mensagem. Para o aviso tocar no seu celular, use o seu número pessoal ou um grupo em que ele também esteja.</li>
+                <li>A queda do próprio WhatsApp não tem como ser avisada por aqui.</li>
+                <li>Com o aviso desligado, as quedas e verificações só aparecem no sino do painel.</li>
+              </ol>
+            }
+            @case ('repeticao') {
+              <p class="regra-como-intro">Evita que a mesma oferta apareça de novo cedo demais no mesmo grupo.</p>
+              <strong>Como fica, na prática</strong>
+              <ol>
+                <li>
+                  Postou um produto: ele fica <strong>{{ textoHoras(n(rCooldown())) }}</strong> sem voltar a esse grupo — a não ser
+                  que o preço caia <strong>10% ou mais</strong>, o desconto suba 10 pontos ou ele vire <strong>oferta relâmpago</strong>.
+                </li>
+                <li>Depois disso, volta assim que <strong>o preço baixar ou o desconto subir</strong>, qualquer valor.</li>
+                @if (n(rRepostar()) > 0) {
+                  <li>E passados <strong>{{ rRepostar() }} dias</strong>, pode voltar mesmo com o mesmo preço.</li>
+                } @else {
+                  <li>Com o mesmo preço, <strong>não volta nunca</strong>.</li>
+                }
+              </ol>
+            }
+            @case ('cupons') {
+              <p class="regra-como-intro">O robô junta os códigos de cupom que aparecem nos outros grupos e manda uma mensagem só de cupons, quantas vezes por dia você escolher.</p>
+              <strong>Como funciona</strong>
+              <ol>
+                <li>
+                  O robô lê as mensagens de todos os grupos e canais em que o WhatsApp dele está (menos os seus, e não
+                  só os da clonagem) e guarda todo <strong>código</strong> de cupom que aparecer. Os códigos valem só no dia:
+                  virou o dia, ele joga fora os de ontem e começa a juntar os de hoje.
+                </li>
+                <li>
+                  As listas do dia saem <strong>bem separadas</strong>: o horário de funcionamento é dividido em partes
+                  iguais e sai no máximo uma por parte. Com 2x, uma de manhã e outra no fim da tarde; com 3x, manhã,
+                  tarde e noite.
+                </li>
+                <li>
+                  Na hora da lista, ele lê os grupos de novo e <strong>sorteia a loja</strong>: entram as ligadas que juntaram
+                  cupom novo desde a última vez. Cada loja sai uma vez por rodada, em ordem aleatória, antes de alguma repetir.
+                </li>
+                <li>
+                  A mensagem leva até {{ listaMaxCupons }} códigos dessa loja (os que ainda não saíram no grupo primeiro), com o
+                  texto, a imagem e o link que você pôs para ela.
+                </li>
+                <li>Cupom que não diz de qual loja é fica de fora.</li>
+                <li>Cupom de <strong>primeira compra</strong> é sempre ignorado.</li>
+                <li>Nas ofertas de produto, o cupom vai junto <strong>sempre que tiver</strong> um; sem cupom, a oferta sai normal.</li>
+                <li>A lista não conta como oferta: não muda o ritmo das postagens nem a repetição de produtos.</li>
+              </ol>
+            }
+            @case ('divulgacao') {
+              <p class="regra-como-intro">Um recado seu com o Linktree dos seus grupos, que sai esporadicamente — no máximo 1 ou 2 vezes por dia em cada grupo.</p>
+              <strong>Como funciona</strong>
+              <ol>
+                <li>Escreva <strong>&#123;link&#125;</strong> onde o link deve aparecer — se não escrever, o link entra automaticamente no fim.</li>
+                <li>Cada mensagem pode ter uma imagem, que sai junto como nas ofertas.</li>
+                <li>Com mais de uma mensagem, o robô alterna entre elas (até {{ maxDivulgacoes }}).</li>
+                <li>Ela sai de forma esporádica ao longo do dia, sem passar do limite por dia de cada grupo.</li>
+              </ol>
+            }
+            @case ('horario') {
+              <p class="regra-como-intro">Dentro do horário o robô posta normalmente. Fora dele não manda nada nos grupos, mas continua garimpando ofertas para o dia seguinte.</p>
+              <strong>Como fica, na prática</strong>
+              <ol>
+                <li>Das <strong>{{ rHorInicio() }}</strong> às <strong>{{ rHorFim() }}</strong> o robô posta no ritmo da Frequência.</li>
+                <li>Fora disso <strong>não posta nos grupos</strong>, mas segue garimpando ofertas de tempo em tempo.</li>
+                <li>Às {{ rHorInicio() }} a primeira postagem sai logo, com o catálogo cheio.</li>
+                @if (rHorVirada()) {
+                  <li>A janela passa da meia-noite: liga num dia e desliga no outro.</li>
+                }
+              </ol>
+              <span class="hint">O robô precisa estar ligado no Painel. Horário de Brasília.</span>
+            }
+            @case ('marca') {
+              <p class="regra-como-intro">Quando a foto de uma oferta chega com a marca d’água de outro grupo, o robô apaga a marca dele e coloca a sua no mesmo lugar.</p>
+              <strong>Regras da imagem</strong>
+              <ul>
+                <li><strong>PNG com fundo transparente</strong> (recomendado). JPG e WebP também servem, mas saem com fundo.</li>
+                <li><strong>Deitada</strong>, no formato de faixa: de {{ regrasMarca.minProporcao }} a {{ regrasMarca.maxProporcao }} vezes mais larga que alta (ex.: 660×128 px).</li>
+                <li>Pelo menos <strong>{{ regrasMarca.minLargura }}×{{ regrasMarca.minAltura }} px</strong> e no máximo <strong>2 MB</strong>.</li>
+                <li>Foto do perfil à esquerda e o seu <strong>&#64;</strong> em letra grande e clara — ela é reduzida ao tamanho da marca do concorrente.</li>
+              </ul>
+              <strong class="regra-como-sub">Como fica, na prática</strong>
+              <ol>
+                <li>A foto da oferta chega com o card de outro grupo (foto do perfil + &#64;).</li>
+                <li>A IA apaga o card e redesenha o fundo atrás dele.</li>
+                <li>A sua marca entra no mesmo lugar, cobrindo onde ele estava.</li>
+              </ol>
+              <p class="hint-text">Foto que chega sem marca de concorrente vai para o grupo como está.</p>
+            }
+          }
+        </div>
+      }
 
       @switch (j) {
         @case ('frequencia') {
@@ -240,10 +346,6 @@
             </div>
           </div>
 
-          <div class="regra-previa">
-            <span class="regra-previa-numero">{{ rPorDia() }}</span>
-            <span>postagens por dia em cada grupo, mais ou menos.</span>
-          </div>
           @if (rGarimpoMax()) {
             <p class="regra-card-texto">O garimpo guarda no máximo <strong>{{ rGarimpoMax() }} produtos por dia</strong> em cada grupo.</p>
           }
@@ -282,57 +384,14 @@
             </div>
           </div>
 
-          <div class="regra-como">
-            <strong>Como fica, na prática</strong>
-            <ol>
-              <li>
-                Postou um produto: ele fica <strong>{{ textoHoras(n(rCooldown())) }}</strong> sem voltar a esse grupo — a não ser
-                que o preço caia <strong>10% ou mais</strong>, o desconto suba 10 pontos ou ele vire <strong>oferta relâmpago</strong>.
-              </li>
-              <li>Depois disso, volta assim que <strong>o preço baixar ou o desconto subir</strong>, qualquer valor.</li>
-              @if (n(rRepostar()) > 0) {
-                <li>E passados <strong>{{ rRepostar() }} dias</strong>, pode voltar mesmo com o mesmo preço.</li>
-              } @else {
-                <li>Com o mesmo preço, <strong>não volta nunca</strong>.</li>
-              }
-            </ol>
-            @if (rConflitoRepeticao()) {
-              <p class="regra-aviso">
-                O tempo mínimo ({{ textoHoras(n(rCooldown())) }}) é maior que {{ rRepostar() }} dias — na prática vale o tempo mínimo.
-              </p>
-            }
-          </div>
+          @if (rConflitoRepeticao()) {
+            <p class="regra-aviso">
+              O tempo mínimo ({{ textoHoras(n(rCooldown())) }}) é maior que {{ rRepostar() }} dias — na prática vale o tempo mínimo.
+            </p>
+          }
         }
 
         @case ('cupons') {
-          @if (rCupomAjuda()) {
-            <div class="regra-como" id="regras-postagem-cupons-ajuda">
-              <ol>
-                <li>
-                  O robô lê as mensagens de todos os grupos e canais em que o WhatsApp dele está (menos os seus, e não
-                  só os da clonagem) e guarda todo <strong>código</strong> de cupom que aparecer. Os códigos valem só no dia:
-                  virou o dia, ele joga fora os de ontem e começa a juntar os de hoje.
-                </li>
-                <li>
-                  As listas do dia saem <strong>bem separadas</strong>: o horário de funcionamento é dividido em partes
-                  iguais e sai no máximo uma por parte. Com 2x, uma de manhã e outra no fim da tarde; com 3x, manhã,
-                  tarde e noite.
-                </li>
-                <li>
-                  Na hora da lista, ele lê os grupos de novo e <strong>sorteia a loja</strong>: entram as ligadas que juntaram
-                  cupom novo desde a última vez. Cada loja sai uma vez por rodada, em ordem aleatória, antes de alguma repetir.
-                </li>
-                <li>
-                  A mensagem leva até {{ listaMaxCupons }} códigos dessa loja (os que ainda não saíram no grupo primeiro), com o
-                  texto, a imagem e o link que você pôs para ela.
-                </li>
-                <li>Cupom que não diz de qual loja é fica de fora.</li>
-                <li>Cupom de <strong>primeira compra</strong> é sempre ignorado.</li>
-                <li>Nas ofertas de produto, o cupom vai junto <strong>sempre que tiver</strong> um; sem cupom, a oferta sai normal.</li>
-                <li>A lista não conta como oferta: não muda o ritmo das postagens nem a repetição de produtos.</li>
-              </ol>
-            </div>
-          }
           <div class="toggle-row">
             <button
               type="button"
@@ -502,11 +561,6 @@
           @if (rDivAtivo()) {
             <div class="field">
               <span class="field-rotulo">Mensagens</span>
-              <span class="hint">
-                Sua chamada e assinatura. Escreva <strong>&#123;link&#125;</strong> onde o link deve aparecer — se não escrever,
-                o link entra automaticamente no fim. Cada mensagem pode ter uma imagem, que sai junto como
-                nas ofertas. Com mais de uma mensagem, o robô alterna entre elas (até {{ maxDivulgacoes }}).
-              </span>
               @for (t of rDivTextos(); track $index; let i = $index) {
                 <div class="div-mensagem">
                   <div class="div-mensagem-topo">
@@ -570,7 +624,6 @@
                   2 vezes
                 </button>
               </div>
-              <span class="hint">O robô envia de forma esporádica ao longo do dia, sem passar desse limite.</span>
             </div>
 
             @if (rDivPreviews().length) {
@@ -599,10 +652,6 @@
           <div class="copy-editor">
             <div class="field">
               <label for="regras-postagem-copy">Modelo da mensagem</label>
-              <span class="hint">
-                Clique numa parte para colocá-la onde está o cursor. Linha com uma parte que o produto não tem (ex.: o
-                cupom) some sozinha. *negrito*, _itálico_ e ~riscado~ funcionam como no WhatsApp.
-              </span>
               <div class="copy-variaveis" role="group" aria-label="Partes da mensagem">
                 @for (v of variaveisCopy; track v.nome) {
                   <button type="button" class="regra-chip" [title]="v.dica" [attr.aria-label]="'Inserir ' + v.rotulo + ': ' + v.dica" (click)="inserirVariavel(v.nome, campoCopy)">
@@ -675,70 +724,38 @@
                 <input id="regras-postagem-hora-desligar" type="time" step="300" [ngModel]="rHorFim()" (ngModelChange)="rHorFim.set($event)" />
               </div>
             </div>
-
-            <div class="regra-previa">
-              <span class="regra-previa-numero">{{ rHorDuracao() }}</span>
-              <span>
-                por dia postando
-                @if (rHorVirada()) { — a janela passa da meia-noite (liga num dia, desliga no outro). }
-              </span>
-            </div>
-
-            <div class="regra-como">
-              <strong>Como fica, na prática</strong>
-              <ol>
-                <li>Das <strong>{{ rHorInicio() }}</strong> às <strong>{{ rHorFim() }}</strong> o robô posta no ritmo da Frequência.</li>
-                <li>Fora disso <strong>não posta nos grupos</strong>, mas segue garimpando ofertas de tempo em tempo.</li>
-                <li>Às {{ rHorInicio() }} a primeira postagem sai logo, com o catálogo cheio.</li>
-              </ol>
-              <span class="hint">O robô precisa estar ligado no Painel. Horário de Brasília.</span>
-            </div>
           } @else {
             <div class="info-box">Com o horário desligado, o robô posta a qualquer hora do dia e da noite.</div>
           }
         }
 
         @case ('marca') {
-          <div class="marca-palco">
-            @if (rMarcaMostrar(); as url) {
+          <input type="file" accept="image/png,image/jpeg,image/webp" hidden [disabled]="salvando() || rMarcaConferindo()" (change)="escolherMarca(campoMarca)" #campoMarca />
+          @if (rMarcaMostrar(); as url) {
+            <div class="marca-palco" [class.marca-desligado]="rMarcaConferindo()">
               <img [src]="url" alt="Prévia da marca d’água" />
-            } @else {
-              <span class="marca-vazia">Nenhuma marca d’água cadastrada</span>
-            }
-          </div>
-
-          <div class="marca-acoes">
-            <label class="btn btn-ghost" [class.marca-desligado]="salvando() || rMarcaConferindo()">
-              <input type="file" accept="image/png,image/jpeg,image/webp" hidden [disabled]="salvando() || rMarcaConferindo()" (change)="escolherMarca(campoMarca)" #campoMarca />
-              {{ rMarcaConferindo() ? 'Conferindo…' : rMarcaMostrar() ? 'Trocar imagem' : 'Escolher imagem' }}
-            </label>
-            @if (rMarcaMostrar()) {
-              <button type="button" class="btn btn-danger-soft" [disabled]="salvando()" (click)="removerMarca()">Remover</button>
-            }
-          </div>
+              <div class="marca-acoes">
+                <button type="button" class="marca-acao" [disabled]="salvando() || rMarcaConferindo()" (click)="campoMarca.click()"
+                  aria-label="Trocar imagem" title="Trocar imagem">
+                  <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 3.5V8h4.5"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 20.5V16h-4.5"/></svg>
+                </button>
+                <button type="button" class="marca-acao marca-acao-perigo" [disabled]="salvando()" (click)="removerMarca()"
+                  aria-label="Remover" title="Remover">
+                  <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M5.5 7l1 12.5A1.5 1.5 0 0 0 8 21h8a1.5 1.5 0 0 0 1.5-1.5L18.5 7M9 7V4.5A1.5 1.5 0 0 1 10.5 3h3A1.5 1.5 0 0 1 15 4.5V7"/></svg>
+                </button>
+              </div>
+              @if (rMarcaConferindo()) { <span class="marca-status">Conferindo…</span> }
+            </div>
+          } @else {
+            <button type="button" class="marca-palco marca-palco-vazio" [disabled]="salvando() || rMarcaConferindo()" (click)="campoMarca.click()">
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v2.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V16"/></svg>
+              <span>{{ rMarcaConferindo() ? 'Conferindo…' : 'Escolher imagem' }}</span>
+              <small>PNG com fundo transparente</small>
+            </button>
+          }
           @if (rMarcaRemover()) {
             <div class="info-box">Ao salvar, a marca é removida: a dos concorrentes continua sendo apagada, mas nada entra no lugar.</div>
           }
-
-          <div class="regra-como">
-            <strong>Regras da imagem</strong>
-            <ul>
-              <li><strong>PNG com fundo transparente</strong> (recomendado). JPG e WebP também servem, mas saem com fundo.</li>
-              <li><strong>Deitada</strong>, no formato de faixa: de {{ regrasMarca.minProporcao }} a {{ regrasMarca.maxProporcao }} vezes mais larga que alta (ex.: 660×128 px).</li>
-              <li>Pelo menos <strong>{{ regrasMarca.minLargura }}×{{ regrasMarca.minAltura }} px</strong> e no máximo <strong>2 MB</strong>.</li>
-              <li>Foto do perfil à esquerda e o seu <strong>&#64;</strong> em letra grande e clara — ela é reduzida ao tamanho da marca do concorrente.</li>
-            </ul>
-          </div>
-
-          <div class="regra-como">
-            <strong>Como fica, na prática</strong>
-            <ol>
-              <li>A foto da oferta chega com o card de outro grupo (foto do perfil + &#64;).</li>
-              <li>A IA apaga o card e redesenha o fundo atrás dele.</li>
-              <li>A sua marca entra no mesmo lugar, cobrindo onde ele estava.</li>
-            </ol>
-            <p class="hint-text">Foto que chega sem marca de concorrente vai para o grupo como está.</p>
-          </div>
         }
 
         @case ('alerta') {
@@ -781,13 +798,6 @@
               }
             </div>
 
-            <div class="info-box">
-              O WhatsApp não notifica o celular do próprio número que enviou a mensagem. Para o aviso tocar no seu
-              celular, use o seu número pessoal ou um grupo em que ele também esteja. A queda do próprio WhatsApp não
-              tem como ser avisada por aqui.
-            </div>
-          } @else {
-            <div class="info-box">Com o aviso desligado, as quedas e verificações só aparecem no sino do painel.</div>
           }
         }
       }

@@ -8,6 +8,10 @@ export interface TemaEvento {
   fim: string;
   peso: number;
   palavras: string[];
+  /** Desligada: fica guardada, mas não vale. Sem o campo = ligada. */
+  ativo?: boolean;
+  /** Nome da data pronta que esta editou (a pronta deixa de valer). */
+  substitui?: string | null;
 }
 
 export interface GrupoTematico {
@@ -40,13 +44,15 @@ export interface GrupoTematico {
 
 export type FonteProdutos = 'garimpo' | 'clonagem';
 
-export type LojaAfiliado = 'mercadolivre' | 'amazon' | 'shopee';
+export type LojaAfiliado = 'mercadolivre' | 'amazon' | 'shopee' | 'nike' | 'adidas';
 
 /** As lojas de afiliado, na ordem de sempre. */
 export const LOJAS_AFILIADO: { id: LojaAfiliado; nome: string; logo: string }[] = [
   { id: 'mercadolivre', nome: 'Mercado Livre', logo: 'lojas/mercadolivre.svg' },
   { id: 'amazon', nome: 'Amazon', logo: 'lojas/amazon.svg' },
   { id: 'shopee', nome: 'Shopee', logo: 'lojas/shopee.svg' },
+  { id: 'nike', nome: 'Nike', logo: 'lojas/nike.png' },
+  { id: 'adidas', nome: 'Adidas', logo: 'lojas/adidas.png' },
 ];
 
 export interface Agendamento {
@@ -137,6 +143,9 @@ export interface DashboardConfig {
   sazonalidade: {
     ativo: boolean;
     eventos: TemaEvento[];
+    /** Datas prontas desligadas (aparecem apagadas) e excluídas (somem), pelo nome. */
+    prontasDesligadas?: string[];
+    prontasRemovidas?: string[];
   };
   agendamento: Agendamento;
   cupons: Cupons;

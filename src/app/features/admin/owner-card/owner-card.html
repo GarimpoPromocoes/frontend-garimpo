@@ -1,11 +1,11 @@
 <div class="card">
   <div class="card-header">
     <div>
-      <h2>Clientes</h2>
-      <p class="card-subtitle">
-        Quem usa o sistema e quanto cada um usa. Aqui aparecem contagens e estado da conta — nunca o
-        conteúdo de ninguém (produtos, grupos ou mensagens).
-      </p>
+      <h2 class="modal-titulo-linha">Clientes <app-info #info controla="clientes-ajuda" /></h2>
+      @if (info.aberto()) {
+        <div class="regra-como regra-como-cabeca" id="clientes-ajuda">Quem usa o sistema e quanto cada um usa. Aqui aparecem contagens e estado da conta — nunca o
+        conteúdo de ninguém (produtos, grupos ou mensagens).</div>
+      }
     </div>
   </div>
 

@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { ProdutosService, OrdemProduto, SituacaoProduto } from '../../../core/services/produtos.service';
 import { ConfirmacaoService } from '../../../core/services/confirmacao.service';
 import { ConfigService } from '../../../core/services/config.service';
+import { Info } from '../../../shared/info/info';
 
 const NOME_LOJA: Record<string, string> = {
   mercadolivre: 'Mercado Livre',
@@ -13,7 +14,7 @@ const NOME_LOJA: Record<string, string> = {
 @Component({
   selector: 'app-produtos-card',
   standalone: true,
-  imports: [FormsModule],
+  imports: [Info, FormsModule],
   templateUrl: './produtos-card.html',
 })
 export class ProdutosCard implements OnInit {

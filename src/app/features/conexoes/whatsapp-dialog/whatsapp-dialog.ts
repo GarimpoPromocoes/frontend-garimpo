@@ -16,6 +16,8 @@ import { WhatsappUiService } from '../../../core/services/whatsapp-ui.service';
   templateUrl: './whatsapp-dialog.html',
 })
 export class WhatsappDialog {
+  /** Explicação de como funciona, atrás do "i" do cabeçalho. */
+  protected readonly mostrarAjuda = signal(false);
   protected statusService = inject(StatusService);
   protected jobsService = inject(JobsService);
   protected verificacao = inject(VerificacaoService);

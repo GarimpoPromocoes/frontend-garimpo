@@ -59,9 +59,6 @@ export class MembrosCard {
   protected readonly grupoFiltro = signal<string>('');
   protected readonly ordem = signal<'entradas' | 'saidas'>('entradas');
   protected readonly barraAtiva = signal<Barra | null>(null);
-  protected readonly dicaMembros = 'Soma dos membros de todos os grupos, cada um na sua última leitura.';
-  protected readonly dicaGrafico =
-    'Com o robô ligado, os membros de cada grupo são conferidos a cada 30 minutos (ou na hora, pelo "Atualizar agora"). Cada entrada e saída conta no dia em que aconteceu, pelos avisos do próprio grupo ("Fulano saiu", "Fulano entrou").';
 
   constructor() {
     effect(() => void this.est.carregarMembros(this.dias()));
