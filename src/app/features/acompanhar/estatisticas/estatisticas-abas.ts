@@ -39,6 +39,11 @@ export class EstatisticasAbas {
         }
       </div>
     }
+    @if (tela.visao() === 'ganhos') {
+      <button type="button" class="topbar-icone" aria-label="Ganhos do mês" title="Ganhos do mês" (click)="tela.ganhosAberto.set(true)">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15 9.2c-.5-.9-1.6-1.5-3-1.5-1.8 0-3 .9-3 2.2 0 3 6 1.7 6 4.3 0 1.3-1.2 2.1-3 2.1-1.5 0-2.6-.6-3.1-1.6"/><path d="M12 6v1.7M12 16.3V18"/></svg>
+      </button>
+    }
     <!-- Vale para todas as visões: lê ganhos, vendas e membros de uma vez e recarrega tudo. Com o
          robô ligado também funciona: ele lê na espera entre uma postagem e outra, sem parar. -->
     <button type="button" class="topbar-icone" [class.topbar-icone-girando]="tela.lendo()"

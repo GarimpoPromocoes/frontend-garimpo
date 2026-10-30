@@ -1,11 +1,10 @@
+@if (ganhos.erro()) {
+  <p class="error-text" role="alert">{{ ganhos.erro() }}</p>
+}
+
 <div class="card ganhos-cartao-lojas">
   <div class="ganhos-topo">
-    <div>
-      <h2 class="ganhos-titulo">
-        Ganhos de afiliado
-      </h2>
-      <p class="card-subtitle">Resumo por plataforma {{ rotuloResumo() }}.</p>
-    </div>
+    <h2 class="ganhos-titulo">Ganhos de afiliado</h2>
     <div class="est-controles">
       <label class="ganhos-mes">
         <span>Mês</span>
@@ -27,129 +26,32 @@
         <span class="ganhos-plataforma-nome"><span class="ganhos-ponto" aria-hidden="true"></span>{{ l.nome }}</span>
         @if (l.conectada) {
           <b class="ganhos-plataforma-valor">{{ moeda(l.gerado) }}</b>
-          <span class="ganhos-plataforma-meta">
-            @if (l.cliques != null) {
-              <span class="ganhos-meta-item">
-                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m9 9 11 4.2-4.6 1.6L13.8 19.5Z"/><path d="M5 3.5 6 6M3.5 9.5 6 9M11 4.5 10 7"/></svg>
-                <b>{{ inteiro(l.cliques) }}</b> cliques
-              </span>
-              <span class="ganhos-meta-sep" aria-hidden="true">•</span>
-            }
-            @if (l.pedidos != null) {
-              <span class="ganhos-meta-item"><b>{{ inteiro(l.pedidos) }}</b> pedidos</span>
-              <span class="ganhos-meta-sep" aria-hidden="true">•</span>
-            }
-            @if (l.aguardando) {
-              <span class="ganhos-meta-item">Aguardando leitura…</span>
-            } @else if (l.semToken) {
-              <span class="ganhos-meta-item ganhos-meta-erro" role="alert">Cole o token da API em Conexões</span>
-            } @else if (l.ok === false) {
-              <span class="ganhos-meta-item ganhos-meta-erro" role="alert">Sessão expirada, reconecte</span>
-            } @else {
-              <span class="ganhos-meta-item">
-                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
-                Última leitura: {{ quando(l.lidoEm) }}
-              </span>
-            }
+          <span class="ganhos-meta-item ganhos-meta-numeros">
+            <span><b>{{ inteiro(l.cliques) }}</b> cliques</span>
+            <span><b>{{ inteiro(l.pedidos) }}</b> pedidos</span>
           </span>
+          @if (l.aguardando) {
+            <span class="ganhos-meta-item">Aguardando leitura…</span>
+          } @else if (l.semToken) {
+            <span class="ganhos-meta-item ganhos-meta-erro" role="alert">Cole o token em Conexões</span>
+          } @else if (l.ok === false) {
+            <span class="ganhos-meta-item ganhos-meta-erro" role="alert">Sessão expirada, reconecte</span>
+          } @else {
+            <span class="ganhos-meta-item">Lido em {{ quando(l.lidoEm) }}</span>
+          }
         } @else {
-          <b class="ganhos-plataforma-valor ganhos-plataforma-off">Não conectada</b>
-          <span class="ganhos-plataforma-meta">
-            <span class="ganhos-meta-item">
-              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1.2 1.2"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1.2-1.2"/></svg>
-              Integre sua conta para ver os dados.
-            </span>
-          </span>
+          <span class="ganhos-plataforma-off">Não conectada</span>
         }
       </li>
     }
   </ul>
-
-  @if (ganhos.erro()) {
-    <p class="error-text" role="alert">{{ ganhos.erro() }}</p>
-  }
-</div>
-
-<div class="ganhos-kpis">
-  <div class="card ganhos-kpi">
-    <span class="ganhos-kpi-icone" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m9 9 11 4.2-4.6 1.6L13.8 19.5Z"/><path d="M5 3.5 6 6M3.5 9.5 6 9M11 4.5 10 7"/></svg>
-    </span>
-    <div class="ganhos-kpi-texto">
-      <span class="ganhos-kpi-rotulo">Cliques {{ rotuloResumo() }}</span>
-      <span class="ganhos-kpi-valor">{{ inteiro(resumo().cliques) }}</span>
-    </div>
-  </div>
-  <div class="card ganhos-kpi">
-    <span class="ganhos-kpi-icone" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3.5h6l-1.6 3.2h-2.8Z"/><path d="M10.6 6.7C6.5 8.4 4.5 12 4.5 15.2c0 3.2 2.6 5.3 7.5 5.3s7.5-2.1 7.5-5.3c0-3.2-2-6.8-6.1-8.5"/><path d="M13.8 11.3c-.4-.6-1.1-.9-1.8-.9-1 0-1.8.6-1.8 1.4 0 1.9 3.6 1.1 3.6 3 0 .8-.8 1.4-1.8 1.4-.8 0-1.5-.3-1.9-.9M12 9.6v.8M12 16.2v.8"/></svg>
-    </span>
-    <div class="ganhos-kpi-texto">
-      <span class="ganhos-kpi-rotulo">Gerado {{ rotuloResumo() }}</span>
-      <span class="ganhos-kpi-valor">{{ moeda(resumo().total) }}</span>
-    </div>
-  </div>
-  <div class="card ganhos-kpi">
-    <span class="ganhos-kpi-icone" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
-    </span>
-    <div class="ganhos-kpi-texto">
-      <span class="ganhos-kpi-rotulo">Pendente</span>
-      <span class="ganhos-kpi-valor">{{ moeda(resumo().pendente) }}</span>
-    </div>
-  </div>
-  <div class="card ganhos-kpi">
-    <span class="ganhos-kpi-icone ganhos-kpi-icone-ok" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="m8.4 12.2 2.4 2.4 4.8-5"/></svg>
-    </span>
-    <div class="ganhos-kpi-texto">
-      <span class="ganhos-kpi-rotulo">Aprovado / a receber</span>
-      <span class="ganhos-kpi-valor">{{ moeda(resumo().confirmado) }}</span>
-    </div>
-  </div>
-  <div class="card ganhos-kpi">
-    <span class="ganhos-kpi-icone" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l1 13H5Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
-    </span>
-    <div class="ganhos-kpi-texto">
-      <span class="ganhos-kpi-rotulo">Pedidos</span>
-      <span class="ganhos-kpi-valor">{{ inteiro(resumo().pedidos) }}</span>
-    </div>
-  </div>
-  <div class="card ganhos-kpi">
-    <span class="ganhos-kpi-icone" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3.5 8 4.5v8l-8 4.5L4 16V8Z"/><path d="m4 8 8 4.5L20 8M12 12.5v8"/></svg>
-    </span>
-    <div class="ganhos-kpi-texto">
-      <span class="ganhos-kpi-rotulo">Itens vendidos</span>
-      <span class="ganhos-kpi-valor">{{ inteiro(resumo().itens) }}</span>
-    </div>
-  </div>
-  <div class="card ganhos-kpi">
-    <span class="ganhos-kpi-icone" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7h17v10h-17Z"/><circle cx="12" cy="12" r="2.5"/></svg>
-    </span>
-    <div class="ganhos-kpi-texto">
-      <span class="ganhos-kpi-rotulo">Valor dos pedidos</span>
-      <span class="ganhos-kpi-valor">{{ moeda(resumo().valorPedidos) }}</span>
-    </div>
-  </div>
-  <div class="card ganhos-kpi">
-    <span class="ganhos-kpi-icone" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.8-3.8 3.4-5.5 7-5.5s6.2 1.7 7 5.5"/></svg>
-    </span>
-    <div class="ganhos-kpi-texto">
-      <span class="ganhos-kpi-rotulo">Compradores</span>
-      <span class="ganhos-kpi-valor">{{ inteiro(resumo().compradores) }}@if (resumo().novosCompradores != null) { <small> · {{ inteiro(resumo().novosCompradores) }} novos</small> }</span>
-    </div>
-  </div>
 </div>
 
 <div class="card ganhos-cartao-evolucao">
   <div class="card-header">
     <div>
       <h2>Evolução</h2>
-      <p class="card-subtitle">Últimos 12 meses, somando as lojas. Clique num mês para ver o resumo dele.</p>
+      <p class="card-subtitle">Últimos 12 meses, somando as lojas. Clique num mês para ver os ganhos dele.</p>
     </div>
     <div class="ganhos-legenda">
       @for (l of lojas; track l.id) {
@@ -183,7 +85,7 @@
           <g class="ganhos-coluna" [class.ativa]="colunaAtiva() === c" tabindex="0" role="img"
             [attr.aria-label]="nomeMes(c.mes) + ': ' + moeda(c.total)"
             (mouseenter)="colunaAtiva.set(c)" (focus)="colunaAtiva.set(c)" (blur)="colunaAtiva.set(null)"
-            (click)="mesEscolhido.set(c.mes)" (keydown.enter)="mesEscolhido.set(c.mes)">
+            (click)="abrirMes(c.mes)" (keydown.enter)="abrirMes(c.mes)">
             <rect class="ganhos-alvo" [attr.x]="c.centro - grafico().passo / 2" [attr.y]="g.topo"
               [attr.width]="grafico().passo" [attr.height]="g.altura - g.topo - g.base" />
             @for (b of c.barras; track b.loja) {
@@ -218,3 +120,109 @@
     </div>
   }
 </div>
+
+@if (tela.ganhosAberto()) {
+  <div class="modal-fundo" (click)="tela.ganhosAberto.set(false)">
+    <div class="modal-caixa ganhos-metricas" role="dialog" aria-modal="true" aria-labelledby="ganhos-metricas-titulo" (click)="$event.stopPropagation()">
+      <div class="card-header">
+        <h2 id="ganhos-metricas-titulo">Ganhos {{ rotuloResumo() }}</h2>
+        <div class="est-controles">
+          <label class="ganhos-mes">
+            <span>Mês</span>
+            <span class="ganhos-select">
+              <select aria-label="Mês do resumo" (change)="escolherMes($event)">
+                @for (m of mesesDisponiveis(); track m) {
+                  <option [value]="m" [selected]="mesEscolhido() === m">{{ nomeMes(m) }}</option>
+                }
+              </select>
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 9.5 5.5 5.5 5.5-5.5"/></svg>
+            </span>
+          </label>
+          <button type="button" class="btn-fechar" (click)="tela.ganhosAberto.set(false)" aria-label="Fechar" title="Fechar">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6 18 18M18 6 6 18" /></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="ganhos-kpis">
+        <div class="card ganhos-kpi">
+          <span class="ganhos-kpi-icone" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m9 9 11 4.2-4.6 1.6L13.8 19.5Z"/><path d="M5 3.5 6 6M3.5 9.5 6 9M11 4.5 10 7"/></svg>
+          </span>
+          <div class="ganhos-kpi-texto">
+            <span class="ganhos-kpi-rotulo">Cliques {{ rotuloResumo() }}</span>
+            <span class="ganhos-kpi-valor">{{ inteiro(resumo().cliques) }}</span>
+          </div>
+        </div>
+        <div class="card ganhos-kpi">
+          <span class="ganhos-kpi-icone" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3.5h6l-1.6 3.2h-2.8Z"/><path d="M10.6 6.7C6.5 8.4 4.5 12 4.5 15.2c0 3.2 2.6 5.3 7.5 5.3s7.5-2.1 7.5-5.3c0-3.2-2-6.8-6.1-8.5"/><path d="M13.8 11.3c-.4-.6-1.1-.9-1.8-.9-1 0-1.8.6-1.8 1.4 0 1.9 3.6 1.1 3.6 3 0 .8-.8 1.4-1.8 1.4-.8 0-1.5-.3-1.9-.9M12 9.6v.8M12 16.2v.8"/></svg>
+          </span>
+          <div class="ganhos-kpi-texto">
+            <span class="ganhos-kpi-rotulo">Gerado {{ rotuloResumo() }}</span>
+            <span class="ganhos-kpi-valor">{{ moeda(resumo().total) }}</span>
+          </div>
+        </div>
+        <div class="card ganhos-kpi">
+          <span class="ganhos-kpi-icone" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+          </span>
+          <div class="ganhos-kpi-texto">
+            <span class="ganhos-kpi-rotulo">Pendente</span>
+            <span class="ganhos-kpi-valor">{{ moeda(resumo().pendente) }}</span>
+          </div>
+        </div>
+        <div class="card ganhos-kpi">
+          <span class="ganhos-kpi-icone ganhos-kpi-icone-ok" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="m8.4 12.2 2.4 2.4 4.8-5"/></svg>
+          </span>
+          <div class="ganhos-kpi-texto">
+            <span class="ganhos-kpi-rotulo">Aprovado / a receber</span>
+            <span class="ganhos-kpi-valor">{{ moeda(resumo().confirmado) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <dl class="ganhos-metricas-total">
+        <div><dt>Pedidos</dt><dd>{{ inteiro(resumo().pedidos) }}</dd></div>
+        <div><dt>Itens vendidos</dt><dd>{{ inteiro(resumo().itens) }}</dd></div>
+        <div><dt>Valor dos pedidos</dt><dd>{{ moeda(resumo().valorPedidos) }}</dd></div>
+        <div><dt>Compradores</dt><dd>{{ inteiro(resumo().compradores) }}</dd></div>
+        <div><dt>Novos compradores</dt><dd>{{ inteiro(resumo().novosCompradores) }}</dd></div>
+      </dl>
+
+      <div class="ganhos-metricas-tabela">
+        <table class="tabela">
+          <thead>
+            <tr>
+              <th>Loja</th>
+              <th class="col-num">Gerado</th>
+              <th class="col-num">Pendente</th>
+              <th class="col-num">Aprovado</th>
+              <th class="col-num">Cliques</th>
+              <th class="col-num">Pedidos</th>
+              <th class="col-num">Itens</th>
+              <th class="col-num">Valor</th>
+              <th>Última leitura</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (l of estadoLojas(); track l.id) {
+              <tr [style.--loja-cor]="l.cor">
+                <td><span class="ganhos-ponto" aria-hidden="true"></span> {{ l.nome }}</td>
+                <td class="col-num">{{ moeda(l.gerado) }}</td>
+                <td class="col-num">{{ moeda(l.pendente) }}</td>
+                <td class="col-num">{{ moeda(l.confirmado) }}</td>
+                <td class="col-num">{{ inteiro(l.cliques) }}</td>
+                <td class="col-num">{{ inteiro(l.pedidos) }}</td>
+                <td class="col-num">{{ inteiro(l.itens) }}</td>
+                <td class="col-num">{{ moeda(l.valorPedidos) }}</td>
+                <td>{{ quando(l.lidoEm) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+}

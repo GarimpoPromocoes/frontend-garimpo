@@ -1,6 +1,7 @@
-import { Component, ElementRef, OnDestroy, OnInit, computed, effect, inject, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { GanhosService, GanhoMes, Loja } from '../../../core/services/ganhos.service';
 import { ConexoesService } from '../../../core/services/conexoes.service';
+import { EstatisticasVisaoService } from '../../../core/services/estatisticas-visao.service';
 
 const LOJAS: { id: Loja; nome: string; cor: string }[] = [
   { id: 'mercadolivre', nome: 'Mercado Livre', cor: 'var(--serie-1)' },
@@ -80,6 +81,7 @@ function tetoRedondo(max: number): number {
 export class GanhosCard implements OnInit, OnDestroy {
   protected ganhos = inject(GanhosService);
   private conexoes = inject(ConexoesService);
+  protected tela = inject(EstatisticasVisaoService);
   protected readonly lojas = LOJAS;
   private readonly tamanho = signal<{ w: number; h: number } | null>(null);
   private readonly geometria = computed(() => {
@@ -152,6 +154,10 @@ export class GanhosCard implements OnInit, OnDestroy {
         semToken: /token/i.test(r?.erro ?? ''),
         cliques: this.valorDe(mes, l.id)?.cliques ?? null,
         pedidos: this.valorDe(mes, l.id)?.pedidos ?? null,
+        itens: this.valorDe(mes, l.id)?.itens ?? null,
+        valorPedidos: this.valorDe(mes, l.id)?.valorPedidos ?? null,
+        pendente: this.valorDe(mes, l.id)?.pendente ?? null,
+        confirmado: this.valorDe(mes, l.id)?.confirmado ?? null,
         gerado: totalDe(this.valorDe(mes, l.id)),
       };
     });
@@ -220,7 +226,18 @@ export class GanhosCard implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.tela.ganhosAberto.set(false);
     this.observador?.disconnect();
+  }
+
+  @HostListener('document:keydown.escape')
+  protected fecharGanhos(): void {
+    this.tela.ganhosAberto.set(false);
+  }
+
+  protected abrirMes(mes: string): void {
+    this.mesEscolhido.set(mes);
+    this.tela.ganhosAberto.set(true);
   }
 
   protected inteiro(v: number | null | undefined): string {
