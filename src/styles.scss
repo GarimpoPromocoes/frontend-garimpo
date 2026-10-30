@@ -1264,6 +1264,9 @@ input[type='checkbox'] {
   --serie-1: #2a78d6;
   --serie-2: #d9541f;
   --serie-3: #12875c;
+  --serie-4: #8a4fd0;
+  --serie-5: #c2831a;
+  --serie-6: #c23b6a;
 }
 .ganhos-pagina {
   display: flex;
@@ -5754,7 +5757,7 @@ app-ganhos-card {
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 16px;
 }
 .ganhos-plataforma {
@@ -5871,8 +5874,8 @@ app-ganhos-card {
 }
 
 .ganhos-cartao-evolucao {
-  flex: 1;
-  min-height: 0;
+  flex: 1 0 auto;
+  min-height: 340px;
   display: flex;
   flex-direction: column;
 }
@@ -7363,4 +7366,11 @@ app-lojas-card {
     grid-column: 2;
     justify-self: start;
   }
+}
+
+/* Ganhos: com as metricas novas a aba pode passar da altura da tela (a pagina nao rola). */
+app-ganhos-card.ganhos-pagina {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }

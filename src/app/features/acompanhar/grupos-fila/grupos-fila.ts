@@ -6,7 +6,7 @@ import { JobsService } from '../../../core/services/jobs.service';
 
 type Filtro = 'todos' | StatusFila;
 
-const NOME_LOJA: Record<string, string> = { mercadolivre: 'Mercado Livre', amazon: 'Amazon', shopee: 'Shopee' };
+const NOME_LOJA: Record<string, string> = { mercadolivre: 'Mercado Livre', amazon: 'Amazon', shopee: 'Shopee', nike: 'Nike', adidas: 'Adidas', centauro: 'Centauro' };
 const RESUMO_A_CADA_MS = 20000;
 const LISTA_A_CADA_MS = 10000;
 

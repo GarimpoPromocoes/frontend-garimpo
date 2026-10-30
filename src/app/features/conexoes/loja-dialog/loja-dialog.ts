@@ -16,6 +16,7 @@ const ROTULO: Record<Provedor, string> = {
   shopee: 'Shopee',
   nike: 'Nike',
   adidas: 'Adidas',
+  centauro: 'Centauro',
 };
 
 const LOGO: Record<Provedor, string> = {
@@ -24,6 +25,7 @@ const LOGO: Record<Provedor, string> = {
   shopee: 'lojas/shopee.svg',
   nike: 'lojas/nike.png',
   adidas: 'lojas/adidas.png',
+  centauro: 'lojas/centauro.png',
 };
 
 // "o Mercado Livre" x "a Amazon": o artigo muda por loja.
@@ -33,6 +35,7 @@ const ARTIGO: Record<Provedor, 'o' | 'a'> = {
   shopee: 'a',
   nike: 'a',
   adidas: 'a',
+  centauro: 'a',
 };
 
 // Garimpo e link da Shopee saem da API (App ID/Secret). O login de navegador
@@ -72,13 +75,19 @@ const AJUDA: Partial<Record<Provedor, { texto: string; link: string; rotuloLink:
   },
   nike: {
     texto:
-      'A Nike é pela Awin: basta o seu ID de afiliado (o número no canto do painel da Awin). O robô monta o link de afiliado sozinho, sem login. Na clonagem, o link da Nike que o concorrente postar vira o seu, com o texto e a foto da mensagem dele.',
+      'A Nike é pela Awin: informe o seu ID de afiliado (o número no canto do painel da Awin) e o token da API (painel da Awin → Ferramentas → API). O robô gera o link curto de afiliado sozinho, sem login. Na clonagem, o link da Nike que o concorrente postar vira o seu, com o texto e a foto da mensagem dele.',
+    link: 'https://ui.awin.com',
+    rotuloLink: 'Abrir a Awin',
+  },
+  centauro: {
+    texto:
+      'A Centauro é pela Awin: informe o seu ID de afiliado (o número no canto do painel da Awin) e o token da API (painel da Awin → Ferramentas → API). O robô gera o link curto de afiliado sozinho, sem login. Na clonagem, o link da Centauro que o concorrente postar vira o seu, com o texto e a foto da mensagem dele.',
     link: 'https://ui.awin.com',
     rotuloLink: 'Abrir a Awin',
   },
   adidas: {
     texto:
-      'A Adidas é pela Awin: basta o seu ID de afiliado (o número no canto do painel da Awin). O robô monta o link de afiliado sozinho, sem login. Na clonagem, o link da Adidas que o concorrente postar vira o seu, com o texto e a foto da mensagem dele.',
+      'A Adidas é pela Awin: informe o seu ID de afiliado (o número no canto do painel da Awin) e o token da API (painel da Awin → Ferramentas → API). O robô gera o link curto de afiliado sozinho, sem login. Na clonagem, o link da Adidas que o concorrente postar vira o seu, com o texto e a foto da mensagem dele.',
     link: 'https://ui.awin.com',
     rotuloLink: 'Abrir a Awin',
   },
@@ -129,7 +138,10 @@ export class LojaDialog {
    * vêm os ganhos — pede o login dele de novo de tempos em tempos. Aí o modal oferece entrar de novo.
    */
   protected readonly painelPediuLogin = computed(
-    () => this.provedor() === 'amazon' && this.ganhos.leituras().find((l) => l.loja === 'amazon')?.ok === false,
+    () => {
+      const p = this.provedor();
+      return (p === 'amazon' || p === 'shopee') && this.ganhos.leituras().find((l) => l.loja === p)?.ok === false;
+    },
   );
   protected readonly rotulo = computed(() => {
     const p = this.provedor();
@@ -228,6 +240,7 @@ export class LojaDialog {
           tipo: c.tipo,
           opcoes: c.opcoes,
           grupo: 'afiliado' as const,
+          opcional: c.opcional,
         }));
 
     if (!this.usaNavegador()) return afiliado;
@@ -299,7 +312,7 @@ export class LojaDialog {
 
     // Ao abrir a Amazon, confere a última leitura dos ganhos (pra saber se o painel pediu login).
     effect(() => {
-      if (this.provedor() === 'amazon') untracked(() => void this.ganhos.carregar());
+      if (this.provedor() === 'amazon' || this.provedor() === 'shopee') untracked(() => void this.ganhos.carregar());
     });
     // Cada loja abre com a explicação fechada.
     effect(() => {
@@ -309,7 +322,7 @@ export class LojaDialog {
     // Entrou de novo na Amazon: já pede a leitura dos ganhos, pra "Sessão expirada" sumir na hora.
     effect(() => {
       const f = this.fim();
-      if (f?.ok && this.provedor() === 'amazon') untracked(() => void this.ganhos.atualizar());
+      if (f?.ok && (this.provedor() === 'amazon' || this.provedor() === 'shopee')) untracked(() => void this.ganhos.atualizar());
     });
 
     // Desliga com folga: entre um clique e a próxima foto a loja pode ficar um
@@ -633,6 +646,20 @@ export class LojaDialog {
     this.jobsService.esquecerVerificacao(p);
     const r = await this.jobsService.iniciar(job);
     if (!r.ok) this.erro.set(r.erro ?? null);
+  }
+
+  protected readonly eAwin = computed(() => this.provedor() === 'nike' || this.provedor() === 'adidas' || this.provedor() === 'centauro');
+
+  async salvarToken(): Promise<void> {
+    const p = this.provedor();
+    const token = this.valorDe('tokenApi').trim();
+    if (!p || !token) return;
+    this.enviando.set(true);
+    this.erro.set(null);
+    const r = await this.conexoes.salvarTokenAwin(p, token);
+    this.enviando.set(false);
+    if (r.ok) this.definir('tokenApi', '');
+    else this.erro.set(r.erro ?? null);
   }
 
   async desconectar(): Promise<void> {

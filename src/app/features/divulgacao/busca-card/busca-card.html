@@ -31,7 +31,7 @@
       @if (lojas().length) {
         <span class="hint-text">Procura em:</span>
         @for (l of lojas(); track l) {
-          <span class="busca-loja-chip"><img [src]="logo(l)" alt="" />{{ nomeLoja(l) }}</span>
+          <span class="busca-loja-chip" [title]="soClone(l) ? 'Esta loja entra só pelo clone' : null"><img [src]="logo(l)" alt="" />{{ nomeLoja(l) }}@if (soClone(l)) { <small>· só clone</small> }</span>
         }
       } @else {
         <span class="hint-text">Nenhuma loja de afiliado conectada — conecte uma em "Lojas de afiliado" para buscar.</span>

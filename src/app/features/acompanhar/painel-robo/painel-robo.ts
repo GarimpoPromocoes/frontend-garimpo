@@ -34,7 +34,7 @@ const BASE: Record<EtapaPainelId, { titulo: string; sub: string; icone: Icone }>
   concluido: { titulo: 'Concluído', sub: 'Produto publicado', icone: 'check' },
 };
 
-const NOME_LOJA: Record<string, string> = { mercadolivre: 'Mercado Livre', amazon: 'Amazon', shopee: 'Shopee' };
+const NOME_LOJA: Record<string, string> = { mercadolivre: 'Mercado Livre', amazon: 'Amazon', shopee: 'Shopee', nike: 'Nike', adidas: 'Adidas', centauro: 'Centauro' };
 const NUMEROS_A_CADA_MS = 60000;
 
 function hhmm(iso: string | null | undefined): string {

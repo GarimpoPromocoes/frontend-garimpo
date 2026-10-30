@@ -30,7 +30,7 @@
         <button type="button" role="checkbox" class="grupo-origem-opcao" data-fonte="garimpo"
           [class.grupo-origem-ativa]="garimpa(g)" [attr.aria-checked]="garimpa(g)"
           [disabled]="trocando() === g.id"
-          [title]="clona(g) ? 'Quando a fila dos concorrentes não tiver nada que sirva, garimpa nas lojas pelas palavras do grupo' : 'Ofertas e buscas no Mercado Livre, Amazon e Shopee pelas palavras do grupo'"
+          [title]="clona(g) ? 'Quando a fila dos concorrentes não tiver nada que sirva, garimpa nas lojas pelas palavras do grupo' : 'Ofertas e buscas no Mercado Livre, Amazon e Shopee pelas palavras do grupo. Nike, Adidas e Centauro entram só pelo clone'"
           (click)="alternarOrigem(g, 'garimpo')">
           <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9 5 4.5h14L20.5 9"/><path d="M3.5 9h17v9.5a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5Z"/></svg>
           Garimpar
@@ -199,7 +199,7 @@
                 @if (clona(r)) {
                   Quando a fila dos concorrentes não tiver nada que sirva, busca nas lojas pelo assunto do grupo.
                 } @else {
-                  Busca no Mercado Livre, Amazon e Shopee pelo assunto do grupo.
+                  Busca no Mercado Livre, Amazon e Shopee pelo assunto do grupo. Nike, Adidas e Centauro entram só pelo clone.
                 }
               </small>
             </span>

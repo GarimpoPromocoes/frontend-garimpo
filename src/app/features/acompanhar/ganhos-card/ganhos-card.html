@@ -35,8 +35,14 @@
               </span>
               <span class="ganhos-meta-sep" aria-hidden="true">•</span>
             }
+            @if (l.pedidos != null) {
+              <span class="ganhos-meta-item"><b>{{ inteiro(l.pedidos) }}</b> pedidos</span>
+              <span class="ganhos-meta-sep" aria-hidden="true">•</span>
+            }
             @if (l.aguardando) {
               <span class="ganhos-meta-item">Aguardando leitura…</span>
+            } @else if (l.semToken) {
+              <span class="ganhos-meta-item ganhos-meta-erro" role="alert">Cole o token da API em Conexões</span>
             } @else if (l.ok === false) {
               <span class="ganhos-meta-item ganhos-meta-erro" role="alert">Sessão expirada, reconecte</span>
             } @else {
@@ -99,6 +105,42 @@
     <div class="ganhos-kpi-texto">
       <span class="ganhos-kpi-rotulo">Aprovado / a receber</span>
       <span class="ganhos-kpi-valor">{{ moeda(resumo().confirmado) }}</span>
+    </div>
+  </div>
+  <div class="card ganhos-kpi">
+    <span class="ganhos-kpi-icone" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l1 13H5Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
+    </span>
+    <div class="ganhos-kpi-texto">
+      <span class="ganhos-kpi-rotulo">Pedidos</span>
+      <span class="ganhos-kpi-valor">{{ inteiro(resumo().pedidos) }}</span>
+    </div>
+  </div>
+  <div class="card ganhos-kpi">
+    <span class="ganhos-kpi-icone" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3.5 8 4.5v8l-8 4.5L4 16V8Z"/><path d="m4 8 8 4.5L20 8M12 12.5v8"/></svg>
+    </span>
+    <div class="ganhos-kpi-texto">
+      <span class="ganhos-kpi-rotulo">Itens vendidos</span>
+      <span class="ganhos-kpi-valor">{{ inteiro(resumo().itens) }}</span>
+    </div>
+  </div>
+  <div class="card ganhos-kpi">
+    <span class="ganhos-kpi-icone" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7h17v10h-17Z"/><circle cx="12" cy="12" r="2.5"/></svg>
+    </span>
+    <div class="ganhos-kpi-texto">
+      <span class="ganhos-kpi-rotulo">Valor dos pedidos</span>
+      <span class="ganhos-kpi-valor">{{ moeda(resumo().valorPedidos) }}</span>
+    </div>
+  </div>
+  <div class="card ganhos-kpi">
+    <span class="ganhos-kpi-icone" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.8-3.8 3.4-5.5 7-5.5s6.2 1.7 7 5.5"/></svg>
+    </span>
+    <div class="ganhos-kpi-texto">
+      <span class="ganhos-kpi-rotulo">Compradores</span>
+      <span class="ganhos-kpi-valor">{{ inteiro(resumo().compradores) }}@if (resumo().novosCompradores != null) { <small> · {{ inteiro(resumo().novosCompradores) }} novos</small> }</span>
     </div>
   </div>
 </div>

@@ -15,7 +15,7 @@ type EstadoConexao = 'ok' | 'atencao' | 'off';
 
 /** Um cartão da tela: um canal de envio (WhatsApp, Telegram) ou uma loja de afiliado. */
 interface Conta {
-  provedor: ProvedorConexao | 'nike' | 'adidas';
+  provedor: ProvedorConexao | 'nike' | 'adidas' | 'centauro';
   nome: string;
   logo: string;
   conectada: boolean;
@@ -63,7 +63,6 @@ export class LojasCard implements OnInit {
   protected readonly emBreve: LojaEmBreve[] = [
     { id: 'shein', nome: 'Shein', logo: 'lojas/shein.png' },
     { id: 'netshoes', nome: 'Netshoes', logo: 'lojas/netshoes.png' },
-    { id: 'centauro', nome: 'Centauro', logo: 'lojas/centauro.png' },
   ];
 
   protected readonly erro = computed(() => this.conexoes.erro());
@@ -141,6 +140,12 @@ export class LojasCard implements OnInit {
         nome: 'Adidas',
         logo: 'lojas/adidas.png',
         conectada: conexao('adidas')?.status === 'conectado',
+      }),
+      this.completar({
+        provedor: 'centauro',
+        nome: 'Centauro',
+        logo: 'lojas/centauro.png',
+        conectada: conexao('centauro')?.status === 'conectado',
       }),
     ];
   });

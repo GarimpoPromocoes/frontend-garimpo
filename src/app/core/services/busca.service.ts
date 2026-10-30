@@ -2,7 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
-export type LojaBusca = 'mercadolivre' | 'amazon' | 'shopee';
+export type LojaBusca = 'mercadolivre' | 'amazon' | 'shopee' | 'nike' | 'adidas' | 'centauro';
 
 /** Uma oferta da lista que a busca devolve (dados da listagem da loja). */
 export interface OfertaLista {

@@ -20,7 +20,7 @@ export const VARIAVEIS_COPY: VariavelCopy[] = [
   { nome: 'cupom', rotulo: 'Cupom', dica: 'Só o código do cupom (vazio se não tiver)' },
   { nome: 'linha_cupom', rotulo: 'Linha do cupom', dica: 'A linha de sempre: 🎟️ Use o cupom X' },
   { nome: 'link', rotulo: 'Link', dica: 'Seu link de afiliado (obrigatório)' },
-  { nome: 'loja', rotulo: 'Loja', dica: 'Mercado Livre, Amazon ou Shopee' },
+  { nome: 'loja', rotulo: 'Loja', dica: 'Mercado Livre, Amazon, Shopee, Nike, Adidas ou Centauro' },
 ];
 
 /** Produto de exemplo da prévia, com e sem cupom (valores no formato que o robô usa). */

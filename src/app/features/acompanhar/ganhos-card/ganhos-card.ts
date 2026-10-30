@@ -1,10 +1,14 @@
 import { Component, ElementRef, OnDestroy, OnInit, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { GanhosService, GanhoMes, Loja } from '../../../core/services/ganhos.service';
+import { ConexoesService } from '../../../core/services/conexoes.service';
 
 const LOJAS: { id: Loja; nome: string; cor: string }[] = [
   { id: 'mercadolivre', nome: 'Mercado Livre', cor: 'var(--serie-1)' },
   { id: 'amazon', nome: 'Amazon', cor: 'var(--serie-2)' },
   { id: 'shopee', nome: 'Shopee', cor: 'var(--serie-3)' },
+  { id: 'nike', nome: 'Nike', cor: 'var(--serie-4)' },
+  { id: 'adidas', nome: 'Adidas', cor: 'var(--serie-5)' },
+  { id: 'centauro', nome: 'Centauro', cor: 'var(--serie-6)' },
 ];
 
 const NOME_MES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
@@ -75,6 +79,7 @@ function tetoRedondo(max: number): number {
 })
 export class GanhosCard implements OnInit, OnDestroy {
   protected ganhos = inject(GanhosService);
+  private conexoes = inject(ConexoesService);
   protected readonly lojas = LOJAS;
   private readonly tamanho = signal<{ w: number; h: number } | null>(null);
   private readonly geometria = computed(() => {
@@ -118,6 +123,11 @@ export class GanhosCard implements OnInit, OnDestroy {
       confirmado: somar(doMes.map((g) => g?.confirmado ?? null)),
       pago: somar(doMes.map((g) => g?.pago ?? null)),
       cliques: somar(doMes.map((g) => g?.cliques ?? null)),
+      pedidos: somar(doMes.map((g) => g?.pedidos ?? null)),
+      itens: somar(doMes.map((g) => g?.itens ?? null)),
+      valorPedidos: somar(doMes.map((g) => g?.valorPedidos ?? null)),
+      compradores: somar(doMes.map((g) => g?.compradores ?? null)),
+      novosCompradores: somar(doMes.map((g) => g?.novosCompradores ?? null)),
     };
   });
 
@@ -134,8 +144,14 @@ export class GanhosCard implements OnInit, OnDestroy {
         lidoEm: r?.lidoEm ?? null,
         aguardando: !!(r?.pedidoEm && (!r.lidoEm || r.pedidoEm > r.lidoEm)),
         // Sem nenhuma leitura e sem ganho no mes: a loja ainda nao foi integrada.
-        conectada: !!r || this.valorDe(mes, l.id) != null,
+        // Nike e Adidas nao tem leitura de navegador: vale a conexao delas.
+        conectada:
+          l.id === 'nike' || l.id === 'adidas' || l.id === 'centauro'
+            ? this.conexoes.statusDe(l.id)?.status === 'conectado'
+            : !!r || this.valorDe(mes, l.id) != null,
+        semToken: /token/i.test(r?.erro ?? ''),
         cliques: this.valorDe(mes, l.id)?.cliques ?? null,
+        pedidos: this.valorDe(mes, l.id)?.pedidos ?? null,
         gerado: totalDe(this.valorDe(mes, l.id)),
       };
     });
@@ -200,6 +216,7 @@ export class GanhosCard implements OnInit, OnDestroy {
   ngOnInit(): void {
     // O "Atualizar agora" e o acompanhamento da leitura ficam na barra de Estatísticas.
     void this.ganhos.carregar();
+    void this.conexoes.carregar();
   }
 
   ngOnDestroy(): void {

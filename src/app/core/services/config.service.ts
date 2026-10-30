@@ -44,7 +44,7 @@ export interface GrupoTematico {
 
 export type FonteProdutos = 'garimpo' | 'clonagem';
 
-export type LojaAfiliado = 'mercadolivre' | 'amazon' | 'shopee' | 'nike' | 'adidas';
+export type LojaAfiliado = 'mercadolivre' | 'amazon' | 'shopee' | 'nike' | 'adidas' | 'centauro';
 
 /** As lojas de afiliado, na ordem de sempre. */
 export const LOJAS_AFILIADO: { id: LojaAfiliado; nome: string; logo: string }[] = [
@@ -53,6 +53,7 @@ export const LOJAS_AFILIADO: { id: LojaAfiliado; nome: string; logo: string }[] 
   { id: 'shopee', nome: 'Shopee', logo: 'lojas/shopee.svg' },
   { id: 'nike', nome: 'Nike', logo: 'lojas/nike.png' },
   { id: 'adidas', nome: 'Adidas', logo: 'lojas/adidas.png' },
+  { id: 'centauro', nome: 'Centauro', logo: 'lojas/centauro.png' },
 ];
 
 export interface Agendamento {
@@ -88,7 +89,7 @@ export interface CupomDeGrupo {
   valor: number | null;
   minimo: number | null;
   limite: number | null;
-  loja: 'mercadolivre' | 'amazon' | 'shopee' | null;
+  loja: 'mercadolivre' | 'amazon' | 'shopee' | 'nike' | 'adidas' | 'centauro' | null;
   grupos: string[];
   vistoEm: string;
 }

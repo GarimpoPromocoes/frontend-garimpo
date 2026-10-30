@@ -1,4 +1,7 @@
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+import { AuthService } from './auth.service';
 import { ProvedorConexao, StatusService } from './status.service';
 import { JobsService } from './jobs.service';
 import { VerificacaoService } from './verificacao.service';
@@ -6,7 +9,18 @@ import { WhatsappUiService } from './whatsapp-ui.service';
 import { TelegramUiService } from './telegram-ui.service';
 import { LojasUiService } from './lojas-ui.service';
 
-export type OrigemAviso = ProvedorConexao | 'desafio';
+export type OrigemAviso = ProvedorConexao | 'desafio' | 'banco';
+
+interface UsoBanco {
+  usadoMb: number;
+  limiteMb: number;
+  pct: number;
+}
+
+// A partir de quanto o sino do dono avisa que o banco esta enchendo.
+const BANCO_ATENCAO = 80;
+const BANCO_CRITICO = 90;
+const BANCO_CONSULTA_MS = 10 * 60 * 1000;
 
 export interface Aviso {
   /** Muda a cada nova queda — é o que decide se o aviso já foi visto. */
@@ -60,6 +74,11 @@ export class AvisosService {
   private whatsappUi = inject(WhatsappUiService);
   private telegramUi = inject(TelegramUiService);
   private lojasUi = inject(LojasUiService);
+  private http = inject(HttpClient);
+  private auth = inject(AuthService);
+
+  private readonly usoBanco = signal<UsoBanco | null>(null);
+  private consultaBanco: ReturnType<typeof setInterval> | null = null;
 
   private conectadoAgora(p: ProvedorConexao): boolean {
     switch (p) {
@@ -110,6 +129,21 @@ export class AvisosService {
       });
     }
 
+    const banco = this.usoBanco();
+    if (banco && banco.pct >= BANCO_ATENCAO) {
+      const critico = banco.pct >= BANCO_CRITICO;
+      lista.unshift({
+        // Muda de faixa, avisa de novo; dentro da mesma faixa, nao repete.
+        id: `banco:${critico ? BANCO_CRITICO : BANCO_ATENCAO}`,
+        origem: 'banco',
+        titulo: critico ? 'O banco de dados está quase cheio' : 'O banco de dados está enchendo',
+        texto: `${banco.usadoMb} MB de ${banco.limiteMb} MB usados (${banco.pct}%). Libere espaço ou aumente o plano do Supabase antes que ele lote.`,
+        em: null,
+        gravidade: critico ? 'erro' : 'aviso',
+        acao: 'Abrir o Supabase',
+      });
+    }
+
     return lista;
   });
 
@@ -121,6 +155,19 @@ export class AvisosService {
   });
 
   constructor() {
+    // So o dono ve o espaco do banco: a consulta comeca quando ele entra e para quando sai.
+    effect(() => {
+      const dono = !!this.auth.usuario()?.admin;
+      if (this.consultaBanco) clearInterval(this.consultaBanco);
+      this.consultaBanco = null;
+      if (!dono) {
+        this.usoBanco.set(null);
+        return;
+      }
+      void this.lerBanco();
+      this.consultaBanco = setInterval(() => void this.lerBanco(), BANCO_CONSULTA_MS);
+    });
+
     // Não deixa a lista de vistos crescer pra sempre: só guarda os ativos.
     effect(() => {
       const ativos = new Set(this.avisos().map((a) => a.id));
@@ -149,8 +196,19 @@ export class AvisosService {
       case 'desafio':
         this.jobsService.desafioPopupAberto.set(true);
         return;
+      case 'banco':
+        window.open('https://supabase.com/dashboard', '_blank', 'noopener');
+        return;
       default:
         this.lojasUi.abrir(aviso.origem);
+    }
+  }
+
+  private async lerBanco(): Promise<void> {
+    try {
+      this.usoBanco.set(await firstValueFrom(this.http.get<UsoBanco>('/api/admin/banco')));
+    } catch (_) {
+      // Sem resposta agora: fica o ultimo valor lido e tenta de novo na proxima.
     }
   }
 
