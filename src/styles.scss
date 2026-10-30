@@ -74,8 +74,8 @@
   --lanterna-bg: #2a1d12;
   --lanterna-borda: transparent;
   --lanterna-luz: #6f5f52;
-  --toggle-trilho: #2a1d12;
-  --toggle-bola: #e0a520;
+  --toggle-trilho: var(--gold-deep);
+  --toggle-bola: #ffffff;
   /* Plaquinha atrás das logos das lojas (elas são desenhadas para fundo claro). */
   --logo-placa: var(--surface-2);
   --logo-caixa: transparent;
@@ -922,6 +922,41 @@ body:has(.modal-fundo) .bot-control-fixo {
   box-shadow: var(--focus-halo);
 }
 
+/* Padrão de todas as caixinhas: borda cinza e fundo branco; marcada, fundo amarelo com check branco
+   (o mesmo de Grupos > Produtos > Clonar). */
+input[type='checkbox'] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  flex-shrink: 0;
+  border: 1.5px solid var(--border-control);
+  border-radius: 5px;
+  background: var(--surface) center / 14px no-repeat;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s;
+
+  &:hover:not(:disabled) {
+    border-color: var(--gold-deep);
+  }
+  &:checked {
+    border-color: var(--gold-deep);
+    background-color: var(--gold-deep);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.5 4.5L19 7.5'/%3E%3C/svg%3E");
+  }
+  &:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
 .checkbox-row {
   display: flex;
   align-items: flex-start;
@@ -935,7 +970,6 @@ body:has(.modal-fundo) .bot-control-fixo {
   width: 18px;
   height: 18px;
   margin: 2px 0 0;
-  accent-color: var(--gold-deep);
   flex-shrink: 0;
 }
 .checkbox-row strong {
@@ -977,7 +1011,7 @@ body:has(.modal-fundo) .bot-control-fixo {
   box-shadow: 0 1px 2px rgba(26, 26, 24, 0.28);
   transition: transform 0.16s ease;
 }
-/* Ligada: trilho escuro com a bolinha amarela — o estado não depende só da cor. */
+/* Ligada: trilho amarelo com a bolinha branca à direita — o estado não depende só da cor. */
 .toggle-switch-on {
   background: var(--toggle-trilho);
 }
@@ -2458,11 +2492,13 @@ app-groups-card {
   }
 }
 .gm-loja-ativa {
-  border-color: var(--text-soft);
+  border-color: var(--gold);
+  box-shadow: inset 0 0 0 1px var(--gold);
+  background: var(--gold-soft);
 
   .gm-check {
-    border-color: var(--espresso);
-    background: var(--espresso);
+    border-color: var(--gold-deep);
+    background: var(--gold-deep);
     color: #fff;
 
     svg {
@@ -2570,7 +2606,6 @@ app-groups-card {
     height: 20px;
     margin: 2px 0 0;
     flex-shrink: 0;
-    accent-color: var(--gold-deep);
   }
   span {
     display: flex;
@@ -2588,7 +2623,8 @@ app-groups-card {
   }
 }
 .gm-tudo-ativo {
-  border-color: var(--gold-border);
+  border-color: var(--gold);
+  box-shadow: inset 0 0 0 1px var(--gold);
   background: var(--gold-soft);
 }
 .gm-estrito {
@@ -3771,10 +3807,11 @@ app-sino {
   border-color: var(--border-strong);
   color: var(--text);
 }
-.regra-chip-ativa {
-  border-color: var(--on-gold);
-  background: var(--gold);
-  color: var(--on-gold);
+.regra-chip-ativa,
+.regra-chip-ativa:hover {
+  border-color: var(--gold-deep);
+  background: var(--gold-deep);
+  color: #fff;
   font-weight: 600;
 }
 .regra-chip-campo {
