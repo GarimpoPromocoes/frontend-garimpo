@@ -97,9 +97,6 @@ export class LojasCard implements OnInit {
     return this.lojasConectadas().map((c) => ({ ...c, loja: true, desligada: desligadas.has(c.provedor) }));
   });
 
-  protected readonly lojasLigadas = computed(() => this.lojas().filter((c) => !c.desligada));
-  protected readonly lojasDesligadas = computed(() => this.lojas().filter((c) => c.desligada));
-
   private readonly lojasConectadas = computed<Conta[]>(() => {
     const conexao = (p: Provedor) => this.conexoes.statusDe(p);
     return [

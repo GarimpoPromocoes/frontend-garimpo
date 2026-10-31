@@ -7209,7 +7209,7 @@ app-lojas-card {
 .lj-secao {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 .lj-secao-titulo {
   margin: 0;
@@ -7225,23 +7225,23 @@ app-lojas-card {
 }
 .lj-grade {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   /* Cada cartão na altura do que tem: sem esticar pra igualar o vizinho (sobrava espaço vazio). */
   align-items: start;
-  gap: 16px;
+  gap: 12px;
 }
 .lj-cartao {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 20px;
+  gap: 10px;
+  padding: 12px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
 }
 .lj-cartao[data-estado='atencao'] {
   border: 2px solid var(--gold-border);
-  padding: 19px;
+  padding: 11px;
 }
 .lj-cartao[data-estado='off'] {
   border-style: dashed;
@@ -7250,16 +7250,16 @@ app-lojas-card {
 .lj-topo {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
 }
 /* Todos os logos na mesma caixa: as marcas têm proporções bem diferentes. */
 .lj-logo {
   flex-shrink: 0;
-  width: 96px;
-  height: 56px;
+  width: 76px;
+  height: 44px;
   display: grid;
   place-items: center;
-  padding: 8px;
+  padding: 6px;
   box-sizing: border-box;
   border-radius: var(--radius-sm);
   background: var(--logo-placa);
@@ -7279,19 +7279,19 @@ app-lojas-card {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 6px;
+  gap: 4px;
   min-width: 0;
 }
 .lj-nome strong {
-  font-size: 17px;
+  font-size: 15px;
 }
 .lj-selo {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 3px 10px;
+  padding: 2px 8px;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   border: 1px solid var(--border);
   background: var(--surface-2);
@@ -7319,40 +7319,32 @@ app-lojas-card {
   line-height: 1.45;
   color: var(--text-soft);
 }
+.lj-rodape {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
 .lj-acao {
-  width: 100%;
-  min-height: 42px;
+  flex: 1;
+  min-height: 34px;
+  padding-block: 4px;
+  font-size: 13px;
 }
 /* Ligar/desligar a loja sem desconectar. */
 .lj-ligar {
+  flex-shrink: 0;
   display: flex;
-  align-items: flex-start;
-  gap: 11px;
-  padding: 12px 14px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface-2);
-}
-.lj-ligar .toggle-switch {
-  margin-top: 1px;
+  align-items: center;
+  gap: 8px;
 }
 .lj-ligar .toggle-switch:disabled {
   opacity: 0.6;
   cursor: progress;
 }
 .lj-ligar-texto {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-.lj-ligar-texto strong {
-  font-size: 14px;
-}
-.lj-ligar-texto small {
   font-size: 13px;
-  line-height: 1.4;
-  color: var(--text-muted);
+  font-weight: 600;
 }
 .lj-cartao-desligada .lj-logo img {
   filter: grayscale(1);
