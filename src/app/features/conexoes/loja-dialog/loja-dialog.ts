@@ -16,6 +16,9 @@ const ROTULO: Record<Provedor, string> = {
   shopee: 'Shopee',
   nike: 'Nike',
   adidas: 'Adidas',
+  netshoes: 'Netshoes',
+  shein: 'Shein',
+  centauro: 'Centauro',
 };
 
 const LOGO: Record<Provedor, string> = {
@@ -24,6 +27,9 @@ const LOGO: Record<Provedor, string> = {
   shopee: 'lojas/shopee.svg',
   nike: 'lojas/nike.png',
   adidas: 'lojas/adidas.png',
+  netshoes: 'lojas/netshoes.png',
+  shein: 'lojas/shein.png',
+  centauro: 'lojas/centauro.png',
 };
 
 // "o Mercado Livre" x "a Amazon": o artigo muda por loja.
@@ -33,6 +39,9 @@ const ARTIGO: Record<Provedor, 'o' | 'a'> = {
   shopee: 'a',
   nike: 'a',
   adidas: 'a',
+  netshoes: 'a',
+  shein: 'a',
+  centauro: 'a',
 };
 
 // Garimpo e link da Shopee saem da API (App ID/Secret). O login de navegador
@@ -42,6 +51,7 @@ const JOB_DE: Partial<Record<Provedor, JobTipo>> = {
   mercadolivre: 'login-ml',
   amazon: 'login-amazon',
   shopee: 'login-shopee',
+  shein: 'login-shein',
 };
 
 // Lojas em que o robô também sabe entrar pela conta Google.
@@ -81,6 +91,24 @@ const AJUDA: Partial<Record<Provedor, { texto: string; link: string; rotuloLink:
       'A Adidas é pela Awin: basta o seu ID de afiliado (o número no canto do painel da Awin). O robô monta o link de afiliado sozinho, sem login. Na clonagem, o link da Adidas que o concorrente postar vira o seu, com o texto e a foto da mensagem dele.',
     link: 'https://ui.awin.com',
     rotuloLink: 'Abrir a Awin',
+  },
+  netshoes: {
+    texto:
+      'A Netshoes é pela Rakuten: o ID criptografado (em Links > Deep Links, ou no "id=" de qualquer link seu) basta para o robô montar o seu link. Com as chaves da API (opcionais: Client ID e Client Secret em Developer Portal > Account and Application; o Scope ID/SID fica no canto do painel), o nome, o preço e a foto saem do catálogo oficial da Netshoes. Sem elas, saem da mensagem do concorrente.',
+    link: 'https://rakutenadvertising.io',
+    rotuloLink: 'Abrir a Rakuten',
+  },
+  centauro: {
+    texto:
+      'A Centauro é pela Awin: basta o seu ID de afiliado (o número no canto do painel da Awin) e a sua conta inscrita no programa "Centauro BR". O robô monta o link de afiliado sozinho, sem login. Na clonagem, o link da Centauro que o concorrente postar vira o seu, com o texto e a foto da mensagem dele.',
+    link: 'https://ui.awin.com',
+    rotuloLink: 'Abrir a Awin',
+  },
+  shein: {
+    texto:
+      'A Shein não tem API: o robô entra no seu painel de afiliados e usa a tela "Converter link", a mesma que você usaria. Use o e-mail ou telefone e a senha da sua conta Shein (o "Entrar com Google" não funciona no robô). Na clonagem, o link da Shein que o concorrente postar vira o seu, com o texto e a foto da mensagem dele.',
+    link: 'https://m.shein.com/br/affiliate',
+    rotuloLink: 'Abrir o painel da Shein',
   },
 };
 
@@ -227,6 +255,7 @@ export class LojaDialog {
           rotulo: c.rotulo,
           tipo: c.tipo,
           opcoes: c.opcoes,
+          opcional: c.opcional,
           grupo: 'afiliado' as const,
         }));
 
@@ -241,6 +270,7 @@ export class LojaDialog {
   private rotuloUsuario(p: Provedor): string {
     if (p === 'amazon') return 'E-mail ou telefone da conta Amazon';
     if (p === 'shopee') return 'E-mail, telefone ou usuário da Shopee';
+    if (p === 'shein') return 'E-mail ou telefone da conta Shein';
     return 'E-mail, telefone ou usuário';
   }
 

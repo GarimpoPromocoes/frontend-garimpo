@@ -2,7 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
-export type Provedor = 'mercadolivre' | 'shopee' | 'amazon' | 'nike' | 'adidas';
+export type Provedor = 'mercadolivre' | 'shopee' | 'amazon' | 'nike' | 'adidas' | 'netshoes' | 'shein' | 'centauro';
 export type StatusConexao = 'desconectado' | 'conectando' | 'conectado' | 'erro';
 
 export interface LoginGuardado {
@@ -26,6 +26,7 @@ export interface CampoConexao {
   rotulo: string;
   tipo: 'texto' | 'segredo' | 'opcoes';
   opcoes?: string[];
+  opcional?: boolean;
 }
 
 export interface FormularioProvedor {

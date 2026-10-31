@@ -10,6 +10,7 @@ export type JobTipo =
   | 'desconectar-ml'
   | 'login-amazon'
   | 'login-shopee'
+  | 'login-shein'
   | 'desconectar-shopee'
   | 'trocar-zap'
   | 'desconectar-zap'

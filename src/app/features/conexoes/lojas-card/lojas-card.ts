@@ -15,7 +15,7 @@ type EstadoConexao = 'ok' | 'atencao' | 'off';
 
 /** Um cartão da tela: um canal de envio (WhatsApp, Telegram) ou uma loja de afiliado. */
 interface Conta {
-  provedor: ProvedorConexao | 'nike' | 'adidas';
+  provedor: ProvedorConexao | 'nike' | 'adidas' | 'netshoes' | 'shein' | 'centauro';
   nome: string;
   logo: string;
   conectada: boolean;
@@ -61,9 +61,6 @@ export class LojasCard implements OnInit {
   // Ainda em desenvolvimento: ficam visíveis, mas o clique só avisa.
   // Quando uma ficar pronta, ela sai daqui e entra em `lojas` com o provedor.
   protected readonly emBreve: LojaEmBreve[] = [
-    { id: 'shein', nome: 'Shein', logo: 'lojas/shein.png' },
-    { id: 'netshoes', nome: 'Netshoes', logo: 'lojas/netshoes.png' },
-    { id: 'centauro', nome: 'Centauro', logo: 'lojas/centauro.png' },
   ];
 
   protected readonly erro = computed(() => this.conexoes.erro());
@@ -141,6 +138,27 @@ export class LojasCard implements OnInit {
         nome: 'Adidas',
         logo: 'lojas/adidas.png',
         conectada: conexao('adidas')?.status === 'conectado',
+      }),
+      // Centauro: pela Awin, como Nike e Adidas.
+      this.completar({
+        provedor: 'centauro',
+        nome: 'Centauro',
+        logo: 'lojas/centauro.png',
+        conectada: conexao('centauro')?.status === 'conectado',
+      }),
+      // Netshoes: pela Rakuten, so' o ID criptografado (o link e' montado, nada cai).
+      this.completar({
+        provedor: 'netshoes',
+        nome: 'Netshoes',
+        logo: 'lojas/netshoes.png',
+        conectada: conexao('netshoes')?.status === 'conectado',
+      }),
+      // Shein: login no painel de afiliados (o robo grava a conexao quando entra).
+      this.completar({
+        provedor: 'shein',
+        nome: 'Shein',
+        logo: 'lojas/shein.png',
+        conectada: conexao('shein')?.status === 'conectado',
       }),
     ];
   });

@@ -107,19 +107,21 @@
   </section>
 }
 
-<section class="lj-secao" aria-labelledby="lj-breve">
-  <h2 class="lj-secao-titulo lj-secao-titulo-leve" id="lj-breve">Em breve</h2>
-  <ul class="lj-breve">
-    @for (loja of emBreve; track loja.id) {
-      <li>
-        <button type="button" class="lj-breve-item" [attr.aria-label]="loja.nome + ' — em desenvolvimento'" (click)="avisarEmBreve(loja.nome)">
-          <img [src]="loja.logo" alt="" />
-          {{ loja.nome }}
-        </button>
-      </li>
-    }
-  </ul>
-</section>
+@if (emBreve.length) {
+  <section class="lj-secao" aria-labelledby="lj-breve">
+    <h2 class="lj-secao-titulo lj-secao-titulo-leve" id="lj-breve">Em breve</h2>
+    <ul class="lj-breve">
+      @for (loja of emBreve; track loja.id) {
+        <li>
+          <button type="button" class="lj-breve-item" [attr.aria-label]="loja.nome + ' — em desenvolvimento'" (click)="avisarEmBreve(loja.nome)">
+            <img [src]="loja.logo" alt="" />
+            {{ loja.nome }}
+          </button>
+        </li>
+      }
+    </ul>
+  </section>
+}
 
 @if (erro(); as e) {
   <div class="alert-banner">
