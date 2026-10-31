@@ -2,7 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
-export type Loja = 'mercadolivre' | 'amazon' | 'shopee';
+export type Loja = 'mercadolivre' | 'amazon' | 'shopee' | 'nike' | 'adidas' | 'centauro';
 
 export interface GanhoMes {
   loja: Loja;
@@ -12,6 +12,11 @@ export interface GanhoMes {
   confirmado: number | null;
   pago: number | null;
   cliques: number | null;
+  pedidos: number | null;
+  itens: number | null;
+  valorPedidos: number | null;
+  compradores: number | null;
+  novosCompradores: number | null;
   lidoEm: string;
 }
 

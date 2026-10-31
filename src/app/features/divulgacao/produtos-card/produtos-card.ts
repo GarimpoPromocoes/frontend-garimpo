@@ -9,6 +9,9 @@ const NOME_LOJA: Record<string, string> = {
   mercadolivre: 'Mercado Livre',
   amazon: 'Amazon',
   shopee: 'Shopee',
+  nike: 'Nike',
+  adidas: 'Adidas',
+  centauro: 'Centauro',
 };
 
 @Component({

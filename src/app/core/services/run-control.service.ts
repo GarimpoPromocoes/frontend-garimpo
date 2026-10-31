@@ -21,6 +21,9 @@ export class RunControlService {
     if (this.verificacao.mercadoLivreConectado()) lojas.push('mercadolivre');
     if (this.conexoes.statusDe('amazon')?.status === 'conectado') lojas.push('amazon');
     if (this.verificacao.shopeeConectado()) lojas.push('shopee');
+    if (this.conexoes.statusDe('nike')?.status === 'conectado') lojas.push('nike');
+    if (this.conexoes.statusDe('adidas')?.status === 'conectado') lojas.push('adidas');
+    if (this.conexoes.statusDe('centauro')?.status === 'conectado') lojas.push('centauro');
     return lojas;
   });
 
@@ -76,7 +79,7 @@ export class RunControlService {
       itens.push({ texto: 'Conectar um canal de envio (WhatsApp ou Telegram)', aba: 'lojas' });
     }
     if (!this.lojasConectadas().length) {
-      itens.push({ texto: 'Conectar pelo menos uma loja de afiliado (Mercado Livre, Amazon ou Shopee)', aba: 'lojas' });
+      itens.push({ texto: 'Conectar pelo menos uma loja de afiliado (Mercado Livre, Amazon, Shopee, Nike, Adidas ou Centauro)', aba: 'lojas' });
     }
     if (this.grupos().length === 0) {
       itens.push({ texto: 'Cadastrar pelo menos um grupo', aba: 'grupos' });
@@ -111,7 +114,7 @@ export class RunControlService {
       await this.confirmacao.pedir({
         titulo: 'Configuração incompleta',
         texto:
-          'Para ligar o robô, conecte pelo menos um e-commerce (Mercado Livre, Amazon ou Shopee) e pelo menos um canal de envio (WhatsApp ou Telegram).',
+          'Para ligar o robô, conecte pelo menos um e-commerce (Mercado Livre, Amazon, Shopee, Nike, Adidas ou Centauro) e pelo menos um canal de envio (WhatsApp ou Telegram).',
         confirmar: 'Entendi',
         soAviso: true,
       });
@@ -121,7 +124,7 @@ export class RunControlService {
       await this.confirmacao.pedir({
         titulo: 'Nenhum e-commerce conectado',
         texto:
-          'Conecte pelo menos um e-commerce (Mercado Livre, Amazon ou Shopee) antes de ligar o robô — é de onde saem as ofertas.',
+          'Conecte pelo menos um e-commerce (Mercado Livre, Amazon, Shopee, Nike, Adidas ou Centauro) antes de ligar o robô — é de onde saem as ofertas.',
         confirmar: 'Entendi',
         soAviso: true,
       });

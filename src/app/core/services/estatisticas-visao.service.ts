@@ -40,6 +40,8 @@ export class EstatisticasVisaoService {
 
   readonly visao = signal<VisaoEstatisticas>(visaoSalva());
   readonly dias = signal(30);
+  /** A janela de ganhos do mes, aberta pelo icone de moeda do cabecalho. */
+  readonly ganhosAberto = signal(false);
   readonly pedindo = signal(false);
   readonly erroAcao = signal<string | null>(null);
   /** Robô ligado: diz o que ele está fazendo com o pedido (some quando ele termina). */

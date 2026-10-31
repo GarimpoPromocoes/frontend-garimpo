@@ -91,7 +91,7 @@ export interface CupomDeGrupo {
   valor: number | null;
   minimo: number | null;
   limite: number | null;
-  loja: 'mercadolivre' | 'amazon' | 'shopee' | null;
+  loja: 'mercadolivre' | 'amazon' | 'shopee' | 'nike' | 'adidas' | 'centauro' | null;
   grupos: string[];
   vistoEm: string;
 }

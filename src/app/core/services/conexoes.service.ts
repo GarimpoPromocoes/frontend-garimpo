@@ -19,6 +19,7 @@ export interface Conexao {
   ultimaValidacao: string | null;
   erro: string | null;
   login: LoginGuardado;
+  temTokenApi?: boolean;
 }
 
 export interface CampoConexao {
@@ -77,6 +78,17 @@ export class ConexoesService {
       return { ok: true };
     } catch (e: any) {
       return { ok: false, erro: e?.error?.erro || 'Não foi possível conectar — tente novamente.' };
+    }
+  }
+
+  /** Token da API da Awin (o mesmo para Nike e Adidas): encurta os links. */
+  async salvarTokenAwin(provedor: Provedor, tokenApi: string): Promise<{ ok: boolean; erro?: string }> {
+    try {
+      await firstValueFrom(this.http.post(`/api/conexoes/${provedor}/token`, { tokenApi }));
+      await this.carregar();
+      return { ok: true };
+    } catch (e: any) {
+      return { ok: false, erro: e?.error?.erro || 'Não consegui salvar o token — tente novamente.' };
     }
   }
 

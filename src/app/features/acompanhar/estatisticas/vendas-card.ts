@@ -2,7 +2,7 @@ import { Component, computed, effect, inject, input } from '@angular/core';
 import { EstatisticasService, OrigemVenda, Venda } from '../../../core/services/estatisticas.service';
 import { Loja } from '../../../core/services/ganhos.service';
 
-const NOME_LOJA: Record<Loja, string> = { mercadolivre: 'Mercado Livre', amazon: 'Amazon', shopee: 'Shopee' };
+const NOME_LOJA: Record<Loja, string> = { mercadolivre: 'Mercado Livre', amazon: 'Amazon', shopee: 'Shopee', nike: 'Nike', adidas: 'Adidas', centauro: 'Centauro' };
 
 @Component({
   selector: 'app-vendas-card',

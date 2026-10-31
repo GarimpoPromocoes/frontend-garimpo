@@ -21,8 +21,13 @@
             } @else if (emLogin()) {
               O robô está entrando na sua conta. Isso leva alguns segundos.
             } @else if (conectada() && painelPediuLogin()) {
-              Os posts da Amazon seguem saindo, mas o painel de Associados pediu para entrar de novo — sem isso os
-              ganhos não são lidos.
+              @if (provedor() === 'shopee') {
+                As ofertas e os pedidos da Shopee seguem funcionando pela API, mas o painel de afiliados pediu para entrar
+                de novo — sem isso os cliques não são lidos.
+              } @else {
+                Os posts da Amazon seguem saindo, mas o painel de Associados pediu para entrar de novo — sem isso os
+                ganhos não são lidos.
+              }
             } @else if (conectada()) {
               Esta loja está conectada e trabalhando para você.
             } @else if (usaNavegador()) {
@@ -326,7 +331,32 @@
           </div>
         }
       } @else if (conectada()) {
+        @if (eAwin()) {
+          <div class="field">
+            <label for="loja-tokenApi">
+              Token da API da Awin
+              @if (conexao()?.temTokenApi) { <span class="rotulo-opcional">salvo — links curtos ligados</span> }
+            </label>
+            <input
+              id="loja-tokenApi"
+              type="password"
+              autocomplete="off"
+              [placeholder]="conexao()?.temTokenApi ? 'Cole outro para trocar' : 'Cole o token da API da Awin'"
+              [ngModel]="valorDe('tokenApi')"
+              (ngModelChange)="definir('tokenApi', $event)"
+              (keyup.enter)="salvarToken()"
+            />
+          </div>
+          @if (erro(); as e) {
+            <p class="error-text" role="alert">{{ e }}</p>
+          }
+        }
         <div class="form-actions">
+          @if (eAwin()) {
+            <button type="button" class="btn btn-primary" [disabled]="enviando() || !valorDe('tokenApi').trim()" (click)="salvarToken()">
+              {{ enviando() ? 'Salvando…' : 'Salvar token' }}
+            </button>
+          }
           @if (painelPediuLogin()) {
             <button type="button" class="btn btn-primary" [disabled]="enviando()" (click)="entrarDeNovo()">Entrar de novo</button>
           }

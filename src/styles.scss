@@ -746,6 +746,143 @@ a.prod-titulo:hover {
   line-height: 1.1;
   color: var(--text);
 }
+.dono-totais > .dono-total-alerta {
+  border-color: var(--danger);
+}
+.dono-total-alerta strong {
+  color: var(--danger);
+}
+.badge-erro {
+  background: color-mix(in srgb, var(--danger) 14%, transparent);
+  color: var(--danger);
+}
+.badge-erro .badge-dot {
+  background: var(--danger);
+}
+app-owner-card .tabela-rolagem {
+  overflow-x: auto;
+}
+app-owner-card .tabela {
+  table-layout: auto;
+  font-size: 13px;
+}
+app-owner-card .tabela th {
+  white-space: normal;
+  vertical-align: bottom;
+}
+app-owner-card .tabela td {
+  overflow: visible;
+  white-space: normal;
+  padding: 10px 8px;
+}
+app-owner-card .tabela .col-acao {
+  width: auto;
+}
+app-owner-card .tabela-rolagem {
+  margin: 0;
+}
+app-owner-card .prod-titulo,
+app-owner-card .prod-meta {
+  display: block;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+app-owner-card .tabela td:not(:first-child) .prod-meta {
+  overflow-wrap: normal;
+}
+app-owner-card .tabela td:first-child {
+  max-width: 210px;
+}
+app-owner-card .badge {
+  white-space: nowrap;
+}
+.tabela td.dono-acoes {
+  white-space: nowrap;
+}
+.dono-acoes > * {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+.dono-acoes > * + * {
+  margin-top: 4px;
+}
+.dono-detalhe {
+  width: min(1040px, 100%);
+}
+.dono-detalhe-grade {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 28px;
+}
+.dono-detalhe-grade h3 {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+.dono-detalhe-largo {
+  grid-column: 1 / -1;
+}
+.dono-dados {
+  margin: 0;
+}
+.dono-dados > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.dono-dados dt {
+  color: var(--text-muted);
+}
+.dono-dados dd {
+  margin: 0;
+  color: var(--text);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.dono-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.dono-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+.dono-form input,
+.dono-form select {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+}
+.dono-form-largo {
+  grid-column: 1 / -1;
+}
+.dono-form-botoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+@media (max-width: 760px) {
+  .dono-detalhe-grade {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 .dono-totais span {
   font-size: 13px;
   color: var(--text-muted);
@@ -1264,6 +1401,9 @@ input[type='checkbox'] {
   --serie-1: #2a78d6;
   --serie-2: #d9541f;
   --serie-3: #12875c;
+  --serie-4: #8a4fd0;
+  --serie-5: #c2831a;
+  --serie-6: #c23b6a;
 }
 .ganhos-pagina {
   display: flex;
@@ -5754,7 +5894,7 @@ app-ganhos-card {
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 16px;
 }
 .ganhos-plataforma {
@@ -5871,8 +6011,8 @@ app-ganhos-card {
 }
 
 .ganhos-cartao-evolucao {
-  flex: 1;
-  min-height: 0;
+  flex: 1 0 auto;
+  min-height: 340px;
   display: flex;
   flex-direction: column;
 }
@@ -7362,5 +7502,138 @@ app-lojas-card {
   .datas-acoes {
     grid-column: 2;
     justify-self: start;
+  }
+}
+
+/* Ganhos cabe na tela, sem rolar: o grafico fica com o que sobrar e o detalhe vai para a janela de
+   metricas. So em tela estreita, onde os cartoes empilham, a aba rola. */
+app-ganhos-card.ganhos-pagina {
+  flex: 1;
+  min-height: 0;
+  gap: 14px;
+}
+app-ganhos-card .ganhos-cartao-lojas {
+  flex: none;
+  padding-bottom: 16px;
+}
+app-ganhos-card .ganhos-plataformas {
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+}
+app-ganhos-card .ganhos-plataforma {
+  gap: 4px;
+  padding: 10px 12px;
+}
+app-ganhos-card .ganhos-plataforma-nome {
+  gap: 8px;
+  font-size: 13px;
+}
+app-ganhos-card .ganhos-ponto {
+  width: 10px;
+  height: 10px;
+}
+app-ganhos-card .ganhos-plataforma-valor {
+  font-size: 20px;
+}
+app-ganhos-card .ganhos-plataforma-off {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+app-ganhos-card .ganhos-meta-item {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+app-ganhos-card .ganhos-meta-erro {
+  color: var(--danger);
+}
+app-ganhos-card .ganhos-meta-numeros {
+  flex-wrap: wrap;
+  gap: 0 6px;
+  font-size: 11.5px;
+}
+app-ganhos-card .ganhos-cartao-lojas .ganhos-topo {
+  margin-bottom: 10px;
+}
+app-ganhos-card .ganhos-kpi {
+  padding: 8px 14px;
+  gap: 12px;
+}
+app-ganhos-card .ganhos-kpi-icone {
+  width: 34px;
+  height: 34px;
+}
+app-ganhos-card .ganhos-kpi-valor {
+  font-size: 20px;
+}
+app-ganhos-card .ganhos-cartao-evolucao {
+  flex: 1 1 0;
+  min-height: 0;
+}
+app-ganhos-card .ganhos-cartao-evolucao .ganhos-grafico {
+  min-height: 0;
+}
+.ganhos-metricas {
+  width: min(1040px, 100%);
+}
+.ganhos-metricas-total {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0 0 14px;
+}
+.ganhos-metricas-total > div {
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+.ganhos-metricas-total dt {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.ganhos-metricas-total dd {
+  margin: 2px 0 0;
+  font-size: 19px;
+  font-weight: 700;
+  font-stretch: var(--estreita);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.ganhos-metricas-tabela {
+  overflow-x: auto;
+}
+.ganhos-metricas-tabela .tabela {
+  min-width: 760px;
+  font-size: 13px;
+}
+.ganhos-metricas-tabela th:first-child {
+  width: 18%;
+}
+.ganhos-metricas-tabela th:last-child {
+  width: 15%;
+}
+@media (max-width: 1100px) {
+  app-ganhos-card.ganhos-pagina {
+    overflow-y: auto;
+  }
+  app-ganhos-card .ganhos-plataformas {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  app-ganhos-card .ganhos-cartao-evolucao {
+    flex: none;
+    min-height: 320px;
+  }
+}
+@media (max-width: 760px) {
+  .ganhos-metricas-total {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1101px) and (max-height: 520px) {
+  app-ganhos-card.ganhos-pagina {
+    overflow-y: auto;
+  }
+  app-ganhos-card .ganhos-cartao-evolucao {
+    flex: none;
+    min-height: 240px;
   }
 }

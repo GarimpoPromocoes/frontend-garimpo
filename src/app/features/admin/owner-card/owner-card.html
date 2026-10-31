@@ -3,8 +3,8 @@
     <div>
       <h2 class="modal-titulo-linha">Clientes <app-info #info controla="clientes-ajuda" /></h2>
       @if (info.aberto()) {
-        <div class="regra-como regra-como-cabeca" id="clientes-ajuda">Quem usa o sistema e quanto cada um usa. Aqui aparecem contagens e estado da conta — nunca o
-        conteúdo de ninguém (produtos, grupos ou mensagens).</div>
+        <div class="regra-como regra-como-cabeca" id="clientes-ajuda">Quem comprou o sistema, se está em dia e quanto cada conta usa e consome. Aqui aparecem dados da conta e contagens,
+        nunca senhas, produtos, grupos ou mensagens de ninguém.</div>
       }
     </div>
   </div>
@@ -12,8 +12,15 @@
   <div class="dono-totais">
     <div><strong>{{ totais().clientes }}</strong><span>clientes</span></div>
     <div><strong>{{ totais().ativos }}</strong><span>contas ativas</span></div>
-    <div><strong>{{ totais().produtos }}</strong><span>produtos garimpados</span></div>
-    <div><strong>{{ totais().postagens }}</strong><span>promoções enviadas</span></div>
+    <div><strong>{{ totais().emDia }}</strong><span>pagamentos em dia</span></div>
+    <div [class.dono-total-alerta]="totais().emAtraso > 0"><strong>{{ totais().emAtraso }}</strong><span>vencidos ou não pagos</span></div>
+    <div><strong>{{ moeda(totais().receitaMensal) }}</strong><span>receita por mês</span></div>
+    <div><strong>{{ moeda(totais().vitalicio) }}</strong><span>em planos vitalícios</span></div>
+    <div><strong>{{ totais().robos }}</strong><span>robôs ligados</span></div>
+    <div><strong>{{ dolar(totais().custoIa) }}</strong><span>custo de IA no mês</span></div>
+    @if (admin.banco(); as b) {
+      <div [class.dono-total-alerta]="b.pct >= 80"><strong>{{ b.pct }}%</strong><span>do banco ({{ b.usadoMb }} de {{ b.limiteMb }} MB)</span></div>
+    }
   </div>
 
   @if (admin.erro()) {
@@ -31,11 +38,14 @@
         <thead>
           <tr>
             <th scope="col">Conta</th>
-            <th scope="col" class="col-num">Produtos</th>
-            <th scope="col" class="col-num">Envios</th>
-            <th scope="col" class="col-num">Lojas</th>
-            <th scope="col">Última promoção</th>
+            <th scope="col">Plano</th>
+            <th scope="col">Pagamento</th>
             <th scope="col">Situação</th>
+            <th scope="col">Robô</th>
+            <th scope="col">Último acesso</th>
+            <th scope="col" class="col-num">Envios (30 dias)</th>
+            <th scope="col" class="col-num">Lojas</th>
+            <th scope="col" class="col-num">Custo de IA</th>
             <th scope="col"><span class="sr-only">Ações</span></th>
           </tr>
         </thead>
@@ -49,10 +59,18 @@
                   @if (c.admin) { · dono }
                 </span>
               </td>
-              <td class="col-num">{{ c.produtos }}</td>
-              <td class="col-num">{{ c.postagens }}</td>
-              <td class="col-num">{{ c.lojasConectadas }}</td>
-              <td>{{ quando(c.ultimaPostagem) }}</td>
+              <td>
+                {{ nomePlano(c) }}
+                @if (c.assinatura.valor != null) {
+                  <span class="prod-meta">{{ moeda(c.assinatura.valor) }}</span>
+                }
+              </td>
+              <td>
+                <span class="badge" [class]="pagamento(c).classe"><span class="badge-dot"></span>{{ pagamento(c).texto }}</span>
+                @if (vencimento(c)) {
+                  <span class="prod-meta">{{ vencimento(c) }}</span>
+                }
+              </td>
               <td>
                 @if (c.ativo) {
                   <span class="badge badge-ok"><span class="badge-dot"></span>Ativa</span>
@@ -60,7 +78,18 @@
                   <span class="badge badge-off"><span class="badge-dot"></span>Suspensa</span>
                 }
               </td>
-              <td class="col-acao">
+              <td>
+                {{ nomeRobo(c) }}
+                @if (c.consumo.memoriaMb != null) {
+                  <span class="prod-meta">{{ tamanho(c.consumo.memoriaMb) }} de memória</span>
+                }
+              </td>
+              <td>{{ quando(c.ultimoAcesso) }}</td>
+              <td class="col-num">{{ inteiro(c.envios.dias30) }}</td>
+              <td class="col-num">{{ lojasConectadas(c) }}</td>
+              <td class="col-num">{{ dolar(c.ia.custoUsd) }}</td>
+              <td class="col-acao dono-acoes">
+                <button type="button" class="btn btn-sm" (click)="abrir(c)">Detalhes</button>
                 @if (souEu(c)) {
                   <span class="hint-text">você</span>
                 } @else {
@@ -82,8 +111,128 @@
     </div>
 
     <p class="hint-text">
-      Suspender bloqueia o acesso sem apagar nada — o cliente volta exatamente como estava ao ser reativado.
+      Suspender bloqueia o acesso sem apagar nada e para o robô. O cliente volta exatamente como estava ao ser reativado.
       Promover alguém a dono é feito direto no banco, de propósito: não existe tela que dê esse poder.
     </p>
   }
 </div>
+
+@if (aberto(); as c) {
+  <div class="modal-fundo" (click)="fechar()">
+    <div class="modal-caixa dono-detalhe" role="dialog" aria-modal="true" aria-labelledby="dono-detalhe-titulo" (click)="$event.stopPropagation()">
+      <div class="card-header">
+        <div>
+          <h2 id="dono-detalhe-titulo">{{ c.nome || c.email }}</h2>
+          <span class="prod-meta">{{ c.email }} · desde {{ quando(c.criadoEm) }}</span>
+        </div>
+        <button type="button" class="btn-fechar" (click)="fechar()" aria-label="Fechar" title="Fechar">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6 18 18M18 6 6 18" /></svg>
+        </button>
+      </div>
+
+      <div class="dono-detalhe-grade">
+        <section>
+          <h3>Plano e pagamento</h3>
+          <form class="dono-form" (ngSubmit)="salvar(c)">
+            <label><span>Plano</span>
+              <select name="plano" [(ngModel)]="form.plano">
+                <option value="">Sem plano</option>
+                <option value="teste">Teste</option>
+                <option value="mensal">Mensal</option>
+                <option value="anual">Anual</option>
+                <option value="vitalicio">Vitalício</option>
+                <option value="cortesia">Cortesia</option>
+              </select>
+            </label>
+            <label><span>Valor (R$)</span>
+              <input name="valor" type="number" min="0" step="0.01" [(ngModel)]="form.valor" />
+            </label>
+            <label><span>Pago até</span>
+              <input name="pagoAte" type="date" [(ngModel)]="form.pagoAte" />
+            </label>
+            <label><span>Último pagamento</span>
+              <input name="ultimoPagamento" type="date" [(ngModel)]="form.ultimoPagamento" />
+            </label>
+            <label class="dono-form-largo"><span>Observação</span>
+              <input name="observacao" type="text" maxlength="500" [(ngModel)]="form.observacao" />
+            </label>
+            @if (erroForm()) {
+              <p class="error-text dono-form-largo" role="alert">{{ erroForm() }}</p>
+            }
+            <div class="dono-form-largo dono-form-botoes">
+              <button type="button" class="btn btn-sm" [disabled]="!form.plano" (click)="marcarPago()">Marcar pago hoje</button>
+              <button type="submit" class="btn btn-sm btn-primary" [disabled]="salvando()">{{ salvando() ? 'Salvando…' : 'Salvar' }}</button>
+            </div>
+          </form>
+        </section>
+
+        <section>
+          <h3>Consumo</h3>
+          <dl class="dono-dados">
+            <div><dt>Memória agora</dt><dd>{{ c.consumo.memoriaMb != null ? tamanho(c.consumo.memoriaMb) : 'robô parado' }}</dd></div>
+            <div><dt>Processador agora</dt><dd>{{ c.consumo.cpuPct != null ? c.consumo.cpuPct + '%' : 'robô parado' }}</dd></div>
+            <div><dt>Disco</dt><dd>{{ tamanho(c.consumo.discoMb) }}</dd></div>
+            <div><dt>Banco (aprox.)</dt><dd>{{ tamanho(c.consumo.bancoMb) }}</dd></div>
+            <div><dt>Chamadas de IA no mês</dt><dd>{{ inteiro(c.ia.chamadas) }}</dd></div>
+            <div><dt>Tokens de IA no mês</dt><dd>{{ inteiro(c.ia.tokensEntrada + c.ia.tokensSaida) }}</dd></div>
+            <div><dt>Custo de IA no mês</dt><dd>{{ dolar(c.ia.custoUsd) }}</dd></div>
+          </dl>
+        </section>
+
+        <section>
+          <h3>Uso</h3>
+          <dl class="dono-dados">
+            <div><dt>Robô</dt><dd>{{ nomeRobo(c) }}</dd></div>
+            <div><dt>Última rodada</dt><dd>{{ quando(c.robo.ultimaRodada) }}</dd></div>
+            <div><dt>Envios hoje</dt><dd>{{ inteiro(c.envios.hoje) }}</dd></div>
+            <div><dt>Envios em 30 dias</dt><dd>{{ inteiro(c.envios.dias30) }}</dd></div>
+            <div><dt>Último envio</dt><dd>{{ quando(c.envios.ultimo) }}</dd></div>
+            <div><dt>Buscas em 30 dias</dt><dd>{{ inteiro(c.buscas30) }}</dd></div>
+            <div><dt>Produtos / cupons</dt><dd>{{ inteiro(c.produtos) }} / {{ inteiro(c.cupons) }}</dd></div>
+            <div><dt>Grupos / no Telegram</dt><dd>{{ inteiro(c.grupos) }} / {{ inteiro(c.gruposTelegram) }}</dd></div>
+            <div><dt>Membros nos grupos</dt><dd>{{ inteiro(c.membros) }}</dd></div>
+          </dl>
+        </section>
+
+        <section>
+          <h3>WhatsApp e ganhos do mês</h3>
+          <dl class="dono-dados">
+            <div><dt>WhatsApp</dt><dd>{{ c.whatsapp.conectado ? 'Conectado' : 'Desconectado' }}</dd></div>
+            @if (c.whatsapp.numero) {
+              <div><dt>Número</dt><dd>{{ c.whatsapp.numero }}</dd></div>
+            }
+            <div><dt>Gerado</dt><dd>{{ moeda(c.ganhosMes.gerado) }}</dd></div>
+            <div><dt>Aprovado</dt><dd>{{ moeda(c.ganhosMes.confirmado) }}</dd></div>
+            <div><dt>Cliques / pedidos</dt><dd>{{ inteiro(c.ganhosMes.cliques) }} / {{ inteiro(c.ganhosMes.pedidos) }}</dd></div>
+          </dl>
+        </section>
+
+        <section class="dono-detalhe-largo">
+          <h3>Lojas</h3>
+          @if (c.lojas.length) {
+            <div class="tabela-rolagem">
+              <table class="tabela">
+                <thead>
+                  <tr><th scope="col">Loja</th><th scope="col">Conexão</th><th scope="col">Ligada</th><th scope="col">Última leitura</th><th scope="col">Erro</th></tr>
+                </thead>
+                <tbody>
+                  @for (l of c.lojas; track l.loja) {
+                    <tr>
+                      <td>{{ nomeLoja(l.loja) }}</td>
+                      <td>{{ l.status === 'conectado' ? 'Conectada' : l.status === 'erro' ? 'Com erro' : 'Desconectada' }}</td>
+                      <td>{{ l.desligada ? 'Não' : 'Sim' }}</td>
+                      <td>{{ quando(l.lidaEm) }}</td>
+                      <td>{{ l.erro || '—' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else {
+            <p class="hint-text">Nenhuma loja conectada.</p>
+          }
+        </section>
+      </div>
+    </div>
+  </div>
+}

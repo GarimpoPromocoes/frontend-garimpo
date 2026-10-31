@@ -11,12 +11,18 @@ const NOME_LOJA: Record<string, string> = {
   mercadolivre: 'Mercado Livre',
   amazon: 'Amazon',
   shopee: 'Shopee',
+  nike: 'Nike',
+  adidas: 'Adidas',
+  centauro: 'Centauro',
 };
 
 const LOGO_LOJA: Record<string, string> = {
   mercadolivre: 'lojas/mercadolivre.svg',
   amazon: 'lojas/amazon.svg',
   shopee: 'lojas/shopee.svg',
+  nike: 'lojas/nike.png',
+  adidas: 'lojas/adidas.png',
+  centauro: 'lojas/centauro.png',
 };
 
 const ORIGEM_FOTO: Record<string, string> = {
@@ -56,6 +62,9 @@ export class BuscaCard implements OnInit, OnDestroy {
   private runControl = inject(RunControlService);
 
   protected termo = '';
+  protected soClone(l: string): boolean {
+    return l === 'nike' || l === 'adidas' || l === 'centauro';
+  }
   protected readonly grupos = computed(() => this.configService.config()?.grupos ?? []);
   protected readonly lojas = computed(() => this.runControl.lojasConectadas() as LojaBusca[]);
 
