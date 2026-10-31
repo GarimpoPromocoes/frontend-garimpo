@@ -15,13 +15,23 @@ export const OPCOES_LISTA_POR_DIA = [
   { vezes: 6, rotulo: '6x' },
 ];
 
-export type Loja = 'mercadolivre' | 'shopee' | 'amazon';
+export type Loja = 'mercadolivre' | 'shopee' | 'amazon' | 'nike' | 'adidas' | 'centauro';
 export const LOJAS: { id: Loja; nome: string; daLoja: string }[] = [
   { id: 'mercadolivre', nome: 'Mercado Livre', daLoja: 'do Mercado Livre' },
   { id: 'shopee', nome: 'Shopee', daLoja: 'da Shopee' },
   { id: 'amazon', nome: 'Amazon', daLoja: 'da Amazon' },
+  { id: 'nike', nome: 'Nike', daLoja: 'da Nike' },
+  { id: 'adidas', nome: 'Adidas', daLoja: 'da Adidas' },
+  { id: 'centauro', nome: 'Centauro', daLoja: 'da Centauro' },
 ];
-const NA_LOJA: Record<Loja, string> = { mercadolivre: 'NO MERCADO LIVRE', shopee: 'NA SHOPEE', amazon: 'NA AMAZON' };
+const NA_LOJA: Record<Loja, string> = {
+  mercadolivre: 'NO MERCADO LIVRE',
+  shopee: 'NA SHOPEE',
+  amazon: 'NA AMAZON',
+  nike: 'NA NIKE',
+  adidas: 'NA ADIDAS',
+  centauro: 'NA CENTAURO',
+};
 
 /** Texto padrão da mensagem de cupons (o robô usa o mesmo: bot-ml/src/postagem/listaCupons.js). */
 export const LISTA_COPY_PADRAO = [
@@ -37,7 +47,7 @@ export const LISTA_COPY_PADRAO = [
 export const VARIAVEIS_LISTA: VariavelCopy[] = [
   { nome: 'titulo', rotulo: 'Título', dica: 'NOVO CUPOM NO MERCADO LIVRE (ou CUPONS NO…, com mais de um)' },
   { nome: 'cupons', rotulo: 'Cupons', dica: 'Os códigos com o desconto, um embaixo do outro (obrigatório)' },
-  { nome: 'loja', rotulo: 'Loja', dica: 'Mercado Livre, Shopee ou Amazon' },
+  { nome: 'loja', rotulo: 'Loja', dica: 'O nome da loja: Mercado Livre, Shopee, Amazon, Nike, Adidas ou Centauro' },
   { nome: 'link', rotulo: 'Link', dica: 'O link que você pôs para a loja (a linha some sem ele)' },
 ];
 
@@ -61,6 +71,15 @@ export const EXEMPLO_CUPONS: Record<Loja, CupomDeGrupo[]> = {
   ],
   amazon: [
     { codigo: 'AMZ10', tipo: 'percentual', valor: 10, minimo: null, limite: 50, loja: 'amazon', grupos: [], vistoEm: '' },
+  ],
+  nike: [
+    { codigo: 'NIKE15', tipo: 'percentual', valor: 15, minimo: 299, limite: null, loja: 'nike', grupos: [], vistoEm: '' },
+  ],
+  adidas: [
+    { codigo: 'ADIDAS20', tipo: 'percentual', valor: 20, minimo: 199, limite: null, loja: 'adidas', grupos: [], vistoEm: '' },
+  ],
+  centauro: [
+    { codigo: 'CENTAURO30', tipo: 'valorFixo', valor: 30, minimo: 199, limite: null, loja: 'centauro', grupos: [], vistoEm: '' },
   ],
 };
 

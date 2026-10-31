@@ -70,7 +70,7 @@ export interface Cupons {
   /** % das mensagens que são produto com cupom. O resto é produto sem cupom. */
   percentualProduto?: number;
   /** Mensagem "lista de cupons": vezes por dia em cada grupo (0 = desligada) e a imagem (id do upload). */
-  lista?: { porDia: number; lojas: Partial<Record<'mercadolivre' | 'shopee' | 'amazon', LojaListaCupons>> };
+  lista?: { porDia: number; lojas: Partial<Record<'mercadolivre' | 'shopee' | 'amazon' | 'nike' | 'adidas' | 'centauro', LojaListaCupons>> };
 }
 
 /** Lista de cupons de uma loja: se entra no revezamento, a imagem (id do upload) e o link do fim. */
