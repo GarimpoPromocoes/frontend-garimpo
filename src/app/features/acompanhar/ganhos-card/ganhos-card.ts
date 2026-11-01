@@ -53,11 +53,9 @@ function mesesAte(fim: string, n: number): string[] {
   return lista;
 }
 
+// Pendente/confirmado/pago dos paineis sao o saldo da conta, nao o ganho do mes: nao entram aqui.
 function totalDe(g: GanhoMes | undefined): number | null {
-  if (!g) return null;
-  if (g.estimado != null) return g.estimado;
-  const partes = [g.pendente, g.confirmado, g.pago].filter((v): v is number => v != null);
-  return partes.length ? partes.reduce((s, v) => s + v, 0) : null;
+  return g?.estimado ?? null;
 }
 
 function somar(valores: (number | null)[]): number | null {
