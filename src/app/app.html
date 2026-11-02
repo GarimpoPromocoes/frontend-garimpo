@@ -11,7 +11,12 @@
     </div>
   </div>
 } @else if (!auth.usuario()) {
-  <app-login-card />
+  <!-- Deslogado: a landing primeiro; #entrar e #criar abrem o formulário. -->
+  @if (telaVisitante(); as modo) {
+    <app-login-card [modo]="modo" />
+  } @else {
+    <app-landing />
+  }
 } @else {
 <a class="pular-link" href="#conteudo">Pular para o conteúdo</a>
 <div class="shell">

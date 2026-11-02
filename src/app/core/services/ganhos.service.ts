@@ -2,7 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
-export type Loja = 'mercadolivre' | 'amazon' | 'shopee' | 'nike' | 'adidas' | 'centauro';
+export type Loja = 'mercadolivre' | 'amazon' | 'shopee' | 'nike' | 'adidas' | 'centauro' | 'netshoes' | 'shein';
 
 export interface GanhoMes {
   loja: Loja;

@@ -89,8 +89,12 @@ export class EstatisticasVisaoService {
     // Robô parado: sem mensagem quando dá certo — o ícone girando e cada loja aparecendo já contam
     // o que está acontecendo. Ligado fora do painel (terminal), a leitura sai na próxima espera.
     if (!r.ok) this.erroAcao.set(r.erro ?? null);
-    else if (r.modo === 'na-fila' && this.roboRodando()) {
-      this.avisoAcao.set('Pedido enviado: o robô atualiza na próxima pausa entre uma postagem e outra.');
+    else if (r.modo === 'na-fila') {
+      this.avisoAcao.set(
+        this.roboRodando()
+          ? 'Pedido enviado: o robô atualiza na próxima pausa entre uma postagem e outra.'
+          : 'Tem outra tarefa rodando: atualizo assim que ela terminar.'
+      );
     }
   }
 

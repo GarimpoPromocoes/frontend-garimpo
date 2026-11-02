@@ -12,6 +12,7 @@ import { TelegramUiService } from './core/services/telegram-ui.service';
 import { ConfirmacaoService } from './core/services/confirmacao.service';
 import { BuscaService } from './core/services/busca.service';
 import { LoginCard } from './features/auth/login-card/login-card';
+import { Landing } from './features/landing/landing';
 import { LojasCard } from './features/conexoes/lojas-card/lojas-card';
 import { RegrasPostagem } from './features/divulgacao/regras-postagem/regras-postagem';
 import { GroupsCard } from './features/divulgacao/groups-card/groups-card';
@@ -111,11 +112,18 @@ for (const aba of ABAS) {
 
 const CHAVE_ABA = 'promobot:aba';
 
+/** O formulário que o endereço pede para quem está deslogado; null é a landing. */
+function telaDoEndereco(): 'entrar' | 'criar' | null {
+  const hash = location.hash.slice(1);
+  return hash === 'entrar' || hash === 'criar' ? hash : null;
+}
+
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [
     LoginCard,
+    Landing,
     LojasCard,
     RegrasPostagem,
     GroupsCard,
@@ -162,6 +170,12 @@ export class App implements OnInit, OnDestroy {
     })).filter((s) => s.itens.length),
   );
   protected readonly aba = signal<AbaId>('painel');
+  protected readonly telaVisitante = signal(telaDoEndereco());
+  private readonly aoMudarEndereco = () => {
+    this.telaVisitante.set(telaDoEndereco());
+    this.auth.erro.set(null);
+    if (this.telaVisitante()) window.scrollTo(0, 0);
+  };
   protected readonly menuAberto = signal(false);
   /** Modal grandão da atividade — abre pelo "Ver tudo" do painel, no lugar de trocar de aba. */
   protected readonly atividadeModalAberta = signal(false);
@@ -233,6 +247,11 @@ export class App implements OnInit, OnDestroy {
   constructor() {
     effect(() => {
       const logado = !!this.auth.usuario();
+      // Entrou: o endereço do formulário sai, para o "Sair" levar de volta à landing.
+      if (logado && telaDoEndereco()) {
+        history.replaceState(null, '', location.pathname + location.search);
+        this.telaVisitante.set(null);
+      }
       if (logado && !this.dashboardIniciado) {
         this.dashboardIniciado = true;
         this.configService.carregar();
@@ -270,10 +289,12 @@ export class App implements OnInit, OnDestroy {
       if (salva && ABAS.some((a) => a.id === salva)) this.aba.set(salva);
     } catch (_) {
     }
+    window.addEventListener('hashchange', this.aoMudarEndereco);
     this.auth.restaurarSessao();
   }
 
   ngOnDestroy(): void {
+    window.removeEventListener('hashchange', this.aoMudarEndereco);
     this.statusService.pararPolling();
   }
 

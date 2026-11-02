@@ -10,7 +10,12 @@ const LOJAS: { id: Loja; nome: string; cor: string }[] = [
   { id: 'nike', nome: 'Nike', cor: 'var(--serie-4)' },
   { id: 'adidas', nome: 'Adidas', cor: 'var(--serie-5)' },
   { id: 'centauro', nome: 'Centauro', cor: 'var(--serie-6)' },
+  { id: 'netshoes', nome: 'Netshoes', cor: 'var(--serie-7)' },
+  { id: 'shein', nome: 'Shein', cor: 'var(--serie-8)' },
 ];
+
+// Sem painel lido por sessão de loja: quem diz se estão conectadas é a tela de Conexões.
+const LOJAS_POR_CONEXAO: Loja[] = ['nike', 'adidas', 'centauro', 'netshoes', 'shein'];
 
 const NOME_MES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 const MESES_NO_GRAFICO = 12;
@@ -144,12 +149,10 @@ export class GanhosCard implements OnInit, OnDestroy {
         lidoEm: r?.lidoEm ?? null,
         aguardando: !!(r?.pedidoEm && (!r.lidoEm || r.pedidoEm > r.lidoEm)),
         // Sem nenhuma leitura e sem ganho no mes: a loja ainda nao foi integrada.
-        // Nike e Adidas nao tem leitura de navegador: vale a conexao delas.
-        conectada:
-          l.id === 'nike' || l.id === 'adidas' || l.id === 'centauro'
-            ? this.conexoes.statusDe(l.id)?.status === 'conectado'
-            : !!r || this.valorDe(mes, l.id) != null,
-        semToken: /token/i.test(r?.erro ?? ''),
+        conectada: LOJAS_POR_CONEXAO.includes(l.id)
+          ? this.conexoes.statusDe(l.id)?.status === 'conectado'
+          : !!r || this.valorDe(mes, l.id) != null,
+        semToken: /token|chaves da api/i.test(r?.erro ?? ''),
         cliques: this.valorDe(mes, l.id)?.cliques ?? null,
         pedidos: this.valorDe(mes, l.id)?.pedidos ?? null,
         itens: this.valorDe(mes, l.id)?.itens ?? null,

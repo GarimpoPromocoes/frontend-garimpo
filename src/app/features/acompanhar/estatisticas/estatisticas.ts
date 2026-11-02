@@ -50,8 +50,8 @@ export class Estatisticas implements OnInit, OnDestroy {
       const ganhosPendentes =
         this.ganhos.lendoAgora() ||
         this.ganhos.leituras().some((r) => r.pedidoEm && (!r.lidoEm || r.pedidoEm > r.lidoEm));
-      // Membros só são lidos com o robô ligado (WhatsApp aberto): parado, não adianta perguntar.
-      const membrosPendentes = this.est.aguardandoMembros() && this.runControl.rodandoContinuo();
+      // Membros são lidos pelo robô ligado ou pela leitura avulsa; sem nenhum dos dois, não adianta perguntar.
+      const membrosPendentes = this.est.aguardandoMembros() && (this.runControl.rodandoContinuo() || this.ganhos.lendoAgora());
       const passouDoPrazo = this.tela.roboAtualizandoAte() > 0 && Date.now() > this.tela.roboAtualizandoAte();
       if ((ganhosPendentes || membrosPendentes) && !passouDoPrazo) void this.tela.recarregarTudo();
       // O robô já atendeu o pedido (ou demorou demais): para de girar e o aviso sai.

@@ -1404,6 +1404,8 @@ input[type='checkbox'] {
   --serie-4: #8a4fd0;
   --serie-5: #c2831a;
   --serie-6: #c23b6a;
+  --serie-7: #0f8fa3;
+  --serie-8: #5f6b7a;
 }
 .ganhos-pagina {
   display: flex;
@@ -4880,40 +4882,13 @@ app-painel-robo {
 .pn-onde-rodape {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   flex-wrap: wrap;
   gap: 8px 16px;
   padding-top: 12px;
   border-top: 1px solid var(--border);
   font-size: 13px;
   color: var(--text-soft);
-}
-.pn-onde-hoje {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px 14px;
-}
-.pn-onde-rotulo {
-  color: var(--text-soft);
-}
-.pn-onde-num {
-  padding: 0;
-  font: inherit;
-  color: inherit;
-  background: none;
-  border: none;
-}
-button.pn-onde-num {
-  cursor: pointer;
-}
-button.pn-onde-num:hover {
-  text-decoration: underline;
-}
-.pn-onde-num strong {
-  color: var(--text);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
 }
 .pn-onde-link {
   display: inline-flex;
@@ -4932,27 +4907,6 @@ button.pn-onde-num:hover {
 .pn-onde-link svg {
   width: 14px;
   height: 14px;
-}
-.pn-variacao {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  margin-left: -8px;
-  padding: 1px 7px;
-  border-radius: 999px;
-  background: var(--ok-soft);
-  color: var(--ok);
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-.pn-variacao[data-subiu='false'] {
-  background: var(--danger-soft);
-  color: var(--danger);
-}
-.pn-variacao svg {
-  width: 13px;
-  height: 13px;
 }
 
 

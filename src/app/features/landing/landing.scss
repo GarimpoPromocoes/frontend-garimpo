@@ -1,0 +1,628 @@
+/* Linguagem de cartaz de varejo: o café e o dourado do painel, e o preço como etiqueta de oferta.
+   A ousadia fica toda nas etiquetas; o resto da página é quieto. */
+.lp {
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: clip;
+}
+
+.lp-largura {
+  width: min(1120px, 100%);
+  margin-inline: auto;
+  padding-inline: 32px;
+}
+
+h2 {
+  font-size: clamp(32px, 4.4vw, 48px);
+  font-weight: 800;
+  font-stretch: 70%;
+  line-height: 1.02;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+/* Topo */
+.lp-mina {
+  background: var(--lanterna-bg);
+  color: #fff;
+}
+.lp-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-block: 20px;
+}
+.lp-marca {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--gold);
+  font-size: 24px;
+  font-weight: 800;
+  font-stretch: 70%;
+  text-decoration: none;
+
+  img {
+    width: 44px;
+    height: 44px;
+    border: 2px solid var(--gold);
+    border-radius: 50%;
+    object-fit: cover;
+  }
+}
+.lp-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+}
+.lp-nav-planos:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.lp-nav .lp-nav-entrar {
+  border: 1px solid #8f7a64;
+}
+.lp-nav .lp-nav-entrar:hover {
+  background: var(--espresso-soft);
+}
+.lp-mina a:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* Hero: o que chega no grupo é a prova do que o robô faz. */
+.lp-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  align-items: end;
+  gap: 56px;
+  padding-block: 56px 0;
+}
+.lp-hero-texto {
+  padding-bottom: 72px;
+
+  h1 {
+    max-width: 19ch;
+    font-size: clamp(46px, 6vw, 72px);
+    font-weight: 800;
+    font-stretch: 64%;
+    line-height: 0.94;
+    color: var(--gold);
+  }
+  p {
+    max-width: 48ch;
+    margin-top: 24px;
+    font-size: 19px;
+    line-height: 1.5;
+    color: #e6ddd3;
+  }
+}
+.lp-hero-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+  margin-top: 32px;
+}
+.lp-link-claro {
+  color: #fff;
+  font-weight: 600;
+  text-underline-offset: 4px;
+}
+
+/* A mensagem sai do pé do bloco café, como um celular apoiado na borda. */
+.lp-post {
+  align-self: end;
+  padding: 14px 14px 24px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background: #efe6d8;
+  color: #241a11;
+
+  figcaption {
+    margin-top: 12px;
+    font-size: 13px;
+    text-align: center;
+    color: #51453a;
+  }
+}
+.lp-post-grupo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 4px 12px;
+  font-size: 15px;
+  font-weight: 700;
+}
+.lp-post-balao {
+  position: relative;
+  padding: 8px 8px 12px;
+  border-radius: 4px var(--radius) var(--radius) var(--radius);
+  background: #fff;
+  font-size: 15px;
+  line-height: 1.5;
+
+  p {
+    padding-inline: 6px;
+  }
+}
+.lp-post-foto {
+  display: grid;
+  place-items: center;
+  height: 150px;
+  margin-bottom: 10px;
+  border-radius: var(--radius-xs);
+  background: var(--gold-soft);
+  color: var(--espresso);
+
+  svg {
+    width: 62%;
+  }
+}
+.lp-post-titulo {
+  font-weight: 700;
+}
+.lp-post-link {
+  margin-top: 6px;
+  color: var(--wpp-green-dark);
+  font-weight: 600;
+}
+.lp-post-hora {
+  display: block;
+  margin-top: 2px;
+  padding-right: 6px;
+  font-size: 12px;
+  text-align: right;
+  color: #726758;
+}
+
+/* Seções quietas */
+.lp-secao {
+  padding-block: 88px;
+}
+
+.lp-passos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 40px;
+  margin: 40px 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: passo;
+
+  li {
+    counter-increment: passo;
+    padding-top: 16px;
+    border-top: 3px solid var(--gold);
+  }
+  li::before {
+    content: counter(passo);
+    display: block;
+    margin-bottom: 8px;
+    font-size: 40px;
+    font-weight: 800;
+    font-stretch: 64%;
+    line-height: 1;
+    color: var(--gold-ink);
+  }
+  h3 {
+    font-size: 21px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  p {
+    margin-top: 8px;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--text-soft);
+  }
+}
+
+.lp-faixa {
+  background: var(--surface-2);
+}
+.lp-lojas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2.4fr);
+  gap: 32px 56px;
+  padding-block: 72px;
+
+  h2 {
+    grid-row: span 2;
+  }
+  h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 28px;
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  img {
+    width: 40px;
+    height: 40px;
+    padding: 4px;
+    border-radius: var(--radius-xs);
+    background: #fff;
+    object-fit: contain;
+  }
+}
+
+.lp-recursos {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2.4fr);
+  gap: 32px 56px;
+
+  dl {
+    display: grid;
+    gap: 28px;
+    margin: 0;
+  }
+  dl > div {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    gap: 8px 32px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-strong);
+  }
+  dt {
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  dd {
+    margin: 0;
+    max-width: 58ch;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--text-soft);
+  }
+}
+
+/* Planos: a parte memorável. */
+.lp-planos {
+  padding-block: 80px 96px;
+  background: var(--lanterna-bg);
+  scroll-margin-top: 0;
+
+  h2 {
+    color: #fff;
+    max-width: 14ch;
+  }
+}
+.lp-planos-topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 56px;
+}
+.lp-ciclo {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: var(--radius);
+  background: var(--espresso-soft);
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 8px 18px;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: #fff;
+    font: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button span {
+    color: var(--gold);
+    font-weight: 700;
+  }
+  button[aria-checked='true'] {
+    background: var(--gold);
+    color: var(--on-gold);
+  }
+  button[aria-checked='true'] span {
+    color: var(--on-gold);
+  }
+  button:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
+}
+
+.lp-etiquetas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.14fr) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.lp-etiqueta {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 28px 24px 24px;
+  border-radius: var(--radius);
+  background: #fff;
+  color: #241a11;
+
+  h3 {
+    font-size: 28px;
+    font-weight: 800;
+    font-stretch: 70%;
+    line-height: 1.1;
+  }
+  .btn {
+    margin-top: auto;
+  }
+  .btn-ghost {
+    background: #fff;
+    border-color: #8f8474;
+    color: #241a11;
+  }
+  .btn-ghost:hover {
+    background: #efebe2;
+  }
+  .btn-primary {
+    background: #2a1d12;
+    color: #fff;
+  }
+  .btn-primary:hover {
+    background: #3d2c1c;
+  }
+}
+.lp-etiqueta-destaque {
+  margin-block: -20px;
+  padding: 32px 28px 28px;
+  background: var(--gold);
+  color: var(--on-gold);
+
+  h3 {
+    font-size: 34px;
+  }
+  .lp-preco-valor {
+    font-size: 112px;
+  }
+  .lp-para-quem,
+  .lp-preco-detalhe {
+    color: var(--on-gold);
+  }
+  .lp-economia {
+    background: var(--on-gold);
+    color: #fff;
+  }
+  .lp-recursos-plano li::before {
+    color: var(--on-gold);
+  }
+}
+.lp-selo {
+  align-self: flex-start;
+  margin-bottom: 14px;
+  padding: 5px 12px;
+  border-radius: var(--radius-xs);
+  background: #a83232;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+.lp-para-quem {
+  margin-top: 4px;
+  font-size: 15px;
+  line-height: 1.4;
+  color: #51453a;
+}
+
+/* Preço de cartaz: R$ pequeno, número enorme e centavos em cima de "por mês". */
+.lp-preco {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  margin-top: 16px;
+  font-weight: 800;
+  font-stretch: 62%;
+  font-variant-numeric: lining-nums;
+}
+.lp-preco-rs {
+  padding-top: 10px;
+  font-size: 22px;
+}
+.lp-preco-valor {
+  font-size: 88px;
+  line-height: 0.95;
+  letter-spacing: -0.01em;
+}
+.lp-preco-fim {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 8px;
+
+  span:first-child {
+    font-size: 30px;
+    line-height: 1;
+  }
+  span:last-child {
+    font-size: 15px;
+    font-weight: 600;
+    font-stretch: 80%;
+  }
+}
+.lp-preco-detalhe {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #51453a;
+}
+/* Guarda o espaço no mensal, para a etiqueta não pular ao trocar a forma de pagamento. */
+.lp-economia {
+  align-self: flex-start;
+  min-height: 28px;
+  margin-top: 10px;
+  padding: 4px 10px;
+  border-radius: var(--radius-xs);
+  background: #ecf5ef;
+  color: #1f7a4d;
+  font-size: 14px;
+  font-weight: 700;
+}
+.lp-economia-vazia {
+  visibility: hidden;
+}
+.lp-recursos-plano {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0 24px;
+  padding: 0;
+  list-style: none;
+
+  li {
+    position: relative;
+    padding-left: 22px;
+    font-size: 15px;
+    line-height: 1.4;
+  }
+  li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    font-weight: 800;
+    color: #1f7a4d;
+  }
+}
+
+/* Fim da página */
+.lp-comecar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  padding-block: 72px;
+
+  h2 {
+    font-size: clamp(28px, 3.4vw, 36px);
+  }
+  ul {
+    display: grid;
+    gap: 8px;
+    margin: 18px 0 0;
+    padding-left: 20px;
+    font-size: 17px;
+    line-height: 1.4;
+    color: var(--text-soft);
+  }
+}
+.lp-comecar-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+@media (max-width: 960px) {
+  .lp-etiquetas {
+    grid-template-columns: minmax(0, 1fr);
+    width: min(520px, 100%);
+    margin-inline: auto;
+  }
+  /* No celular, o pacote em destaque é o primeiro que a pessoa vê. */
+  .lp-etiqueta-destaque {
+    order: -1;
+    margin-block: 0;
+  }
+  .lp-hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    padding-top: 32px;
+  }
+  .lp-hero-texto {
+    padding-bottom: 48px;
+  }
+  .lp-post {
+    width: min(400px, 100%);
+    justify-self: center;
+  }
+  .lp-lojas,
+  .lp-recursos {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .lp-lojas h2 {
+    grid-row: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .lp-largura {
+    padding-inline: 16px;
+  }
+  .lp-secao {
+    padding-block: 56px;
+  }
+  .lp-passos {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+  }
+  .lp-recursos dl > div {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .lp-nav-planos {
+    display: none !important;
+  }
+  .lp-hero-texto p {
+    font-size: 17px;
+  }
+  .lp-planos {
+    padding-block: 56px 64px;
+  }
+  .lp-planos-topo {
+    margin-bottom: 32px;
+  }
+  .lp-ciclo {
+    display: flex;
+    width: 100%;
+
+    button {
+      flex: 1;
+      justify-content: center;
+      padding-inline: 10px;
+    }
+  }
+  .lp-comecar-acoes,
+  .lp-comecar-acoes .btn {
+    width: 100%;
+  }
+}
+
+a.btn {
+  text-decoration: none;
+}

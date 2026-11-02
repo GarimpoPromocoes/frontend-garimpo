@@ -1,0 +1,170 @@
+<div class="lp">
+  <div class="lp-mina">
+    <header class="lp-topo lp-largura">
+      <a class="lp-marca" href="#">
+        <img src="logo.webp" alt="" width="44" height="44" />
+        <span>Garimpo Bot</span>
+      </a>
+      <nav class="lp-nav" aria-label="Página inicial">
+        <a class="lp-nav-planos" href="#planos">Planos</a>
+        <a class="lp-nav-entrar" href="#entrar">Entrar</a>
+      </nav>
+    </header>
+
+    <main class="lp-hero lp-largura">
+      <div class="lp-hero-texto">
+        <h1>Seus grupos de promoção postando sozinhos, com o seu link de afiliado.</h1>
+        <p>
+          O robô garimpa ofertas nas lojas e nos grupos concorrentes, troca o link pelo seu e publica no WhatsApp e no
+          Telegram.
+        </p>
+        <div class="lp-hero-acoes">
+          <a class="btn btn-lg btn-hero" href="#criar">Criar conta</a>
+          <a class="lp-link-claro" href="#planos">Ver os planos</a>
+        </div>
+      </div>
+
+      <figure class="lp-post">
+        <div class="lp-post-grupo">
+          <img src="lojas/whatsapp.svg" alt="" width="22" height="22" />
+          <span>Seu grupo de ofertas</span>
+        </div>
+        <div class="lp-post-balao">
+          <div class="lp-post-foto" aria-hidden="true">
+            <svg viewBox="0 0 120 60" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 40c0-5 1-16 3-22 3 3 8 4 12 2 7 7 20 13 36 16 12 2 34 2 50 9 3 2 3 7-1 7H19c-7 0-11-4-11-12Z"/><path d="M8 42c28 3 66 3 102 3"/><path d="m37 25-4 5M45 30l-4 5M54 34l-3 5"/></svg>
+          </div>
+          <p class="lp-post-titulo">Tênis de corrida masculino</p>
+          <p>🔥De <s>R$ 399</s>&ngsp;<b>por R$ 249</b></p>
+          <p>🎟️ Cupom: <b>CORRE15</b></p>
+          <p class="lp-post-link">🛒 Comprar com o seu link de afiliado</p>
+          <span class="lp-post-hora">agora</span>
+        </div>
+        <figcaption>Exemplo de postagem</figcaption>
+      </figure>
+    </main>
+  </div>
+
+  <section class="lp-secao lp-largura" aria-labelledby="lp-como">
+    <h2 id="lp-como">Do achado à postagem, sem você copiar e colar</h2>
+    <ol class="lp-passos">
+      <li>
+        <h3>Encontra a oferta</h3>
+        <p>Ele procura nas lojas e lê as mensagens dos grupos concorrentes que você escolher.</p>
+      </li>
+      <li>
+        <h3>Coloca o seu link</h3>
+        <p>O link vira o da sua conta de afiliado e o robô procura um cupom que valha para o produto.</p>
+      </li>
+      <li>
+        <h3>Publica nos seus grupos</h3>
+        <p>Foto, preço e link vão para cada grupo, na frequência que você definir e sem repetir produto.</p>
+      </li>
+    </ol>
+  </section>
+
+  <section class="lp-faixa" aria-labelledby="lp-lojas">
+    <div class="lp-largura lp-lojas">
+      <h2 id="lp-lojas">8 lojas para divulgar</h2>
+      <div class="lp-lojas-grupo">
+        <h3>Garimpo direto no site</h3>
+        <ul>
+          @for (l of lojasDiretas; track l.nome) {
+            <li><img [src]="l.logo" alt="" /><span>{{ l.nome }}</span></li>
+          }
+        </ul>
+      </div>
+      <div class="lp-lojas-grupo">
+        <h3>Pelas ofertas dos grupos que você clona</h3>
+        <ul>
+          @for (l of lojasClonagem; track l.nome) {
+            <li><img [src]="l.logo" alt="" /><span>{{ l.nome }}</span></li>
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-secao lp-largura lp-recursos" aria-labelledby="lp-painel">
+    <h2 id="lp-painel">Tudo em um painel só</h2>
+    <dl>
+      <div>
+        <dt>Clonagem de grupos</dt>
+        <dd>
+          Escolha de quais grupos concorrentes cada grupo seu copia. O link vira o seu, e o cupom pessoal do concorrente
+          fica de fora da mensagem.
+        </dd>
+      </div>
+      <div>
+        <dt>Cupons</dt>
+        <dd>O robô junta os cupons das lojas, avisa qual vale para cada produto e posta listas de cupons nos grupos.</dd>
+      </div>
+      <div>
+        <dt>Regras de postagem</dt>
+        <dd>Defina a frequência, a repetição de produtos e as datas especiais em que os produtos da ocasião vão na frente.</dd>
+      </div>
+      <div>
+        <dt>Estatísticas</dt>
+        <dd>Veja ganhos, cliques e vendas por grupo, e quantos membros entraram e saíram, conforme o que cada loja informa.</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="lp-planos" id="planos" aria-labelledby="lp-planos-titulo">
+    <div class="lp-largura">
+      <div class="lp-planos-topo">
+        <h2 id="lp-planos-titulo">Escolha o tamanho da sua operação</h2>
+        <div class="lp-ciclo" role="radiogroup" aria-label="Forma de pagamento">
+          <button type="button" role="radio" [attr.aria-checked]="ciclo() === 'mensal'" (click)="ciclo.set('mensal')">
+            Mensal
+          </button>
+          <button type="button" role="radio" [attr.aria-checked]="ciclo() === 'anual'" (click)="ciclo.set('anual')">
+            Anual <span>{{ economiaMaxima }}% menos</span>
+          </button>
+        </div>
+      </div>
+
+      <ul class="lp-etiquetas">
+        @for (p of planos; track p.id) {
+          @let v = preco(p);
+          <li class="lp-etiqueta" [class.lp-etiqueta-destaque]="p.destaque">
+            @if (p.destaque) {
+              <p class="lp-selo">Melhor custo-benefício</p>
+            }
+            <h3>{{ p.nome }}</h3>
+            <p class="lp-para-quem">{{ p.paraQuem }}</p>
+            <p class="lp-preco" aria-live="polite">
+              <span class="lp-preco-rs">R$</span>
+              <span class="lp-preco-valor">{{ v.reais }}</span>
+              <span class="lp-preco-fim"><span>,{{ v.centavos }}</span><span>por mês</span></span>
+            </p>
+            <p class="lp-preco-detalhe">{{ v.detalhe }}</p>
+            <p class="lp-economia" [class.lp-economia-vazia]="!v.economia">{{ v.economia }}</p>
+            <ul class="lp-recursos-plano">
+              @for (r of p.recursos; track r) {
+                <li>{{ r }}</li>
+              }
+            </ul>
+            <a class="btn btn-lg btn-block" [class.btn-primary]="p.destaque" [class.btn-ghost]="!p.destaque" href="#criar">
+              Criar conta
+            </a>
+          </li>
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="lp-comecar lp-largura" aria-labelledby="lp-comecar-titulo">
+    <div>
+      <h2 id="lp-comecar-titulo">Para ligar o robô, você precisa de</h2>
+      <ul>
+        <li>Um WhatsApp ou Telegram para enviar as postagens</li>
+        <li>Conta de afiliado em pelo menos uma das lojas</li>
+        <li>Pelo menos um grupo para receber as ofertas</li>
+      </ul>
+    </div>
+    <div class="lp-comecar-acoes">
+      <a class="btn btn-lg btn-hero" href="#criar">Criar conta</a>
+      <a class="btn btn-lg btn-ghost" href="#entrar">Já tenho conta</a>
+    </div>
+  </section>
+</div>

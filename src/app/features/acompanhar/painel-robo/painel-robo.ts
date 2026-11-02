@@ -1,16 +1,15 @@
-import { Component, DestroyRef, HostListener, computed, effect, inject, output, signal } from '@angular/core';
+import { Component, HostListener, computed, inject, output, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { AlvoGrupos, EstadoEtapa, EtapaPainelId, JobsService } from '../../../core/services/jobs.service';
 import { VerificacaoService } from '../../../core/services/verificacao.service';
 import { RunControlService } from '../../../core/services/run-control.service';
 import { StatusService } from '../../../core/services/status.service';
-import { PainelService } from '../../../core/services/painel.service';
 import { GruposFila } from '../grupos-fila/grupos-fila';
 import { duracao } from '../topo-kpis/topo-kpis';
 
 type Icone =
   | 'busca' | 'sacola' | 'doc' | 'envio' | 'check' | 'alerta' | 'relogio' | 'grupos'
-  | 'navegar' | 'seta' | 'subiu' | 'desceu';
+  | 'navegar' | 'seta';
 /** Abas do app que o Painel abre. */
 export type DestinoPainel = 'estatisticas' | 'grupos';
 
@@ -35,7 +34,6 @@ const BASE: Record<EtapaPainelId, { titulo: string; sub: string; icone: Icone }>
 };
 
 const NOME_LOJA: Record<string, string> = { mercadolivre: 'Mercado Livre', amazon: 'Amazon', shopee: 'Shopee', nike: 'Nike', adidas: 'Adidas', centauro: 'Centauro' };
-const NUMEROS_A_CADA_MS = 60000;
 
 function hhmm(iso: string | null | undefined): string {
   if (!iso) return '';
@@ -43,7 +41,7 @@ function hhmm(iso: string | null | undefined): string {
 }
 
 /**
- * O Painel: onde publicar agora (os grupos que recebem as postagens e os números de hoje), a
+ * O Painel: onde publicar agora (os grupos que recebem as postagens), a
  * pipeline do produto da vez e os grupos marcados para postar. O log completo abre pelo botão "Logs" do topo. O gráfico das postagens por dia fica em Estatísticas. O tempo ativo e a próxima postagem ficam no cabeçalho
  * (topo-kpis); ligar, pausar e parar, no botão flutuante.
  */
@@ -60,23 +58,9 @@ export class PainelRobo {
   protected runControl = inject(RunControlService);
   protected jobs = inject(JobsService);
   protected statusService = inject(StatusService);
-  private painelService = inject(PainelService);
   private verificacao = inject(VerificacaoService);
 
   protected readonly statsAbertas = signal(false);
-
-  constructor() {
-    void this.painelService.carregar();
-    const t = setInterval(() => document.visibilityState === 'visible' && void this.painelService.carregar(), NUMEROS_A_CADA_MS);
-    inject(DestroyRef).onDestroy(() => clearInterval(t));
-    // Postou: os cartões e os grupos atualizam na hora, sem esperar a próxima leitura.
-    let concluidos: number | null = null;
-    effect(() => {
-      const n = this.jobs.painel()?.hoje?.concluidos ?? null;
-      if (concluidos !== null && n !== null && n !== concluidos) void this.painelService.carregar();
-      concluidos = n;
-    });
-  }
 
   @HostListener('document:keydown.escape')
   protected fecharComEsc(): void {
@@ -84,7 +68,6 @@ export class PainelRobo {
   }
 
   private readonly painel = computed(() => this.jobs.painel());
-  private readonly numeros = computed(() => this.painelService.numeros());
 
   // ---- Pipeline do produto da vez ----
 
@@ -193,40 +176,9 @@ export class PainelRobo {
     this.runControl.postandoAgora() && this.painel()?.atual ? this.painel()?.grupo?.nome ?? null : null
   );
 
-  protected readonly numerosDosGrupos = computed(() => {
-    const m: Record<string, { membros: number | null; postadosHoje: number }> = {};
-    for (const g of this.numeros()?.grupos ?? []) m[g.id] = { membros: g.membros, postadosHoje: g.postadosHoje };
-    return m;
-  });
-
   // ---- Onde publicar agora ----
 
   protected readonly gruposAtivos = computed(() => this.gruposAlvo().length);
-
-  protected readonly postadosHoje = computed(() => this.statusService.status()?.hoje?.postados ?? null);
-
-  /** Variação contra ontem: só com ontem > 0 (de zero não dá porcentagem). */
-  protected readonly variacao = computed<{ texto: string; subiu: boolean } | null>(() => {
-    const h = this.statusService.status()?.hoje;
-    if (!h || !h.postadosOntem) return null;
-    const pct = Math.round(((h.postados - h.postadosOntem) / h.postadosOntem) * 100);
-    return { texto: `${Math.abs(pct)}%`, subiu: pct >= 0 };
-  });
-
-  protected readonly membrosTotais = computed<number | null>(() => {
-    const m = this.numerosDosGrupos();
-    const lidos = this.gruposAlvo().map((g) => m[g.id]?.membros).filter((n): n is number => n != null);
-    return lidos.length ? lidos.reduce((a, b) => a + b, 0) : null;
-  });
-
-  protected readonly receitaHoje = computed(() => {
-    const v = this.numeros()?.receitaHoje;
-    return v == null ? '—' : v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-  });
-
-  protected numero(n: number | null): string {
-    return n == null ? '—' : n.toLocaleString('pt-BR');
-  }
 
   // ---- Estatísticas de hoje (cartão "Postados hoje") ----
 

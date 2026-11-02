@@ -10,8 +10,6 @@
     @case ('grupos') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 19c.6-3 2.8-4.6 5.5-4.6s4.9 1.6 5.5 4.6"/><path d="M15.5 5.6a3.2 3.2 0 0 1 0 5.8M17.2 14.6c1.8.5 3 1.9 3.3 4.4"/></svg> }
     @case ('navegar') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 3.5 3.8 10.6c-.8.3-.7 1.4.1 1.6l6.6 1.3 1.3 6.6c.2.8 1.3.9 1.6.1Z"/></svg> }
     @case ('seta') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg> }
-    @case ('subiu') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg> }
-    @case ('desceu') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg> }
   }
 </ng-template>
 
@@ -19,7 +17,7 @@
   <p class="alert-banner" role="alert">{{ runControl.erro() }}</p>
 }
 
-<!-- 1. Onde publicar agora: os grupos que recebem as postagens (tocar tira ou põe de volta) e os números de hoje. -->
+<!-- 1. Onde publicar agora: os grupos que recebem as postagens (tocar tira ou põe de volta). -->
 <section class="pn-onde" aria-labelledby="pn-onde-titulo">
   <div class="pn-onde-topo">
     <span class="pn-onde-icone"><ng-container *ngTemplateOutlet="icone; context: { $implicit: 'navegar' }" /></span>
@@ -63,19 +61,6 @@
   }
 
   <div class="pn-onde-rodape">
-    <span class="pn-onde-hoje">
-      <span class="pn-onde-rotulo">Hoje:</span>
-      <button type="button" class="pn-onde-num" (click)="statsAbertas.set(true)" title="Ver as estatísticas de hoje">
-        <strong>{{ numero(postadosHoje()) }}</strong> postados
-      </button>
-      @if (variacao(); as v) {
-        <span class="pn-variacao" [attr.data-subiu]="v.subiu" [title]="'Comparado com ontem (' + (statusService.status()?.hoje?.postadosOntem ?? 0) + ')'">
-          <ng-container *ngTemplateOutlet="icone; context: { $implicit: v.subiu ? 'subiu' : 'desceu' }" />{{ v.texto }}
-        </span>
-      }
-      <span class="pn-onde-num"><strong>{{ numero(membrosTotais()) }}</strong> membros</span>
-      <span class="pn-onde-num"><strong>{{ receitaHoje() }}</strong> de receita</span>
-    </span>
     <button type="button" class="pn-onde-link" aria-haspopup="dialog" (click)="verProdutos.emit()">
       Ver produtos <ng-container *ngTemplateOutlet="icone; context: { $implicit: 'seta' }" />
     </button>

@@ -54,9 +54,11 @@
       {{ auth.enviando() ? 'Um momento…' : modo() === 'entrar' ? 'Entrar' : 'Criar conta' }}
     </button>
 
-    <button type="button" class="btn btn-ghost btn-block" (click)="alternarModo()">
+    <a class="btn btn-ghost btn-block" [href]="modo() === 'entrar' ? '#criar' : '#entrar'">
       {{ modo() === 'entrar' ? 'Ainda não tenho conta' : 'Já tenho conta' }}
-    </button>
+    </a>
+
+    <a class="login-voltar" href="#">Voltar para a página inicial</a>
   </form>
   </div>
 </main>
