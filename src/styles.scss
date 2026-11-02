@@ -7492,6 +7492,11 @@ app-ganhos-card .ganhos-meta-item {
 app-ganhos-card .ganhos-meta-erro {
   color: var(--danger);
 }
+/* Loja desligada ou desconectada: os dados ficam, o aviso diz por que nao atualizam. */
+app-ganhos-card .ganhos-meta-parada {
+  color: var(--warn);
+  font-weight: 500;
+}
 app-ganhos-card .ganhos-meta-numeros {
   flex-wrap: wrap;
   gap: 0 6px;

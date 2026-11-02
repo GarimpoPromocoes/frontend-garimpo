@@ -72,7 +72,7 @@ export interface Cupons {
   /** % das mensagens que são produto com cupom. O resto é produto sem cupom. */
   percentualProduto?: number;
   /** Mensagem "lista de cupons": vezes por dia em cada grupo (0 = desligada) e a imagem (id do upload). */
-  lista?: { porDia: number; lojas: Partial<Record<'mercadolivre' | 'shopee' | 'amazon' | 'nike' | 'adidas' | 'centauro', LojaListaCupons>> };
+  lista?: { porDia: number; lojas: Partial<Record<'mercadolivre' | 'shopee' | 'amazon' | 'nike' | 'adidas' | 'centauro' | 'netshoes' | 'shein', LojaListaCupons>> };
 }
 
 /** Lista de cupons de uma loja: se entra no revezamento, a imagem (id do upload) e o link do fim. */
@@ -91,7 +91,7 @@ export interface CupomDeGrupo {
   valor: number | null;
   minimo: number | null;
   limite: number | null;
-  loja: 'mercadolivre' | 'amazon' | 'shopee' | 'nike' | 'adidas' | 'centauro' | null;
+  loja: 'mercadolivre' | 'amazon' | 'shopee' | 'nike' | 'adidas' | 'centauro' | 'netshoes' | 'shein' | null;
   grupos: string[];
   vistoEm: string;
 }

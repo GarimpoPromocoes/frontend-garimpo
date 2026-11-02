@@ -15,7 +15,7 @@ export const OPCOES_LISTA_POR_DIA = [
   { vezes: 6, rotulo: '6x' },
 ];
 
-export type Loja = 'mercadolivre' | 'shopee' | 'amazon' | 'nike' | 'adidas' | 'centauro';
+export type Loja = 'mercadolivre' | 'shopee' | 'amazon' | 'nike' | 'adidas' | 'centauro' | 'netshoes' | 'shein';
 export const LOJAS: { id: Loja; nome: string; daLoja: string }[] = [
   { id: 'mercadolivre', nome: 'Mercado Livre', daLoja: 'do Mercado Livre' },
   { id: 'shopee', nome: 'Shopee', daLoja: 'da Shopee' },
@@ -23,6 +23,8 @@ export const LOJAS: { id: Loja; nome: string; daLoja: string }[] = [
   { id: 'nike', nome: 'Nike', daLoja: 'da Nike' },
   { id: 'adidas', nome: 'Adidas', daLoja: 'da Adidas' },
   { id: 'centauro', nome: 'Centauro', daLoja: 'da Centauro' },
+  { id: 'netshoes', nome: 'Netshoes', daLoja: 'da Netshoes' },
+  { id: 'shein', nome: 'Shein', daLoja: 'da Shein' },
 ];
 const NA_LOJA: Record<Loja, string> = {
   mercadolivre: 'NO MERCADO LIVRE',
@@ -31,6 +33,8 @@ const NA_LOJA: Record<Loja, string> = {
   nike: 'NA NIKE',
   adidas: 'NA ADIDAS',
   centauro: 'NA CENTAURO',
+  netshoes: 'NA NETSHOES',
+  shein: 'NA SHEIN',
 };
 
 /** Texto padrão da mensagem de cupons (o robô usa o mesmo: bot-ml/src/postagem/listaCupons.js). */
@@ -47,7 +51,7 @@ export const LISTA_COPY_PADRAO = [
 export const VARIAVEIS_LISTA: VariavelCopy[] = [
   { nome: 'titulo', rotulo: 'Título', dica: 'NOVO CUPOM NO MERCADO LIVRE (ou CUPONS NO…, com mais de um)' },
   { nome: 'cupons', rotulo: 'Cupons', dica: 'Os códigos com o desconto, um embaixo do outro (obrigatório)' },
-  { nome: 'loja', rotulo: 'Loja', dica: 'O nome da loja: Mercado Livre, Shopee, Amazon, Nike, Adidas ou Centauro' },
+  { nome: 'loja', rotulo: 'Loja', dica: 'O nome da loja: Mercado Livre, Shopee, Amazon, Nike, Adidas, Centauro, Netshoes ou Shein' },
   { nome: 'link', rotulo: 'Link', dica: 'O link que você pôs para a loja (a linha some sem ele)' },
 ];
 
@@ -80,6 +84,12 @@ export const EXEMPLO_CUPONS: Record<Loja, CupomDeGrupo[]> = {
   ],
   centauro: [
     { codigo: 'CENTAURO30', tipo: 'valorFixo', valor: 30, minimo: 199, limite: null, loja: 'centauro', grupos: [], vistoEm: '' },
+  ],
+  netshoes: [
+    { codigo: 'NETSHOES15', tipo: 'percentual', valor: 15, minimo: 199, limite: null, loja: 'netshoes', grupos: [], vistoEm: '' },
+  ],
+  shein: [
+    { codigo: 'SHEIN20', tipo: 'percentual', valor: 20, minimo: 149, limite: null, loja: 'shein', grupos: [], vistoEm: '' },
   ],
 };
 

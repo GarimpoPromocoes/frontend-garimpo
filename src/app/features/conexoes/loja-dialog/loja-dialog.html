@@ -190,6 +190,9 @@
               }
 
               @case ('navegador') {
+                @if (p.aviso) {
+                  <p class="info-box" role="status">{{ p.aviso }}</p>
+                }
                 <app-tela-ao-vivo [rotulo]="rotulo()" carregando="Abrindo o navegador…">
                   <div class="login-trabalhando" demorou>
                     <span class="login-spinner"></span>

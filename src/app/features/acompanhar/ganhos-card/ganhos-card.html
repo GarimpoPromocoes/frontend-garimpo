@@ -24,23 +24,24 @@
     @for (l of estadoLojas(); track l.id) {
       <li class="ganhos-plataforma" [style.--loja-cor]="l.cor">
         <span class="ganhos-plataforma-nome"><span class="ganhos-ponto" aria-hidden="true"></span>{{ l.nome }}</span>
-        @if (l.conectada) {
-          <b class="ganhos-plataforma-valor">{{ moeda(l.gerado) }}</b>
-          <span class="ganhos-meta-item ganhos-meta-numeros">
-            <span><b>{{ inteiro(l.cliques) }}</b> cliques</span>
-            <span><b>{{ inteiro(l.pedidos) }}</b> pedidos</span>
-          </span>
-          @if (l.aguardando) {
-            <span class="ganhos-meta-item">Aguardando leitura…</span>
-          } @else if (l.semToken) {
-            <span class="ganhos-meta-item ganhos-meta-erro" role="alert">{{ l.id === 'netshoes' ? 'Preencha as chaves da API em Conexões' : 'Cole o token em Conexões' }}</span>
-          } @else if (l.ok === false) {
-            <span class="ganhos-meta-item ganhos-meta-erro" role="alert">Sessão expirada, reconecte</span>
-          } @else {
-            <span class="ganhos-meta-item">Lido em {{ quando(l.lidoEm) }}</span>
-          }
+        <!-- Os dados aparecem sempre; o que muda e' o aviso de baixo. -->
+        <b class="ganhos-plataforma-valor">{{ moeda(l.gerado) }}</b>
+        <span class="ganhos-meta-item ganhos-meta-numeros">
+          <span><b>{{ inteiro(l.cliques) }}</b> cliques</span>
+          <span><b>{{ inteiro(l.pedidos) }}</b> pedidos</span>
+        </span>
+        @if (l.desligada) {
+          <span class="ganhos-meta-item ganhos-meta-parada">Desligada em Conexões{{ l.mesDoValor ? ' · valor de ' + nomeMes(l.mesDoValor) : '' }}</span>
+        } @else if (!l.conectada) {
+          <span class="ganhos-meta-item ganhos-meta-parada">Desconectada{{ l.mesDoValor ? ' · valor de ' + nomeMes(l.mesDoValor) : '' }}</span>
+        } @else if (l.aguardando) {
+          <span class="ganhos-meta-item">Aguardando leitura…</span>
+        } @else if (l.semToken) {
+          <span class="ganhos-meta-item ganhos-meta-erro" role="alert">{{ l.id === 'netshoes' ? 'Preencha as chaves da API em Conexões' : 'Cole o token em Conexões' }}</span>
+        } @else if (l.ok === false) {
+          <span class="ganhos-meta-item ganhos-meta-erro" role="alert">Sessão expirada, reconecte</span>
         } @else {
-          <span class="ganhos-plataforma-off">Não conectada</span>
+          <span class="ganhos-meta-item">Lido em {{ quando(l.lidoEm) }}</span>
         }
       </li>
     }

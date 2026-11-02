@@ -101,6 +101,8 @@ export interface PedidoLogin {
   /** Título da própria página, quando o nosso título é outro (forma 'pagina'). */
   subtitulo?: string | null;
   texto?: string | null;
+  /** Por que a tela de verdade abriu sozinha (forma 'navegador'). */
+  aviso?: string | null;
   /** O que a página diz, em ordem (formas 'pagina' e 'camera'). */
   textos?: string[];
   /** Botões, links e opções da página (formas 'pagina' e 'camera'). */

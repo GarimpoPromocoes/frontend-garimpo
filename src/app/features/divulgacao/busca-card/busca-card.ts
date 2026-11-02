@@ -14,6 +14,8 @@ const NOME_LOJA: Record<string, string> = {
   nike: 'Nike',
   adidas: 'Adidas',
   centauro: 'Centauro',
+  netshoes: 'Netshoes',
+  shein: 'Shein',
 };
 
 const LOGO_LOJA: Record<string, string> = {
@@ -23,6 +25,8 @@ const LOGO_LOJA: Record<string, string> = {
   nike: 'lojas/nike.png',
   adidas: 'lojas/adidas.png',
   centauro: 'lojas/centauro.png',
+  netshoes: 'lojas/netshoes.png',
+  shein: 'lojas/shein.png',
 };
 
 const ORIGEM_FOTO: Record<string, string> = {
@@ -62,11 +66,12 @@ export class BuscaCard implements OnInit, OnDestroy {
   private runControl = inject(RunControlService);
 
   protected termo = '';
-  protected soClone(l: string): boolean {
-    return l === 'nike' || l === 'adidas' || l === 'centauro';
-  }
   protected readonly grupos = computed(() => this.configService.config()?.grupos ?? []);
-  protected readonly lojas = computed(() => this.runControl.lojasConectadas() as LojaBusca[]);
+  /** As lojas conectadas e ligadas: a desligada em Conexões não entra na busca. */
+  protected readonly lojas = computed(() => {
+    const desligadas = new Set<string>(this.configService.config()?.lojasDesligadas ?? []);
+    return this.runControl.lojasConectadas().filter((l) => !desligadas.has(l)) as LojaBusca[];
+  });
 
   protected readonly resultado = computed(() => this.busca.atual()?.resultado ?? null);
   /** Busca de antes da lista de ofertas (o robô escolhia sozinho): só dá pra buscar de novo. */

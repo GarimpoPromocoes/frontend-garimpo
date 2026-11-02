@@ -1,6 +1,8 @@
 import { Component, ElementRef, HostListener, OnDestroy, OnInit, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { GanhosService, GanhoMes, Loja } from '../../../core/services/ganhos.service';
 import { ConexoesService } from '../../../core/services/conexoes.service';
+import { ConfigService } from '../../../core/services/config.service';
+import { VerificacaoService } from '../../../core/services/verificacao.service';
 import { EstatisticasVisaoService } from '../../../core/services/estatisticas-visao.service';
 
 const LOJAS: { id: Loja; nome: string; cor: string }[] = [
@@ -13,9 +15,6 @@ const LOJAS: { id: Loja; nome: string; cor: string }[] = [
   { id: 'netshoes', nome: 'Netshoes', cor: 'var(--serie-7)' },
   { id: 'shein', nome: 'Shein', cor: 'var(--serie-8)' },
 ];
-
-// Sem painel lido por sessão de loja: quem diz se estão conectadas é a tela de Conexões.
-const LOJAS_POR_CONEXAO: Loja[] = ['nike', 'adidas', 'centauro', 'netshoes', 'shein'];
 
 const NOME_MES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 const MESES_NO_GRAFICO = 12;
@@ -84,6 +83,8 @@ function tetoRedondo(max: number): number {
 export class GanhosCard implements OnInit, OnDestroy {
   protected ganhos = inject(GanhosService);
   private conexoes = inject(ConexoesService);
+  private configService = inject(ConfigService);
+  private verificacao = inject(VerificacaoService);
   protected tela = inject(EstatisticasVisaoService);
   protected readonly lojas = LOJAS;
   private readonly tamanho = signal<{ w: number; h: number } | null>(null);
@@ -110,6 +111,24 @@ export class GanhosCard implements OnInit, OnDestroy {
 
   private valorDe(mes: string, loja: Loja): GanhoMes | undefined {
     return this.porChave().get(`${mes}|${loja}`);
+  }
+
+  // A conexao de verdade da loja (nao "tem leitura gravada"): a leitura antiga fica no banco
+  // mesmo depois de a loja cair.
+  private conectada(loja: Loja): boolean {
+    if (loja === 'mercadolivre') return this.verificacao.mercadoLivreConectado();
+    if (loja === 'shopee') return this.verificacao.shopeeConectado();
+    // Nike, Adidas, Centauro, Netshoes e Shein (e a Amazon): vale a tela de Conexoes.
+    return this.conexoes.statusDe(loja)?.status === 'conectado';
+  }
+
+  // O ultimo mes com valor da loja, ate o mes escolhido (pra loja parada continuar mostrando o
+  // que faturou).
+  private ultimoComValor(loja: Loja, ate: string): GanhoMes | undefined {
+    return this.ganhos
+      .meses()
+      .filter((g) => g.loja === loja && g.mes <= ate && totalDe(g) != null)
+      .sort((a, b) => (a.mes < b.mes ? 1 : -1))[0];
   }
 
   // Meses com ganho lido, do mais novo pro mais velho (o atual sempre entra).
@@ -140,26 +159,33 @@ export class GanhosCard implements OnInit, OnDestroy {
 
   protected readonly estadoLojas = computed(() => {
     const mes = this.mesEscolhido();
+    const desligadas = new Set<string>(this.configService.config()?.lojasDesligadas ?? []);
     return LOJAS.map((l) => {
       const r = this.ganhos.leituras().find((x) => x.loja === l.id);
+      const conectada = this.conectada(l.id);
+      const desligada = desligadas.has(l.id);
+      // Loja parada (desligada ou desconectada) sem leitura no mes: vale o ultimo mes que ela leu.
+      const doMes = this.valorDe(mes, l.id);
+      const parada = desligada || !conectada;
+      const g = doMes ?? (parada ? this.ultimoComValor(l.id, mes) : undefined);
       return {
         ...l,
         ok: r?.ok ?? null,
         erro: r?.erro ?? null,
         lidoEm: r?.lidoEm ?? null,
         aguardando: !!(r?.pedidoEm && (!r.lidoEm || r.pedidoEm > r.lidoEm)),
-        // Sem nenhuma leitura e sem ganho no mes: a loja ainda nao foi integrada.
-        conectada: LOJAS_POR_CONEXAO.includes(l.id)
-          ? this.conexoes.statusDe(l.id)?.status === 'conectado'
-          : !!r || this.valorDe(mes, l.id) != null,
+        conectada,
+        desligada,
+        // O valor mostrado e' de outro mes (o ultimo que a loja leu antes de parar).
+        mesDoValor: g && g.mes !== mes ? g.mes : null,
         semToken: /token|chaves da api/i.test(r?.erro ?? ''),
-        cliques: this.valorDe(mes, l.id)?.cliques ?? null,
-        pedidos: this.valorDe(mes, l.id)?.pedidos ?? null,
-        itens: this.valorDe(mes, l.id)?.itens ?? null,
-        valorPedidos: this.valorDe(mes, l.id)?.valorPedidos ?? null,
-        pendente: this.valorDe(mes, l.id)?.pendente ?? null,
-        confirmado: this.valorDe(mes, l.id)?.confirmado ?? null,
-        gerado: totalDe(this.valorDe(mes, l.id)),
+        cliques: g?.cliques ?? null,
+        pedidos: g?.pedidos ?? null,
+        itens: g?.itens ?? null,
+        valorPedidos: g?.valorPedidos ?? null,
+        pendente: g?.pendente ?? null,
+        confirmado: g?.confirmado ?? null,
+        gerado: totalDe(g),
       };
     });
   });

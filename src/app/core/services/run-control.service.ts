@@ -24,6 +24,8 @@ export class RunControlService {
     if (this.conexoes.statusDe('nike')?.status === 'conectado') lojas.push('nike');
     if (this.conexoes.statusDe('adidas')?.status === 'conectado') lojas.push('adidas');
     if (this.conexoes.statusDe('centauro')?.status === 'conectado') lojas.push('centauro');
+    if (this.conexoes.statusDe('netshoes')?.status === 'conectado') lojas.push('netshoes');
+    if (this.conexoes.statusDe('shein')?.status === 'conectado') lojas.push('shein');
     return lojas;
   });
 
