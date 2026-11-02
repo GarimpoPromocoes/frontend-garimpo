@@ -24,6 +24,16 @@
         </div>
       </div>
 
+      <div class="lp-fluxo">
+      <p class="lp-chip lp-chip-origem">
+        <img src="lojas/mercadolivre.svg" alt="" /><img src="lojas/amazon.svg" alt="" /><img src="lojas/shopee.svg" alt="" />
+        Oferta encontrada
+      </p>
+      <p class="lp-chip lp-chip-link">Link trocado pelo seu</p>
+      <p class="lp-chip lp-chip-destino">
+        <img src="lojas/whatsapp.svg" alt="" /><img src="lojas/telegram.png" alt="" />
+        Postada nos seus grupos
+      </p>
       <figure class="lp-post">
         <div class="lp-post-grupo">
           <img src="lojas/whatsapp.svg" alt="" width="22" height="22" />
@@ -41,8 +51,30 @@
         </div>
         <figcaption>Exemplo de postagem</figcaption>
       </figure>
+      </div>
     </main>
   </div>
+
+  <section class="lp-faixa" aria-label="Lojas atendidas">
+    <div class="lp-largura lp-lojas">
+      <div class="lp-lojas-grupo">
+        <h2>Garimpo direto no site</h2>
+        <ul>
+          @for (l of lojasDiretas; track l.nome) {
+            <li><img [src]="l.logo" alt="" /><span>{{ l.nome }}</span></li>
+          }
+        </ul>
+      </div>
+      <div class="lp-lojas-grupo">
+        <h2>Pelas ofertas dos grupos que você clona</h2>
+        <ul>
+          @for (l of lojasClonagem; track l.nome) {
+            <li><img [src]="l.logo" alt="" /><span>{{ l.nome }}</span></li>
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
 
   <section class="lp-secao lp-largura" aria-labelledby="lp-como">
     <h2 id="lp-como">Do achado à postagem, sem você copiar e colar</h2>
@@ -62,51 +94,57 @@
     </ol>
   </section>
 
-  <section class="lp-faixa" aria-labelledby="lp-lojas">
-    <div class="lp-largura lp-lojas">
-      <h2 id="lp-lojas">8 lojas para divulgar</h2>
-      <div class="lp-lojas-grupo">
-        <h3>Garimpo direto no site</h3>
-        <ul>
-          @for (l of lojasDiretas; track l.nome) {
-            <li><img [src]="l.logo" alt="" /><span>{{ l.nome }}</span></li>
-          }
-        </ul>
-      </div>
-      <div class="lp-lojas-grupo">
-        <h3>Pelas ofertas dos grupos que você clona</h3>
-        <ul>
-          @for (l of lojasClonagem; track l.nome) {
-            <li><img [src]="l.logo" alt="" /><span>{{ l.nome }}</span></li>
-          }
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <section class="lp-secao lp-largura lp-recursos" aria-labelledby="lp-painel">
+  <section class="lp-secao lp-largura" aria-labelledby="lp-painel">
     <h2 id="lp-painel">Tudo em um painel só</h2>
-    <dl>
-      <div>
-        <dt>Clonagem de grupos</dt>
-        <dd>
-          Escolha de quais grupos concorrentes cada grupo seu copia. O link vira o seu, e o cupom pessoal do concorrente
-          fica de fora da mensagem.
-        </dd>
-      </div>
-      <div>
-        <dt>Cupons</dt>
-        <dd>O robô junta os cupons das lojas, avisa qual vale para cada produto e posta listas de cupons nos grupos.</dd>
-      </div>
-      <div>
-        <dt>Regras de postagem</dt>
-        <dd>Defina a frequência, a repetição de produtos e as datas especiais em que os produtos da ocasião vão na frente.</dd>
-      </div>
-      <div>
-        <dt>Estatísticas</dt>
-        <dd>Veja ganhos, cliques e vendas por grupo, e quantos membros entraram e saíram, conforme o que cada loja informa.</dd>
-      </div>
-    </dl>
+    <div class="lp-blocos">
+      <article class="lp-bloco">
+        <h3>Clonagem de grupos</h3>
+        <p>Escolha de quais grupos concorrentes cada grupo seu copia. O cupom pessoal do concorrente fica de fora.</p>
+        <div class="lp-troca" aria-hidden="true">
+          <span class="lp-troca-de"><s>link do concorrente</s></span>
+          <span class="lp-troca-para">o seu link de afiliado</span>
+        </div>
+      </article>
+
+      <article class="lp-bloco lp-bloco-numeros">
+        <h3>Estatísticas</h3>
+        <p>Veja ganhos, cliques e vendas por grupo, e quantos membros entraram e saíram, conforme o que cada loja informa.</p>
+        <table>
+          <caption>Números de exemplo</caption>
+          <thead>
+            <tr><th scope="col">Grupo</th><th scope="col">Cliques</th><th scope="col">Vendas</th><th scope="col">Ganhos</th></tr>
+          </thead>
+          <tbody>
+            @for (g of exemploGrupos; track g.nome) {
+              <tr>
+                <th scope="row">{{ g.nome }}<i [style.width.%]="g.barra" aria-hidden="true"></i></th>
+                <td>{{ g.cliques }}</td>
+                <td>{{ g.vendas }}</td>
+                <td>{{ g.ganhos }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </article>
+
+      <article class="lp-bloco">
+        <h3>Cupons</h3>
+        <p>O robô junta os cupons das lojas, avisa qual vale para cada produto e posta listas de cupons nos grupos.</p>
+        <span class="lp-cupom" aria-hidden="true">CORRE15</span>
+      </article>
+
+      <article class="lp-bloco lp-bloco-regras">
+        <div>
+          <h3>Regras de postagem</h3>
+          <p>Defina como o robô posta, sem precisar acompanhar o dia todo.</p>
+        </div>
+        <ul>
+          <li>Frequência das postagens</li>
+          <li>Repetição de produtos</li>
+          <li>Datas especiais na frente da fila</li>
+        </ul>
+      </article>
+    </div>
   </section>
 
   <section class="lp-planos" id="planos" aria-labelledby="lp-planos-titulo">

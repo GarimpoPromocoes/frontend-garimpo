@@ -39,6 +39,13 @@ export class Landing {
     { nome: 'Shein', logo: 'lojas/shein.png' },
   ];
 
+  /** Só ilustra a tela de estatísticas; a página marca como "Números de exemplo". */
+  protected readonly exemploGrupos = [
+    { nome: 'Ofertas de tênis', cliques: '1.240', vendas: 86, ganhos: 'R$ 412', barra: 100 },
+    { nome: 'Achados da casa', cliques: '860', vendas: 51, ganhos: 'R$ 238', barra: 58 },
+    { nome: 'Cupons do dia', cliques: '530', vendas: 29, ganhos: 'R$ 127', barra: 31 },
+  ];
+
   protected preco(plano: Plano): Preco {
     if (this.ciclo() === 'mensal') {
       return { reais: reais(plano.mensal), centavos: '00', detalhe: 'cobrado todo mês', economia: null };
