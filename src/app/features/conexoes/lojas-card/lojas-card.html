@@ -81,14 +81,16 @@
   </div>
 </section>
 
-<section class="lj-secao" aria-labelledby="lj-suas">
-  <h2 class="lj-secao-titulo" id="lj-suas">Lojas de afiliado</h2>
-  <div class="lj-grade">
-    @for (c of lojas(); track c.provedor) {
-      <ng-container *ngTemplateOutlet="cartao; context: { $implicit: c }" />
-    }
-  </div>
-</section>
+@for (s of secoesDeLojas(); track s.id) {
+  <section class="lj-secao" [attr.aria-labelledby]="'lj-' + s.id">
+    <h2 class="lj-secao-titulo" [id]="'lj-' + s.id">{{ s.titulo }}</h2>
+    <div class="lj-grade">
+      @for (c of s.lojas; track c.provedor) {
+        <ng-container *ngTemplateOutlet="cartao; context: { $implicit: c }" />
+      }
+    </div>
+  </section>
+}
 
 @if (emBreve.length) {
   <section class="lj-secao" aria-labelledby="lj-breve">

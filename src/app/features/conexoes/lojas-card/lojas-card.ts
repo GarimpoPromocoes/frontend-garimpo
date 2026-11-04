@@ -97,6 +97,20 @@ export class LojasCard implements OnInit {
     return this.lojasConectadas().map((c) => ({ ...c, loja: true, desligada: desligadas.has(c.provedor) }));
   });
 
+  /**
+   * As lojas em três seções. Ligada inclui a que caiu (o cartão mostra "Precisa entrar de novo");
+   * desligada é só a conectada que foi desligada; a nunca conectada vai pra "não conectadas",
+   * mesmo desligada (o que falta nela é conectar).
+   */
+  protected readonly secoesDeLojas = computed(() => {
+    const lojas = this.lojas();
+    return [
+      { id: 'ligadas', titulo: 'Lojas ligadas', lojas: lojas.filter((l) => l.estado !== 'off' && !l.desligada) },
+      { id: 'desligadas', titulo: 'Lojas desligadas', lojas: lojas.filter((l) => l.estado !== 'off' && l.desligada) },
+      { id: 'nao-conectadas', titulo: 'Lojas não conectadas', lojas: lojas.filter((l) => l.estado === 'off') },
+    ].filter((s) => s.lojas.length);
+  });
+
   private readonly lojasConectadas = computed<Conta[]>(() => {
     const conexao = (p: Provedor) => this.conexoes.statusDe(p);
     return [
