@@ -39,8 +39,7 @@ export type AbaId =
   | 'estatisticas'
   | 'grupos'
   | 'regras'
-  | 'lojas'
-  | 'dono';
+  | 'lojas';
 
 type BadgeId = 'grupos' | 'lojas' | 'alerta' | null;
 
@@ -94,13 +93,6 @@ const ABAS: Aba[] = [
     badge: 'lojas',
   },
 
-  {
-    id: 'dono',
-    label: 'Painel do dono',
-    titulo: 'Painel do dono',
-    descricao: 'Quem usa o sistema e quanto cada um usa.',
-    secao: 'Administração',
-  },
 ];
 
 const SECOES: { nome: string; itens: Aba[] }[] = [];
@@ -111,6 +103,11 @@ for (const aba of ABAS) {
 }
 
 const CHAVE_ABA = 'promobot:aba';
+
+/** O painel do dono mora em /admin, fora do dashboard (sem menu, sem robô). */
+function ehRotaAdmin(): boolean {
+  return /^\/admin\/?$/i.test(location.pathname);
+}
 
 /** O formulário que o endereço pede para quem está deslogado; null é a landing. */
 function telaDoEndereco(): 'entrar' | 'criar' | null {
@@ -163,12 +160,9 @@ export class App implements OnInit, OnDestroy {
   private confirmacaoService = inject(ConfirmacaoService);
   private buscaService = inject(BuscaService);
 
-  protected readonly secoes = computed(() =>
-    SECOES.map((s) => ({
-      nome: s.nome,
-      itens: s.itens.filter((i) => i.id !== 'dono' || !!this.auth.usuario()?.admin),
-    })).filter((s) => s.itens.length),
-  );
+  protected readonly secoes = SECOES;
+  /** Endereço /admin: mostra só o painel do dono. Trocar entre ele e o dashboard recarrega a página. */
+  protected readonly rotaAdmin = ehRotaAdmin();
   protected readonly aba = signal<AbaId>('painel');
   protected readonly telaVisitante = signal(telaDoEndereco());
   private readonly aoMudarEndereco = () => {
@@ -252,7 +246,8 @@ export class App implements OnInit, OnDestroy {
         history.replaceState(null, '', location.pathname + location.search);
         this.telaVisitante.set(null);
       }
-      if (logado && !this.dashboardIniciado) {
+      // Em /admin o dashboard (config, conexões, status do robô) nem começa.
+      if (logado && !this.dashboardIniciado && !this.rotaAdmin) {
         this.dashboardIniciado = true;
         this.configService.carregar();
         // A dupla checagem (banco + ao vivo) já carrega conexões e status —
@@ -306,7 +301,6 @@ export class App implements OnInit, OnDestroy {
       void import('./features/divulgacao/busca-card/busca-card');
       void import('./features/conexoes/lojas-card/lojas-card');
       void import('./features/divulgacao/regras-postagem/regras-postagem');
-      if (this.auth.usuario()?.admin) void import('./features/admin/owner-card/owner-card');
     };
     if (typeof requestIdleCallback === 'function') requestIdleCallback(carregar, { timeout: 5000 });
     else setTimeout(carregar, 2000);

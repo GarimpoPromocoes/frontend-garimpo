@@ -11,12 +11,49 @@
     </div>
   </div>
 } @else if (!auth.usuario()) {
-  <!-- Deslogado: a landing primeiro; #entrar e #criar abrem o formulário. -->
-  @if (telaVisitante(); as modo) {
+  <!-- Deslogado: a landing primeiro; #entrar e #criar abrem o formulário. Em /admin, direto o entrar. -->
+  @if (rotaAdmin) {
+    <app-login-card [modo]="telaVisitante() ?? 'entrar'" />
+  } @else if (telaVisitante(); as modo) {
     <app-login-card [modo]="modo" />
   } @else {
     <app-landing />
   }
+} @else if (rotaAdmin) {
+<!-- Painel do dono (/admin): página própria, sem o menu e sem o robô do dashboard. -->
+<a class="pular-link" href="#conteudo">Pular para o conteúdo</a>
+<div class="admin-pagina">
+  <header class="topbar">
+    <div class="admin-marca">
+      <img class="brand-mark" src="logo.webp" alt="" width="46" height="46" />
+      <span class="brand-text">Garimpo Bot</span>
+    </div>
+    <div class="topbar-title">
+      <h1>Painel do dono</h1>
+    </div>
+    <div class="admin-acoes">
+      <span class="usuario-email">{{ auth.usuario()?.email }}</span>
+      <a class="btn btn-ghost btn-sm" href="/">Ir para o dashboard</a>
+      <button type="button" class="btn btn-ghost btn-sm" (click)="sair()">Sair</button>
+    </div>
+  </header>
+  <main class="content" id="conteudo" tabindex="-1">
+    @if (auth.usuario()?.admin) {
+      @defer (on immediate) {
+        <app-owner-card />
+      } @placeholder {
+        <div class="card card-carregando">Carregando…</div>
+      }
+    } @else {
+      <div class="card admin-negado" role="alert">
+        <h2>Acesso restrito</h2>
+        <p>Esta página é só para o dono do sistema.</p>
+        <a class="btn btn-primary" href="/">Ir para o dashboard</a>
+      </div>
+    }
+  </main>
+</div>
+<app-confirmacao-dialog />
 } @else {
 <a class="pular-link" href="#conteudo">Pular para o conteúdo</a>
 <div class="shell">
@@ -27,7 +64,7 @@
     </div>
 
     <nav class="sidebar-nav" aria-label="Páginas do painel">
-      @for (s of secoes(); track s.nome) {
+      @for (s of secoes; track s.nome) {
         <p class="nav-secao">{{ s.nome }}</p>
         @for (a of s.itens; track a.id) {
           <button
@@ -41,7 +78,6 @@
             @case ('painel') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.6"/></svg> }
             @case ('estatisticas') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 20.5h17"/><rect x="5" y="11" width="3.4" height="7" rx="1"/><rect x="10.3" y="6" width="3.4" height="12" rx="1"/><rect x="15.6" y="13" width="3.4" height="5" rx="1"/></svg> }
             @case ('atividade') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l2.5-7 5 14 2.5-7h6"/></svg> }
-            @case ('dono') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 20 6v5.4c0 4.4-3.1 8.2-8 9.8-4.9-1.6-8-5.4-8-9.8V6Z"/><path d="m9.2 12.2 2 2 3.6-3.8"/></svg> }
             @case ('grupos') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 19v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V19"/><circle cx="9" cy="7" r="3.4"/><path d="M22 19v-1.5a4 4 0 0 0-3-3.87"/><path d="M16.5 4.2a3.4 3.4 0 0 1 0 6.6"/></svg> }
             @case ('regras') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h7M14 7h7M3 17h4M11 17h10"/><circle cx="12" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg> }
             @case ('lojas') { <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v5M15 3v5"/><path d="M6.5 8h11v3a5.5 5.5 0 0 1-11 0Z"/><path d="M12 16.5V21"/></svg> }
@@ -228,14 +264,6 @@
         @case ('estatisticas') {
           @defer (on immediate) {
             <app-estatisticas />
-          } @placeholder {
-            <div class="card card-carregando">Carregando…</div>
-          }
-        }
-
-        @case ('dono') {
-          @defer (on immediate) {
-            <app-owner-card />
           } @placeholder {
             <div class="card card-carregando">Carregando…</div>
           }
