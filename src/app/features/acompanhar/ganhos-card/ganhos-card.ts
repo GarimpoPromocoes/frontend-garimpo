@@ -146,6 +146,8 @@ export class GanhosCard implements OnInit, OnDestroy {
       pendente: somar(doMes.map((g) => g?.pendente ?? null)),
       confirmado: somar(doMes.map((g) => g?.confirmado ?? null)),
       pago: somar(doMes.map((g) => g?.pago ?? null)),
+      // A API da Shopee nao informa cliques: ela fica fora da soma.
+      cliques: somar(doMes.map((g, i) => (LOJAS[i].id === 'shopee' ? null : g?.cliques ?? null))),
       pedidos: somar(doMes.map((g) => g?.pedidos ?? null)),
       itens: somar(doMes.map((g) => g?.itens ?? null)),
       valorPedidos: somar(doMes.map((g) => g?.valorPedidos ?? null)),
@@ -178,6 +180,8 @@ export class GanhosCard implements OnInit, OnDestroy {
         // O valor mostrado e' de outro mes (o ultimo que a loja leu antes de parar).
         mesDoValor: g && g.mes !== mes ? g.mes : null,
         semToken: /token|chaves da api/i.test(r?.erro ?? ''),
+        temCliques: l.id !== 'shopee',
+        cliques: g?.cliques ?? null,
         pedidos: g?.pedidos ?? null,
         itens: g?.itens ?? null,
         valorPedidos: g?.valorPedidos ?? null,

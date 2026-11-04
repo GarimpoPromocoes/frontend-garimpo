@@ -28,6 +28,9 @@
         <b class="ganhos-plataforma-valor">{{ moeda(l.gerado) }}</b>
         <span class="ganhos-meta-item ganhos-meta-numeros">
           <!-- Sem leitura ainda mostra 0, nao "—": o aviso de baixo diz se a loja nao foi lida. -->
+          @if (l.temCliques) {
+            <span><b>{{ inteiro(l.cliques ?? 0) }}</b> cliques</span>
+          }
           <span><b>{{ inteiro(l.pedidos ?? 0) }}</b> pedidos</span>
         </span>
         @if (l.desligada) {
@@ -148,7 +151,16 @@
         </div>
       </div>
 
-      <div class="ganhos-kpis ganhos-kpis-3">
+      <div class="ganhos-kpis">
+        <div class="card ganhos-kpi">
+          <span class="ganhos-kpi-icone" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m9 9 11 4.2-4.6 1.6L13.8 19.5Z"/><path d="M5 3.5 6 6M3.5 9.5 6 9M11 4.5 10 7"/></svg>
+          </span>
+          <div class="ganhos-kpi-texto">
+            <span class="ganhos-kpi-rotulo">Cliques {{ rotuloResumo() }}</span>
+            <span class="ganhos-kpi-valor">{{ inteiro(resumo().cliques) }}</span>
+          </div>
+        </div>
         <div class="card ganhos-kpi">
           <span class="ganhos-kpi-icone" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3.5h6l-1.6 3.2h-2.8Z"/><path d="M10.6 6.7C6.5 8.4 4.5 12 4.5 15.2c0 3.2 2.6 5.3 7.5 5.3s7.5-2.1 7.5-5.3c0-3.2-2-6.8-6.1-8.5"/><path d="M13.8 11.3c-.4-.6-1.1-.9-1.8-.9-1 0-1.8.6-1.8 1.4 0 1.9 3.6 1.1 3.6 3 0 .8-.8 1.4-1.8 1.4-.8 0-1.5-.3-1.9-.9M12 9.6v.8M12 16.2v.8"/></svg>
@@ -194,6 +206,7 @@
               <th class="col-num">Gerado</th>
               <th class="col-num">Pendente</th>
               <th class="col-num">Aprovado</th>
+              <th class="col-num">Cliques</th>
               <th class="col-num">Pedidos</th>
               <th class="col-num">Itens</th>
               <th class="col-num">Valor</th>
@@ -207,6 +220,7 @@
                 <td class="col-num">{{ moeda(l.gerado) }}</td>
                 <td class="col-num">{{ moeda(l.pendente) }}</td>
                 <td class="col-num">{{ moeda(l.confirmado) }}</td>
+                <td class="col-num">{{ l.temCliques ? inteiro(l.cliques) : '—' }}</td>
                 <td class="col-num">{{ inteiro(l.pedidos) }}</td>
                 <td class="col-num">{{ inteiro(l.itens) }}</td>
                 <td class="col-num">{{ moeda(l.valorPedidos) }}</td>
