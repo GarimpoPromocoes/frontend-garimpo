@@ -27,8 +27,9 @@
         <!-- Os dados aparecem sempre; o que muda e' o aviso de baixo. -->
         <b class="ganhos-plataforma-valor">{{ moeda(l.gerado) }}</b>
         <span class="ganhos-meta-item ganhos-meta-numeros">
-          <span><b>{{ inteiro(l.cliques) }}</b> cliques</span>
-          <span><b>{{ inteiro(l.pedidos) }}</b> pedidos</span>
+          <!-- Sem leitura ainda mostra 0, nao "—": o aviso de baixo diz se a loja nao foi lida. -->
+          <span><b>{{ inteiro(l.cliques ?? 0) }}</b> cliques</span>
+          <span><b>{{ inteiro(l.pedidos ?? 0) }}</b> pedidos</span>
         </span>
         @if (l.desligada) {
           <span class="ganhos-meta-item ganhos-meta-parada">Desligada em Conexões{{ l.mesDoValor ? ' · valor de ' + nomeMes(l.mesDoValor) : '' }}</span>
@@ -38,6 +39,9 @@
           <span class="ganhos-meta-item">Aguardando leitura…</span>
         } @else if (l.semToken) {
           <span class="ganhos-meta-item ganhos-meta-erro" role="alert">{{ l.id === 'netshoes' ? 'Preencha as chaves da API em Conexões' : 'Cole o token em Conexões' }}</span>
+        } @else if (l.ok === false && l.id === 'shopee') {
+          <!-- So' o dashboard (cliques) caiu: pedidos e comissao seguem vindo pela API. -->
+          <span class="ganhos-meta-item ganhos-meta-erro" role="alert">Dashboard deslogado: entre de novo para ler os cliques</span>
         } @else if (l.ok === false) {
           <span class="ganhos-meta-item ganhos-meta-erro" role="alert">Sessão expirada, reconecte</span>
         } @else {

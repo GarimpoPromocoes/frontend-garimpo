@@ -4311,6 +4311,8 @@ app-sino {
   height: auto;
   cursor: crosshair;
   user-select: none;
+  // Sem isso o toque arrasta a página em vez da peça do quebra-cabeça.
+  touch-action: none;
 }
 .tela-loja-atualizando .tela-loja-imagem img {
   opacity: 0.85;
@@ -4324,6 +4326,20 @@ app-sino {
   border: 2px solid var(--gold-deep);
   background: rgba(255, 255, 255, 0.4);
   pointer-events: none;
+}
+.tela-loja-rastro {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.tela-loja-rastro polyline {
+  fill: none;
+  stroke: var(--gold-deep);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .tela-loja-digitar {
   display: flex;

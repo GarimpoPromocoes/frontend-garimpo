@@ -71,7 +71,7 @@ const CAMERA_INTERVALO_MS = 100;
 const AJUDA: Partial<Record<Provedor, { texto: string; link: string; rotuloLink: string }>> = {
   shopee: {
     texto:
-      'A Shopee usa a API (App ID/Secret) para o garimpo e os links. A conta e a senha abaixo servem para o robo abrir o dashboard e ler os cliques (a API nao entrega cliques). As chaves ficam em "Open API", no menu lateral do painel de Afiliados.',
+      'A Shopee usa a API para o garimpo, a clonagem, os links e as vendas: copie o AppID e a Senha da tela "Abrir API" do painel de Afiliados (essa Senha é o antigo App Secret, não a senha da sua conta). O e-mail e a senha da conta Shopee servem para o robô abrir o dashboard e ler os cliques, que a API não entrega.',
     link: 'https://affiliate.shopee.com.br',
     rotuloLink: 'Abrir painel da Shopee',
   },
@@ -172,7 +172,7 @@ export class LojaDialog {
   });
   protected readonly artigoM = computed(() => (this.artigo() === 'o' ? 'O' : 'A'));
 
-  /** A Shopee nao abre navegador nenhum: conectar e' so' informar as chaves. */
+  /** Lojas em que o robo entra pelo navegador (na Shopee, so' pro dashboard de cliques). */
   protected readonly usaNavegador = computed(() => {
     const p = this.provedor();
     return !!p && !!JOB_DE[p];
@@ -230,6 +230,15 @@ export class LojaDialog {
   });
   protected readonly loginGuardado = computed(() => this.conexao()?.login ?? null);
 
+  /**
+   * Shopee com as chaves de API salvas, mas sem o e-mail e a senha da conta guardados (ou com o
+   * dashboard pedindo login): a janela já pede a conta ali mesmo — sem ela os cliques não são lidos.
+   */
+  protected readonly pedeContaShopee = computed(
+    () => this.provedor() === 'shopee' && this.conectada() && (!this.loginGuardado()?.salvo || this.painelPediuLogin()),
+  );
+  protected readonly camposConta = computed(() => this.campos().filter((c) => c.grupo === 'login'));
+
   protected readonly sessao = computed(() => {
     switch (this.provedor()) {
       case 'mercadolivre':
@@ -265,7 +274,11 @@ export class LojaDialog {
     if (!this.usaNavegador()) return afiliado;
 
     const login: CampoModal[] = [{ nome: 'usuario', rotulo: this.rotuloUsuario(p), tipo: 'texto', grupo: 'login' }];
-    if (!ESCOLHE_METODO.includes(p)) login.push({ nome: 'senha', rotulo: 'Senha', tipo: 'segredo', grupo: 'login' });
+    if (!ESCOLHE_METODO.includes(p)) {
+      // Na Shopee a API tambem tem uma "Senha": aqui deixa claro que esta e' a da conta.
+      const rotulo = p === 'shopee' ? 'Senha da conta Shopee' : 'Senha';
+      login.push({ nome: 'senha', rotulo, tipo: 'segredo', grupo: 'login' });
+    }
 
     return [...afiliado, ...login];
   });

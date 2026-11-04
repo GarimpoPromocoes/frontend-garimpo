@@ -20,6 +20,9 @@
               {{ artigoM() }} {{ rotulo() }} pediu mais uma confirmação. Responda aqui.
             } @else if (emLogin()) {
               O robô está entrando na sua conta. Isso leva alguns segundos.
+            } @else if (pedeContaShopee() && !painelPediuLogin()) {
+              A API da Shopee está conectada (garimpo, links e pedidos). Falta a sua conta Shopee para o robô abrir o
+              dashboard e ler os cliques.
             } @else if (conectada() && painelPediuLogin()) {
               @if (provedor() === 'shopee') {
                 As ofertas e os pedidos da Shopee seguem funcionando pela API, mas o painel de afiliados pediu para entrar
@@ -354,13 +357,38 @@
             <p class="error-text" role="alert">{{ e }}</p>
           }
         }
+        @if (pedeContaShopee()) {
+          <!-- As chaves de API ja estao salvas: aqui so' a conta, pro robo abrir o dashboard e ler os cliques. -->
+          @for (campo of camposConta(); track campo.nome) {
+            <div class="field">
+              <label [for]="'loja-' + campo.nome">{{ campo.rotulo }}</label>
+              <input
+                [id]="'loja-' + campo.nome"
+                [type]="campo.tipo === 'segredo' ? 'password' : 'text'"
+                [autocomplete]="campo.tipo === 'segredo' ? 'current-password' : 'off'"
+                [ngModel]="valorDe(campo.nome)"
+                (ngModelChange)="definir(campo.nome, $event)"
+                (keyup.enter)="conectar()"
+              />
+            </div>
+          }
+          <p class="hint-text">
+            A senha é criptografada aqui no Promobot e nunca aparece no log. Com ela o robô entra sozinho no dashboard
+            sempre que a Shopee derrubar a sessão.
+          </p>
+        }
         <div class="form-actions">
+          @if (pedeContaShopee()) {
+            <button type="button" class="btn btn-primary" [disabled]="!podeConectar()" (click)="conectar()">
+              {{ enviando() ? 'Conectando…' : 'Conectar o dashboard' }}
+            </button>
+          }
           @if (eAwin()) {
             <button type="button" class="btn btn-primary" [disabled]="enviando() || !valorDe('tokenApi').trim()" (click)="salvarToken()">
               {{ enviando() ? 'Salvando…' : 'Salvar token' }}
             </button>
           }
-          @if (painelPediuLogin()) {
+          @if (painelPediuLogin() && !pedeContaShopee()) {
             <button type="button" class="btn btn-primary" [disabled]="enviando()" (click)="entrarDeNovo()">Entrar de novo</button>
           }
           <button type="button" class="btn btn-danger" [disabled]="enviando()" (click)="desconectar()">

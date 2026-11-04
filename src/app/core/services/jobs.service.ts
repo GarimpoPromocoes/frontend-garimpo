@@ -36,7 +36,9 @@ export type EntradaDesafio =
   | { t: 'clique'; x: number; y: number }
   | { t: 'texto'; texto: string }
   | { t: 'tecla'; tecla: string }
-  | { t: 'rolar'; dy: number };
+  | { t: 'rolar'; dy: number }
+  /** Arraste (quebra-cabeça): o caminho do mouse, cada ponto com os ms desde o anterior. */
+  | { t: 'arrastar'; pontos: { x: number; y: number; ms: number }[] };
 
 export type AlvoGrupos = 'todos' | 'selecionados';
 

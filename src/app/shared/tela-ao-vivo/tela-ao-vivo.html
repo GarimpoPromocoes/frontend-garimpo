@@ -9,7 +9,7 @@
       } @else if (atualizando()) {
         <span class="tela-loja-estado"><span class="login-spinner"></span> Atualizando…</span>
       } @else {
-        <span class="tela-loja-estado">Clique na imagem para interagir</span>
+        <span class="tela-loja-estado">Clique, ou segure e arraste, na imagem</span>
       }
     </div>
     <div class="tela-loja-imagem">
@@ -20,9 +20,18 @@
         tabindex="0"
         draggable="false"
         (click)="aoClicar($event)"
+        (pointerdown)="aoApertar($event)"
+        (pointermove)="aoMover($event)"
+        (pointerup)="aoSoltar($event)"
+        (pointercancel)="aoCancelar()"
         (wheel)="aoRolar($event)"
         (keydown)="aoTeclar($event)"
       />
+      @if (rastro(); as r) {
+        <svg class="tela-loja-rastro" viewBox="0 0 1 1" preserveAspectRatio="none" aria-hidden="true">
+          <polyline [attr.points]="r" vector-effect="non-scaling-stroke" />
+        </svg>
+      }
       @if (marca(); as m) {
         <span class="tela-loja-clique" [style.left.%]="m.x * 100" [style.top.%]="m.y * 100"></span>
       }
