@@ -9,9 +9,7 @@ export type JobTipo =
   | 'trocar-ml'
   | 'desconectar-ml'
   | 'login-amazon'
-  | 'login-shopee'
   | 'login-shein'
-  | 'desconectar-shopee'
   | 'trocar-zap'
   | 'desconectar-zap'
   | 'conectar-telegram'
@@ -207,13 +205,12 @@ export interface EstadoPainel {
 const MAX_LINHAS = 500;
 const INTERVALO_LOTE_MS = 150;
 
-const JOBS_DE_LOGIN: JobTipo[] = ['login-ml', 'trocar-ml', 'login-amazon', 'login-shopee'];
+const JOBS_DE_LOGIN: JobTipo[] = ['login-ml', 'trocar-ml', 'login-amazon'];
 
 const PROVEDOR_DO_JOB: Partial<Record<JobTipo, Provedor>> = {
   'login-ml': 'mercadolivre',
   'trocar-ml': 'mercadolivre',
   'login-amazon': 'amazon',
-  'login-shopee': 'shopee',
 };
 
 @Injectable({ providedIn: 'root' })

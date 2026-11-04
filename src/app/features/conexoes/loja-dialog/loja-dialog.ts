@@ -44,13 +44,10 @@ const ARTIGO: Record<Provedor, 'o' | 'a'> = {
   centauro: 'a',
 };
 
-// Garimpo e link da Shopee saem da API (App ID/Secret). O login de navegador
-// abaixo e' um extra: serve so' pra ler os cliques no dashboard, que a API nao
-// entrega. Por isso conectar a Shopee pede as chaves E a conta.
+// Garimpo, link e ganhos da Shopee saem so' da API (AppID e Senha da API): ela nao tem login de navegador.
 const JOB_DE: Partial<Record<Provedor, JobTipo>> = {
   mercadolivre: 'login-ml',
   amazon: 'login-amazon',
-  shopee: 'login-shopee',
   shein: 'login-shein',
 };
 
@@ -71,7 +68,7 @@ const CAMERA_INTERVALO_MS = 100;
 const AJUDA: Partial<Record<Provedor, { texto: string; link: string; rotuloLink: string }>> = {
   shopee: {
     texto:
-      'A Shopee usa a API para o garimpo, a clonagem, os links e as vendas: copie o AppID e a Senha da tela "Abrir API" do painel de Afiliados (essa Senha é o antigo App Secret, não a senha da sua conta). O e-mail e a senha da conta Shopee servem para o robô abrir o dashboard e ler os cliques, que a API não entrega.',
+      'A Shopee usa só a API para o garimpo, a clonagem, os links e os ganhos: copie o AppID e a Senha da tela "Abrir API" do painel de Afiliados (essa Senha é o antigo App Secret, não a senha da sua conta).',
     link: 'https://affiliate.shopee.com.br',
     rotuloLink: 'Abrir painel da Shopee',
   },
@@ -159,7 +156,7 @@ export class LojaDialog {
   protected readonly painelPediuLogin = computed(
     () => {
       const p = this.provedor();
-      return (p === 'amazon' || p === 'shopee') && this.ganhos.leituras().find((l) => l.loja === p)?.ok === false;
+      return p === 'amazon' && this.ganhos.leituras().find((l) => l.loja === p)?.ok === false;
     },
   );
   protected readonly rotulo = computed(() => {
@@ -230,15 +227,6 @@ export class LojaDialog {
   });
   protected readonly loginGuardado = computed(() => this.conexao()?.login ?? null);
 
-  /**
-   * Shopee com as chaves de API salvas, mas sem o e-mail e a senha da conta guardados (ou com o
-   * dashboard pedindo login): a janela já pede a conta ali mesmo — sem ela os cliques não são lidos.
-   */
-  protected readonly pedeContaShopee = computed(
-    () => this.provedor() === 'shopee' && this.conectada() && (!this.loginGuardado()?.salvo || this.painelPediuLogin()),
-  );
-  protected readonly camposConta = computed(() => this.campos().filter((c) => c.grupo === 'login'));
-
   protected readonly sessao = computed(() => {
     switch (this.provedor()) {
       case 'mercadolivre':
@@ -274,18 +262,13 @@ export class LojaDialog {
     if (!this.usaNavegador()) return afiliado;
 
     const login: CampoModal[] = [{ nome: 'usuario', rotulo: this.rotuloUsuario(p), tipo: 'texto', grupo: 'login' }];
-    if (!ESCOLHE_METODO.includes(p)) {
-      // Na Shopee a API tambem tem uma "Senha": aqui deixa claro que esta e' a da conta.
-      const rotulo = p === 'shopee' ? 'Senha da conta Shopee' : 'Senha';
-      login.push({ nome: 'senha', rotulo, tipo: 'segredo', grupo: 'login' });
-    }
+    if (!ESCOLHE_METODO.includes(p)) login.push({ nome: 'senha', rotulo: 'Senha', tipo: 'segredo', grupo: 'login' });
 
     return [...afiliado, ...login];
   });
 
   private rotuloUsuario(p: Provedor): string {
     if (p === 'amazon') return 'E-mail ou telefone da conta Amazon';
-    if (p === 'shopee') return 'E-mail, telefone ou usuário da Shopee';
     if (p === 'shein') return 'E-mail ou telefone da conta Shein';
     return 'E-mail, telefone ou usuário';
   }
@@ -345,7 +328,7 @@ export class LojaDialog {
 
     // Ao abrir a Amazon, confere a última leitura dos ganhos (pra saber se o painel pediu login).
     effect(() => {
-      if (this.provedor() === 'amazon' || this.provedor() === 'shopee') untracked(() => void this.ganhos.carregar());
+      if (this.provedor() === 'amazon') untracked(() => void this.ganhos.carregar());
     });
     // Cada loja abre com a explicação fechada.
     effect(() => {
@@ -355,7 +338,7 @@ export class LojaDialog {
     // Entrou de novo na Amazon: já pede a leitura dos ganhos, pra "Sessão expirada" sumir na hora.
     effect(() => {
       const f = this.fim();
-      if (f?.ok && (this.provedor() === 'amazon' || this.provedor() === 'shopee')) untracked(() => void this.ganhos.atualizar());
+      if (f?.ok && this.provedor() === 'amazon') untracked(() => void this.ganhos.atualizar());
     });
 
     // Desliga com folga: entre um clique e a próxima foto a loja pode ficar um
@@ -722,11 +705,6 @@ export class LojaDialog {
       // Amazon junto (a tag de associado dela continua salva à parte).
       this.jobsService.esquecerVerificacao('amazon');
       const r = await this.jobsService.iniciar('desconectar-ml');
-      if (!r.ok) this.erro.set(r.erro ?? null);
-    }
-    if (p === 'shopee') {
-      // Encerra a sessão de navegador do dashboard (a que lê os cliques).
-      const r = await this.jobsService.iniciar('desconectar-shopee');
       if (!r.ok) this.erro.set(r.erro ?? null);
     }
     this.enviando.set(false);

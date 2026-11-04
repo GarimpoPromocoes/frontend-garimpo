@@ -5936,6 +5936,10 @@ app-ganhos-card {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
 }
+// Ganhos: 3 cartoes (sem cliques). Vem antes das media queries, que continuam valendo.
+.ganhos-kpis-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
 .ganhos-kpi {
   flex-direction: row;
   align-items: center;
