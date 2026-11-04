@@ -240,13 +240,10 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
               </span>
               <img [src]="l.logo" alt="" />
-              <span class="gm-loja-nome">
-                {{ l.nome }}
-                @if (avisoDaLoja(l.id); as aviso) { <small>{{ aviso }}</small> }
-              </span>
+              <span class="gm-loja-nome">{{ l.nome }}</span>
             </button>
           } @empty {
-            <p class="gm-secao-sub">Nenhuma loja conectada. Conecte uma na tela Conexões.</p>
+            <p class="gm-secao-sub">Nenhuma loja conectada e ligada. Conecte ou ligue uma na tela Conexões.</p>
           }
         </div>
       </section>
