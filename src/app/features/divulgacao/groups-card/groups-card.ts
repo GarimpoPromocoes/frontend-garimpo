@@ -264,16 +264,18 @@ export class GroupsCard {
     return this.lojasMarcadas(g).includes(loja);
   }
 
-  /** Só as lojas efetivamente conectadas aparecem no seletor. */
-  protected readonly lojasVisiveis = computed(() =>
-    LOJAS_AFILIADO.filter((l) =>
-      l.id === 'mercadolivre'
+  /** Só as lojas conectadas e ligadas aparecem no seletor: desligada em Conexões some. */
+  protected readonly lojasVisiveis = computed(() => {
+    const desligadas = this.configService.config()?.lojasDesligadas ?? [];
+    return LOJAS_AFILIADO.filter((l) =>
+      !desligadas.includes(l.id) &&
+      (l.id === 'mercadolivre'
         ? this.verificacao.mercadoLivreConectado()
         : l.id === 'shopee'
           ? this.verificacao.shopeeConectado()
-          : this.conexoes.statusDe(l.id)?.status === 'conectado',
-    ),
-  );
+          : this.conexoes.statusDe(l.id)?.status === 'conectado'),
+    );
+  });
 
   /** Marca/desmarca uma loja. A última marcada (entre as conectadas) não sai: grupo sem loja não posta nada. */
   alternarLoja(loja: LojaAfiliado): void {
@@ -285,18 +287,6 @@ export class GroupsCard {
     const nova = atuais.includes(loja) ? atuais.filter((l) => l !== loja) : [...atuais, loja];
     const ordenada = LOJAS_AFILIADO.map((x) => x.id).filter((l) => nova.includes(l));
     this.atualizar('lojas', ordenada.length === LOJAS_AFILIADO.length ? [] : ordenada);
-  }
-
-  /** O que aparece ao lado da loja na janela: desligada no painel ou não conectada. */
-  protected avisoDaLoja(loja: LojaAfiliado): string {
-    if ((this.configService.config()?.lojasDesligadas ?? []).includes(loja)) return 'desligada em Conexões';
-    const conectada =
-      loja === 'mercadolivre'
-        ? this.verificacao.mercadoLivreConectado()
-        : loja === 'shopee'
-          ? this.verificacao.shopeeConectado()
-          : this.conexoes.statusDe(loja)?.status === 'conectado';
-    return conectada ? '' : 'não conectada';
   }
 
   /** "só Mercado Livre", "só Amazon e Shopee" — no rodapé do card. Vazio quando usa todas. */
